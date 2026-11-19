@@ -6,7 +6,6 @@
 #include "AGDDControl/IAGDD2GeoSvc.h"
 
 #include "AGDDControl/IAGDDToolBase.h"
-#include "AGDDControl/AGDDTokenizer.h"
 #include "AGDDControl/AGDDController.h"
 #include "AGDDKernel/AliasStore.h"
 #include "AGDDKernel/AGDDPositionerStore.h"

@@ -28,19 +28,18 @@ public:
   	bool RegisterPhysConstant( std::string&, const std::string&, const std::string&  );
   	bool RegisterExpression( std::string& c, const std::string& v  );
   	bool RegisterArray( std::string& c, const std::vector<double>& v );
-  	bool RegisterVariable( const std::string& var_name, double value);
+  	bool RegisterVariable( std::string var_name, double value);
   
-  	double EvaluateString(const std::string& str);
-  	bool is_delimiter(char c);
-  	bool is_real_variable(const std::string& var_name);
+  	double EvaluateString(std::string_view str);
+  	static bool is_delimiter(char c) noexcept;
+  	bool is_real_variable(std::string_view var_name) const noexcept;
   	double Eval( std::string_view expr );
 	
-	static std::string trim(const std::string&);
-	static std::vector<std::string> tokenize(const std::string&,const std::string&); 
+	static std::vector<std::string> tokenize(std::string_view,std::string_view); 
   
-  	void setFileCurrentlyParsed(const std::string& set)
+  	void setFileCurrentlyParsed(std::string set)
   	{
-   		m_fileCurrentlyParsed = set;
+   		m_fileCurrentlyParsed = std::move(set);
   	}
 
 private:

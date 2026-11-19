@@ -3,7 +3,6 @@
 */
 
 #include "AGDDControl/ExpressionEvaluator.h"
-#include "AGDDControl/AGDDTokenizer.h"
 
 #include <cstdlib>
 #include <cctype>
@@ -11,6 +10,8 @@
 #include <iostream>
 #include <sstream>
 #include <algorithm>
+#include <CxxUtils/StringUtils.h>
+#include <CxxUtils/StringUtilsTemplates.h>
 
 using namespace AGDD;
 
@@ -45,102 +46,76 @@ bool ExpressionEvaluator::RegisterConstant( std::string& c, double v )
   RegisterVariable( c, value );
   return true;
 }
-bool ExpressionEvaluator::RegisterArray( std::string& c, const std::vector<double>& v)
-{  
-   for(unsigned int i=0; i<v.size(); i++)
-   {
-    double value = v[i];
-    std::stringstream ss;
-    std::string index;
-    ss << i;
-    ss >> index;
-    std::string name = c+"_"+index+"_";
-    RegisterVariable( name, value );       
-   }
-   return true;
-}
 
-bool ExpressionEvaluator::RegisterVariable( const std::string& var_name, double value)
+bool ExpressionEvaluator::RegisterVariable( std::string var_name, double value)
 {
- m_real_vars.push_back(var_name);
  m_calc.setVariable( var_name.c_str(), value );
+ m_real_vars.push_back(std::move(var_name));
  return true;
 }
 
-bool ExpressionEvaluator::is_real_variable(const std::string& var_name)
-{
- 
- std::vector<std::string>::iterator start = m_real_vars.begin();
- std::vector<std::string>::iterator end = m_real_vars.end();
- std::vector<std::string>::iterator iter;
 
- iter = find(start, end, var_name);
- 
- if (iter == end)
- {
-  return false;
- }
- else
- {
-  return true;
- }
-}
-
-bool ExpressionEvaluator::is_delimiter(char c)
-{
- if(strchr(" ()|&=!><+-%*/^", c) || c==9 || c==0 || c=='\r' || c=='\n' || c=='\t' || c=='\0' || isspace(c)) return true;
- else return false;
-}
-
-double ExpressionEvaluator::EvaluateString(const std::string& str)
-{
- std::string str_mod = str;
-  const char* c_str_mod = str.c_str(); //string to be modified with file namespace! 
-  std::vector<int> variable_ends;  //variable names to be changed
-  int cur_variable_end = 0;
-  while(*c_str_mod)
-  {
-   if(is_delimiter(*c_str_mod) || isdigit(*c_str_mod))
-   {
-    c_str_mod++;
-    cur_variable_end++;
-   }
-   else if(isalpha(*c_str_mod))
-   {
-    char variable[80];
-    char* token;
-    token = variable;
-    *token = '\0';
-    while(!is_delimiter(*c_str_mod))
-    {
-     *token=*c_str_mod;
-     token++;
-     c_str_mod++;
-     cur_variable_end++;
+bool ExpressionEvaluator::RegisterArray(std::string& c, const std::vector<double>& v) {
+    char buf[32];
+    for (size_t i = 0; i < v.size(); ++i) {
+        double value = v[i];
+        auto [ptr, ec] = std::to_chars(buf, buf + sizeof(buf), i);
+        std::string_view index(buf, ptr - buf);
+        std::string name = CxxUtils::strcat(c, '_', index, '_');
+        RegisterVariable(std::move(name), value);
     }
-    *token = '\0';
-    std::string variable_to_check = variable;
-    if(is_real_variable(variable_to_check))
-    {
-     variable_ends.push_back(cur_variable_end);
-    }
-   }
-   else
-   {
-    c_str_mod++;
-    cur_variable_end++;
-   }
-  std::string::size_type shift = 0;
-  std::string::size_type ns_length = m_fileCurrentlyParsed.size();
-  for(unsigned int i=0; i<variable_ends.size(); i++)
-  {
-   str_mod.insert(shift+variable_ends[i],m_fileCurrentlyParsed);
-   shift += ns_length;
-  }
- }
- double result = m_calc.evaluate( str_mod.c_str() );
- return result;
+    return true;
 }
+
+bool ExpressionEvaluator::is_real_variable(std::string_view var_name) const noexcept {
+    return std::ranges::contains(m_real_vars, var_name);
+}
+
+bool ExpressionEvaluator::is_delimiter(char ch) noexcept {
+    unsigned char c = static_cast<unsigned char>(ch);
+    return std::isspace(c) || c == '\0' || 
+           std::string_view(" ()|&=!><+-%*/^").find(ch) != std::string_view::npos;
+}
+
+double ExpressionEvaluator::EvaluateString(std::string_view str) {
+    std::string str_mod{str};
+    std::vector<int> variable_ends;
+    size_t cur_variable_end = 0;
+    
+    auto c_str_view = str;
+    size_t idx = 0;
+    
+    while (idx < c_str_view.size()) {
+        char c = c_str_view[idx];
+        if (is_delimiter(c) || std::isdigit(static_cast<unsigned char>(c))) {
+            idx++;
+            cur_variable_end++;
+        } else if (std::isalpha(static_cast<unsigned char>(c))) {
+            size_t start_token = idx;
+            while (idx < c_str_view.size() && !is_delimiter(c_str_view[idx])) {
+                idx++;
+                cur_variable_end++;
+            }
+            std::string_view variable_to_guard = c_str_view.substr(start_token, idx - start_token);
+            if (is_real_variable(std::string(variable_to_guard))) {
+                variable_ends.push_back(static_cast<int>(cur_variable_end));
+            }
+        } else {
+            idx++;
+            cur_variable_end++;
+        }
+    }
+
+    size_t shift = 0;
+    size_t ns_length = m_fileCurrentlyParsed.size();
+    for (int var_end : variable_ends) {
+        str_mod.insert(shift + var_end, m_fileCurrentlyParsed);
+        shift += ns_length;
+    }
+    
+    return m_calc.evaluate(str_mod.c_str());
+}
+
 /*********************************************************************************************************/
 /*********************************************************************************************************/
 /*********************************************************************************************************/
@@ -149,11 +124,7 @@ double ExpressionEvaluator::EvaluateString(const std::string& str)
 
 bool ExpressionEvaluator::RegisterPhysConstant( std::string& c, const std::string& value, const std::string& unit  )
 {
-  std::string expr = value;
-  expr += "*(";
-  expr += unit;
-  expr += ")";
-
+  std::string expr = CxxUtils::strcat(value, "*(", unit, ')');
   double dvalue      = EvaluateString( expr );
 
   if( m_calc.status() != HepTool::Evaluator::OK )
@@ -171,9 +142,7 @@ bool ExpressionEvaluator::RegisterPhysConstant( std::string& c, const std::strin
 
 bool ExpressionEvaluator::RegisterExpression( std::string& name, const std::string& text )
 {
-  std::string expr = "(";
-  expr += text;
-  expr += ")";
+  std::string expr = CxxUtils::strcat('(',text,')');
   double value = EvaluateString( expr );
 
   if( m_calc.status() != HepTool::Evaluator::OK )
@@ -187,7 +156,6 @@ bool ExpressionEvaluator::RegisterExpression( std::string& name, const std::stri
   RegisterVariable( name, value );
   return true;
 }
-
 
 double ExpressionEvaluator::Eval( std::string_view expr_mod )
 {
@@ -269,31 +237,14 @@ double ExpressionEvaluator::Eval( std::string_view expr_mod )
   return result;
 }
 
-std::string ExpressionEvaluator::trim (const std::string& s)
-//-------------------------------------------------------------
-{
-        if (s.size () == 0) return (s);
-        std::string temp = s;
-        std::string::size_type i;
-        i = temp.find_first_not_of (' ');
-        if (i == std::string::npos) return std::string();
-// There is at least 1 non blank character in s.
-        if (i > 0)
-        {
-                temp = temp.substr (i);
-        }
-        i = temp.find_last_not_of (' ');
-        if (i < temp.size ())
-        {
-                temp.resize (i + 1);
-        }
-        return (temp);
-}
+
     
-std::vector<std::string> ExpressionEvaluator::tokenize(const std::string& sep,const std::string& expr)
-{
-	std::vector<std::string> tempvect;
-	AGDDTokenizer aa(sep,expr);
-	for (unsigned int i=0;i<aa.size();i++) tempvect.push_back(trim(aa[i]));
-	return tempvect;
+std::vector<std::string> ExpressionEvaluator::tokenize(std::string_view sep, std::string_view expr) {
+    auto tokens = CxxUtils::tokenize<std::string>(expr, sep);
+    
+    for (auto& token : tokens) {
+        token = CxxUtils::trimWhiteSpaces(token);
+    }
+    
+    return tokens;
 }
