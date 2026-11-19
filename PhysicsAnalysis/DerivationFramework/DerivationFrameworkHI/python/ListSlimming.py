@@ -944,6 +944,8 @@ def HIONHPODAllVariables():
 def HIONHPODAllTruthVariables():
     variables = [
         "MET_Truth",
+        "TruthVertices",
+        "TruthParticles",
         "TruthElectrons",
         "TruthMuons",
         "TruthPhotons",
