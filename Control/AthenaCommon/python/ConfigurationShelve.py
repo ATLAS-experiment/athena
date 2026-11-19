@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # @file: AthenaCommon/python/ConfigurationShelve.py
 # @author: Wim Lavrijsen (WLavrijsen@lbl.gov)
@@ -199,8 +199,14 @@ def storeJobOptionsCatalogue( cfg_fname ):
    josvc = PyAthena.py_svc( 'JobOptionsSvc',iface="Gaudi::Interfaces::IOptionsSvc")
    allProps=josvc.items() #a std::tuple<string,string>
    for prop in allProps: 
-      cn=str(prop._0).split(".")
-      v=str(prop._1)
+      if hasattr(prop, '_0'):
+         p0 = prop._0
+         p1 = prop._1
+      else:
+         p0 = prop[0]
+         p1 = prop[1]
+      cn=str(p0).split(".")
+      v=str(p1)
       client=".".join(cn[:-1])
       n=cn[-1]
       jocat[ client ][ n ] = v

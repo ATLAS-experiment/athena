@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # Author: Wim Lavrijsen (LBNL, WLavrijsen@lbl.gov)
 
 """Unit tests for verifying setting of Gaudi/Athena job properties setting.
@@ -32,7 +32,10 @@ class JobOptionsTestBase( unittest.TestCase ):
    def tearDown( self ):
       # Clean JobOptionsSvc
       for p in JobOptionsSvc.items():
-         JobOptionsSvc.pop(p._0)
+         if hasattr(p, '_0'):
+            JobOptionsSvc.pop(p._0)
+         else:
+            JobOptionsSvc.pop(p[0])
       assert len(JobOptionsSvc.items()) == 0, "JobOptionsSvc still has properties"
 
 
