@@ -139,7 +139,12 @@ StatusCode CPCMX::execute(const EventContext& ctx)
   auto l1Menu = SG::makeHandle( m_L1MenuKey , ctx);
 
 
-  float cpScale = l1Menu->thrExtraInfo().EM().emScale();
+  float cpScale = 2; // default scale
+  try {
+    l1Menu->thrExtraInfo().EM().emScale();
+  } catch(const std::out_of_range&) {
+    // legacy EM not present in menu removed, so use default
+  }
   std::vector<std::shared_ptr<TrigConf::L1Threshold>> allThresholds = l1Menu->thresholds();
   std::vector<std::shared_ptr<TrigConf::L1Threshold>> thresholds;
   for ( const auto& thresh : allThresholds  ) {
