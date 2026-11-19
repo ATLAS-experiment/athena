@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MDTSensitiveDetector.h"
@@ -171,7 +171,7 @@ int MDTSensitiveDetector::GetIdentifier(const G4TouchableHistory* touchHist)
       volName.resize(npos-2);
       int volCopyNo = touchHist->GetVolume(i)->GetCopyNo();
       volCopyNo=volCopyNo%1000;
-      stationName   = volName;
+      stationName   = std::move(volName);
       stationEta    = volCopyNo/100;
       stationPhi    = abs(volCopyNo%100);
 
