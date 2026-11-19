@@ -51,8 +51,8 @@ def JETM2ExtraContentCfg(flags):
     from JetRecConfig.JetRecConfig import JetRecCfg, getInputAlgs, getConstitPJGAlg
     from JetRecConfig.JetInputConfig import buildEventShapeAlg
     from JetRecConfig.StandardJetConstits import stdConstitDic as cst
-    from JetRecConfig.StandardSmallRJets import AntiKt4UFOCSSKNoPtCut, AntiKt4EMPFlowNoPtCut, AntiKt4EMPFlowML, AntiKt4EMTopoNoPtCut, AntiKt4MLTopo
-    from JetRecConfig.StandardLargeRJets import AntiKt10TruthDressedWZSoftDrop, AntiKt10UFOCSSKSoftDrop_noLeptons
+    from JetRecConfig.StandardSmallRJets import AntiKt4UFOCSSKNoPtCut, AntiKt4EMPFlowNoPtCut, AntiKt4EMPFlowML, AntiKt4EMTopoNoPtCut, AntiKt4MLTopo, AntiKt4EMPFlow_inclMuons
+    from JetRecConfig.StandardLargeRJets import AntiKt10TruthDressedWZSoftDrop, AntiKt10UFOCSSKSoftDrop_noLeptons, AntiKt10UFOCSSKSoftDrop_inclMuons
 
     #=======================================
     # CHS R = 0.4 UFO jets
@@ -78,6 +78,12 @@ def JETM2ExtraContentCfg(flags):
         if flags.Input.MCCampaign in [Campaign.MC23e, Campaign.MC23g]:
             jetList += [AntiKt10UFOCSSKSoftDrop_noLeptons]
 
+    #=======================================
+    # jets including muons
+    #=======================================
+    
+    jetList += [AntiKt4EMPFlow_inclMuons, AntiKt10UFOCSSKSoftDrop_inclMuons]
+    
     #=======================================
     # R = 1.0 truth WZ Dressed jets
     #=======================================
@@ -220,9 +226,12 @@ def JETM2Cfg(flags):
     JETM2SlimmingHelper.IncludeMinBiasTriggerContent = False
 
     jetOutputList = ["AntiKt4UFOCSSKNoPtCutJets","AntiKt4EMPFlowNoPtCutJets", "AntiKt4EMPFlowMLJets", "AntiKt4MLTopoJets"]
+    jetOutputList += ["AntiKt4EMPFlow_inclMuonsJets", "AntiKt10UFOCSSK_inclMuonsSoftDropBeta100Zcut10Jets"]
+
     if flags.Input.isMC:
         if flags.Input.MCCampaign in [Campaign.MC23e, Campaign.MC23g]:
             jetOutputList += ["AntiKt10UFOCSSK_noLeptonsSoftDropBeta100Zcut10Jets"]
+
     from DerivationFrameworkJetEtMiss.JetCommonConfig import addJetsToSlimmingTool
     addJetsToSlimmingTool(JETM2SlimmingHelper, jetOutputList, JETM2SlimmingHelper.SmartCollections)
 
