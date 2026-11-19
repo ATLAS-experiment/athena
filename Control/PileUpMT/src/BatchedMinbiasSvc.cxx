@@ -20,7 +20,7 @@
 #include "AthenaKernel/IAddressProvider.h"
 #include "AthenaKernel/IProxyProviderSvc.h"
 #include "CxxUtils/FastReseededPRNG.h"
-#include "SGTools/CurrentEventStore.h"
+#include "SGTools/WithEventContext.h"
 #include "StoreGate/ActiveStoreSvc.h"
 
 namespace rv = std::views;
@@ -342,7 +342,7 @@ StatusCode BatchedMinbiasSvc::beginHardScatter(const EventContext& ctx) {
       for (auto&& sg : *m_cache[batch]) {
         // Change active store
         m_activeStoreSvc->setStore(sg.get());
-        SG::CurrentEventStore::Push reader_sg_ces(sg.get());
+        SG::WithEventContext reader_sg_ces(sg.get());
         // Read next event
         ATH_CHECK(sg->clearStore(true));
         if (!(m_bkgEventSelector->next(*m_bkg_evt_sel_ctx)).isSuccess()) {
