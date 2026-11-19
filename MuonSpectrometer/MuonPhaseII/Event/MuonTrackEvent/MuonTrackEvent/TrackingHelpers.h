@@ -44,12 +44,20 @@ namespace MuonR4{
     
     /** @brief Expresses the segment position on the surface of the first
      *         measurement 
-     *  @param gctx: Geometry context to align the measurment surfaces
+     *  @param tgContext: Geometry context to align the measurment surfaces
      *  @param segment: Reference to the segment to be expressed
      *  @param skipOutlier: Allow the first surface to be an outlier*/
-    Amg::Vector3D atFirstSurface(const Acts::GeometryContext& gctx,
+    Amg::Vector3D atFirstSurface(const Acts::GeometryContext& tgContext,
                                  const xAOD::MuonSegment& segment,
                                  const bool skipOutlier = true);
+    /** @brief Expresses the segment position on the surface of the last
+     *         measurement 
+     *  @param tgContext: Geometry context to align the measurment surfaces
+     *  @param segment: Reference to the segment to be expressed
+     *  @param skipOutlier: Allow the last surface to be an outlier*/
+    Amg::Vector3D atLastSurface(const Acts::GeometryContext& tgContext,
+                                const xAOD::MuonSegment& segment,
+                                const bool skipOutlier = true);
     /** @brief Retrieves the first measurement associated with the segment
      *  @param segment: Refernece to the segment for which the measurement
      *                  shall be returned
@@ -57,6 +65,13 @@ namespace MuonR4{
      *                     not an outlier */
     const xAOD::UncalibratedMeasurement* firstMeasurement(const xAOD::MuonSegment& segment,
                                                           const bool skipOutlier =true);
+    /** @brief Retrieves the last measurement associated with the segment
+     *  @param segment: Reference to the segment for which the measurement a
+     *                  shall be returned
+     * @param skipOutlier: If true, it is ensured that the returned measurement is
+     *                     not an outlier */
+    const xAOD::UncalibratedMeasurement* lastMeasurement(const xAOD::MuonSegment& segment,
+                                                         const bool skipOutlier =true);
     /** @brief Returns the identifier of the volume in which the surface is embedded
      *  @param surface: Reference to the surface of interest */
     Acts::GeometryIdentifier volumeId(const Acts::Surface& surface);

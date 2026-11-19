@@ -104,21 +104,42 @@ namespace MuonR4{
         }
         return nullptr;
     }
+    const xAOD::UncalibratedMeasurement* lastMeasurement(const xAOD::MuonSegment& segment,
+                                                          const bool skipOutlier) {
+        const std::size_t n = nMeasurements(segment) -1;
+        for (std::size_t i = 0; i <= n ; ++i) {
+            if (!skipOutlier || !isOutlierMeasurement(segment, n-i)) {
+                return getMeasurement(segment, n-i);
+            }
+        }
+        return nullptr;
+    } 
 
-    Amg::Vector3D atFirstSurface(const Acts::GeometryContext& gctx,
+    Amg::Vector3D atFirstSurface(const Acts::GeometryContext& tgContext,
                                  const xAOD::MuonSegment& segment,
                                  const bool skipOutlier) {
         const xAOD::UncalibratedMeasurement* meas{firstMeasurement(segment, skipOutlier)};
         assert(meas != nullptr);
         const Acts::Surface& surface = xAOD::muonSurface(meas);
 
-        const Acts::MultiIntersection isect = surface.intersect(gctx,
+        const Acts::MultiIntersection isect = surface.intersect(tgContext,
                                                                 segment.position(),
                                                                 segment.direction(),
                                                                 Acts::BoundaryTolerance::Infinite());
         return isect.closest().position();
     }
-
+    Amg::Vector3D atLastSurface(const Acts::GeometryContext& tgContext,
+                                const xAOD::MuonSegment& segment,
+                                const bool skipOutlier) {
+        const xAOD::UncalibratedMeasurement* meas{lastMeasurement(segment, skipOutlier)};
+        assert(meas != nullptr);
+        const Acts::Surface& surface = xAOD::muonSurface(meas);
+        const Acts::MultiIntersection isect = surface.intersect(tgContext,
+                                                                segment.position(),
+                                                                segment.direction(),
+                                                                Acts::BoundaryTolerance::Infinite());
+        return isect.closest().position();
+    }
     bool ParticleSorter::operator()(const xAOD::IParticle* a,
                                     const xAOD::IParticle* b) const {
 

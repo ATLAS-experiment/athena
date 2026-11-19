@@ -106,7 +106,6 @@ namespace MuonR4{
                     }
                 }
             }
-
             if (!refSeg) {
                 ATH_MSG_WARNING(__func__<<"() "<<__LINE__
                     <<" - No reference segment passing the seeding quality was found.");
@@ -185,27 +184,23 @@ namespace MuonR4{
                     } else {
                         /** We want the precision coordinate from the segment and the coordinate along the
                          *  strip from the back extrapolated segment */ 
-                        Acts::Vector2 locStartPos2D {locFrontSegPos.x(), locSeedAtFirst.y()};
+                        Acts::Vector2 locStartPos2D{Acts::Vector2::Zero()};
                         const auto& bounds = firstSurf.bounds();
                         switch (bounds.type()) {
                             case Acts::SurfaceBounds::BoundsType::eRectangle:
-                                if (!bounds.inside(locStartPos2D)) {
-                                    locStartPos2D = bounds.closestPoint(locStartPos2D, Acts::SquareMatrix2::Identity());
-                                }
-                                break;
                             case Acts::SurfaceBounds::BoundsType::eTrapezoid:
                             case Acts::SurfaceBounds::BoundsType::eDiamond:
-                                /** Trapezoids and diamonds have their x and y axis swapped */
-                                std::swap(locStartPos2D.x(), locStartPos2D.y());
-                                if (!bounds.inside(locStartPos2D)) {
-                                    locStartPos2D = bounds.closestPoint(locStartPos2D, Acts::SquareMatrix2::Identity());
-                                }
-                                std::swap(locStartPos2D.x(), locStartPos2D.y());
+                                /** Precision coordinate along local x, strip direction along local y */
+                                locStartPos2D = Acts::Vector2{locFrontSegPos.x(), locSeedAtFirst.y()};
                                 break;
                             default:
                                 ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - Unexpected surface bounds type "
                                                         <<firstSurf.bounds().type());
                                 return Acts::Result<Acts::BoundTrackParameters>::failure(std::make_error_code(std::errc::invalid_argument));
+                        }
+                        /** The bounds are expressed in the same local frame as the surface transform */
+                        if (!bounds.inside(locStartPos2D)) {
+                            locStartPos2D = bounds.closestPoint(locStartPos2D, Acts::SquareMatrix2::Identity());
                         }
                         const Amg::Vector3D locStartPos {locStartPos2D.x(),locStartPos2D.y(), locFrontSegPos.z()};
 
