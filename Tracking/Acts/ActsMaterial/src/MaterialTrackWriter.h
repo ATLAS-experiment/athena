@@ -12,7 +12,7 @@
 #include "ActsEvent/ContextUtility.h"
 #include "ActsGeometry/RecordedMaterialTrackCollection.h"
 
-#include <ActsPlugins/Root/RootMaterialTrackIo.hpp>
+#include "RootMaterialTrackIo.h"
 
 #include "TTree.h"
 #include "TFile.h"
@@ -61,9 +61,9 @@ namespace ActsTrk {
             
             /** @brief Context provider for geometry, magnetic field and calibration contexts */
             ContextUtility m_ctxProvider{this};
-            using Config_t = ActsPlugins::RootMaterialTrackIo::Config;
+            using Config_t = RootMaterialTrackIo::Config;
             /// The read - write payload
-            ActsPlugins::RootMaterialTrackIo m_accessor{Config_t{}};
+            RootMaterialTrackIo m_accessor{Config_t{}};
             /// The output file and tree
            
             TTree* m_outputTree{};

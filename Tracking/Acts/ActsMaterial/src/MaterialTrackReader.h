@@ -11,8 +11,7 @@
 
 #include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsGeometry/RecordedMaterialTrackCollection.h"
-///
-#include <ActsPlugins/Root/RootMaterialTrackIo.hpp>
+#include "RootMaterialTrackIo.h"
 
 #include "TChain.h"
 
@@ -58,7 +57,7 @@ namespace ActsTrk {
             /// Read surface information for the root file
             Gaudi::Property<bool> m_readCachedSurfaceInformation{this, "ReadCachedSurface", false, "Read surface information for the root file"};
             /// The read - write payload
-            ActsPlugins::RootMaterialTrackIo m_accessor{{false, m_readCachedSurfaceInformation}};
+            RootMaterialTrackIo m_accessor{{false, m_readCachedSurfaceInformation}};
             /// The input chain of entries
             std::unique_ptr<TChain> m_inputChain{};
             /// The RecordedMaterialTrackCollection to write

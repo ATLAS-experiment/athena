@@ -5,7 +5,8 @@ atlas_subdir( ActsMaterial )
 
 # External dependencies:
 find_package( Geant4 )
-find_package( Acts COMPONENTS Core PluginRoot PluginJson)
+find_package( ROOT COMPONENTS Core Tree RIO )
+find_package( Acts COMPONENTS Core PluginJson)
 
 # Component(s) in the package:
 atlas_add_library( ActsMaterial
@@ -13,9 +14,9 @@ atlas_add_library( ActsMaterial
                    src/components/*.cxx
                    OBJECT
                    NO_PUBLIC_HEADERS
-                   PRIVATE_INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS}
-                   PRIVATE_LINK_LIBRARIES ${GEANT4_LIBRARIES} AthenaBaseComps GaudiKernel G4AtlasToolsLib ActsGeometryInterfacesLib ActsEventLib ActsGeometryLib
-                   Acts::Core Acts::PluginRoot Acts::PluginJson
+                   PRIVATE_INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
+                   PRIVATE_LINK_LIBRARIES ${GEANT4_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps GaudiKernel G4AtlasToolsLib ActsGeometryInterfacesLib ActsEventLib ActsGeometryLib
+                   Acts::Core Acts::PluginJson
                    )
 set_target_properties( ActsMaterial PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
