@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetBeamSpotRooFit.h"
@@ -13,37 +13,15 @@
 using namespace RooFit;
 using namespace InDet;
 
-InDetBeamSpotRooFit::InDetBeamSpotRooFit( const std::string& type, 
-					  const std::string& name, 
-					  const IInterface* parent):
-  AthAlgTool(type,name,parent),
-  m_cov(10), m_ax(0),m_ay(0),m_k(0),
-  m_mx(0),m_my(0),m_mz(0),m_rho(0),
-  m_sx(0),m_sy(0),m_sz(0),m_nUsed(0),
-  m_vertexCount(0),
-  m_fitStatus(unsolved),m_vtxResCut(0)
-{
-  declareInterface<IInDetBeamSpotTool>(this);
-  declareProperty("vtxResCut", m_vtxResCut = 0.05 );//m_vtxCut="abs(vxx) < .0025 && abs(vyy) < .0025 && abs(z) < 300 && abs(x)<3 && abs(y)<3");
-  declareProperty("InitialKFactor", m_kStart=1.0);
-  declareProperty("RMSCut", m_rmsCutNum = 16);
-  declareProperty("ConstantKFactor", m_kConst=false);
-}
-
 //Copy constructor: any variables that can be set with job options should be copied here
 InDetBeamSpotRooFit::InDetBeamSpotRooFit( const InDetBeamSpotRooFit& rhs ) : 
-  IInDetBeamSpotTool(rhs), 
-  AthAlgTool(rhs.type(), rhs.name(), rhs.parent()),
-  m_cov(10), m_ax(0),m_ay(0),m_k(0),
-  m_mx(0),m_my(0),m_mz(0),m_rho(0),
-  m_sx(0),m_sy(0),m_sz(0),m_nUsed(0),
-  m_vertexCount(0),
-  m_fitStatus(unsolved),
-  m_vtxResCut(rhs.m_vtxResCut),
-  m_kStart(rhs.m_kStart),
-  m_rmsCutNum(rhs.m_rmsCutNum),
-  m_kConst(rhs.m_kConst)
-{}
+  base_class(rhs.type(), rhs.name(), rhs.parent())
+{
+  m_vtxResCut.setValue(rhs.m_vtxResCut.value());
+  m_kStart.setValue(rhs.m_kStart.value());
+  m_rmsCutNum.setValue(rhs.m_rmsCutNum.value());
+  m_kConst.setValue(rhs.m_kConst.value());
+}
 
 StatusCode InDetBeamSpotRooFit::initialize() {
   ATH_MSG_DEBUG( "In initialize" );

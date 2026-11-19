@@ -24,49 +24,6 @@
 
 
 
-RefitTracksAndVertex::RefitTracksAndVertex( const std::string& name, ISvcLocator* pSvcLocator )
-  : AthAlgorithm   (name, pSvcLocator)
-  , m_idHelper(nullptr)
-  , m_vertexListInput("PrimaryVertices")
-  , m_trackListOutput("SiTracksWithRefitTracksAndVertex")
-  , m_outputVertexContainerName("RefittedPrimaryVertex")
-  , m_trackFitter("Trk::GlobalChi2Fitter/InDetTrackFitter")
-  , m_vertexFitter("Trk::FullVertexFitter")
-  , m_applyTrkSel(false)
-  , m_refitTracks(true)
-  , m_addPM(false)
-  , m_selPtMin(0)
-  , m_selEtaMin(-2.5)
-  , m_selEtaMax(2.5)
-  , m_selNHitPIXMin(0)
-  , m_selNHitSCTMin(6)
-  , m_nTracksProcessed(0)
-  , m_nTracksPresel(0)
-  , m_nTracksAccepted(0)
-  , m_nRejectPIX(0)
-  , m_nRejectSCT(0)
-  , m_nRejectTRT(0)
-  , m_nRejectPM(0)
-{
-  // declare algorithm parameters
-  declareProperty("VertexListInput"     , m_vertexListInput) ;
-  declareProperty("TrackListOutput"    , m_trackListOutput) ;
-  declareProperty("OutputVertexContainer"        , m_outputVertexContainerName) ;
-  declareProperty("TrackFitter"        , m_trackFitter) ;
-  declareProperty("VertexFitterTool"   , m_vertexFitter);
-  declareProperty("ApplyTrkSel"        , m_applyTrkSel) ;
-  declareProperty("RefitTracks"        , m_refitTracks) ;
-  declareProperty("AddPseudoMeasurement", m_addPM);
-  declareProperty("SelPtMin"           , m_selPtMin) ;
-  declareProperty("SelEtaMin"          , m_selEtaMin) ;
-  declareProperty("SelEtaMax"          , m_selEtaMax) ;
-  declareProperty("SelNHitPIXMin"      , m_selNHitPIXMin) ;
-  declareProperty("SelNHitSCTMin"      , m_selNHitSCTMin) ;
-
-}
-
-RefitTracksAndVertex::~RefitTracksAndVertex() {}
-
 StatusCode RefitTracksAndVertex::initialize() {
   //retrieve the DetectorStore service
   StatusCode status=detStore().retrieve() ;
@@ -128,14 +85,14 @@ StatusCode RefitTracksAndVertex::execute(const EventContext& ctx) {
   // Primary Vertex
   //---------------------------
   const xAOD::VertexContainer* vertices = nullptr;
-  if ( !evtStore()->retrieve( vertices, m_vertexListInput ).isSuccess() ){ // retrieve arguments: container type, container key
+  if ( !evtStore()->retrieve( vertices, m_vertexListInput.value() ).isSuccess() ){ // retrieve arguments: container type, container key
     ATH_MSG_WARNING("execute() Failed to retrieve Reconstructed vertex container. " << m_vertexListInput );
     //ATH_MSG_ERROR(evtStore()->dump());
     delete outputtracks;
     return StatusCode::SUCCESS; //?? really
   }
 
-  if( evtStore()->record( outputtracks, m_trackListOutput ).isFailure() ) {
+  if( evtStore()->record( outputtracks, m_trackListOutput.value() ).isFailure() ) {
     ATH_MSG_ERROR( "Failed to record trackcollection with name " << m_trackListOutput );
   }
 
@@ -143,8 +100,8 @@ StatusCode RefitTracksAndVertex::execute(const EventContext& ctx) {
   xAOD::VertexAuxContainer* theVertexAuxContainer = new xAOD::VertexAuxContainer;
   theVertexContainer->setStore( theVertexAuxContainer );
 
-  CHECK( evtStore()->record(theVertexContainer,  m_outputVertexContainerName) );
-  CHECK( evtStore()->record(theVertexAuxContainer, m_outputVertexContainerName + "Aux.") );
+  CHECK( evtStore()->record(theVertexContainer,  m_outputVertexContainerName.value()) );
+  CHECK( evtStore()->record(theVertexAuxContainer, m_outputVertexContainerName.value() + "Aux.") );
 
   const xAOD::Vertex* primaryVertex = nullptr;
   for( const xAOD::Vertex* vertex: *vertices ) {
