@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -9,6 +9,10 @@
 #ifndef EVENT_EVENTPRIMITIVES_H
 #define EVENT_EVENTPRIMITIVES_H
 
+// Define plugins to extend Eigen classes.
+// Note that these definitions are also provided on the command line
+// (via the EventPrimitives CMakeFiles.txt) so that things will work
+// properly even if Eigen/Core is included before this.
 #define EIGEN_MATRIXBASE_PLUGIN "EventPrimitives/AmgMatrixBasePlugin.h"
 #define EIGEN_TRANSFORM_PLUGIN "EventPrimitives/AmgTransformPlugin.h"
 
