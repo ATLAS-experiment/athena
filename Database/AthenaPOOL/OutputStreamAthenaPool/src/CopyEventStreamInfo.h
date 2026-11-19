@@ -10,48 +10,46 @@
  *  @author Peter van Gemmeren <gemmeren@anl.gov>
  **/
 
-#include "GaudiKernel/ServiceHandle.h"
+#include <string>
 
 #include "AthenaBaseComps/AthAlgTool.h"
-
-#include "AthenaKernel/IMetaDataTool.h"
 #include "AthenaKernel/IAthMetaDataSvc.h"
-
-#include <string>
+#include "AthenaKernel/IMetaDataTool.h"
+#include "GaudiKernel/ServiceHandle.h"
 
 class StoreGateSvc;
 
-/** @class CopyEventStreamInfo 
+/** @class CopyEventStreamInfo
  *  @brief This class provides an algorithm to make the EventStreamInfo object and update it.
  **/
 class CopyEventStreamInfo : public extends<::AthAlgTool, IMetaDataTool> {
 public:
-   /// Standard AlgTool Constructor
-   CopyEventStreamInfo(const std::string& type, const std::string& name, const IInterface* parent);
-   /// Destructor
-   virtual ~CopyEventStreamInfo() = default;
+  /// Standard AlgTool Constructor
+  CopyEventStreamInfo(const std::string& type, const std::string& name, const IInterface* parent);
+  /// Destructor
+  virtual ~CopyEventStreamInfo() = default;
 
-   /// AthAlgTool Interface method implementations:
-   virtual StatusCode initialize() override final;
+  /// AthAlgTool Interface method implementations:
+  virtual StatusCode initialize() override final;
 
-   /// Function called when a new input file is opened
-   virtual StatusCode beginInputFile(const SG::SourceID& = "Serial") override final;
+  /// Function called when a new input file is opened
+  virtual StatusCode beginInputFile(const SG::SourceID& = "Serial") override final;
 
-   /// Function called when the currently open input file got completely
-   /// processed
-   virtual StatusCode endInputFile(const SG::SourceID& = "Serial") override final;
+  /// Function called when the currently open input file got completely
+  /// processed
+  virtual StatusCode endInputFile(const SG::SourceID& = "Serial") override final;
 
-   /// Function called when the tool should write out its metadata
-   virtual StatusCode metaDataStop() override final;
+  /// Function called when the tool should write out its metadata
+  virtual StatusCode metaDataStop() override final;
 
 private:
-   /// (optional) list of keys to copy, all if empty, default: empty
-   Gaudi::Property<std::vector<std::string>> m_keys{this, "Keys", {},
-      "(optional) list of keys to copy, all if empty. default: empty"};
+  /// (optional) list of keys to copy, all if empty, default: empty
+  Gaudi::Property<std::vector<std::string>> m_keys{
+      this, "Keys", {}, "(optional) list of keys to copy, all if empty. default: empty"};
 
-   /// Access to output MetaDataStore through MetaDataSvc (using MetaContainers)
-   ServiceHandle<IAthMetaDataSvc> m_metaDataSvc{this, "MetaDataSvc", "MetaDataSvc"};
-   /// MetaDataStore for input
-   ServiceHandle<StoreGateSvc> m_inputMetaDataStore{this, "InputMetaDataStore", "StoreGateSvc/InputMetaDataStore"};
+  /// Access to output MetaDataStore through MetaDataSvc (using MetaContainers)
+  ServiceHandle<IAthMetaDataSvc> m_metaDataSvc{this, "MetaDataSvc", "MetaDataSvc"};
+  /// MetaDataStore for input
+  ServiceHandle<StoreGateSvc> m_inputMetaDataStore{this, "InputMetaDataStore", "StoreGateSvc/InputMetaDataStore"};
 };
 #endif
