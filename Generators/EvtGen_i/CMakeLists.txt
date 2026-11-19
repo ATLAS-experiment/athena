@@ -69,6 +69,13 @@ atlas_add_component( EvtGen_i
                      src/components/*.cxx
                      LINK_LIBRARIES EvtGen_iLib )
 
+# Test of the barcodes given to new decay products in readExisting mode:
+atlas_add_test( EvtGenBarcodes_test
+                SOURCES test/EvtGenBarcodes_test.cxx
+                INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
+                LINK_LIBRARIES ${CLHEP_LIBRARIES} AtlasHepMCLib AthenaKernel GeneratorObjectsTPCnv SGTools TestTools TruthUtils
+                POST_EXEC_SCRIPT nopost.sh )
+
 # Install files from the package:
 atlas_install_joboptions( share/common/*.py )
 atlas_install_runtime( share/file/*.DEC share/file/*.table share/file/*.dec share/file/*.pdt share/file/*.dat )

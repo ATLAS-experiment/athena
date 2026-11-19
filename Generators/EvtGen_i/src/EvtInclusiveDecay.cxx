@@ -15,6 +15,7 @@
 //*****************************************************************************
 
 #include "EvtGen_i/EvtInclusiveDecay.h"
+#include "EvtGen_i/EvtGenBarcodes.h"
 
 #include "EvtGenBase/EvtAbsRadCorr.hh"
 #include "EvtGenBase/EvtDecayBase.hh"
@@ -265,6 +266,13 @@ StatusCode EvtInclusiveDecay::execute(const EventContext& ctx) {
     }
 
 
+    // An event read from a file has the barcodes stored in the file. The decay products
+    // get barcodes above the largest particle barcode and below the lowest vertex barcode,
+    // so that they do not take the barcode of a particle or vertex already in the event.
+    if (m_readExisting) {
+      EvtGenBarcodes::findBarcodeRange(*hepMC, m_maxParticleBarcode, m_minVertexBarcode);
+    }
+
     // Decay selected particles
     bool eventPassesCuts(false);
     int loopCounter(0);
@@ -286,6 +294,12 @@ StatusCode EvtInclusiveDecay::execute(const EventContext& ctx) {
 
       m_nRepeatedDecays++;
       loopCounter++;
+    }
+
+    if (m_readExisting && (m_maxParticleBarcode >= HepMC::SIM_BARCODE_THRESHOLD ||
+                           m_minVertexBarcode <= -HepMC::SIM_BARCODE_THRESHOLD)) {
+      ATH_MSG_ERROR("The barcodes of the EvtGen decay products reach the simulation range");
+      return StatusCode::FAILURE;
     }
 
     // Store the number of decay attempts in event weights std::map, only if repeated decays enabled
@@ -464,6 +478,9 @@ void EvtInclusiveDecay::addEvtGenDecayTree(HepMC::GenEvent* hepMC, HepMC::GenPar
     HepMC::GenVertexPtr end_vtx = HepMC::newGenVertexPtr(HepMC::FourVector(x,y,z,ct));
 
     hepMC->add_vertex(end_vtx);
+    if (m_readExisting) {
+      HepMC::suggest_barcode(end_vtx, --m_minVertexBarcode);
+    }
     end_vtx->add_particle_in(std::move(part));
 
     // Add decay daughter with their own decay trees
@@ -477,6 +494,9 @@ void EvtInclusiveDecay::addEvtGenDecayTree(HepMC::GenEvent* hepMC, HepMC::GenPar
       if(evtPart->getDaug(it)->getNDaug() != 0) status=2;
       HepMC::GenParticlePtr daughter = HepMC::newGenParticlePtr(HepMC::FourVector(px,py,pz,e),id,status);
       end_vtx->add_particle_out(daughter);
+      if (m_readExisting) {
+        HepMC::suggest_barcode(daughter, ++m_maxParticleBarcode);
+      }
       addEvtGenDecayTree(hepMC, std::move(daughter), evtPart->getDaug(it), treeStart, momentumScaleFactor);
     }
   }
