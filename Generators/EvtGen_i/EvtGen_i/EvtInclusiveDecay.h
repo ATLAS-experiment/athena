@@ -113,6 +113,9 @@ private:
   std::string m_outputKeyName;
 
   bool m_readExisting;
+  // Largest particle barcode and lowest vertex barcode of the event, with readExisting
+  int m_maxParticleBarcode = 0;
+  int m_minVertexBarcode = 0;
   bool m_prohibitFinalStateDecay;
   bool m_prohibitReDecay;
   bool m_prohibitUnDecay;
