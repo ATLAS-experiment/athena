@@ -10,57 +10,55 @@
  *  $Id: MakeEventStreamInfo.h,v 1.2 2008-05-27 21:22:07 gemmeren Exp $
  **/
 
-#include "AthenaKernel/IAthenaOutputTool.h"
-
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "AthenaKernel/IAthMetaDataSvc.h"
-
 #include <string>
 
-class StoreGateSvc;
-namespace xAODMaker {  class IEventInfoCnvTool;  }
+#include "AthenaBaseComps/AthAlgTool.h"
+#include "AthenaKernel/IAthMetaDataSvc.h"
+#include "AthenaKernel/IAthenaOutputTool.h"
+#include "GaudiKernel/ServiceHandle.h"
 
-/** @class MakeEventStreamInfo 
+class StoreGateSvc;
+namespace xAODMaker { class IEventInfoCnvTool; }
+
+/** @class MakeEventStreamInfo
  *  @brief This class provides an algorithm to make the EventStreamInfo object and update it.
  **/
 class MakeEventStreamInfo : public extends<::AthAlgTool, IAthenaOutputTool> {
 public:
-   /// Standard AlgTool Constructor
-   MakeEventStreamInfo(const std::string& type, const std::string& name, const IInterface* parent);
-   /// Destructor
-   virtual ~MakeEventStreamInfo() = default;
-   /// Required of all IAthenaOutputTools:
-   /// Called by AthenaOutputStream::initialize() (via ToolSvc retrieve()).
-   virtual StatusCode initialize() override;
-   /// Called at the end of AthenaOutputStream::initialize().
-   virtual StatusCode postInitialize() override;
-   /// Called at the beginning of AthenaOutputStream::execute().
-   virtual StatusCode preExecute() override;
-   /// Called before actually streaming objects.
-   virtual StatusCode preStream() override;
-   /// Called at the end of AthenaOutputStream::execute().
-   virtual StatusCode postExecute() override;
-   /// Called at the beginning of AthenaOutputStream::finalize().
-   virtual StatusCode preFinalize() override;
-   /// Called at the end of AthenaOutputStream::finalize() (via release()).
-   virtual StatusCode finalize() override;
+  /// Standard AlgTool Constructor
+  MakeEventStreamInfo(const std::string& type, const std::string& name, const IInterface* parent);
+  /// Destructor
+  virtual ~MakeEventStreamInfo() = default;
+  /// Required of all IAthenaOutputTools:
+  /// Called by AthenaOutputStream::initialize() (via ToolSvc retrieve()).
+  virtual StatusCode initialize() override;
+  /// Called at the end of AthenaOutputStream::initialize().
+  virtual StatusCode postInitialize() override;
+  /// Called at the beginning of AthenaOutputStream::execute().
+  virtual StatusCode preExecute() override;
+  /// Called before actually streaming objects.
+  virtual StatusCode preStream() override;
+  /// Called at the end of AthenaOutputStream::execute().
+  virtual StatusCode postExecute() override;
+  /// Called at the beginning of AthenaOutputStream::finalize().
+  virtual StatusCode preFinalize() override;
+  /// Called at the end of AthenaOutputStream::finalize() (via release()).
+  virtual StatusCode finalize() override;
 
 private:
-   /// Name of DataHeader key
-   Gaudi::Property<std::string> m_dataHeaderKey{this, "DataHeaderKey", "", "name of the data header key"};
-   /// Key, the StoreGate key for the EventStreamInfo object.
-   Gaudi::Property<std::string> m_key{this, "Key", "", "name of the EventStreamInfo object"};
+  /// Name of DataHeader key
+  Gaudi::Property<std::string> m_dataHeaderKey{this, "DataHeaderKey", "", "name of the data header key"};
+  /// Key, the StoreGate key for the EventStreamInfo object.
+  Gaudi::Property<std::string> m_key{this, "Key", "", "name of the EventStreamInfo object"};
 
-   /// Key, the StoreGate key for the xAOD::EventInfo object.
-   Gaudi::Property<std::string> m_eventInfoKey{this, "EventInfoKey", "EventInfo", "name of the xAOD::EventInfo"};
+  /// Key, the StoreGate key for the xAOD::EventInfo object.
+  Gaudi::Property<std::string> m_eventInfoKey{this, "EventInfoKey", "EventInfo", "name of the xAOD::EventInfo"};
 
-   /// Pointer to the data stores
-   ServiceHandle<IAthMetaDataSvc> m_metaDataSvc{this, "MetaDataSvc", "MetaDataSvc"};
-   ServiceHandle<StoreGateSvc> m_eventStore{this, "StoreGateSvc", "StoreGateSvc"};
+  /// Pointer to the data stores
+  ServiceHandle<IAthMetaDataSvc> m_metaDataSvc{this, "MetaDataSvc", "MetaDataSvc"};
+  ServiceHandle<StoreGateSvc> m_eventStore{this, "StoreGateSvc", "StoreGateSvc"};
 
-   /// Counter of the events in the stream
-   std::atomic<unsigned int> m_eventCounter{0};
-
+  /// Counter of the events in the stream
+  std::atomic<unsigned int> m_eventCounter{0};
 };
 #endif

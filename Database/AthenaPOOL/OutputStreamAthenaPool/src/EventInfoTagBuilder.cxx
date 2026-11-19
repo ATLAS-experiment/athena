@@ -7,29 +7,25 @@
 #include <StoreGate/ReadHandle.h>
 #include <StoreGate/WriteHandle.h>
 
-
-StatusCode EventInfoTagBuilder::initialize()
-{
-  ATH_MSG_DEBUG( "Initializing " << name() );
+StatusCode EventInfoTagBuilder::initialize() {
+  ATH_MSG_DEBUG("Initializing " << name());
 
   if (m_attributeListName.empty()) {
     ATH_MSG_ERROR("Output attribute list name should not be empty.");
     return StatusCode::FAILURE;
   }
 
-  ATH_CHECK( m_tool.retrieve() );
+  ATH_CHECK(m_tool.retrieve());
 
-  ATH_CHECK( m_evtKey.initialize() );
-  ATH_CHECK( m_inputAttList.initialize(m_propInput) );
-  ATH_CHECK( m_attributeListName.initialize() );
+  ATH_CHECK(m_evtKey.initialize());
+  ATH_CHECK(m_inputAttList.initialize(m_propInput));
+  ATH_CHECK(m_attributeListName.initialize());
 
   return StatusCode::SUCCESS;
 }
 
-
-StatusCode EventInfoTagBuilder::execute(const EventContext &ctx) const
-{
-  ATH_MSG_DEBUG( "Executing " << name() );
+StatusCode EventInfoTagBuilder::execute(const EventContext& ctx) const {
+  ATH_MSG_DEBUG("Executing " << name());
 
   SG::ReadHandle<xAOD::EventInfo> h_evt(m_evtKey, ctx);
   if (!h_evt.isValid()) {
@@ -38,8 +34,7 @@ StatusCode EventInfoTagBuilder::execute(const EventContext &ctx) const
   }
 
   /** create a EventInfo Tag and ask the tool to fill it */
-  std::unique_ptr<AthenaAttributeList> attribList =
-    m_tool->getAttributeListPtr( *h_evt );
+  std::unique_ptr<AthenaAttributeList> attribList = m_tool->getAttributeListPtr(*h_evt);
 
   // Check whether to propagate
   if (m_propInput) {
@@ -57,18 +52,18 @@ StatusCode EventInfoTagBuilder::execute(const EventContext &ctx) const
               (*attribList)[it.name()].data<bool>() = (*h_att)[it.name()].data<bool>();
             }
           }
-        } // take only bools
-      }   // loop
-    } else { // valid input
+        }  // take only bools
+      }  // loop
+    } else {  // valid input
       ATH_MSG_INFO("No input attribute list");
     }
-  } // propagate
+  }  // propagate
 
   /** record attribute list to SG */
   SG::WriteHandle<AthenaAttributeList> wh(m_attributeListName, ctx);
-  ATH_CHECK( wh.record(std::move(attribList)) );
+  ATH_CHECK(wh.record(std::move(attribList)));
 
-  ATH_MSG_DEBUG( "Finished " << name() );
+  ATH_MSG_DEBUG("Finished " << name());
 
   return StatusCode::SUCCESS;
 }

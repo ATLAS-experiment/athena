@@ -35,10 +35,8 @@ inclusion in an event tag database.
 
 #include "EventInfoAttListTool.h"
 
-class EventInfoTagBuilder : public AthReentrantAlgorithm
-{
+class EventInfoTagBuilder : public AthReentrantAlgorithm {
 public:
-
   /// Standard constructor.
   using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
@@ -46,18 +44,21 @@ public:
   ~EventInfoTagBuilder() = default;
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute(const EventContext &ctx) const override;
+  virtual StatusCode execute(const EventContext& ctx) const override;
 
 private:
-  ToolHandle<EventInfoAttListTool> m_tool{this, "Tool", "EventInfoAttListTool/EventInfoAttListTool", "EventInfoAttListTool used"};
+  ToolHandle<EventInfoAttListTool> m_tool{this, "Tool", "EventInfoAttListTool/EventInfoAttListTool",
+                                          "EventInfoAttListTool used"};
 
   SG::ReadHandleKey<xAOD::EventInfo> m_evtKey{this, "EventInfoKey", "EventInfo", "xAOD::EventInfo ReadHandleKey"};
-  SG::ReadHandleKey<AthenaAttributeList> m_inputAttList{this, "InputList", "Input", "Input Athena attribute list ReadHandleKey"};
-  SG::WriteHandleKey<AthenaAttributeList> m_attributeListName{this, "AttributeList", "SimpleTag", "Output Athena attribute list WriteHandleKey"};
+  SG::ReadHandleKey<AthenaAttributeList> m_inputAttList{this, "InputList", "Input",
+                                                        "Input Athena attribute list ReadHandleKey"};
+  SG::WriteHandleKey<AthenaAttributeList> m_attributeListName{this, "AttributeList", "SimpleTag",
+                                                              "Output Athena attribute list WriteHandleKey"};
 
   Gaudi::Property<bool> m_propInput{this, "PropagateInput", true, "Propagate input attribute list to the output"};
-  Gaudi::Property<std::string> m_filter{this, "FilterString", "", "Filter input attribute list when propagating to the output"};
-
+  Gaudi::Property<std::string> m_filter{this, "FilterString", "",
+                                        "Filter input attribute list when propagating to the output"};
 };
 
-#endif // EVENTTAGALGS_EVENTINFOTAGBUILDER_H
+#endif  // EVENTTAGALGS_EVENTINFOTAGBUILDER_H

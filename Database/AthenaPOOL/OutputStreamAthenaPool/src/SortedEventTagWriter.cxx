@@ -4,11 +4,6 @@
 
 #include "SortedEventTagWriter.h"
 
-#include "DataModelRoot/RootType.h"
-#include "PersistentDataModel/Placement.h"
-#include "PersistentDataModel/Token.h"
-#include "StorageSvc/APRDefaults.h"
-
 #include <StoreGate/ReadHandle.h>
 
 #include <algorithm>
@@ -17,16 +12,19 @@
 #include <string>
 #include <typeinfo>
 
-StatusCode SortedEventTagWriter::initialize()
-{
+#include "DataModelRoot/RootType.h"
+#include "PersistentDataModel/Placement.h"
+#include "PersistentDataModel/Token.h"
+#include "StorageSvc/APRDefaults.h"
+
+StatusCode SortedEventTagWriter::initialize() {
   // Initialize the read handle key and retrieve the pool conversion service
   ATH_CHECK(m_inputAttList.initialize());
   ATH_CHECK(m_athenaPoolCnvSvc.retrieve());
   return StatusCode::SUCCESS;
 }
 
-StatusCode SortedEventTagWriter::execute(const EventContext& ctx)
-{
+StatusCode SortedEventTagWriter::execute(const EventContext& ctx) {
   // Read the input Athena attribute list
   SG::ReadHandle<AthenaAttributeList> inputAttributes(m_inputAttList, ctx);
   if (!inputAttributes.isValid()) {
@@ -34,14 +32,12 @@ StatusCode SortedEventTagWriter::execute(const EventContext& ctx)
     return StatusCode::FAILURE;
   }
   if (!inputAttributes->exists(m_tokenAttribute.value())) {
-    ATH_MSG_ERROR("Input AthenaAttributeList has no '" << m_tokenAttribute.value()
-                  << "' attribute");
+    ATH_MSG_ERROR("Input AthenaAttributeList has no '" << m_tokenAttribute.value() << "' attribute");
     return StatusCode::FAILURE;
   }
 
   if (!inputAttributes->exists(m_sortAttribute.value())) {
-    ATH_MSG_ERROR("Input AthenaAttributeList has no '" << m_sortAttribute.value()
-                  << "' sort attribute");
+    ATH_MSG_ERROR("Input AthenaAttributeList has no '" << m_sortAttribute.value() << "' sort attribute");
     return StatusCode::FAILURE;
   }
 
@@ -50,8 +46,7 @@ StatusCode SortedEventTagWriter::execute(const EventContext& ctx)
   return StatusCode::SUCCESS;
 }
 
-StatusCode SortedEventTagWriter::finalize()
-{
+StatusCode SortedEventTagWriter::finalize() {
   // If no event-tag rows were collected, there is nothing to write
   if (m_rows.empty()) {
     ATH_MSG_WARNING("No event tags were collected; no output file was written");
@@ -64,19 +59,16 @@ StatusCode SortedEventTagWriter::finalize()
   const std::type_info& sortType = (*m_rows.front())[sortKey].specification().type();
   auto sortAs = [&]<typename T>() {
     if (sortType != typeid(T)) return false;
-    std::stable_sort(m_rows.begin(), m_rows.end(),
-                     [&](const auto& lhs, const auto& rhs) {
-                       return (*lhs)[sortKey].template data<T>() <
-                              (*rhs)[sortKey].template data<T>();
-                     });
+    std::stable_sort(m_rows.begin(), m_rows.end(), [&](const auto& lhs, const auto& rhs) {
+      return (*lhs)[sortKey].template data<T>() < (*rhs)[sortKey].template data<T>();
+    });
     return true;
   };
   const bool sorted =
-    // cppcheck-suppress internalAstError; avoid cppcheck parse warning
-    sortAs.operator()<int>() || sortAs.operator()<unsigned int>() ||
-    sortAs.operator()<long>() || sortAs.operator()<unsigned long>() ||
-    sortAs.operator()<long long>() || sortAs.operator()<unsigned long long>() ||
-    sortAs.operator()<float>() || sortAs.operator()<double>();
+      // cppcheck-suppress internalAstError; avoid cppcheck parse warning
+      sortAs.operator()<int>() || sortAs.operator()<unsigned int>() || sortAs.operator()<long>() ||
+      sortAs.operator()<unsigned long>() || sortAs.operator()<long long>() || sortAs.operator()<unsigned long long>() ||
+      sortAs.operator()<float>() || sortAs.operator()<double>();
   if (!sorted) {
     ATH_MSG_ERROR("SortAttribute '" << sortKey << "' is not of a supported numeric type");
     return StatusCode::FAILURE;
@@ -109,8 +101,8 @@ StatusCode SortedEventTagWriter::finalize()
     columnPlacements.push_back(makePlacement(column));
     // The token string is persisted as a Token
     columnTypes.emplace_back(column == m_tokenAttribute.value()
-      ? RootType("Token")
-      : RootType((*m_rows.front())[column].specification().type()));
+                                 ? RootType("Token")
+                                 : RootType((*m_rows.front())[column].specification().type()));
   }
 
   // Write one row: all its columns, then a commit. RNTuple columns are grouped
@@ -120,10 +112,10 @@ StatusCode SortedEventTagWriter::finalize()
     for (std::size_t i = 0; i < columns.size(); ++i) {
       const coral::Attribute& attribute = row[columns[i]];
       const void* data = columns[i] == m_tokenAttribute.value()
-        ? static_cast<const void*>(attribute.data<std::string>().c_str())
-        : attribute.addressOfData();
+                             ? static_cast<const void*>(attribute.data<std::string>().c_str())
+                             : attribute.addressOfData();
       std::unique_ptr<Token> columnToken(
-        m_athenaPoolCnvSvc->registerForWrite(&columnPlacements[i], data, columnTypes[i]));
+          m_athenaPoolCnvSvc->registerForWrite(&columnPlacements[i], data, columnTypes[i]));
       if (!columnToken) {
         ATH_MSG_ERROR("Failed to write " << columns[i] << " event-tag column");
         return false;
@@ -137,16 +129,14 @@ StatusCode SortedEventTagWriter::finalize()
   };
 
   // Write all collected event-tag rows to the output POOL file
-  const bool written = std::all_of(
-    m_rows.begin(), m_rows.end(),
-    [&](const std::unique_ptr<AthenaAttributeList>& row) { return writeRow(*row); });
+  const bool written = std::all_of(m_rows.begin(), m_rows.end(),
+                                   [&](const std::unique_ptr<AthenaAttributeList>& row) { return writeRow(*row); });
 
   // Single disconnect for success and failure: it commits, flushes and closes the file
   const StatusCode disconnected = m_athenaPoolCnvSvc->disconnectOutput(outputFile);
   if (!written || disconnected.isFailure()) {
     return StatusCode::FAILURE;
   }
-  ATH_MSG_INFO("Wrote " << m_rows.size() << " sorted event-tag rows to "
-                        << outputFile);
+  ATH_MSG_INFO("Wrote " << m_rows.size() << " sorted event-tag rows to " << outputFile);
   return StatusCode::SUCCESS;
 }
