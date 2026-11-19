@@ -39,3 +39,21 @@ def MlMuonDVtxHypoToolConfig(flags, name="MlMuonDVtxHypoToolConfig"):
 def MlMuonDVtxHypoToolFromDict(flags, chainDict):
     name = chainDict['chainName']
     return MlMuonDVtxHypoToolConfig(flags, name)
+
+def MlMuonDVtxTrkVetoHypoAlgConfig(flags, name="MlMuonDVtxTrkVetoHypoAlg", **kwargs):
+    """Prompt-track veto after the ML score cut"""
+    return CompFactory.MlMuonDVtxTrkVetoHypoAlg(name, **kwargs)
+
+def MlMuonDVtxTrkVetoHypoToolConfig(flags, name="MlMuonDVtxTrkVetoHypoTool"):
+    the_tool = CompFactory.MlMuonDVtxTrkVetoHypoTool(name)
+    the_tool.MinTrackPt = 5000.  # MeV
+    the_tool.MaxTrackDR = 0.4
+    the_tool.MaxDz0SinTheta = 2.  # mm
+    the_tool.MinClusterSegments = 2
+    the_tool.OnlyLeadingCluster = True
+    the_tool.MaxClusters = 5  # used with OnlyLeadingCluster = False
+    return the_tool
+
+def MlMuonDVtxTrkVetoHypoToolFromDict(flags, chainDict):
+    name = chainDict['chainName']
+    return MlMuonDVtxTrkVetoHypoToolConfig(flags, name)

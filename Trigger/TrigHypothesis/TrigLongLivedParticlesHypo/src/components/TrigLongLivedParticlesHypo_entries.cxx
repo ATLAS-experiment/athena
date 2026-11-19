@@ -22,6 +22,8 @@
 
 #include "../MlMuonDVtxHypoAlg.h"
 #include "../MlMuonDVtxHypoTool.h"
+#include "../MlMuonDVtxTrkVetoHypoAlg.h"
+#include "../MlMuonDVtxTrkVetoHypoTool.h"
 
 DECLARE_COMPONENT( TrigDisappearingTrackHypoAlg )
 DECLARE_COMPONENT( TrigDisappearingTrackHypoTool )
@@ -46,3 +48,5 @@ DECLARE_COMPONENT( MuonClusterHypoTool )
 
 DECLARE_COMPONENT( MlMuonDVtxHypoAlg )
 DECLARE_COMPONENT( MlMuonDVtxHypoTool )
+DECLARE_COMPONENT( MlMuonDVtxTrkVetoHypoAlg )
+DECLARE_COMPONENT( MlMuonDVtxTrkVetoHypoTool )

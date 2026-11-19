@@ -717,7 +717,10 @@ def dictFromChainName(flags, chainInfo):
         thisChainPartName = chainPart['chainPartName']
 
         if thisSignature in ['Muon','Bphysics']:
-            if 'MuonnoL1' in thisAlignGroup or 'lateMu' in thisExtra:
+            if 'mlvtx' in thisExtra:
+                if 'FSNOSEED' not in thisL1:
+                    log.error("Muon mlvtx chain should be seeded from FSNOSEED. Check %s seeded from %s (defined L1: %s), signature %s",chainDict['chainName'],thisL1,l1Thresholds,thisSignature)
+            elif 'MuonnoL1' in thisAlignGroup or 'lateMu' in thisExtra:
                 if 'FSNOSEED' not in thisL1:
                     log.error("Muon noL1 and lateMu chain should be seeded from FSNOSEED. Check %s seeded from %s (defined L1: %s), signature %s",chainDict['chainName'],thisL1,l1Thresholds,thisSignature)
             else:
