@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "InDetBeamSpotFinder/BeamSpotStatusCode.h"
+#include "BeamSpotStatusCode.h"
 
 //bit settings for the status word components
 using namespace InDet;

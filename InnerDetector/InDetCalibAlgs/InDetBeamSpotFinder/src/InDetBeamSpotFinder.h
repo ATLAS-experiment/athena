@@ -14,8 +14,8 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ITHistSvc.h"
-#include "InDetBeamSpotFinder/IInDetBeamSpotTool.h" //for BeamSpot::Event
-#include "InDetBeamSpotFinder/BeamSpotStatusCode.h"
+#include "IInDetBeamSpotTool.h" //for BeamSpot::Event
+#include "BeamSpotStatusCode.h"
 #include "xAODEventInfo/EventInfo.h" //typedef, can't fwd declare
 #include "xAODTracking/VertexContainer.h" //typedef, can't fwd declare
 #include "xAODTracking/TrackingPrimitives.h" //for xAOD::VxType

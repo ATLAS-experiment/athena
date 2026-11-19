@@ -12,7 +12,7 @@
 ////////////////////////////////////////////////////////////
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "InDetBeamSpotFinder/IInDetBeamSpotTool.h"
+#include "IInDetBeamSpotTool.h"
 #include "TrkEventPrimitives/VertexType.h"
 #include "CLHEP/Matrix/Vector.h"
 #include "TMinuit.h"

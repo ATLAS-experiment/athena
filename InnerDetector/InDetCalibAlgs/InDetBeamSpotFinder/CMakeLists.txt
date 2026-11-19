@@ -8,19 +8,12 @@ find_package( CLHEP )
 find_package( ROOT COMPONENTS Core Tree MathCore Hist Matrix Minuit RooFitCore RooFit )
 
 # Component(s) in the package:
-atlas_add_library( InDetBeamSpotFinderLib
-                   src/*.cxx
-                   PUBLIC_HEADERS InDetBeamSpotFinder
-                   INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
-                   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                   DEFINITIONS ${CLHEP_DEFINITIONS}
-                   LINK_LIBRARIES ${CLHEP_LIBRARIES} BeamSpotConditionsData LumiBlockData GaudiKernel TrkFitterUtils xAODTracking
-                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps CxxUtils EventInfo xAODEventInfo TrkEventPrimitives VxVertex AtlasDetDescr Identifier StoreGateLib TrkFitterInterfaces TrkParameters TrkPseudoMeasurementOnTrack TrkRIO_OnTrack TrkTrack TrkVertexFitterInterfaces )
-
 atlas_add_component( InDetBeamSpotFinder
+                     src/*.cxx
                      src/components/*.cxx
-                     INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${ROOT_LIBRARIES} InDetBeamSpotFinderLib TrkFitterInterfaces TrkVertexFitterInterfaces )
+                     INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
+                     DEFINITIONS ${CLHEP_DEFINITIONS}
+                     LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AtlasDetDescr BeamSpotConditionsData CxxUtils EventInfo GaudiKernel Identifier LumiBlockData StoreGateLib TrkEventPrimitives TrkFitterInterfaces TrkFitterUtils TrkParameters TrkPseudoMeasurementOnTrack TrkRIO_OnTrack TrkTrack TrkVertexFitterInterfaces VxVertex xAODEventInfo xAODTracking )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py )

@@ -3,7 +3,7 @@
 */
 
 #include "InDetBeamSpotFinder.h"
-#include "InDetBeamSpotFinder/IInDetBeamSpotTool.h"
+#include "IInDetBeamSpotTool.h"
 #include "InDetBeamSpotVertex.h"
 #include "InDetBeamSpotRooFit.h"
 #include "VxVertex/VxCandidate.h"

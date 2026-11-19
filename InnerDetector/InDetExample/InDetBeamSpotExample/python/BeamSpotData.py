@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 """
 Tools for handling beam spot data in ntuples or in COOL.
@@ -985,7 +985,7 @@ class BeamSpotFinderNt(BeamSpotContainer):
 
     # Status word conversion maps
     # For status word definition see https://twiki.cern.ch/twiki/bin/view/Atlas/CoolBeamSpotParameters#Definition_of_the_Status_Word
-    # InDetBeamSpotFinder uses (see InDetBeamSpotFinder/IInDetBeamSpotTool.h):
+    # InDetBeamSpotFinder uses (see InDetBeamSpotFinder/src/IInDetBeamSpotTool.h):
     # enum FitResult {unsolved=0, successful, failed, problems};
     # enum FitID {vertexLL=1, vertexChi2=2, trackChi2=3, userDefined=4,unknown = 99};
     fitResultToStatusMap = {0: 0, 1: 3, 2: 0, 3: 0}
