@@ -18,16 +18,12 @@ def BPHY23Cfg(flags):
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
     acc = ComponentAccumulator()
     isSimulation = flags.Input.isMC
-    V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(flags, BPHYDerivationName))
-    vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(flags, BPHYDerivationName)) # VKalVrt vertex fitter
-    acc.addPublicTool(vkalvrt)
-    acc.addPublicTool(V0Tools)
-    trackselect = acc.popToolsAndMerge(BPHY_InDetDetailedTrackSelectorToolCfg(flags, BPHYDerivationName))
-    acc.addPublicTool(trackselect)
-    vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags, BPHYDerivationName))
-    acc.addPublicTool(vpest)
-    PVrefit = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
-    acc.addPublicTool(PVrefit)
+
+    # Configure common Public Tools
+    V0Tools = acc.addPublicTool(acc.popToolsAndMerge(BPHY_V0ToolCfg(flags, BPHYDerivationName)))
+    vkalvrt = acc.addPublicTool(acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(flags, BPHYDerivationName))) # VKalVrt vertex fitter
+    trackselect = acc.addPublicTool(acc.popToolsAndMerge(BPHY_InDetDetailedTrackSelectorToolCfg(flags, BPHYDerivationName)))
+    PVrefit = acc.addPublicTool(acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)))
 
     # mass bounds and constants used in the following
     X_hi = 141000.0
@@ -56,401 +52,428 @@ def BPHY23Cfg(flags):
     B0mass = 5279.66
     Bs0mass = 5366.92
     Upsimass = 9460.30
-    
-    BPHY23JpsiFinder = CompFactory.Analysis.JpsiFinder(
-        name                        = "BPHY23JpsiFinder",
-        muAndMu                     = True,
-        muAndTrack                  = False,
-        TrackAndTrack               = False,
-        assumeDiMuons               = True,  # If true, will assume dimu hypothesis and use PDG value for mu mass
-        trackThresholdPt            = 2400.,
-        invMassLower                = Jpsi_lo,
-        invMassUpper                = Upsi_hi,
-        Chi2Cut                     = 10.,
-        oppChargesOnly	            = True,
-        atLeastOneComb              = True,
-        useCombinedMeasurement      = False, # Only takes effect if combOnly=True	
-        muonCollectionKey           = "Muons",
-        TrackParticleCollection     = "InDetTrackParticles",
-        TrkVertexFitterTool         = vkalvrt, # VKalVrt vertex fitter
-        TrackSelectorTool           = trackselect,
-        VertexPointEstimator        = vpest,
-        useMCPCuts                  = False )
-    acc.addPublicTool(BPHY23JpsiFinder)
 
-    BPHY23_Reco_mumu = acc.popToolsAndMerge(Reco_VertexCfg(flags,
-        name                   = "BPHY23_Reco_mumu",
-        VertexSearchTool       = BPHY23JpsiFinder,
-        OutputVtxContainerName = "BPHY23OniaCandidates",
-        PVContainerName        = "PrimaryVertices",
-        RefPVContainerName     = "SHOULDNOTBEUSED",
-        V0Tools                = V0Tools,
-        PVRefitter             = PVrefit,
-        DoVertexType           = 1))
+    augmentation_tools = []
+
+    augmentation_tools.append(acc.addPublicTool(acc.popToolsAndMerge(
+        Reco_VertexCfg(flags,
+                       name = "BPHY23_Reco_mumu",
+                       VertexSearchTool = CompFactory.Analysis.JpsiFinder(
+                           name = "BPHY23JpsiFinder",
+                           muAndMu = True,
+                           muAndTrack = False,
+                           TrackAndTrack = False,
+                           assumeDiMuons = True,  # If true, will assume dimu hypothesis and use PDG value for mu mass
+                           trackThresholdPt = 2400.,
+                           invMassLower = Jpsi_lo,
+                           invMassUpper = Upsi_hi,
+                           Chi2Cut = 10.,
+                           oppChargesOnly = True,
+                           atLeastOneComb = True,
+                           useCombinedMeasurement = False, # Only takes effect if combOnly=True
+                           muonCollectionKey = "Muons",
+                           TrackParticleCollection = "InDetTrackParticles",
+                           TrkVertexFitterTool = vkalvrt, # PublicToolHandle
+                           TrackSelectorTool = trackselect, # PublicToolHandle
+                           VertexPointEstimator = acc.addPublicTool(acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags, BPHYDerivationName))), # PublicToolHandle
+                           useMCPCuts = False ),
+                       OutputVtxContainerName = "BPHY23OniaCandidates",
+                       PVContainerName = "PrimaryVertices",
+                       RefPVContainerName = "SHOULDNOTBEUSED",
+                       V0Tools = V0Tools, # PublicToolHandle
+                       PVRefitter = PVrefit, #PublicToolHandle
+                       DoVertexType = 1)
+    )))
 
 
     # X(3872), Psi(2S) -> J/psi + pi pi
-    BPHY23PsiX3872_Jpsi2Trk = CompFactory.Analysis.JpsiPlus2Tracks(
-        name                                = "BPHY23PsiX3872_Jpsi2Trk",
-        kaonkaonHypothesis		    = False,
-        pionpionHypothesis                  = True,
-        kaonpionHypothesis                  = False,
-        kaonprotonHypothesis                = False,
-        trkThresholdPt			    = 380.,
-        trkMaxEta		 	    = 2.6,
-        oppChargesOnly                      = False,
-        JpsiMassLower                       = Jpsi_lo,
-        JpsiMassUpper                       = Jpsi_hi,
-        TrkQuadrupletMassLower              = Psi_lo,
-        TrkQuadrupletMassUpper              = Psi_hi,
-        Chi2Cut                             = 10.,
-        JpsiContainerKey                    = "BPHY23OniaCandidates",
-        TrackParticleCollection             = "InDetTrackParticles",
-        MuonsUsedInJpsi			    = "Muons",
-        ExcludeJpsiMuonsOnly                = True,
-        TrkVertexFitterTool	            = vkalvrt,
-        TrackSelectorTool		    = trackselect,
-        UseMassConstraint                   = False)
-    acc.addPublicTool(BPHY23PsiX3872_Jpsi2Trk)
+    augmentation_tools.append(acc.addPublicTool(acc.popToolsAndMerge(
+        Reco_VertexCfg(flags,
+                       name = "BPHY23FourTrackReco_PsiX3872",
+                       VertexSearchTool = CompFactory.Analysis.JpsiPlus2Tracks(
+                           name = "BPHY23PsiX3872_Jpsi2Trk",
+                           kaonkaonHypothesis = False,
+                           pionpionHypothesis = True,
+                           kaonpionHypothesis = False,
+                           kaonprotonHypothesis = False,
+                           trkThresholdPt = 380.,
+                           trkMaxEta = 2.6,
+                           oppChargesOnly = False,
+                           JpsiMassLower = Jpsi_lo,
+                           JpsiMassUpper = Jpsi_hi,
+                           TrkQuadrupletMassLower = Psi_lo,
+                           TrkQuadrupletMassUpper = Psi_hi,
+                           Chi2Cut = 10.,
+                           JpsiContainerKey = "BPHY23OniaCandidates",
+                           TrackParticleCollection = "InDetTrackParticles",
+                           MuonsUsedInJpsi = "Muons",
+                           ExcludeJpsiMuonsOnly = True,
+                           TrkVertexFitterTool = vkalvrt, # VKalVrt vertex fitter (PublicToolHandle)
+                           TrackSelectorTool = trackselect, # PublicToolHandle
+                           UseMassConstraint = False),
+                       OutputVtxContainerName = "BPHY23FourTrack_PsiX3872",
+                       PVContainerName = "PrimaryVertices",
+                       V0Tools = V0Tools, # PublicToolHandle
+                       PVRefitter = PVrefit, #PublicToolHandle
+                       RefitPV = False,
+                       DoVertexType = 0)
+    )))
+
 
     # Bs0 -> J/psi + K K
-    BPHY23Bs0_Jpsi2Trk = CompFactory.Analysis.JpsiPlus2Tracks(
-        name                                = "BPHY23Bs0_Jpsi2Trk",
-        kaonkaonHypothesis		    = True,
-        pionpionHypothesis                  = False,
-        kaonpionHypothesis                  = False,
-        kaonprotonHypothesis                = False,
-        trkThresholdPt		            = 380.,
-        trkMaxEta		            = 2.6,
-        oppChargesOnly                      = False,
-        JpsiMassLower                       = Jpsi_lo,
-        JpsiMassUpper                       = Jpsi_hi,
-        TrkQuadrupletMassLower              = Bs0_lo,
-        TrkQuadrupletMassUpper              = Bs0_hi,
-        Chi2Cut                             = 10.,
-        JpsiContainerKey                    = "BPHY23OniaCandidates",
-        TrackParticleCollection             = "InDetTrackParticles",
-        MuonsUsedInJpsi		            = "Muons",
-        ExcludeJpsiMuonsOnly                = True,
-        TrkVertexFitterTool		    = vkalvrt,
-        TrackSelectorTool	            = trackselect,
-        UseMassConstraint	            = False)
-    acc.addPublicTool(BPHY23Bs0_Jpsi2Trk)
+    augmentation_tools.append(acc.addPublicTool(acc.popToolsAndMerge(
+        Reco_VertexCfg(flags,
+                       name = "BPHY23FourTrackReco_Bs0",
+                       VertexSearchTool = CompFactory.Analysis.JpsiPlus2Tracks(
+                           name = "BPHY23Bs0_Jpsi2Trk",
+                           kaonkaonHypothesis = True,
+                           pionpionHypothesis = False,
+                           kaonpionHypothesis = False,
+                           kaonprotonHypothesis = False,
+                           trkThresholdPt = 380.,
+                           trkMaxEta = 2.6,
+                           oppChargesOnly = False,
+                           JpsiMassLower = Jpsi_lo,
+                           JpsiMassUpper = Jpsi_hi,
+                           TrkQuadrupletMassLower = Bs0_lo,
+                           TrkQuadrupletMassUpper = Bs0_hi,
+                           Chi2Cut = 10.,
+                           JpsiContainerKey = "BPHY23OniaCandidates",
+                           TrackParticleCollection = "InDetTrackParticles",
+                           MuonsUsedInJpsi = "Muons",
+                           ExcludeJpsiMuonsOnly = True,
+                           TrkVertexFitterTool = vkalvrt, # VKalVrt vertex fitter (PublicToolHandle)
+                           TrackSelectorTool = trackselect, # PublicToolHandle
+                           UseMassConstraint = False),
+                       OutputVtxContainerName = "BPHY23FourTrack_Bs0",
+                       PVContainerName = "PrimaryVertices",
+                       V0Tools = V0Tools, # PublicToolHandle
+                       PVRefitter = PVrefit, #PublicToolHandle
+                       RefitPV = False,
+                       DoVertexType = 0)
+    )))
 
     # B0 -> J/psi + K pi
-    BPHY23B0_Jpsi2Trk = CompFactory.Analysis.JpsiPlus2Tracks(
-        name                                = "BPHY23B0_Jpsi2Trk",
-        kaonkaonHypothesis	            = False,
-        pionpionHypothesis                  = False,
-        kaonpionHypothesis                  = True,
-        kaonprotonHypothesis                = False,
-        trkThresholdPt		            = 380.,
-        trkMaxEta		 	    = 2.6,
-        oppChargesOnly                      = False,
-        JpsiMassLower                       = Jpsi_lo,
-        JpsiMassUpper                       = Jpsi_hi,
-        TrkQuadrupletMassLower              = B_lo,
-        TrkQuadrupletMassUpper              = B_hi,
-        Chi2Cut                             = 10.,
-        JpsiContainerKey                    = "BPHY23OniaCandidates",
-        TrackParticleCollection             = "InDetTrackParticles",
-        MuonsUsedInJpsi			    = "Muons",
-        ExcludeJpsiMuonsOnly                = True,
-        TrkVertexFitterTool		    = vkalvrt,
-        TrackSelectorTool	            = trackselect,
-        UseMassConstraint	            = False)
-    acc.addPublicTool(BPHY23B0_Jpsi2Trk)
-
+    augmentation_tools.append(acc.addPublicTool(acc.popToolsAndMerge(
+        Reco_VertexCfg(flags,
+                       name = "BPHY23FourTrackReco_B0",
+                       VertexSearchTool = CompFactory.Analysis.JpsiPlus2Tracks(
+                           name = "BPHY23B0_Jpsi2Trk",
+                           kaonkaonHypothesis = False,
+                           pionpionHypothesis = False,
+                           kaonpionHypothesis = True,
+                           kaonprotonHypothesis = False,
+                           trkThresholdPt = 380.,
+                           trkMaxEta = 2.6,
+                           oppChargesOnly = False,
+                           JpsiMassLower = Jpsi_lo,
+                           JpsiMassUpper = Jpsi_hi,
+                           TrkQuadrupletMassLower = B_lo,
+                           TrkQuadrupletMassUpper = B_hi,
+                           Chi2Cut = 10.,
+                           JpsiContainerKey = "BPHY23OniaCandidates",
+                           TrackParticleCollection = "InDetTrackParticles",
+                           MuonsUsedInJpsi = "Muons",
+                           ExcludeJpsiMuonsOnly = True,
+                           TrkVertexFitterTool = vkalvrt, # VKalVrt vertex fitter (PublicToolHandle)
+                           TrackSelectorTool = trackselect, # PublicToolHandle
+                           UseMassConstraint = False),
+                       OutputVtxContainerName = "BPHY23FourTrack_B0",
+                       PVContainerName = "PrimaryVertices",
+                       V0Tools = V0Tools, # PublicToolHandle
+                       PVRefitter = PVrefit, #PublicToolHandle
+                       RefitPV = False,
+                       DoVertexType = 0)
+    )))
 
     # Zc(3900)+ -> J/psi pi
-    BPHY23Zc3900_Jpsi1Trk = CompFactory.Analysis.JpsiPlus1Track(
-        name                                = "BPHY23Zc3900_Jpsi1Trk",
-        pionHypothesis                      = True,
-        kaonHypothesis                      = False,
-        trkThresholdPt                      = 380.,
-        trkMaxEta                           = 2.6,
-        JpsiMassLower                       = Jpsi_lo,
-        JpsiMassUpper                       = Jpsi_hi,
-        TrkTrippletMassLower                = Zc_lo,
-        TrkTrippletMassUpper                = Zc_hi,
-        Chi2Cut                             = 10.0,
-        JpsiContainerKey                    = "BPHY23OniaCandidates",
-        TrackParticleCollection             = "InDetTrackParticles",
-        MuonsUsedInJpsi                     = "Muons",
-        ExcludeJpsiMuonsOnly                = True,
-        TrkVertexFitterTool                 = vkalvrt,
-        TrackSelectorTool                   = trackselect,
-        UseMassConstraint                   = False)
-    acc.addPublicTool(BPHY23Zc3900_Jpsi1Trk)
+    augmentation_tools.append(acc.addPublicTool(acc.popToolsAndMerge(
+        Reco_VertexCfg(flags,
+                       name = "BPHY23ThreeTrackReco_Zc3900",
+                       VertexSearchTool = CompFactory.Analysis.JpsiPlus1Track(
+                           name = "BPHY23Zc3900_Jpsi1Trk",
+                           pionHypothesis = True,
+                           kaonHypothesis = False,
+                           trkThresholdPt = 380.,
+                           trkMaxEta = 2.6,
+                           JpsiMassLower = Jpsi_lo,
+                           JpsiMassUpper = Jpsi_hi,
+                           TrkTrippletMassLower = Zc_lo,
+                           TrkTrippletMassUpper = Zc_hi,
+                           Chi2Cut = 10.0,
+                           JpsiContainerKey = "BPHY23OniaCandidates",
+                           TrackParticleCollection = "InDetTrackParticles",
+                           MuonsUsedInJpsi = "Muons",
+                           ExcludeJpsiMuonsOnly = True,
+                           TrkVertexFitterTool = vkalvrt, # VKalVrt vertex fitter (PublicToolHandle)
+                           TrackSelectorTool = trackselect, # PublicToolHandle
+                           UseMassConstraint = False),
+                       OutputVtxContainerName = "BPHY23ThreeTrack_Zc3900",
+                       PVContainerName = "PrimaryVertices",
+                       V0Tools = V0Tools, # PublicToolHandle
+                       PVRefitter = PVrefit, #PublicToolHandle
+                       RefitPV = False,
+                       DoVertexType = 0)
+    )))
 
     # B+ -> J/psi K
-    BPHY23Bpm_Jpsi1Trk = CompFactory.Analysis.JpsiPlus1Track(
-        name                                = "BPHY23Bpm_Jpsi1Trk",
-        pionHypothesis                      = False,
-        kaonHypothesis                      = True,
-        trkThresholdPt                      = 380.,
-        trkMaxEta                           = 2.6,
-        JpsiMassLower                       = Jpsi_lo,
-        JpsiMassUpper                       = Jpsi_hi,
-        TrkTrippletMassLower                = B_lo,
-        TrkTrippletMassUpper                = B_hi,
-        Chi2Cut                             = 10.0,
-        JpsiContainerKey                    = "BPHY23OniaCandidates",
-        TrackParticleCollection             = "InDetTrackParticles",
-        MuonsUsedInJpsi                     = "Muons",
-        ExcludeJpsiMuonsOnly                = True,
-        TrkVertexFitterTool                 = vkalvrt,
-        TrackSelectorTool                   = trackselect,
-        UseMassConstraint                   = False)
-    acc.addPublicTool(BPHY23Bpm_Jpsi1Trk)
-
-    BPHY23FourTrackReco_PsiX3872 = acc.popToolsAndMerge(Reco_VertexCfg(flags,
-        name                     = "BPHY23FourTrackReco_PsiX3872",
-        VertexSearchTool         = BPHY23PsiX3872_Jpsi2Trk,
-        OutputVtxContainerName   = "BPHY23FourTrack_PsiX3872",
-        PVContainerName          = "PrimaryVertices",
-        V0Tools                  = V0Tools,
-        PVRefitter               = PVrefit,
-        RefitPV                  = False,
-        DoVertexType             = 0))
-
-    BPHY23FourTrackReco_Bs0 = acc.popToolsAndMerge(Reco_VertexCfg(flags,
-        name                     = "BPHY23FourTrackReco_Bs0",
-        VertexSearchTool         = BPHY23Bs0_Jpsi2Trk,
-        OutputVtxContainerName   = "BPHY23FourTrack_Bs0",
-        PVContainerName          = "PrimaryVertices",
-        V0Tools                  = V0Tools,
-        PVRefitter               = PVrefit,
-        RefitPV                  = False,
-        DoVertexType             = 0))
-
-    BPHY23FourTrackReco_B0 = acc.popToolsAndMerge(Reco_VertexCfg(flags,
-        name                     = "BPHY23FourTrackReco_B0",
-        VertexSearchTool         = BPHY23B0_Jpsi2Trk,
-        OutputVtxContainerName   = "BPHY23FourTrack_B0",
-        PVContainerName          = "PrimaryVertices",
-        V0Tools                  = V0Tools,
-        PVRefitter               = PVrefit,
-        RefitPV                  = False,
-        DoVertexType             = 0))
-
-    BPHY23ThreeTrackReco_Zc3900 = acc.popToolsAndMerge(Reco_VertexCfg(flags,
-        name                     = "BPHY23ThreeTrackReco_Zc3900",
-        VertexSearchTool         = BPHY23Zc3900_Jpsi1Trk,
-        OutputVtxContainerName   = "BPHY23ThreeTrack_Zc3900",
-        PVContainerName          = "PrimaryVertices",
-        V0Tools                  = V0Tools,
-        PVRefitter               = PVrefit,
-        RefitPV                  = False,
-        DoVertexType             = 0))
-
-    BPHY23ThreeTrackReco_Bpm = acc.popToolsAndMerge(Reco_VertexCfg(flags,
-        name                     = "BPHY23ThreeTrackReco_Bpm",
-        VertexSearchTool         = BPHY23Bpm_Jpsi1Trk,
-        OutputVtxContainerName   = "BPHY23ThreeTrack_Bpm",
-        PVContainerName          = "PrimaryVertices",
-        V0Tools                  = V0Tools,
-        PVRefitter               = PVrefit,
-        RefitPV                  = False,
-        DoVertexType             = 0))
+    augmentation_tools.append(acc.addPublicTool(acc.popToolsAndMerge(
+        Reco_VertexCfg(flags,
+                       name = "BPHY23ThreeTrackReco_Bpm",
+                       VertexSearchTool = CompFactory.Analysis.JpsiPlus1Track(
+                           name = "BPHY23Bpm_Jpsi1Trk",
+                           pionHypothesis = False,
+                           kaonHypothesis = True,
+                           trkThresholdPt = 380.,
+                           trkMaxEta = 2.6,
+                           JpsiMassLower = Jpsi_lo,
+                           JpsiMassUpper = Jpsi_hi,
+                           TrkTrippletMassLower = B_lo,
+                           TrkTrippletMassUpper = B_hi,
+                           Chi2Cut = 10.0,
+                           JpsiContainerKey = "BPHY23OniaCandidates",
+                           TrackParticleCollection = "InDetTrackParticles",
+                           MuonsUsedInJpsi = "Muons",
+                           ExcludeJpsiMuonsOnly = True,
+                           TrkVertexFitterTool = vkalvrt, # VKalVrt vertex fitter (PublicToolHandle)
+                           TrackSelectorTool = trackselect, # PublicToolHandle
+                           UseMassConstraint = False),
+                       OutputVtxContainerName = "BPHY23ThreeTrack_Bpm",
+                       PVContainerName = "PrimaryVertices",
+                       V0Tools = V0Tools, # PublicToolHandle
+                       PVRefitter = PVrefit, #PublicToolHandle
+                       RefitPV = False,
+                       DoVertexType = 0)
+    )))
 
     # revertex with mass constraints to reduce combinatorics
     # Psi(2S) -> J/psi pi pi
-    BPHY23Rev_Psi4Body = acc.popToolsAndMerge(ReVertexCfg(flags,
-        name                       = "BPHY23Rev_Psi4Body",
-        InputVtxContainerName      = "BPHY23FourTrack_PsiX3872",
-        TrackIndices               = [ 0, 1, 2, 3 ],
-        SubVertexTrackIndices      = [ 1, 2 ],
-        RefitPV                    = False,
-        UseMassConstraint          = True,
-        VertexMass                 = Psi2Smass,
-        SubVertexMass              = Jpsimass,
-        MassInputParticles         = [Mumass, Mumass, Pimass, Pimass],
-        Chi2Cut                    = 25.,
-        TrkVertexFitterTool	   = vkalvrt,
-        PVRefitter                 = PVrefit,
-        V0Tools                    = V0Tools,
-        OutputVtxContainerName     = "BPHY23Revtx_Psi4Body"))
+    augmentation_tools.append(acc.addPublicTool(acc.popToolsAndMerge(
+        ReVertexCfg(flags,
+                    name = "BPHY23Rev_Psi4Body",
+                    InputVtxContainerName = "BPHY23FourTrack_PsiX3872",
+                    TrackIndices = [ 0, 1, 2, 3 ],
+                    SubVertexTrackIndices = [ 1, 2 ],
+                    RefitPV = False,
+                    UseMassConstraint = True,
+                    VertexMass = Psi2Smass,
+                    SubVertexMass = Jpsimass,
+                    MassInputParticles = [Mumass, Mumass, Pimass, Pimass],
+                    Chi2Cut = 25.,
+                    TrkVertexFitterTool = vkalvrt, # VKalVrt vertex fitter (PublicToolHandle)
+                    PVRefitter = PVrefit, #PublicToolHandle
+                    V0Tools = V0Tools, # PublicToolHandle
+                    OutputVtxContainerName = "BPHY23Revtx_Psi4Body")
+    )))
 
     # X(3872) -> J/psi pi pi
-    BPHY23Rev_X3872 = acc.popToolsAndMerge(ReVertexCfg(flags,
-        name                       = "BPHY23Rev_X3872",
-        InputVtxContainerName      = "BPHY23FourTrack_PsiX3872",
-        TrackIndices               = [ 0, 1, 2, 3 ],
-        SubVertexTrackIndices      = [ 1, 2 ],
-        RefitPV                    = False,
-        UseMassConstraint          = True,
-        VertexMass                 = X3872mass,
-        SubVertexMass              = Jpsimass,
-        MassInputParticles         = [Mumass, Mumass, Pimass, Pimass],
-        Chi2Cut                    = 25.,
-        TrkVertexFitterTool	   = vkalvrt,
-        PVRefitter                 = PVrefit,
-        V0Tools                    = V0Tools,
-        OutputVtxContainerName     = "BPHY23Revtx_X3872"))
+    augmentation_tools.append(acc.addPublicTool(acc.popToolsAndMerge(
+        ReVertexCfg(flags,
+                    name = "BPHY23Rev_X3872",
+                    InputVtxContainerName = "BPHY23FourTrack_PsiX3872",
+                    TrackIndices = [ 0, 1, 2, 3 ],
+                    SubVertexTrackIndices = [ 1, 2 ],
+                    RefitPV = False,
+                    UseMassConstraint = True,
+                    VertexMass = X3872mass,
+                    SubVertexMass = Jpsimass,
+                    MassInputParticles = [Mumass, Mumass, Pimass, Pimass],
+                    Chi2Cut = 25.,
+                    TrkVertexFitterTool = vkalvrt, # VKalVrt vertex fitter (PublicToolHandle)
+                    PVRefitter = PVrefit, #PublicToolHandle
+                    V0Tools = V0Tools, # PublicToolHandle
+                    OutputVtxContainerName = "BPHY23Revtx_X3872")
+    )))
 
     # Bs0 -> J/psi K K
-    BPHY23Rev_Bs0 = acc.popToolsAndMerge(ReVertexCfg(flags,
-        name                       = "BPHY23Rev_Bs0",
-        InputVtxContainerName      = "BPHY23FourTrack_Bs0",
-        TrackIndices               = [ 0, 1, 2, 3 ],
-        SubVertexTrackIndices      = [ 1, 2 ],
-        RefitPV                    = False,
-        UseMassConstraint          = True,
-        VertexMass                 = Bs0mass,
-        SubVertexMass              = Jpsimass,
-        MassInputParticles         = [Mumass, Mumass, Kmass, Kmass],
-        Chi2Cut                    = 25.,
-        TrkVertexFitterTool	   = vkalvrt,
-        PVRefitter                 = PVrefit,
-        V0Tools                    = V0Tools,
-        OutputVtxContainerName     = "BPHY23Revtx_Bs0"))
+    augmentation_tools.append(acc.addPublicTool(acc.popToolsAndMerge(
+        ReVertexCfg(flags,
+                    name = "BPHY23Rev_Bs0",
+                    InputVtxContainerName = "BPHY23FourTrack_Bs0",
+                    TrackIndices = [ 0, 1, 2, 3 ],
+                    SubVertexTrackIndices = [ 1, 2 ],
+                    RefitPV = False,
+                    UseMassConstraint = True,
+                    VertexMass = Bs0mass,
+                    SubVertexMass = Jpsimass,
+                    MassInputParticles = [Mumass, Mumass, Kmass, Kmass],
+                    Chi2Cut = 25.,
+                    TrkVertexFitterTool = vkalvrt, # VKalVrt vertex fitter (PublicToolHandle)
+                    PVRefitter = PVrefit, #PublicToolHandle
+                    V0Tools = V0Tools, # PublicToolHandle
+                    OutputVtxContainerName = "BPHY23Revtx_Bs0")
+    )))
 
     # B0 -> J/psi K pi
-    BPHY23Rev_B0Kpi = acc.popToolsAndMerge(ReVertexCfg(flags,
-        name                       = "BPHY23Rev_B0Kpi",
-        InputVtxContainerName      = "BPHY23FourTrack_B0",
-        TrackIndices               = [ 0, 1, 2, 3 ],
-        SubVertexTrackIndices      = [ 1, 2 ],
-        RefitPV                    = False,
-        UseMassConstraint          = True,
-        VertexMass                 = B0mass,
-        SubVertexMass              = Jpsimass,
-        MassInputParticles         = [Mumass, Mumass, Kmass, Pimass],
-        Chi2Cut                    = 25.,
-        TrkVertexFitterTool	   = vkalvrt,
-        PVRefitter                 = PVrefit,
-        V0Tools                    = V0Tools,
-        OutputVtxContainerName     = "BPHY23Revtx_B0Kpi"))
+    augmentation_tools.append(acc.addPublicTool(acc.popToolsAndMerge(
+        ReVertexCfg(flags,
+                    name = "BPHY23Rev_B0Kpi",
+                    InputVtxContainerName = "BPHY23FourTrack_B0",
+                    TrackIndices = [ 0, 1, 2, 3 ],
+                    SubVertexTrackIndices = [ 1, 2 ],
+                    RefitPV = False,
+                    UseMassConstraint = True,
+                    VertexMass = B0mass,
+                    SubVertexMass = Jpsimass,
+                    MassInputParticles = [Mumass, Mumass, Kmass, Pimass],
+                    Chi2Cut = 25.,
+                    TrkVertexFitterTool = vkalvrt, # VKalVrt vertex fitter (PublicToolHandle)
+                    PVRefitter = PVrefit, #PublicToolHandle
+                    V0Tools = V0Tools, # PublicToolHandle
+                    OutputVtxContainerName = "BPHY23Revtx_B0Kpi")
+    )))
 
     # B0 -> J/psi pi K
-    BPHY23Rev_B0piK = acc.popToolsAndMerge(ReVertexCfg(flags,
-        name                       = "BPHY23Rev_B0piK",
-        InputVtxContainerName      = "BPHY23FourTrack_B0",
-        TrackIndices               = [ 0, 1, 2, 3 ],
-        SubVertexTrackIndices      = [ 1, 2 ],
-        RefitPV                    = False,
-        UseMassConstraint          = True,
-        VertexMass                 = B0mass,
-        SubVertexMass              = Jpsimass,
-        MassInputParticles         = [Mumass, Mumass, Pimass, Kmass],
-        Chi2Cut                    = 25.,
-        TrkVertexFitterTool	   = vkalvrt,
-        PVRefitter                 = PVrefit,
-        V0Tools                    = V0Tools,
-        OutputVtxContainerName     = "BPHY23Revtx_B0piK"))
+    augmentation_tools.append(acc.addPublicTool(acc.popToolsAndMerge(
+        ReVertexCfg(flags,
+                    name = "BPHY23Rev_B0piK",
+                    InputVtxContainerName = "BPHY23FourTrack_B0",
+                    TrackIndices = [ 0, 1, 2, 3 ],
+                    SubVertexTrackIndices = [ 1, 2 ],
+                    RefitPV = False,
+                    UseMassConstraint = True,
+                    VertexMass = B0mass,
+                    SubVertexMass = Jpsimass,
+                    MassInputParticles = [Mumass, Mumass, Pimass, Kmass],
+                    Chi2Cut = 25.,
+                    TrkVertexFitterTool = vkalvrt, # VKalVrt vertex fitter (PublicToolHandle)
+                    PVRefitter = PVrefit, #PublicToolHandle
+                    V0Tools = V0Tools, # PublicToolHandle
+                    OutputVtxContainerName = "BPHY23Revtx_B0piK")
+    )))
 
     # Zc3900 -> J/psi pi
-    BPHY23Rev_Zc3900 = acc.popToolsAndMerge(ReVertexCfg(flags,
-        name                       = "BPHY23Rev_Zc3900",
-        InputVtxContainerName      = "BPHY23ThreeTrack_Zc3900",
-        TrackIndices               = [ 0, 1, 2 ],
-        SubVertexTrackIndices      = [ 1, 2 ],
-        RefitPV                    = False,
-        UseMassConstraint          = True,
-        SubVertexMass              = Jpsimass,
-        MassInputParticles         = [Mumass, Mumass, Pimass],
-        Chi2Cut                    = 25.,
-        BMassLower                 = Zc_lo,
-        BMassUpper                 = Zc_hi,
-        TrkVertexFitterTool        = vkalvrt,
-        PVRefitter                 = PVrefit,
-        V0Tools                    = V0Tools,
-        OutputVtxContainerName     = "BPHY23Revtx_Zc3900"))
+    augmentation_tools.append(acc.addPublicTool(acc.popToolsAndMerge(
+        ReVertexCfg(flags,
+                    name = "BPHY23Rev_Zc3900",
+                    InputVtxContainerName = "BPHY23ThreeTrack_Zc3900",
+                    TrackIndices = [ 0, 1, 2 ],
+                    SubVertexTrackIndices = [ 1, 2 ],
+                    RefitPV = False,
+                    UseMassConstraint = True,
+                    SubVertexMass = Jpsimass,
+                    MassInputParticles = [Mumass, Mumass, Pimass],
+                    Chi2Cut = 25.,
+                    BMassLower = Zc_lo,
+                    BMassUpper = Zc_hi,
+                    TrkVertexFitterTool = vkalvrt, # VKalVrt vertex fitter (PublicToolHandle)
+                    PVRefitter = PVrefit, #PublicToolHandle
+                    V0Tools = V0Tools, # PublicToolHandle
+                    OutputVtxContainerName = "BPHY23Revtx_Zc3900")
+    )))
 
     # Bpm -> J/psi K
-    BPHY23Rev_Bpm = acc.popToolsAndMerge(ReVertexCfg(flags,
-        name                       = "BPHY23Rev_Bpm",
-        InputVtxContainerName      = "BPHY23ThreeTrack_Bpm",
-        TrackIndices               = [ 0, 1, 2 ],
-        SubVertexTrackIndices      = [ 1, 2 ],
-        RefitPV                    = False,
-        UseMassConstraint          = True,
-        VertexMass                 = Bpmmass,
-        SubVertexMass              = Jpsimass,
-        MassInputParticles         = [Mumass, Mumass, Kmass],
-        Chi2Cut                    = 25.,
-        TrkVertexFitterTool	   = vkalvrt,
-        PVRefitter                 = PVrefit,
-        V0Tools                    = V0Tools,
-        OutputVtxContainerName     = "BPHY23Revtx_Bpm"))
+    augmentation_tools.append(acc.addPublicTool(acc.popToolsAndMerge(
+        ReVertexCfg(flags,
+                    name = "BPHY23Rev_Bpm",
+                    InputVtxContainerName = "BPHY23ThreeTrack_Bpm",
+                    TrackIndices = [ 0, 1, 2 ],
+                    SubVertexTrackIndices = [ 1, 2 ],
+                    RefitPV = False,
+                    UseMassConstraint = True,
+                    VertexMass = Bpmmass,
+                    SubVertexMass = Jpsimass,
+                    MassInputParticles = [Mumass, Mumass, Kmass],
+                    Chi2Cut = 25.,
+                    TrkVertexFitterTool = vkalvrt, # VKalVrt vertex fitter (PublicToolHandle)
+                    PVRefitter = PVrefit, #PublicToolHandle
+                    V0Tools = V0Tools, # PublicToolHandle
+                    OutputVtxContainerName = "BPHY23Revtx_Bpm")
+    )))
 
 
-    BPHY23Select_Jpsi              = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
-        name                       = "BPHY23Select_Jpsi",
-        HypothesisName             = "Jpsi",
-        InputVtxContainerName      = "BPHY23OniaCandidates",
-        V0Tools                    = V0Tools,
-        TrkMasses                  = [Mumass, Mumass],
-        MassMin                    = Jpsi_lo,
-        MassMax                    = Jpsi_hi,
-        DoVertexType               = 0))
+    augmentation_tools.append(acc.addPublicTool(acc.popToolsAndMerge(
+        Select_onia2mumuCfg(flags,
+                            name = "BPHY23Select_Jpsi",
+                            HypothesisName = "Jpsi",
+                            InputVtxContainerName = "BPHY23OniaCandidates",
+                            V0Tools = V0Tools, # PublicToolHandle
+                            TrkMasses = [Mumass, Mumass],
+                            MassMin = Jpsi_lo,
+                            MassMax = Jpsi_hi,
+                            DoVertexType = 0)
+    )))
 
-    BPHY23Select_Psi               = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
-        name                       = "BPHY23Select_Psi",
-        HypothesisName             = "Psi",
-        InputVtxContainerName      = "BPHY23OniaCandidates",
-        V0Tools                    = V0Tools,
-        TrkMasses                  = [Mumass, Mumass],
-        MassMin                    = Psi_lo,
-        MassMax                    = Psi_hi,
-        DoVertexType               = 0))
+    augmentation_tools.append(acc.addPublicTool(acc.popToolsAndMerge(
+        Select_onia2mumuCfg(flags,
+                            name = "BPHY23Select_Psi",
+                            HypothesisName = "Psi",
+                            InputVtxContainerName = "BPHY23OniaCandidates",
+                            V0Tools = V0Tools, # PublicToolHandle
+                            TrkMasses = [Mumass, Mumass],
+                            MassMin = Psi_lo,
+                            MassMax = Psi_hi,
+                            DoVertexType = 0)
+    )))
 
-    BPHY23Select_Upsi              = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
-        name                       = "BPHY23Select_Upsi",
-        HypothesisName             = "Upsi",
-        InputVtxContainerName      = "BPHY23OniaCandidates",
-        V0Tools                    = V0Tools,
-        TrkMasses                  = [Mumass, Mumass],
-        MassMin                    = Upsi_lo,
-        MassMax                    = Upsi_hi,
-        DoVertexType               = 0))
+    augmentation_tools.append(acc.addPublicTool(acc.popToolsAndMerge(
+        Select_onia2mumuCfg(flags,
+                            name = "BPHY23Select_Upsi",
+                            HypothesisName = "Upsi",
+                            InputVtxContainerName = "BPHY23OniaCandidates",
+                            V0Tools = V0Tools, # PublicToolHandle
+                            TrkMasses = [Mumass, Mumass],
+                            MassMin = Upsi_lo,
+                            MassMax = Upsi_hi,
+                            DoVertexType = 0)
+    )))
 
-    BPHY23Rev_Jpsi = acc.popToolsAndMerge(ReVertexCfg(flags,
-        name                       = "BPHY23Rev_Jpsi",
-        InputVtxContainerName      = "BPHY23OniaCandidates",
-        HypothesisNames            = [ "Jpsi" ],
-        TrackIndices               = [ 0, 1 ],
-        RefitPV                    = False,
-        UseMassConstraint          = True,
-        VertexMass                 = Jpsimass,
-        MassInputParticles         = [Mumass, Mumass],
-        Chi2Cut                    = 50.,
-        TrkVertexFitterTool        = vkalvrt,
-        PVRefitter                 = PVrefit,
-        V0Tools                    = V0Tools,
-        OutputVtxContainerName     = "BPHY23Revtx_Jpsi"))
+    augmentation_tools.append(acc.addPublicTool(acc.popToolsAndMerge(
+        ReVertexCfg(flags,
+                    name = "BPHY23Rev_Jpsi",
+                    InputVtxContainerName = "BPHY23OniaCandidates",
+                    HypothesisNames = [ "Jpsi" ],
+                    TrackIndices = [ 0, 1 ],
+                    RefitPV = False,
+                    UseMassConstraint = True,
+                    VertexMass = Jpsimass,
+                    MassInputParticles = [Mumass, Mumass],
+                    Chi2Cut = 50.,
+                    TrkVertexFitterTool = vkalvrt, # VKalVrt vertex fitter (PublicToolHandle)
+                    PVRefitter = PVrefit, #PublicToolHandle
+                    V0Tools = V0Tools, # PublicToolHandle
+                    OutputVtxContainerName = "BPHY23Revtx_Jpsi")
+    )))
 
-    BPHY23Rev_Psi = acc.popToolsAndMerge(ReVertexCfg(flags,
-        name                       = "BPHY23Rev_Psi",
-        InputVtxContainerName      = "BPHY23OniaCandidates",
-        HypothesisNames            = [ "Psi" ],
-        TrackIndices               = [ 0, 1 ],
-        RefitPV                    = False,
-        UseMassConstraint          = True,
-        VertexMass                 = Psi2Smass,
-        MassInputParticles         = [Mumass, Mumass],
-        Chi2Cut                    = 50.,
-        TrkVertexFitterTool        = vkalvrt,
-        PVRefitter                 = PVrefit,
-        V0Tools                    = V0Tools,
-        OutputVtxContainerName     = "BPHY23Revtx_Psi"))
+    augmentation_tools.append(acc.addPublicTool(acc.popToolsAndMerge(
+        ReVertexCfg(flags,
+                    name = "BPHY23Rev_Psi",
+                    InputVtxContainerName = "BPHY23OniaCandidates",
+                    HypothesisNames = [ "Psi" ],
+                    TrackIndices = [ 0, 1 ],
+                    RefitPV = False,
+                    UseMassConstraint = True,
+                    VertexMass = Psi2Smass,
+                    MassInputParticles = [Mumass, Mumass],
+                    Chi2Cut = 50.,
+                    TrkVertexFitterTool = vkalvrt, # VKalVrt vertex fitter (PublicToolHandle)
+                    PVRefitter = PVrefit, #PublicToolHandle
+                    V0Tools = V0Tools, # PublicToolHandle
+                    OutputVtxContainerName = "BPHY23Revtx_Psi")
+    )))
 
-    BPHY23Rev_Upsi = acc.popToolsAndMerge(ReVertexCfg(flags,
-        name                       = "BPHY23Rev_Upsi",
-        InputVtxContainerName      = "BPHY23OniaCandidates",
-        HypothesisNames            = [ "Upsi" ],
-        TrackIndices               = [ 0, 1 ],
-        RefitPV                    = False,
-        UseMassConstraint          = True,
-        VertexMass                 = Upsimass,
-        MassInputParticles         = [Mumass, Mumass],
-        Chi2Cut                    = 50.,
-        TrkVertexFitterTool        = vkalvrt,
-        PVRefitter                 = PVrefit,
-        V0Tools                    = V0Tools,
-        OutputVtxContainerName     = "BPHY23Revtx_Upsi"))
+    augmentation_tools.append(acc.addPublicTool(acc.popToolsAndMerge(
+        ReVertexCfg(flags,
+                    name = "BPHY23Rev_Upsi",
+                    InputVtxContainerName = "BPHY23OniaCandidates",
+                    HypothesisNames = [ "Upsi" ],
+                    TrackIndices = [ 0, 1 ],
+                    RefitPV = False,
+                    UseMassConstraint = True,
+                    VertexMass = Upsimass,
+                    MassInputParticles = [Mumass, Mumass],
+                    Chi2Cut = 50.,
+                    TrkVertexFitterTool = vkalvrt, # VKalVrt vertex fitter (PublicToolHandle)
+                    PVRefitter = PVrefit, #PublicToolHandle
+                    V0Tools = V0Tools, # PublicToolHandle
+                    OutputVtxContainerName = "BPHY23Revtx_Upsi")
+    )))
 
+
+    OutputCollections = []
+    RefPVContainers = []
+    RefPVAuxContainers = []
+    passedCandidates = []
 
     ########################
     ###  2 trks + 0 trk  ###
@@ -481,34 +504,38 @@ def BPHY23Cfg(flags):
                                Jpsimass, Psi2Smass, Upsimass,
                                Jpsimass, Psi2Smass, Upsimass]
 
-    list_2trk0trk_obj = []
-    for hypo in list_2trk0trk_hypo:
-        list_2trk0trk_obj.append( acc.popToolsAndMerge(JpsiPlusPsiCascadeCfg(flags, name = "BPHY23_"+hypo) ) )
-
-    for i in range(len(list_2trk0trk_obj)):
-        list_2trk0trk_obj[i].HypothesisName           = list_2trk0trk_hypo[i]
-        list_2trk0trk_obj[i].JpsiVertices             = list_2trk0trk_jpsiInput[i]
-        list_2trk0trk_obj[i].PsiVertices              = list_2trk0trk_psiInput[i]
-        list_2trk0trk_obj[i].NumberOfPsiDaughters     = 4
-        list_2trk0trk_obj[i].MassLowerCut             = 0.
-        list_2trk0trk_obj[i].MassUpperCut             = X_hi
-        list_2trk0trk_obj[i].Chi2Cut                  = 30.
-        list_2trk0trk_obj[i].MaxCandidates            = 15
-        list_2trk0trk_obj[i].MaxnPV                   = 100
-        list_2trk0trk_obj[i].PVRefitter               = PVrefit
-        list_2trk0trk_obj[i].TrkVertexFitterTool      = vkalvrt
-        list_2trk0trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
-        list_2trk0trk_obj[i].RefPVContainerName       = "BPHY23_"+list_2trk0trk_hypo[i]+"_RefPrimaryVertices"
-        list_2trk0trk_obj[i].CascadeVertexCollections = ["BPHY23_"+list_2trk0trk_hypo[i]+"_CascadeVtx1","BPHY23_"+list_2trk0trk_hypo[i]+"_CascadeVtx2","BPHY23_"+list_2trk0trk_hypo[i]+"_CascadeVtx3"]
-        list_2trk0trk_obj[i].RefitPV                  = True
-        list_2trk0trk_obj[i].Vtx1Daug3MassHypo        = list_2trk0trk_dau3Mass[i]
-        list_2trk0trk_obj[i].Vtx1Daug4MassHypo        = list_2trk0trk_dau4Mass[i]
-        list_2trk0trk_obj[i].ApplyJpsiMassConstraint  = True
-        list_2trk0trk_obj[i].JpsiMass                 = list_2trk0trk_jpsiMass[i]
-        list_2trk0trk_obj[i].ApplyPsiMassConstraint   = True
-        list_2trk0trk_obj[i].PsiMass                  = list_2trk0trk_psiMass[i]
-        list_2trk0trk_obj[i].ApplyJpsi2MassConstraint = True
-        list_2trk0trk_obj[i].Jpsi2Mass                = list_2trk0trk_jpsi2Mass[i]
+    for i, hypo in enumerate(list_2trk0trk_hypo):
+        TwoTrk0TrkArgs = { }
+        TwoTrk0TrkArgs.setdefault("HypothesisName", hypo)
+        TwoTrk0TrkArgs.setdefault("JpsiVertices", list_2trk0trk_jpsiInput[i])
+        TwoTrk0TrkArgs.setdefault("PsiVertices", list_2trk0trk_psiInput[i])
+        TwoTrk0TrkArgs.setdefault("NumberOfPsiDaughters", 4)
+        TwoTrk0TrkArgs.setdefault("MassLowerCut", 0.)
+        TwoTrk0TrkArgs.setdefault("MassUpperCut", X_hi)
+        TwoTrk0TrkArgs.setdefault("Chi2Cut", 30.)
+        TwoTrk0TrkArgs.setdefault("MaxCandidates", 15)
+        TwoTrk0TrkArgs.setdefault("MaxnPV", 100)
+        TwoTrk0TrkArgs.setdefault("PVRefitter", PVrefit) # PublicToolHandle
+        TwoTrk0TrkArgs.setdefault("TrkVertexFitterTool", vkalvrt) # PublicToolHandle
+        TwoTrk0TrkArgs.setdefault("VxPrimaryCandidateName", "PrimaryVertices")
+        TwoTrk0TrkArgs.setdefault("RefPVContainerName", "BPHY23_"+hypo+"_RefPrimaryVertices")
+        TwoTrk0TrkArgs.setdefault("CascadeVertexCollections", ["BPHY23_"+hypo+"_CascadeVtx1","BPHY23_"+hypo+"_CascadeVtx2","BPHY23_"+hypo+"_CascadeVtx3"])
+        TwoTrk0TrkArgs.setdefault("RefitPV", True)
+        TwoTrk0TrkArgs.setdefault("Vtx1Daug3MassHypo", list_2trk0trk_dau3Mass[i])
+        TwoTrk0TrkArgs.setdefault("Vtx1Daug4MassHypo", list_2trk0trk_dau4Mass[i])
+        TwoTrk0TrkArgs.setdefault("ApplyJpsiMassConstraint", True)
+        TwoTrk0TrkArgs.setdefault("JpsiMass", list_2trk0trk_jpsiMass[i])
+        TwoTrk0TrkArgs.setdefault("ApplyPsiMassConstraint", True)
+        TwoTrk0TrkArgs.setdefault("PsiMass", list_2trk0trk_psiMass[i])
+        TwoTrk0TrkArgs.setdefault("ApplyJpsi2MassConstraint", True)
+        TwoTrk0TrkArgs.setdefault("Jpsi2Mass", list_2trk0trk_jpsi2Mass[i])
+        augmentation_tools.append(acc.addPublicTool(acc.popToolsAndMerge(
+            JpsiPlusPsiCascadeCfg(flags, name = "BPHY23_"+hypo, **TwoTrk0TrkArgs)
+        )))
+        OutputCollections += TwoTrk0TrkArgs["CascadeVertexCollections"]
+        RefPVContainers += ["xAOD::VertexContainer#BPHY23_" + hypo + "_RefPrimaryVertices"]
+        RefPVAuxContainers += ["xAOD::VertexAuxContainer#BPHY23_" + hypo + "_RefPrimaryVerticesAux."]
+        passedCandidates += ["BPHY23_" + hypo + "_CascadeVtx3"]
 
     list2_2trk0trk_hypo = ["Psi2Jpsi0", "Psi2Psi0", "Psi2Upsi0",
                            "X3872Jpsi0", "X3872Psi0", "X3872Upsi0"]
@@ -522,40 +549,44 @@ def BPHY23Cfg(flags):
     list2_2trk0trk_psi1mass = [Psi2Smass, Psi2Smass, Psi2Smass, X3872mass, X3872mass, X3872mass]
     list2_2trk0trk_jpsi2mass = [Jpsimass, Psi2Smass, Upsimass, Jpsimass, Psi2Smass, Upsimass]
 
-    list2_2trk0trk_obj = []
-    for hypo in list2_2trk0trk_hypo:
-        list2_2trk0trk_obj.append( acc.popToolsAndMerge(PsiPlusPsiSingleVertexCfg(flags, name = "BPHY23_"+hypo) ) )
-
-    for i in range(len(list2_2trk0trk_obj)):
-        list2_2trk0trk_obj[i].HypothesisName           = list2_2trk0trk_hypo[i]
-        list2_2trk0trk_obj[i].Psi1Vertices             = list2_2trk0trk_psi1Input[i]
-        list2_2trk0trk_obj[i].Psi2Vertices             = list2_2trk0trk_psi2Input[i]
-        list2_2trk0trk_obj[i].MaxCandidates            = 15
-        list2_2trk0trk_obj[i].NumberOfPsi1Daughters    = 4
-        list2_2trk0trk_obj[i].NumberOfPsi2Daughters    = 2
-        list2_2trk0trk_obj[i].Jpsi1MassLowerCut        = Jpsi_lo
-        list2_2trk0trk_obj[i].Jpsi1MassUpperCut        = Jpsi_hi
-        list2_2trk0trk_obj[i].Psi1MassLowerCut         = Psi_lo
-        list2_2trk0trk_obj[i].Psi1MassUpperCut         = Psi_hi
-        list2_2trk0trk_obj[i].Jpsi2MassLowerCut        = list2_2trk0trk_jpsi2lo[i]
-        list2_2trk0trk_obj[i].Jpsi2MassUpperCut        = list2_2trk0trk_jpsi2hi[i]
-        list2_2trk0trk_obj[i].MassLowerCut             = 0.
-        list2_2trk0trk_obj[i].MassUpperCut             = X_hi
-        list2_2trk0trk_obj[i].Jpsi1Mass                = list2_2trk0trk_jpsi1mass[i]
-        list2_2trk0trk_obj[i].Psi1Mass                 = list2_2trk0trk_psi1mass[i]
-        list2_2trk0trk_obj[i].Jpsi2Mass                = list2_2trk0trk_jpsi2mass[i]
-        list2_2trk0trk_obj[i].ApplyJpsi1MassConstraint = True
-        list2_2trk0trk_obj[i].ApplyPsi1MassConstraint  = True
-        list2_2trk0trk_obj[i].ApplyJpsi2MassConstraint = True
-        list2_2trk0trk_obj[i].Chi2Cut                  = 30.
-        list2_2trk0trk_obj[i].PVRefitter               = PVrefit
-        list2_2trk0trk_obj[i].TrkVertexFitterTool      = vkalvrt
-        list2_2trk0trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
-        list2_2trk0trk_obj[i].OutputVertexCollections  = ["BPHY23_"+list2_2trk0trk_hypo[i]+"_SubVtx1","BPHY23_"+list2_2trk0trk_hypo[i]+"_SubVtx2","BPHY23_"+list2_2trk0trk_hypo[i]+"_MainVtx"]
-        list2_2trk0trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
-        list2_2trk0trk_obj[i].RefPVContainerName       = "BPHY23_"+list2_2trk0trk_hypo[i]+"_RefPrimaryVertices"
-        list2_2trk0trk_obj[i].RefitPV                  = True
-        list2_2trk0trk_obj[i].MaxnPV                   = 100
+    for i, hypo in enumerate(list2_2trk0trk_hypo):
+        TwoTrk0TrkArgs = { }
+        TwoTrk0TrkArgs.setdefault("HypothesisName", hypo)
+        TwoTrk0TrkArgs.setdefault("Psi1Vertices", list2_2trk0trk_psi1Input[i])
+        TwoTrk0TrkArgs.setdefault("Psi2Vertices", list2_2trk0trk_psi2Input[i])
+        TwoTrk0TrkArgs.setdefault("MaxCandidates", 15)
+        TwoTrk0TrkArgs.setdefault("NumberOfPsi1Daughters", 4)
+        TwoTrk0TrkArgs.setdefault("NumberOfPsi2Daughters", 2)
+        TwoTrk0TrkArgs.setdefault("Jpsi1MassLowerCut", Jpsi_lo)
+        TwoTrk0TrkArgs.setdefault("Jpsi1MassUpperCut", Jpsi_hi)
+        TwoTrk0TrkArgs.setdefault("Psi1MassLowerCut", Psi_lo)
+        TwoTrk0TrkArgs.setdefault("Psi1MassUpperCut", Psi_hi)
+        TwoTrk0TrkArgs.setdefault("Jpsi2MassLowerCut", list2_2trk0trk_jpsi2lo[i])
+        TwoTrk0TrkArgs.setdefault("Jpsi2MassUpperCut", list2_2trk0trk_jpsi2hi[i])
+        TwoTrk0TrkArgs.setdefault("MassLowerCut", 0.)
+        TwoTrk0TrkArgs.setdefault("MassUpperCut", X_hi)
+        TwoTrk0TrkArgs.setdefault("Jpsi1Mass", list2_2trk0trk_jpsi1mass[i])
+        TwoTrk0TrkArgs.setdefault("Psi1Mass", list2_2trk0trk_psi1mass[i])
+        TwoTrk0TrkArgs.setdefault("Jpsi2Mass", list2_2trk0trk_jpsi2mass[i])
+        TwoTrk0TrkArgs.setdefault("ApplyJpsi1MassConstraint", True)
+        TwoTrk0TrkArgs.setdefault("ApplyPsi1MassConstraint", True)
+        TwoTrk0TrkArgs.setdefault("ApplyJpsi2MassConstraint", True)
+        TwoTrk0TrkArgs.setdefault("Chi2Cut", 30.)
+        TwoTrk0TrkArgs.setdefault("PVRefitter", PVrefit) # PublicToolHandle
+        TwoTrk0TrkArgs.setdefault("TrkVertexFitterTool", vkalvrt) # PublicToolHandle
+        TwoTrk0TrkArgs.setdefault("VxPrimaryCandidateName", "PrimaryVertices")
+        TwoTrk0TrkArgs.setdefault("OutputVertexCollections", ["BPHY23_"+hypo+"_SubVtx1","BPHY23_"+hypo+"_SubVtx2","BPHY23_"+hypo+"_MainVtx"])
+        TwoTrk0TrkArgs.setdefault("VxPrimaryCandidateName", "PrimaryVertices")
+        TwoTrk0TrkArgs.setdefault("RefPVContainerName", "BPHY23_"+hypo+"_RefPrimaryVertices")
+        TwoTrk0TrkArgs.setdefault("RefitPV", True)
+        TwoTrk0TrkArgs.setdefault("MaxnPV", 100)
+        augmentation_tools.append(acc.addPublicTool(acc.popToolsAndMerge(
+            PsiPlusPsiSingleVertexCfg(flags, name = "BPHY23_"+hypo, **TwoTrk0TrkArgs)
+        )))
+        OutputCollections += TwoTrk0TrkArgs["OutputVertexCollections"]
+        RefPVContainers += ["xAOD::VertexContainer#BPHY23_" + hypo + "_RefPrimaryVertices"]
+        RefPVAuxContainers += ["xAOD::VertexAuxContainer#BPHY23_" + hypo + "_RefPrimaryVerticesAux."]
+        passedCandidates += ["BPHY23_" + hypo + "_MainVtx"]
 
     #######################
     ###  1 trk + 0 trk  ###
@@ -569,33 +600,37 @@ def BPHY23Cfg(flags):
     list_1trk0trk_dau3Mass = [Kmass, Kmass, Kmass]
     list_1trk0trk_jpsi2Mass = [Jpsimass, Psi2Smass, Upsimass]
 
-    list_1trk0trk_obj = []
-    for hypo in list_1trk0trk_hypo:
-        list_1trk0trk_obj.append( acc.popToolsAndMerge(JpsiPlusPsiCascadeCfg(flags, name = "BPHY23_"+hypo) ) )
-
-    for i in range(len(list_1trk0trk_obj)):
-        list_1trk0trk_obj[i].HypothesisName           = list_1trk0trk_hypo[i]
-        list_1trk0trk_obj[i].JpsiVertices             = list_1trk0trk_jpsiInput[i]
-        list_1trk0trk_obj[i].PsiVertices              = list_1trk0trk_psiInput[i]
-        list_1trk0trk_obj[i].NumberOfPsiDaughters     = 3
-        list_1trk0trk_obj[i].MassLowerCut             = 0.
-        list_1trk0trk_obj[i].MassUpperCut             = X_hi
-        list_1trk0trk_obj[i].Chi2Cut                  = 30.
-        list_1trk0trk_obj[i].MaxCandidates            = 15
-        list_1trk0trk_obj[i].MaxnPV                   = 100
-        list_1trk0trk_obj[i].PVRefitter               = PVrefit
-        list_1trk0trk_obj[i].TrkVertexFitterTool      = vkalvrt
-        list_1trk0trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
-        list_1trk0trk_obj[i].RefPVContainerName       = "BPHY23_"+list_1trk0trk_hypo[i]+"_RefPrimaryVertices"
-        list_1trk0trk_obj[i].CascadeVertexCollections = ["BPHY23_"+list_1trk0trk_hypo[i]+"_CascadeVtx1","BPHY23_"+list_1trk0trk_hypo[i]+"_CascadeVtx2","BPHY23_"+list_1trk0trk_hypo[i]+"_CascadeVtx3"]
-        list_1trk0trk_obj[i].RefitPV                  = True
-        list_1trk0trk_obj[i].Vtx1Daug3MassHypo        = list_1trk0trk_dau3Mass[i]
-        list_1trk0trk_obj[i].ApplyJpsiMassConstraint  = True
-        list_1trk0trk_obj[i].JpsiMass                 = list_1trk0trk_jpsiMass[i]
-        list_1trk0trk_obj[i].ApplyPsiMassConstraint   = True
-        list_1trk0trk_obj[i].PsiMass                  = list_1trk0trk_psiMass[i]
-        list_1trk0trk_obj[i].ApplyJpsi2MassConstraint = True
-        list_1trk0trk_obj[i].Jpsi2Mass                = list_1trk0trk_jpsi2Mass[i]
+    for i, hypo in enumerate(list_1trk0trk_hypo):
+        OneTrk0TrkArgs = { }
+        OneTrk0TrkArgs.setdefault("HypothesisName", hypo)
+        OneTrk0TrkArgs.setdefault("JpsiVertices", list_1trk0trk_jpsiInput[i])
+        OneTrk0TrkArgs.setdefault("PsiVertices", list_1trk0trk_psiInput[i])
+        OneTrk0TrkArgs.setdefault("NumberOfPsiDaughters", 3)
+        OneTrk0TrkArgs.setdefault("MassLowerCut", 0.)
+        OneTrk0TrkArgs.setdefault("MassUpperCut", X_hi)
+        OneTrk0TrkArgs.setdefault("Chi2Cut", 30.)
+        OneTrk0TrkArgs.setdefault("MaxCandidates", 15)
+        OneTrk0TrkArgs.setdefault("MaxnPV", 100)
+        OneTrk0TrkArgs.setdefault("PVRefitter", PVrefit) # PublicToolHandle
+        OneTrk0TrkArgs.setdefault("TrkVertexFitterTool", vkalvrt) # PublicToolHandle
+        OneTrk0TrkArgs.setdefault("VxPrimaryCandidateName", "PrimaryVertices")
+        OneTrk0TrkArgs.setdefault("RefPVContainerName", "BPHY23_"+hypo+"_RefPrimaryVertices")
+        OneTrk0TrkArgs.setdefault("CascadeVertexCollections", ["BPHY23_"+hypo+"_CascadeVtx1","BPHY23_"+hypo+"_CascadeVtx2","BPHY23_"+hypo+"_CascadeVtx3"])
+        OneTrk0TrkArgs.setdefault("RefitPV", True)
+        OneTrk0TrkArgs.setdefault("Vtx1Daug3MassHypo", list_1trk0trk_dau3Mass[i])
+        OneTrk0TrkArgs.setdefault("ApplyJpsiMassConstraint", True)
+        OneTrk0TrkArgs.setdefault("JpsiMass", list_1trk0trk_jpsiMass[i])
+        OneTrk0TrkArgs.setdefault("ApplyPsiMassConstraint", True)
+        OneTrk0TrkArgs.setdefault("PsiMass", list_1trk0trk_psiMass[i])
+        OneTrk0TrkArgs.setdefault("ApplyJpsi2MassConstraint", True)
+        OneTrk0TrkArgs.setdefault("Jpsi2Mass", list_1trk0trk_jpsi2Mass[i])
+        augmentation_tools.append(acc.addPublicTool(acc.popToolsAndMerge(
+            JpsiPlusPsiCascadeCfg(flags, name = "BPHY23_"+hypo, **OneTrk0TrkArgs)
+        )))
+        OutputCollections += OneTrk0TrkArgs["CascadeVertexCollections"]
+        RefPVContainers += ["xAOD::VertexContainer#BPHY23_" + hypo + "_RefPrimaryVertices"]
+        RefPVAuxContainers += ["xAOD::VertexAuxContainer#BPHY23_" + hypo + "_RefPrimaryVerticesAux."]
+        passedCandidates += ["BPHY23_" + hypo + "_CascadeVtx3"]
 
     list2_1trk0trk_hypo = ["Zc3900Jpsi0", "Zc3900Psi0", "Zc3900Upsi0"]
     list2_1trk0trk_psi1Input = ["BPHY23Revtx_Zc3900", "BPHY23Revtx_Zc3900", "BPHY23Revtx_Zc3900"]
@@ -606,40 +641,44 @@ def BPHY23Cfg(flags):
     list2_1trk0trk_psi1mass = [Zcmass, Zcmass, Zcmass]
     list2_1trk0trk_jpsi2mass = [Jpsimass, Psi2Smass, Upsimass]
 
-    list2_1trk0trk_obj = []
-    for hypo in list2_1trk0trk_hypo:
-        list2_1trk0trk_obj.append( acc.popToolsAndMerge(PsiPlusPsiSingleVertexCfg(flags, name = "BPHY23_"+hypo) ) )
-
-    for i in range(len(list2_1trk0trk_obj)):
-        list2_1trk0trk_obj[i].HypothesisName           = list2_1trk0trk_hypo[i]
-        list2_1trk0trk_obj[i].Psi1Vertices             = list2_1trk0trk_psi1Input[i]
-        list2_1trk0trk_obj[i].Psi2Vertices             = list2_1trk0trk_psi2Input[i]
-        list2_1trk0trk_obj[i].MaxCandidates            = 15
-        list2_1trk0trk_obj[i].NumberOfPsi1Daughters    = 3
-        list2_1trk0trk_obj[i].NumberOfPsi2Daughters    = 2
-        list2_1trk0trk_obj[i].Jpsi1MassLowerCut        = Jpsi_lo
-        list2_1trk0trk_obj[i].Jpsi1MassUpperCut        = Jpsi_hi
-        list2_1trk0trk_obj[i].Psi1MassLowerCut         = Zc_lo
-        list2_1trk0trk_obj[i].Psi1MassUpperCut         = Zc_hi
-        list2_1trk0trk_obj[i].Jpsi2MassLowerCut        = list2_1trk0trk_jpsi2lo[i]
-        list2_1trk0trk_obj[i].Jpsi2MassUpperCut        = list2_1trk0trk_jpsi2hi[i]
-        list2_1trk0trk_obj[i].MassLowerCut             = 0.
-        list2_1trk0trk_obj[i].MassUpperCut             = X_hi
-        list2_1trk0trk_obj[i].Jpsi1Mass                = list2_1trk0trk_jpsi1mass[i]
-        list2_1trk0trk_obj[i].Psi1Mass                 = list2_1trk0trk_psi1mass[i]
-        list2_1trk0trk_obj[i].Jpsi2Mass                = list2_1trk0trk_jpsi2mass[i]
-        list2_1trk0trk_obj[i].ApplyJpsi1MassConstraint = True
-        list2_1trk0trk_obj[i].ApplyPsi1MassConstraint  = True
-        list2_1trk0trk_obj[i].ApplyJpsi2MassConstraint = True
-        list2_1trk0trk_obj[i].Chi2Cut                  = 30.
-        list2_1trk0trk_obj[i].PVRefitter               = PVrefit
-        list2_1trk0trk_obj[i].TrkVertexFitterTool      = vkalvrt
-        list2_1trk0trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
-        list2_1trk0trk_obj[i].OutputVertexCollections  = ["BPHY23_"+list2_1trk0trk_hypo[i]+"_SubVtx1","BPHY23_"+list2_1trk0trk_hypo[i]+"_SubVtx2","BPHY23_"+list2_1trk0trk_hypo[i]+"_MainVtx"]
-        list2_1trk0trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
-        list2_1trk0trk_obj[i].RefPVContainerName       = "BPHY23_"+list2_1trk0trk_hypo[i]+"_RefPrimaryVertices"
-        list2_1trk0trk_obj[i].RefitPV                  = True
-        list2_1trk0trk_obj[i].MaxnPV                   = 100
+    for i, hypo in enumerate(list2_1trk0trk_hypo):
+        OneTrk0TrkArgs = { }
+        OneTrk0TrkArgs.setdefault("HypothesisName", hypo)
+        OneTrk0TrkArgs.setdefault("Psi1Vertices", list2_1trk0trk_psi1Input[i])
+        OneTrk0TrkArgs.setdefault("Psi2Vertices", list2_1trk0trk_psi2Input[i])
+        OneTrk0TrkArgs.setdefault("MaxCandidates", 15)
+        OneTrk0TrkArgs.setdefault("NumberOfPsi1Daughters", 3)
+        OneTrk0TrkArgs.setdefault("NumberOfPsi2Daughters", 2)
+        OneTrk0TrkArgs.setdefault("Jpsi1MassLowerCut", Jpsi_lo)
+        OneTrk0TrkArgs.setdefault("Jpsi1MassUpperCut", Jpsi_hi)
+        OneTrk0TrkArgs.setdefault("Psi1MassLowerCut", Zc_lo)
+        OneTrk0TrkArgs.setdefault("Psi1MassUpperCut", Zc_hi)
+        OneTrk0TrkArgs.setdefault("Jpsi2MassLowerCut", list2_1trk0trk_jpsi2lo[i])
+        OneTrk0TrkArgs.setdefault("Jpsi2MassUpperCut", list2_1trk0trk_jpsi2hi[i])
+        OneTrk0TrkArgs.setdefault("MassLowerCut", 0.)
+        OneTrk0TrkArgs.setdefault("MassUpperCut", X_hi)
+        OneTrk0TrkArgs.setdefault("Jpsi1Mass", list2_1trk0trk_jpsi1mass[i])
+        OneTrk0TrkArgs.setdefault("Psi1Mass", list2_1trk0trk_psi1mass[i])
+        OneTrk0TrkArgs.setdefault("Jpsi2Mass", list2_1trk0trk_jpsi2mass[i])
+        OneTrk0TrkArgs.setdefault("ApplyJpsi1MassConstraint", True)
+        OneTrk0TrkArgs.setdefault("ApplyPsi1MassConstraint", True)
+        OneTrk0TrkArgs.setdefault("ApplyJpsi2MassConstraint", True)
+        OneTrk0TrkArgs.setdefault("Chi2Cut", 30.)
+        OneTrk0TrkArgs.setdefault("PVRefitter", PVrefit) # PublicToolHandle
+        OneTrk0TrkArgs.setdefault("TrkVertexFitterTool", vkalvrt) # PublicToolHandle
+        OneTrk0TrkArgs.setdefault("VxPrimaryCandidateName", "PrimaryVertices")
+        OneTrk0TrkArgs.setdefault("OutputVertexCollections", ["BPHY23_"+hypo+"_SubVtx1","BPHY23_"+hypo+"_SubVtx2","BPHY23_"+hypo+"_MainVtx"])
+        OneTrk0TrkArgs.setdefault("VxPrimaryCandidateName", "PrimaryVertices")
+        OneTrk0TrkArgs.setdefault("RefPVContainerName", "BPHY23_"+hypo+"_RefPrimaryVertices")
+        OneTrk0TrkArgs.setdefault("RefitPV", True)
+        OneTrk0TrkArgs.setdefault("MaxnPV", 100)
+        augmentation_tools.append(acc.addPublicTool(acc.popToolsAndMerge(
+            PsiPlusPsiSingleVertexCfg(flags, name = "BPHY23_"+hypo, **OneTrk0TrkArgs)
+        )))
+        OutputCollections += OneTrk0TrkArgs["OutputVertexCollections"]
+        RefPVContainers += ["xAOD::VertexContainer#BPHY23_" + hypo + "_RefPrimaryVertices"]
+        RefPVAuxContainers += ["xAOD::VertexAuxContainer#BPHY23_" + hypo + "_RefPrimaryVerticesAux."]
+        passedCandidates += ["BPHY23_" + hypo + "_MainVtx"]
 
     #######################
     ###  1 trk + 1 trk  ###
@@ -655,41 +694,45 @@ def BPHY23Cfg(flags):
     list_1trk1trk_psi2Mass = [Zcmass, Bpmmass]
     list_1trk1trk_p2dau3Mass = [Pimass, Kmass]
 
-    list_1trk1trk_obj = []
-    for hypo in list_1trk1trk_hypo:
-        list_1trk1trk_obj.append( acc.popToolsAndMerge(PsiPlusPsiCascadeCfg(flags, name = "BPHY23_"+hypo) ) )
-
-    for i in range(len(list_1trk1trk_obj)):
-        list_1trk1trk_obj[i].HypothesisName           = list_1trk1trk_hypo[i]
-        list_1trk1trk_obj[i].Psi1Vertices             = list_1trk1trk_psi1Input[i]
-        list_1trk1trk_obj[i].Psi2Vertices             = list_1trk1trk_psi2Input[i]
-        list_1trk1trk_obj[i].NumberOfPsi1Daughters    = 3
-        list_1trk1trk_obj[i].NumberOfPsi2Daughters    = 3
-        list_1trk1trk_obj[i].MassLowerCut             = 0.
-        list_1trk1trk_obj[i].MassUpperCut             = X_hi
-        list_1trk1trk_obj[i].Chi2CutPsi1              = 5.
-        list_1trk1trk_obj[i].Chi2CutPsi2              = 5.
-        list_1trk1trk_obj[i].Chi2Cut                  = 30.
-        list_1trk1trk_obj[i].MaxCandidates            = 15
-        list_1trk1trk_obj[i].RemoveDuplicatePairs     = True
-        list_1trk1trk_obj[i].MaxnPV                   = 100
-        list_1trk1trk_obj[i].PVRefitter               = PVrefit
-        list_1trk1trk_obj[i].TrkVertexFitterTool      = vkalvrt
-        list_1trk1trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
-        list_1trk1trk_obj[i].RefPVContainerName       = "BPHY23_"+list_1trk1trk_hypo[i]+"_RefPrimaryVertices"
-        list_1trk1trk_obj[i].CascadeVertexCollections = ["BPHY23_"+list_1trk1trk_hypo[i]+"_CascadeVtx1","BPHY23_"+list_1trk1trk_hypo[i]+"_CascadeVtx2","BPHY23_"+list_1trk1trk_hypo[i]+"_CascadeVtx3"]
-        list_1trk1trk_obj[i].RefitPV                  = True
-        list_1trk1trk_obj[i].Vtx1Daug3MassHypo        = list_1trk1trk_p1dau3Mass[i]
-        list_1trk1trk_obj[i].Vtx2Daug3MassHypo        = list_1trk1trk_p2dau3Mass[i]
-        list_1trk1trk_obj[i].ApplyJpsi1MassConstraint = True
-        list_1trk1trk_obj[i].Jpsi1Mass                = list_1trk1trk_jpsi1Mass[i]
-        list_1trk1trk_obj[i].ApplyPsi1MassConstraint  = True
-        list_1trk1trk_obj[i].Psi1Mass                 = list_1trk1trk_psi1Mass[i]
-        list_1trk1trk_obj[i].ApplyJpsi2MassConstraint = True
-        list_1trk1trk_obj[i].Jpsi2Mass                = list_1trk1trk_jpsi2Mass[i]
+    for i, hypo in enumerate(list_1trk1trk_hypo):
+        OneTrk1TrkArgs = { }
+        OneTrk1TrkArgs.setdefault("HypothesisName", hypo)
+        OneTrk1TrkArgs.setdefault("Psi1Vertices", list_1trk1trk_psi1Input[i])
+        OneTrk1TrkArgs.setdefault("Psi2Vertices", list_1trk1trk_psi2Input[i])
+        OneTrk1TrkArgs.setdefault("NumberOfPsi1Daughters", 3)
+        OneTrk1TrkArgs.setdefault("NumberOfPsi2Daughters", 3)
+        OneTrk1TrkArgs.setdefault("MassLowerCut", 0.)
+        OneTrk1TrkArgs.setdefault("MassUpperCut", X_hi)
+        OneTrk1TrkArgs.setdefault("Chi2CutPsi1", 5.)
+        OneTrk1TrkArgs.setdefault("Chi2CutPsi2", 5.)
+        OneTrk1TrkArgs.setdefault("Chi2Cut", 30.)
+        OneTrk1TrkArgs.setdefault("MaxCandidates", 15)
+        OneTrk1TrkArgs.setdefault("RemoveDuplicatePairs", True)
+        OneTrk1TrkArgs.setdefault("MaxnPV", 100)
+        OneTrk1TrkArgs.setdefault("PVRefitter", PVrefit) # PublicToolHandle
+        OneTrk1TrkArgs.setdefault("TrkVertexFitterTool", vkalvrt) # PublicToolHandle
+        OneTrk1TrkArgs.setdefault("VxPrimaryCandidateName", "PrimaryVertices")
+        OneTrk1TrkArgs.setdefault("RefPVContainerName", "BPHY23_"+hypo+"_RefPrimaryVertices")
+        OneTrk1TrkArgs.setdefault("CascadeVertexCollections", ["BPHY23_"+hypo+"_CascadeVtx1","BPHY23_"+hypo+"_CascadeVtx2","BPHY23_"+hypo+"_CascadeVtx3"])
+        OneTrk1TrkArgs.setdefault("RefitPV", True)
+        OneTrk1TrkArgs.setdefault("Vtx1Daug3MassHypo", list_1trk1trk_p1dau3Mass[i])
+        OneTrk1TrkArgs.setdefault("Vtx2Daug3MassHypo", list_1trk1trk_p2dau3Mass[i])
+        OneTrk1TrkArgs.setdefault("ApplyJpsi1MassConstraint", True)
+        OneTrk1TrkArgs.setdefault("Jpsi1Mass", list_1trk1trk_jpsi1Mass[i])
+        OneTrk1TrkArgs.setdefault("ApplyPsi1MassConstraint", True)
+        OneTrk1TrkArgs.setdefault("Psi1Mass", list_1trk1trk_psi1Mass[i])
+        OneTrk1TrkArgs.setdefault("ApplyJpsi2MassConstraint", True)
+        OneTrk1TrkArgs.setdefault("Jpsi2Mass", list_1trk1trk_jpsi2Mass[i])
         if list_1trk1trk_psi2Mass[i] != Zcmass:
-            list_1trk1trk_obj[i].ApplyPsi2MassConstraint  = True
-            list_1trk1trk_obj[i].Psi2Mass                 = list_1trk1trk_psi2Mass[i]
+            OneTrk1TrkArgs.setdefault("ApplyPsi2MassConstraint", True)
+            OneTrk1TrkArgs.setdefault("Psi2Mass", list_1trk1trk_psi2Mass[i])
+        augmentation_tools.append(acc.addPublicTool(acc.popToolsAndMerge(
+            PsiPlusPsiCascadeCfg(flags, name = "BPHY23_"+hypo, **OneTrk1TrkArgs)
+        )))
+        OutputCollections += OneTrk1TrkArgs["CascadeVertexCollections"]
+        RefPVContainers += ["xAOD::VertexContainer#BPHY23_" + hypo + "_RefPrimaryVertices"]
+        RefPVAuxContainers += ["xAOD::VertexAuxContainer#BPHY23_" + hypo + "_RefPrimaryVerticesAux."]
+        passedCandidates += ["BPHY23_" + hypo + "_CascadeVtx3"]
 
     list2_1trk1trk_hypo = ["Zc3900Zc3900"]
     list2_1trk1trk_psi1Input = ["BPHY23Revtx_Zc3900"]
@@ -699,44 +742,48 @@ def BPHY23Cfg(flags):
     list2_1trk1trk_jpsi2mass = [Jpsimass]
     list2_1trk1trk_psi2mass = [Zcmass]
 
-    list2_1trk1trk_obj = []
-    for hypo in list2_1trk1trk_hypo:
-        list2_1trk1trk_obj.append( acc.popToolsAndMerge(PsiPlusPsiSingleVertexCfg(flags, name = "BPHY23_"+hypo) ) )
-
-    for i in range(len(list2_1trk1trk_obj)):
-        list2_1trk1trk_obj[i].HypothesisName           = list2_1trk1trk_hypo[i]
-        list2_1trk1trk_obj[i].Psi1Vertices             = list2_1trk1trk_psi1Input[i]
-        list2_1trk1trk_obj[i].Psi2Vertices             = list2_1trk1trk_psi2Input[i]
-        list2_1trk1trk_obj[i].MaxCandidates            = 15
-        list2_1trk1trk_obj[i].NumberOfPsi1Daughters    = 3
-        list2_1trk1trk_obj[i].NumberOfPsi2Daughters    = 3
-        list2_1trk1trk_obj[i].Jpsi1MassLowerCut        = Jpsi_lo
-        list2_1trk1trk_obj[i].Jpsi1MassUpperCut        = Jpsi_hi
-        list2_1trk1trk_obj[i].Psi1MassLowerCut         = Zc_lo
-        list2_1trk1trk_obj[i].Psi1MassUpperCut         = Zc_hi
-        list2_1trk1trk_obj[i].Jpsi2MassLowerCut        = Jpsi_lo
-        list2_1trk1trk_obj[i].Jpsi2MassUpperCut        = Jpsi_hi
-        list2_1trk1trk_obj[i].Psi2MassLowerCut         = Zc_lo
-        list2_1trk1trk_obj[i].Psi2MassUpperCut         = Zc_hi
-        list2_1trk1trk_obj[i].MassLowerCut             = 0.
-        list2_1trk1trk_obj[i].MassUpperCut             = X_hi
-        list2_1trk1trk_obj[i].Jpsi1Mass                = list2_1trk1trk_jpsi1mass[i]
-        list2_1trk1trk_obj[i].Psi1Mass                 = list2_1trk1trk_psi1mass[i]
-        list2_1trk1trk_obj[i].Jpsi2Mass                = list2_1trk1trk_jpsi2mass[i]
-        list2_1trk1trk_obj[i].Psi2Mass                 = list2_1trk1trk_psi2mass[i]
-        list2_1trk1trk_obj[i].ApplyJpsi1MassConstraint = True
-        list2_1trk1trk_obj[i].ApplyPsi1MassConstraint  = True
-        list2_1trk1trk_obj[i].ApplyJpsi2MassConstraint = True
-        list2_1trk1trk_obj[i].ApplyPsi2MassConstraint  = True
-        list2_1trk1trk_obj[i].Chi2Cut                  = 30.
-        list2_1trk1trk_obj[i].PVRefitter               = PVrefit
-        list2_1trk1trk_obj[i].TrkVertexFitterTool      = vkalvrt
-        list2_1trk1trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
-        list2_1trk1trk_obj[i].OutputVertexCollections  = ["BPHY23_"+list2_1trk1trk_hypo[i]+"_SubVtx1","BPHY23_"+list2_1trk1trk_hypo[i]+"_SubVtx2","BPHY23_"+list2_1trk1trk_hypo[i]+"_MainVtx"]
-        list2_1trk1trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
-        list2_1trk1trk_obj[i].RefPVContainerName       = "BPHY23_"+list2_1trk1trk_hypo[i]+"_RefPrimaryVertices"
-        list2_1trk1trk_obj[i].RefitPV                  = True
-        list2_1trk1trk_obj[i].MaxnPV                   = 100
+    for i, hypo in enumerate(list2_1trk1trk_hypo):
+        OneTrk1TrkArgs = { }
+        OneTrk1TrkArgs.setdefault("HypothesisName", hypo)
+        OneTrk1TrkArgs.setdefault("Psi1Vertices", list2_1trk1trk_psi1Input[i])
+        OneTrk1TrkArgs.setdefault("Psi2Vertices", list2_1trk1trk_psi2Input[i])
+        OneTrk1TrkArgs.setdefault("MaxCandidates", 15)
+        OneTrk1TrkArgs.setdefault("NumberOfPsi1Daughters", 3)
+        OneTrk1TrkArgs.setdefault("NumberOfPsi2Daughters", 3)
+        OneTrk1TrkArgs.setdefault("Jpsi1MassLowerCut", Jpsi_lo)
+        OneTrk1TrkArgs.setdefault("Jpsi1MassUpperCut", Jpsi_hi)
+        OneTrk1TrkArgs.setdefault("Psi1MassLowerCut", Zc_lo)
+        OneTrk1TrkArgs.setdefault("Psi1MassUpperCut", Zc_hi)
+        OneTrk1TrkArgs.setdefault("Jpsi2MassLowerCut", Jpsi_lo)
+        OneTrk1TrkArgs.setdefault("Jpsi2MassUpperCut", Jpsi_hi)
+        OneTrk1TrkArgs.setdefault("Psi2MassLowerCut", Zc_lo)
+        OneTrk1TrkArgs.setdefault("Psi2MassUpperCut", Zc_hi)
+        OneTrk1TrkArgs.setdefault("MassLowerCut", 0.)
+        OneTrk1TrkArgs.setdefault("MassUpperCut", X_hi)
+        OneTrk1TrkArgs.setdefault("Jpsi1Mass", list2_1trk1trk_jpsi1mass[i])
+        OneTrk1TrkArgs.setdefault("Psi1Mass", list2_1trk1trk_psi1mass[i])
+        OneTrk1TrkArgs.setdefault("Jpsi2Mass", list2_1trk1trk_jpsi2mass[i])
+        OneTrk1TrkArgs.setdefault("Psi2Mass", list2_1trk1trk_psi2mass[i])
+        OneTrk1TrkArgs.setdefault("ApplyJpsi1MassConstraint", True)
+        OneTrk1TrkArgs.setdefault("ApplyPsi1MassConstraint", True)
+        OneTrk1TrkArgs.setdefault("ApplyJpsi2MassConstraint", True)
+        OneTrk1TrkArgs.setdefault("ApplyPsi2MassConstraint", True)
+        OneTrk1TrkArgs.setdefault("Chi2Cut", 30.)
+        OneTrk1TrkArgs.setdefault("PVRefitter", PVrefit) # PublicToolHandle
+        OneTrk1TrkArgs.setdefault("TrkVertexFitterTool", vkalvrt) # PublicToolHandle
+        OneTrk1TrkArgs.setdefault("VxPrimaryCandidateName", "PrimaryVertices")
+        OneTrk1TrkArgs.setdefault("OutputVertexCollections", ["BPHY23_"+hypo+"_SubVtx1","BPHY23_"+hypo+"_SubVtx2","BPHY23_"+hypo+"_MainVtx"])
+        OneTrk1TrkArgs.setdefault("VxPrimaryCandidateName", "PrimaryVertices")
+        OneTrk1TrkArgs.setdefault("RefPVContainerName", "BPHY23_"+hypo+"_RefPrimaryVertices")
+        OneTrk1TrkArgs.setdefault("RefitPV", True)
+        OneTrk1TrkArgs.setdefault("MaxnPV", 100)
+        augmentation_tools.append(acc.addPublicTool(acc.popToolsAndMerge(
+            PsiPlusPsiSingleVertexCfg(flags, name = "BPHY23_"+hypo, **OneTrk1TrkArgs)
+        )))
+        OutputCollections += OneTrk1TrkArgs["OutputVertexCollections"]
+        RefPVContainers += ["xAOD::VertexContainer#BPHY23_" + hypo + "_RefPrimaryVertices"]
+        RefPVAuxContainers += ["xAOD::VertexAuxContainer#BPHY23_" + hypo + "_RefPrimaryVerticesAux."]
+        passedCandidates += ["BPHY23_" + hypo + "_MainVtx"]
 
     ########################
     ###  2 trks + 1 trk  ###
@@ -773,41 +820,45 @@ def BPHY23Cfg(flags):
                                 Pimass, Kmass,
                                 Pimass, Kmass]
 
-    list_2trk1trk_obj = []
-    for hypo in list_2trk1trk_hypo:
-        list_2trk1trk_obj.append( acc.popToolsAndMerge(PsiPlusPsiCascadeCfg(flags, name = "BPHY23_"+hypo) ) )
-
-    for i in range(len(list_2trk1trk_obj)):
-        list_2trk1trk_obj[i].HypothesisName           = list_2trk1trk_hypo[i]
-        list_2trk1trk_obj[i].Psi1Vertices             = list_2trk1trk_psi1Input[i]
-        list_2trk1trk_obj[i].Psi2Vertices             = list_2trk1trk_psi2Input[i]
-        list_2trk1trk_obj[i].NumberOfPsi1Daughters    = 4
-        list_2trk1trk_obj[i].NumberOfPsi2Daughters    = 3
-        list_2trk1trk_obj[i].MassLowerCut             = 0.
-        list_2trk1trk_obj[i].MassUpperCut             = X_hi
-        list_2trk1trk_obj[i].Chi2CutPsi1              = 5.
-        list_2trk1trk_obj[i].Chi2CutPsi2              = 5.
-        list_2trk1trk_obj[i].Chi2Cut                  = 30.
-        list_2trk1trk_obj[i].MaxCandidates            = 15
-        list_2trk1trk_obj[i].MaxnPV                   = 100
-        list_2trk1trk_obj[i].PVRefitter               = PVrefit
-        list_2trk1trk_obj[i].TrkVertexFitterTool      = vkalvrt
-        list_2trk1trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
-        list_2trk1trk_obj[i].RefPVContainerName       = "BPHY23_"+list_2trk1trk_hypo[i]+"_RefPrimaryVertices"
-        list_2trk1trk_obj[i].CascadeVertexCollections = ["BPHY23_"+list_2trk1trk_hypo[i]+"_CascadeVtx1","BPHY23_"+list_2trk1trk_hypo[i]+"_CascadeVtx2","BPHY23_"+list_2trk1trk_hypo[i]+"_CascadeVtx3"]
-        list_2trk1trk_obj[i].RefitPV                  = True
-        list_2trk1trk_obj[i].Vtx1Daug3MassHypo        = list_2trk1trk_p1dau3Mass[i]
-        list_2trk1trk_obj[i].Vtx1Daug4MassHypo        = list_2trk1trk_p1dau4Mass[i]
-        list_2trk1trk_obj[i].Vtx2Daug3MassHypo        = list_2trk1trk_p2dau3Mass[i]
-        list_2trk1trk_obj[i].ApplyJpsi1MassConstraint = True
-        list_2trk1trk_obj[i].Jpsi1Mass                = list_2trk1trk_jpsi1Mass[i]
-        list_2trk1trk_obj[i].ApplyPsi1MassConstraint  = True
-        list_2trk1trk_obj[i].Psi1Mass                 = list_2trk1trk_psi1Mass[i]
-        list_2trk1trk_obj[i].ApplyJpsi2MassConstraint = True
-        list_2trk1trk_obj[i].Jpsi2Mass                = list_2trk1trk_jpsi2Mass[i]
+    for i, hypo in enumerate(list_2trk1trk_hypo):
+        TwoTrk1TrkArgs = { }
+        TwoTrk1TrkArgs.setdefault("HypothesisName", hypo)
+        TwoTrk1TrkArgs.setdefault("Psi1Vertices", list_2trk1trk_psi1Input[i])
+        TwoTrk1TrkArgs.setdefault("Psi2Vertices", list_2trk1trk_psi2Input[i])
+        TwoTrk1TrkArgs.setdefault("NumberOfPsi1Daughters", 4)
+        TwoTrk1TrkArgs.setdefault("NumberOfPsi2Daughters", 3)
+        TwoTrk1TrkArgs.setdefault("MassLowerCut", 0.)
+        TwoTrk1TrkArgs.setdefault("MassUpperCut", X_hi)
+        TwoTrk1TrkArgs.setdefault("Chi2CutPsi1", 5.)
+        TwoTrk1TrkArgs.setdefault("Chi2CutPsi2", 5.)
+        TwoTrk1TrkArgs.setdefault("Chi2Cut", 30.)
+        TwoTrk1TrkArgs.setdefault("MaxCandidates", 15)
+        TwoTrk1TrkArgs.setdefault("MaxnPV", 100)
+        TwoTrk1TrkArgs.setdefault("PVRefitter", PVrefit) # PublicToolHandle
+        TwoTrk1TrkArgs.setdefault("TrkVertexFitterTool", vkalvrt) # PublicToolHandle
+        TwoTrk1TrkArgs.setdefault("VxPrimaryCandidateName", "PrimaryVertices")
+        TwoTrk1TrkArgs.setdefault("RefPVContainerName", "BPHY23_"+hypo+"_RefPrimaryVertices")
+        TwoTrk1TrkArgs.setdefault("CascadeVertexCollections", ["BPHY23_"+hypo+"_CascadeVtx1","BPHY23_"+hypo+"_CascadeVtx2","BPHY23_"+hypo+"_CascadeVtx3"])
+        TwoTrk1TrkArgs.setdefault("RefitPV", True)
+        TwoTrk1TrkArgs.setdefault("Vtx1Daug3MassHypo", list_2trk1trk_p1dau3Mass[i])
+        TwoTrk1TrkArgs.setdefault("Vtx1Daug4MassHypo", list_2trk1trk_p1dau4Mass[i])
+        TwoTrk1TrkArgs.setdefault("Vtx2Daug3MassHypo", list_2trk1trk_p2dau3Mass[i])
+        TwoTrk1TrkArgs.setdefault("ApplyJpsi1MassConstraint", True)
+        TwoTrk1TrkArgs.setdefault("Jpsi1Mass", list_2trk1trk_jpsi1Mass[i])
+        TwoTrk1TrkArgs.setdefault("ApplyPsi1MassConstraint", True)
+        TwoTrk1TrkArgs.setdefault("Psi1Mass", list_2trk1trk_psi1Mass[i])
+        TwoTrk1TrkArgs.setdefault("ApplyJpsi2MassConstraint", True)
+        TwoTrk1TrkArgs.setdefault("Jpsi2Mass", list_2trk1trk_jpsi2Mass[i])
         if list_2trk1trk_psi2Mass[i] != Zcmass:
-            list_2trk1trk_obj[i].ApplyPsi2MassConstraint  = True
-            list_2trk1trk_obj[i].Psi2Mass                 = list_2trk1trk_psi2Mass[i]
+            TwoTrk1TrkArgs.setdefault("ApplyPsi2MassConstraint", True)
+            TwoTrk1TrkArgs.setdefault("Psi2Mass", list_2trk1trk_psi2Mass[i])
+        augmentation_tools.append(acc.addPublicTool(acc.popToolsAndMerge(
+            PsiPlusPsiCascadeCfg(flags, name = "BPHY23_"+hypo, **TwoTrk1TrkArgs)
+        )))
+        OutputCollections += TwoTrk1TrkArgs["CascadeVertexCollections"]
+        RefPVContainers += ["xAOD::VertexContainer#BPHY23_" + hypo + "_RefPrimaryVertices"]
+        RefPVAuxContainers += ["xAOD::VertexAuxContainer#BPHY23_" + hypo + "_RefPrimaryVerticesAux."]
+        passedCandidates += ["BPHY23_" + hypo + "_CascadeVtx3"]
 
     list2_2trk1trk_hypo = ["Psi2Zc3900", "X3872Zc3900"]
     list2_2trk1trk_psi1Input = ["BPHY23Revtx_Psi4Body", "BPHY23Revtx_X3872"]
@@ -817,44 +868,48 @@ def BPHY23Cfg(flags):
     list2_2trk1trk_jpsi2mass = [Jpsimass, Jpsimass]
     list2_2trk1trk_psi2mass = [Zcmass, Zcmass]
 
-    list2_2trk1trk_obj = []
-    for hypo in list2_2trk1trk_hypo:
-        list2_2trk1trk_obj.append( acc.popToolsAndMerge(PsiPlusPsiSingleVertexCfg(flags, name = "BPHY23_"+hypo) ) )
-
-    for i in range(len(list2_2trk1trk_obj)):
-        list2_2trk1trk_obj[i].HypothesisName           = list2_2trk1trk_hypo[i]
-        list2_2trk1trk_obj[i].Psi1Vertices             = list2_2trk1trk_psi1Input[i]
-        list2_2trk1trk_obj[i].Psi2Vertices             = list2_2trk1trk_psi2Input[i]
-        list2_2trk1trk_obj[i].MaxCandidates            = 15
-        list2_2trk1trk_obj[i].NumberOfPsi1Daughters    = 4
-        list2_2trk1trk_obj[i].NumberOfPsi2Daughters    = 3
-        list2_2trk1trk_obj[i].Jpsi1MassLowerCut        = Jpsi_lo
-        list2_2trk1trk_obj[i].Jpsi1MassUpperCut        = Jpsi_hi
-        list2_2trk1trk_obj[i].Psi1MassLowerCut         = Psi_lo
-        list2_2trk1trk_obj[i].Psi1MassUpperCut         = Psi_hi
-        list2_2trk1trk_obj[i].Jpsi2MassLowerCut        = Jpsi_lo
-        list2_2trk1trk_obj[i].Jpsi2MassUpperCut        = Jpsi_hi
-        list2_2trk1trk_obj[i].Psi2MassLowerCut         = Zc_lo
-        list2_2trk1trk_obj[i].Psi2MassUpperCut         = Zc_hi
-        list2_2trk1trk_obj[i].MassLowerCut             = 0.
-        list2_2trk1trk_obj[i].MassUpperCut             = X_hi
-        list2_2trk1trk_obj[i].Jpsi1Mass                = list2_2trk1trk_jpsi1mass[i]
-        list2_2trk1trk_obj[i].Psi1Mass                 = list2_2trk1trk_psi1mass[i]
-        list2_2trk1trk_obj[i].Jpsi2Mass                = list2_2trk1trk_jpsi2mass[i]
-        list2_2trk1trk_obj[i].Psi2Mass                 = list2_2trk1trk_psi2mass[i]
-        list2_2trk1trk_obj[i].ApplyJpsi1MassConstraint = True
-        list2_2trk1trk_obj[i].ApplyPsi1MassConstraint  = True
-        list2_2trk1trk_obj[i].ApplyJpsi2MassConstraint = True
-        list2_2trk1trk_obj[i].ApplyPsi2MassConstraint  = True
-        list2_2trk1trk_obj[i].Chi2Cut                  = 30.
-        list2_2trk1trk_obj[i].PVRefitter               = PVrefit
-        list2_2trk1trk_obj[i].TrkVertexFitterTool      = vkalvrt
-        list2_2trk1trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
-        list2_2trk1trk_obj[i].OutputVertexCollections  = ["BPHY23_"+list2_2trk1trk_hypo[i]+"_SubVtx1","BPHY23_"+list2_2trk1trk_hypo[i]+"_SubVtx2","BPHY23_"+list2_2trk1trk_hypo[i]+"_MainVtx"]
-        list2_2trk1trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
-        list2_2trk1trk_obj[i].RefPVContainerName       = "BPHY23_"+list2_2trk1trk_hypo[i]+"_RefPrimaryVertices"
-        list2_2trk1trk_obj[i].RefitPV                  = True
-        list2_2trk1trk_obj[i].MaxnPV                   = 100
+    for i, hypo in enumerate(list2_2trk1trk_hypo):
+        TwoTrk1TrkArgs = { }
+        TwoTrk1TrkArgs.setdefault("HypothesisName", hypo)
+        TwoTrk1TrkArgs.setdefault("Psi1Vertices", list2_2trk1trk_psi1Input[i])
+        TwoTrk1TrkArgs.setdefault("Psi2Vertices", list2_2trk1trk_psi2Input[i])
+        TwoTrk1TrkArgs.setdefault("MaxCandidates", 15)
+        TwoTrk1TrkArgs.setdefault("NumberOfPsi1Daughters", 4)
+        TwoTrk1TrkArgs.setdefault("NumberOfPsi2Daughters", 3)
+        TwoTrk1TrkArgs.setdefault("Jpsi1MassLowerCut", Jpsi_lo)
+        TwoTrk1TrkArgs.setdefault("Jpsi1MassUpperCut", Jpsi_hi)
+        TwoTrk1TrkArgs.setdefault("Psi1MassLowerCut", Psi_lo)
+        TwoTrk1TrkArgs.setdefault("Psi1MassUpperCut", Psi_hi)
+        TwoTrk1TrkArgs.setdefault("Jpsi2MassLowerCut", Jpsi_lo)
+        TwoTrk1TrkArgs.setdefault("Jpsi2MassUpperCut", Jpsi_hi)
+        TwoTrk1TrkArgs.setdefault("Psi2MassLowerCut", Zc_lo)
+        TwoTrk1TrkArgs.setdefault("Psi2MassUpperCut", Zc_hi)
+        TwoTrk1TrkArgs.setdefault("MassLowerCut", 0.)
+        TwoTrk1TrkArgs.setdefault("MassUpperCut", X_hi)
+        TwoTrk1TrkArgs.setdefault("Jpsi1Mass", list2_2trk1trk_jpsi1mass[i])
+        TwoTrk1TrkArgs.setdefault("Psi1Mass", list2_2trk1trk_psi1mass[i])
+        TwoTrk1TrkArgs.setdefault("Jpsi2Mass", list2_2trk1trk_jpsi2mass[i])
+        TwoTrk1TrkArgs.setdefault("Psi2Mass", list2_2trk1trk_psi2mass[i])
+        TwoTrk1TrkArgs.setdefault("ApplyJpsi1MassConstraint", True)
+        TwoTrk1TrkArgs.setdefault("ApplyPsi1MassConstraint", True)
+        TwoTrk1TrkArgs.setdefault("ApplyJpsi2MassConstraint", True)
+        TwoTrk1TrkArgs.setdefault("ApplyPsi2MassConstraint", True)
+        TwoTrk1TrkArgs.setdefault("Chi2Cut", 30.)
+        TwoTrk1TrkArgs.setdefault("PVRefitter", PVrefit) # PublicToolHandle
+        TwoTrk1TrkArgs.setdefault("TrkVertexFitterTool", vkalvrt) # PublicToolHandle
+        TwoTrk1TrkArgs.setdefault("VxPrimaryCandidateName", "PrimaryVertices")
+        TwoTrk1TrkArgs.setdefault("OutputVertexCollections", ["BPHY23_"+hypo+"_SubVtx1","BPHY23_"+hypo+"_SubVtx2","BPHY23_"+hypo+"_MainVtx"])
+        TwoTrk1TrkArgs.setdefault("VxPrimaryCandidateName", "PrimaryVertices")
+        TwoTrk1TrkArgs.setdefault("RefPVContainerName", "BPHY23_"+hypo+"_RefPrimaryVertices")
+        TwoTrk1TrkArgs.setdefault("RefitPV", True)
+        TwoTrk1TrkArgs.setdefault("MaxnPV", 100)
+        augmentation_tools.append(acc.addPublicTool(acc.popToolsAndMerge(
+            PsiPlusPsiSingleVertexCfg(flags, name = "BPHY23_"+hypo, **TwoTrk1TrkArgs)
+        )))
+        OutputCollections += TwoTrk1TrkArgs["OutputVertexCollections"]
+        RefPVContainers += ["xAOD::VertexContainer#BPHY23_" + hypo + "_RefPrimaryVertices"]
+        RefPVAuxContainers += ["xAOD::VertexAuxContainer#BPHY23_" + hypo + "_RefPrimaryVerticesAux."]
+        passedCandidates += ["BPHY23_" + hypo + "_MainVtx"]
 
     ########################
     ###  1 trks + 2 trk  ###
@@ -871,40 +926,44 @@ def BPHY23Cfg(flags):
     list_1trk2trk_p2dau3Mass = [Pimass, Pimass]
     list_1trk2trk_p2dau4Mass = [Pimass, Pimass]
 
-    list_1trk2trk_obj = []
-    for hypo in list_1trk2trk_hypo:
-        list_1trk2trk_obj.append( acc.popToolsAndMerge(PsiPlusPsiCascadeCfg(flags, name = "BPHY23_"+hypo) ) )
-
-    for i in range(len(list_1trk2trk_obj)):
-        list_1trk2trk_obj[i].HypothesisName           = list_1trk2trk_hypo[i]
-        list_1trk2trk_obj[i].Psi1Vertices             = list_1trk2trk_psi1Input[i]
-        list_1trk2trk_obj[i].Psi2Vertices             = list_1trk2trk_psi2Input[i]
-        list_1trk2trk_obj[i].NumberOfPsi1Daughters    = 3
-        list_1trk2trk_obj[i].NumberOfPsi2Daughters    = 4
-        list_1trk2trk_obj[i].MassLowerCut             = 0.
-        list_1trk2trk_obj[i].MassUpperCut             = X_hi
-        list_1trk2trk_obj[i].Chi2CutPsi1              = 5.
-        list_1trk2trk_obj[i].Chi2CutPsi2              = 5.
-        list_1trk2trk_obj[i].Chi2Cut                  = 30.
-        list_1trk2trk_obj[i].MaxCandidates            = 15
-        list_1trk2trk_obj[i].MaxnPV                   = 100
-        list_1trk2trk_obj[i].PVRefitter               = PVrefit
-        list_1trk2trk_obj[i].TrkVertexFitterTool      = vkalvrt
-        list_1trk2trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
-        list_1trk2trk_obj[i].RefPVContainerName       = "BPHY23_"+list_1trk2trk_hypo[i]+"_RefPrimaryVertices"
-        list_1trk2trk_obj[i].CascadeVertexCollections = ["BPHY23_"+list_1trk2trk_hypo[i]+"_CascadeVtx1","BPHY23_"+list_1trk2trk_hypo[i]+"_CascadeVtx2","BPHY23_"+list_1trk2trk_hypo[i]+"_CascadeVtx3"]
-        list_1trk2trk_obj[i].RefitPV                  = True
-        list_1trk2trk_obj[i].Vtx1Daug3MassHypo        = list_1trk2trk_p1dau3Mass[i]
-        list_1trk2trk_obj[i].Vtx2Daug3MassHypo        = list_1trk2trk_p2dau3Mass[i]
-        list_1trk2trk_obj[i].Vtx2Daug4MassHypo        = list_1trk2trk_p2dau4Mass[i]
-        list_1trk2trk_obj[i].ApplyJpsi1MassConstraint = True
-        list_1trk2trk_obj[i].Jpsi1Mass                = list_1trk2trk_jpsi1Mass[i]
-        list_1trk2trk_obj[i].ApplyPsi1MassConstraint  = True
-        list_1trk2trk_obj[i].Psi1Mass                 = list_1trk2trk_psi1Mass[i]
-        list_1trk2trk_obj[i].ApplyJpsi2MassConstraint = True
-        list_1trk2trk_obj[i].Jpsi2Mass                = list_1trk2trk_jpsi2Mass[i]
-        list_1trk2trk_obj[i].ApplyPsi2MassConstraint  = True
-        list_1trk2trk_obj[i].Psi2Mass                 = list_1trk2trk_psi2Mass[i]
+    for i, hypo in enumerate(list_1trk2trk_hypo):
+        OneTrk2TrkArgs = { }
+        OneTrk2TrkArgs.setdefault("HypothesisName", hypo)
+        OneTrk2TrkArgs.setdefault("Psi1Vertices", list_1trk2trk_psi1Input[i])
+        OneTrk2TrkArgs.setdefault("Psi2Vertices", list_1trk2trk_psi2Input[i])
+        OneTrk2TrkArgs.setdefault("NumberOfPsi1Daughters", 3)
+        OneTrk2TrkArgs.setdefault("NumberOfPsi2Daughters", 4)
+        OneTrk2TrkArgs.setdefault("MassLowerCut", 0.)
+        OneTrk2TrkArgs.setdefault("MassUpperCut", X_hi)
+        OneTrk2TrkArgs.setdefault("Chi2CutPsi1", 5.)
+        OneTrk2TrkArgs.setdefault("Chi2CutPsi2", 5.)
+        OneTrk2TrkArgs.setdefault("Chi2Cut", 30.)
+        OneTrk2TrkArgs.setdefault("MaxCandidates", 15)
+        OneTrk2TrkArgs.setdefault("MaxnPV", 100)
+        OneTrk2TrkArgs.setdefault("PVRefitter", PVrefit) # PublicToolHandle
+        OneTrk2TrkArgs.setdefault("TrkVertexFitterTool", vkalvrt) # PublicToolHandle
+        OneTrk2TrkArgs.setdefault("VxPrimaryCandidateName", "PrimaryVertices")
+        OneTrk2TrkArgs.setdefault("RefPVContainerName", "BPHY23_"+hypo+"_RefPrimaryVertices")
+        OneTrk2TrkArgs.setdefault("CascadeVertexCollections", ["BPHY23_"+hypo+"_CascadeVtx1","BPHY23_"+hypo+"_CascadeVtx2","BPHY23_"+hypo+"_CascadeVtx3"])
+        OneTrk2TrkArgs.setdefault("RefitPV", True)
+        OneTrk2TrkArgs.setdefault("Vtx1Daug3MassHypo", list_1trk2trk_p1dau3Mass[i])
+        OneTrk2TrkArgs.setdefault("Vtx2Daug3MassHypo", list_1trk2trk_p2dau3Mass[i])
+        OneTrk2TrkArgs.setdefault("Vtx2Daug4MassHypo", list_1trk2trk_p2dau4Mass[i])
+        OneTrk2TrkArgs.setdefault("ApplyJpsi1MassConstraint", True)
+        OneTrk2TrkArgs.setdefault("Jpsi1Mass", list_1trk2trk_jpsi1Mass[i])
+        OneTrk2TrkArgs.setdefault("ApplyPsi1MassConstraint", True)
+        OneTrk2TrkArgs.setdefault("Psi1Mass", list_1trk2trk_psi1Mass[i])
+        OneTrk2TrkArgs.setdefault("ApplyJpsi2MassConstraint", True)
+        OneTrk2TrkArgs.setdefault("Jpsi2Mass", list_1trk2trk_jpsi2Mass[i])
+        OneTrk2TrkArgs.setdefault("ApplyPsi2MassConstraint", True)
+        OneTrk2TrkArgs.setdefault("Psi2Mass", list_1trk2trk_psi2Mass[i])
+        augmentation_tools.append(acc.addPublicTool(acc.popToolsAndMerge(
+            PsiPlusPsiCascadeCfg(flags, name = "BPHY23_"+hypo, **OneTrk2TrkArgs)
+        )))
+        OutputCollections += OneTrk2TrkArgs["CascadeVertexCollections"]
+        RefPVContainers += ["xAOD::VertexContainer#BPHY23_" + hypo + "_RefPrimaryVertices"]
+        RefPVAuxContainers += ["xAOD::VertexAuxContainer#BPHY23_" + hypo + "_RefPrimaryVerticesAux."]
+        passedCandidates += ["BPHY23_" + hypo + "_CascadeVtx3"]
 
     #########################
     ###  2 trks + 2 trks  ###
@@ -955,42 +1014,46 @@ def BPHY23Cfg(flags):
                                 Kmass, Pimass, Kmass,
                                 Pimass, Kmass, Kmass]
 
-    list_2trk2trk_obj = []
-    for hypo in list_2trk2trk_hypo:
-        list_2trk2trk_obj.append( acc.popToolsAndMerge(PsiPlusPsiCascadeCfg(flags, name = "BPHY23_"+hypo) ) )
-
-    for i in range(len(list_2trk2trk_obj)):
-        list_2trk2trk_obj[i].HypothesisName           = list_2trk2trk_hypo[i]
-        list_2trk2trk_obj[i].Psi1Vertices             = list_2trk2trk_psi1Input[i]
-        list_2trk2trk_obj[i].Psi2Vertices             = list_2trk2trk_psi2Input[i]
-        list_2trk2trk_obj[i].NumberOfPsi1Daughters    = 4
-        list_2trk2trk_obj[i].NumberOfPsi2Daughters    = 4
-        list_2trk2trk_obj[i].MassLowerCut             = 0.
-        list_2trk2trk_obj[i].MassUpperCut             = X_hi
-        list_2trk2trk_obj[i].Chi2CutPsi1              = 4.
-        list_2trk2trk_obj[i].Chi2CutPsi2              = 4.
-        list_2trk2trk_obj[i].Chi2Cut                  = 30.
-        list_2trk2trk_obj[i].MaxCandidates            = 15
-        list_2trk2trk_obj[i].RemoveDuplicatePairs     = True
-        list_2trk2trk_obj[i].MaxnPV                   = 100
-        list_2trk2trk_obj[i].PVRefitter               = PVrefit
-        list_2trk2trk_obj[i].TrkVertexFitterTool      = vkalvrt
-        list_2trk2trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
-        list_2trk2trk_obj[i].RefPVContainerName       = "BPHY23_"+list_2trk2trk_hypo[i]+"_RefPrimaryVertices"
-        list_2trk2trk_obj[i].CascadeVertexCollections = ["BPHY23_"+list_2trk2trk_hypo[i]+"_CascadeVtx1","BPHY23_"+list_2trk2trk_hypo[i]+"_CascadeVtx2","BPHY23_"+list_2trk2trk_hypo[i]+"_CascadeVtx3"]
-        list_2trk2trk_obj[i].RefitPV                  = True
-        list_2trk2trk_obj[i].Vtx1Daug3MassHypo        = list_2trk2trk_p1dau3Mass[i]
-        list_2trk2trk_obj[i].Vtx1Daug4MassHypo        = list_2trk2trk_p1dau4Mass[i]
-        list_2trk2trk_obj[i].Vtx2Daug3MassHypo        = list_2trk2trk_p2dau3Mass[i]
-        list_2trk2trk_obj[i].Vtx2Daug4MassHypo        = list_2trk2trk_p2dau4Mass[i]
-        list_2trk2trk_obj[i].ApplyJpsi1MassConstraint = True
-        list_2trk2trk_obj[i].Jpsi1Mass                = list_2trk2trk_jpsi1Mass[i]
-        list_2trk2trk_obj[i].ApplyPsi1MassConstraint  = True
-        list_2trk2trk_obj[i].Psi1Mass                 = list_2trk2trk_psi1Mass[i]
-        list_2trk2trk_obj[i].ApplyJpsi2MassConstraint = True
-        list_2trk2trk_obj[i].Jpsi2Mass                = list_2trk2trk_jpsi2Mass[i]
-        list_2trk2trk_obj[i].ApplyPsi2MassConstraint  = True
-        list_2trk2trk_obj[i].Psi2Mass                 = list_2trk2trk_psi2Mass[i]
+    for i, hypo in enumerate(list_2trk2trk_hypo):
+        TwoTrk2TrkArgs = { }
+        TwoTrk2TrkArgs.setdefault("HypothesisName", hypo)
+        TwoTrk2TrkArgs.setdefault("Psi1Vertices", list_2trk2trk_psi1Input[i])
+        TwoTrk2TrkArgs.setdefault("Psi2Vertices", list_2trk2trk_psi2Input[i])
+        TwoTrk2TrkArgs.setdefault("NumberOfPsi1Daughters", 4)
+        TwoTrk2TrkArgs.setdefault("NumberOfPsi2Daughters", 4)
+        TwoTrk2TrkArgs.setdefault("MassLowerCut", 0.)
+        TwoTrk2TrkArgs.setdefault("MassUpperCut", X_hi)
+        TwoTrk2TrkArgs.setdefault("Chi2CutPsi1", 4.)
+        TwoTrk2TrkArgs.setdefault("Chi2CutPsi2", 4.)
+        TwoTrk2TrkArgs.setdefault("Chi2Cut", 30.)
+        TwoTrk2TrkArgs.setdefault("MaxCandidates", 15)
+        TwoTrk2TrkArgs.setdefault("RemoveDuplicatePairs", True)
+        TwoTrk2TrkArgs.setdefault("MaxnPV", 100)
+        TwoTrk2TrkArgs.setdefault("PVRefitter", PVrefit) # PublicToolHandle
+        TwoTrk2TrkArgs.setdefault("TrkVertexFitterTool", vkalvrt) # PublicToolHandle
+        TwoTrk2TrkArgs.setdefault("VxPrimaryCandidateName", "PrimaryVertices")
+        TwoTrk2TrkArgs.setdefault("RefPVContainerName", "BPHY23_"+hypo+"_RefPrimaryVertices")
+        TwoTrk2TrkArgs.setdefault("CascadeVertexCollections", ["BPHY23_"+hypo+"_CascadeVtx1","BPHY23_"+hypo+"_CascadeVtx2","BPHY23_"+hypo+"_CascadeVtx3"])
+        TwoTrk2TrkArgs.setdefault("RefitPV", True)
+        TwoTrk2TrkArgs.setdefault("Vtx1Daug3MassHypo", list_2trk2trk_p1dau3Mass[i])
+        TwoTrk2TrkArgs.setdefault("Vtx1Daug4MassHypo", list_2trk2trk_p1dau4Mass[i])
+        TwoTrk2TrkArgs.setdefault("Vtx2Daug3MassHypo", list_2trk2trk_p2dau3Mass[i])
+        TwoTrk2TrkArgs.setdefault("Vtx2Daug4MassHypo", list_2trk2trk_p2dau4Mass[i])
+        TwoTrk2TrkArgs.setdefault("ApplyJpsi1MassConstraint", True)
+        TwoTrk2TrkArgs.setdefault("Jpsi1Mass", list_2trk2trk_jpsi1Mass[i])
+        TwoTrk2TrkArgs.setdefault("ApplyPsi1MassConstraint", True)
+        TwoTrk2TrkArgs.setdefault("Psi1Mass", list_2trk2trk_psi1Mass[i])
+        TwoTrk2TrkArgs.setdefault("ApplyJpsi2MassConstraint", True)
+        TwoTrk2TrkArgs.setdefault("Jpsi2Mass", list_2trk2trk_jpsi2Mass[i])
+        TwoTrk2TrkArgs.setdefault("ApplyPsi2MassConstraint", True)
+        TwoTrk2TrkArgs.setdefault("Psi2Mass", list_2trk2trk_psi2Mass[i])
+        augmentation_tools.append(acc.addPublicTool(acc.popToolsAndMerge(
+            PsiPlusPsiCascadeCfg(flags, name = "BPHY23_"+hypo, **TwoTrk2TrkArgs)
+        )))
+        OutputCollections += TwoTrk2TrkArgs["CascadeVertexCollections"]
+        RefPVContainers += ["xAOD::VertexContainer#BPHY23_" + hypo + "_RefPrimaryVertices"]
+        RefPVAuxContainers += ["xAOD::VertexAuxContainer#BPHY23_" + hypo + "_RefPrimaryVerticesAux."]
+        passedCandidates += ["BPHY23_" + hypo + "_CascadeVtx3"]
 
     list2_2trk2trk_hypo = ["Psi2Psi2", "Psi2X3872", "X3872X3872"]
     list2_2trk2trk_psi1Input = ["BPHY23Revtx_Psi4Body", "BPHY23Revtx_Psi4Body", "BPHY23Revtx_X3872"]
@@ -1000,76 +1063,53 @@ def BPHY23Cfg(flags):
     list2_2trk2trk_jpsi2mass = [Jpsimass, Jpsimass, Jpsimass]
     list2_2trk2trk_psi2mass = [Psi2Smass, X3872mass, X3872mass]
 
-    list2_2trk2trk_obj = []
-    for hypo in list2_2trk2trk_hypo:
-        list2_2trk2trk_obj.append( acc.popToolsAndMerge(PsiPlusPsiSingleVertexCfg(flags, name = "BPHY23_"+hypo) ) )
-
-    for i in range(len(list2_2trk2trk_obj)):
-        list2_2trk2trk_obj[i].HypothesisName           = list2_2trk2trk_hypo[i]
-        list2_2trk2trk_obj[i].Psi1Vertices             = list2_2trk2trk_psi1Input[i]
-        list2_2trk2trk_obj[i].Psi2Vertices             = list2_2trk2trk_psi2Input[i]
-        list2_2trk2trk_obj[i].MaxCandidates            = 15
-        list2_2trk2trk_obj[i].NumberOfPsi1Daughters    = 4
-        list2_2trk2trk_obj[i].NumberOfPsi2Daughters    = 4
-        list2_2trk2trk_obj[i].Jpsi1MassLowerCut        = Jpsi_lo
-        list2_2trk2trk_obj[i].Jpsi1MassUpperCut        = Jpsi_hi
-        list2_2trk2trk_obj[i].Psi1MassLowerCut         = Psi_lo
-        list2_2trk2trk_obj[i].Psi1MassUpperCut         = Psi_hi
-        list2_2trk2trk_obj[i].Jpsi2MassLowerCut        = Jpsi_lo
-        list2_2trk2trk_obj[i].Jpsi2MassUpperCut        = Jpsi_hi
-        list2_2trk2trk_obj[i].Psi2MassLowerCut         = Psi_lo
-        list2_2trk2trk_obj[i].Psi2MassUpperCut         = Psi_hi
-        list2_2trk2trk_obj[i].MassLowerCut             = 0.
-        list2_2trk2trk_obj[i].MassUpperCut             = X_hi
-        list2_2trk2trk_obj[i].Jpsi1Mass                = list2_2trk2trk_jpsi1mass[i]
-        list2_2trk2trk_obj[i].Psi1Mass                 = list2_2trk2trk_psi1mass[i]
-        list2_2trk2trk_obj[i].Jpsi2Mass                = list2_2trk2trk_jpsi2mass[i]
-        list2_2trk2trk_obj[i].Psi2Mass                 = list2_2trk2trk_psi2mass[i]
-        list2_2trk2trk_obj[i].ApplyJpsi1MassConstraint = True
-        list2_2trk2trk_obj[i].ApplyPsi1MassConstraint  = True
-        list2_2trk2trk_obj[i].ApplyJpsi2MassConstraint = True
-        list2_2trk2trk_obj[i].ApplyPsi2MassConstraint  = True
-        list2_2trk2trk_obj[i].Chi2Cut                  = 30.
-        list2_2trk2trk_obj[i].PVRefitter               = PVrefit
-        list2_2trk2trk_obj[i].TrkVertexFitterTool      = vkalvrt
-        list2_2trk2trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
-        list2_2trk2trk_obj[i].OutputVertexCollections  = ["BPHY23_"+list2_2trk2trk_hypo[i]+"_SubVtx1","BPHY23_"+list2_2trk2trk_hypo[i]+"_SubVtx2","BPHY23_"+list2_2trk2trk_hypo[i]+"_MainVtx"]
-        list2_2trk2trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
-        list2_2trk2trk_obj[i].RefPVContainerName       = "BPHY23_"+list2_2trk2trk_hypo[i]+"_RefPrimaryVertices"
-        list2_2trk2trk_obj[i].RefitPV                  = True
-        list2_2trk2trk_obj[i].MaxnPV                   = 100
-
-
-    list_all_obj = list_2trk0trk_obj + list_1trk0trk_obj + list_1trk1trk_obj + list_2trk1trk_obj + list_1trk2trk_obj + list_2trk2trk_obj
-    list2_all_obj = list2_2trk0trk_obj + list2_1trk0trk_obj + list2_1trk1trk_obj + list2_2trk1trk_obj + list2_2trk2trk_obj
-
-    OutputCollections = []
-    RefPVContainers = []
-    RefPVAuxContainers = []
-    passedCandidates = []
-
-    for obj in list_all_obj:
-        OutputCollections += obj.CascadeVertexCollections
-        RefPVContainers += ["xAOD::VertexContainer#BPHY23_" + obj.HypothesisName + "_RefPrimaryVertices"]
-        RefPVAuxContainers += ["xAOD::VertexAuxContainer#BPHY23_" + obj.HypothesisName + "_RefPrimaryVerticesAux."]
-        passedCandidates += ["BPHY23_" + obj.HypothesisName + "_CascadeVtx3"]
-
-    for obj in list2_all_obj:
-        OutputCollections += obj.OutputVertexCollections
-        RefPVContainers += ["xAOD::VertexContainer#BPHY23_" + obj.HypothesisName + "_RefPrimaryVertices"]
-        RefPVAuxContainers += ["xAOD::VertexAuxContainer#BPHY23_" + obj.HypothesisName + "_RefPrimaryVerticesAux."]
-        passedCandidates += ["BPHY23_" + obj.HypothesisName + "_MainVtx"]
-
-    BPHY23_SelectEvent = CompFactory.DerivationFramework.AnyVertexSkimmingTool(name = "BPHY23_SelectEvent", VertexContainerNames = passedCandidates)
-    acc.addPublicTool(BPHY23_SelectEvent)
-
-    augmentation_tools = [BPHY23_Reco_mumu, BPHY23FourTrackReco_PsiX3872, BPHY23FourTrackReco_Bs0, BPHY23FourTrackReco_B0, BPHY23ThreeTrackReco_Zc3900, BPHY23ThreeTrackReco_Bpm, BPHY23Rev_Psi4Body, BPHY23Rev_X3872, BPHY23Rev_Bs0, BPHY23Rev_B0Kpi, BPHY23Rev_B0piK, BPHY23Rev_Zc3900, BPHY23Rev_Bpm, BPHY23Select_Jpsi, BPHY23Select_Psi, BPHY23Select_Upsi, BPHY23Rev_Jpsi, BPHY23Rev_Psi, BPHY23Rev_Upsi] + list_all_obj + list2_all_obj
-    for t in augmentation_tools : acc.addPublicTool(t)
+    for i, hypo in enumerate(list2_2trk2trk_hypo):
+        TwoTrk2TrkArgs = { }
+        TwoTrk2TrkArgs.setdefault("HypothesisName", hypo)
+        TwoTrk2TrkArgs.setdefault("Psi1Vertices", list2_2trk2trk_psi1Input[i])
+        TwoTrk2TrkArgs.setdefault("Psi2Vertices", list2_2trk2trk_psi2Input[i])
+        TwoTrk2TrkArgs.setdefault("MaxCandidates", 15)
+        TwoTrk2TrkArgs.setdefault("NumberOfPsi1Daughters", 4)
+        TwoTrk2TrkArgs.setdefault("NumberOfPsi2Daughters", 4)
+        TwoTrk2TrkArgs.setdefault("Jpsi1MassLowerCut", Jpsi_lo)
+        TwoTrk2TrkArgs.setdefault("Jpsi1MassUpperCut", Jpsi_hi)
+        TwoTrk2TrkArgs.setdefault("Psi1MassLowerCut", Psi_lo)
+        TwoTrk2TrkArgs.setdefault("Psi1MassUpperCut", Psi_hi)
+        TwoTrk2TrkArgs.setdefault("Jpsi2MassLowerCut", Jpsi_lo)
+        TwoTrk2TrkArgs.setdefault("Jpsi2MassUpperCut", Jpsi_hi)
+        TwoTrk2TrkArgs.setdefault("Psi2MassLowerCut", Psi_lo)
+        TwoTrk2TrkArgs.setdefault("Psi2MassUpperCut", Psi_hi)
+        TwoTrk2TrkArgs.setdefault("MassLowerCut", 0.)
+        TwoTrk2TrkArgs.setdefault("MassUpperCut", X_hi)
+        TwoTrk2TrkArgs.setdefault("Jpsi1Mass", list2_2trk2trk_jpsi1mass[i])
+        TwoTrk2TrkArgs.setdefault("Psi1Mass", list2_2trk2trk_psi1mass[i])
+        TwoTrk2TrkArgs.setdefault("Jpsi2Mass", list2_2trk2trk_jpsi2mass[i])
+        TwoTrk2TrkArgs.setdefault("Psi2Mass", list2_2trk2trk_psi2mass[i])
+        TwoTrk2TrkArgs.setdefault("ApplyJpsi1MassConstraint", True)
+        TwoTrk2TrkArgs.setdefault("ApplyPsi1MassConstraint", True)
+        TwoTrk2TrkArgs.setdefault("ApplyJpsi2MassConstraint", True)
+        TwoTrk2TrkArgs.setdefault("ApplyPsi2MassConstraint", True)
+        TwoTrk2TrkArgs.setdefault("Chi2Cut", 30.)
+        TwoTrk2TrkArgs.setdefault("PVRefitter", PVrefit) # PublicToolHandle
+        TwoTrk2TrkArgs.setdefault("TrkVertexFitterTool", vkalvrt) # PublicToolHandle
+        TwoTrk2TrkArgs.setdefault("VxPrimaryCandidateName", "PrimaryVertices")
+        TwoTrk2TrkArgs.setdefault("OutputVertexCollections", ["BPHY23_"+hypo+"_SubVtx1","BPHY23_"+hypo+"_SubVtx2","BPHY23_"+hypo+"_MainVtx"])
+        TwoTrk2TrkArgs.setdefault("VxPrimaryCandidateName", "PrimaryVertices")
+        TwoTrk2TrkArgs.setdefault("RefPVContainerName", "BPHY23_"+hypo+"_RefPrimaryVertices")
+        TwoTrk2TrkArgs.setdefault("RefitPV", True)
+        TwoTrk2TrkArgs.setdefault("MaxnPV", 100)
+        augmentation_tools.append(acc.addPublicTool(acc.popToolsAndMerge(
+            PsiPlusPsiSingleVertexCfg(flags, name = "BPHY23_"+hypo, **TwoTrk2TrkArgs)
+        )))
+        OutputCollections += TwoTrk2TrkArgs["OutputVertexCollections"]
+        RefPVContainers += ["xAOD::VertexContainer#BPHY23_" + hypo + "_RefPrimaryVertices"]
+        RefPVAuxContainers += ["xAOD::VertexAuxContainer#BPHY23_" + hypo + "_RefPrimaryVerticesAux."]
+        passedCandidates += ["BPHY23_" + hypo + "_MainVtx"]
 
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
         "BPHY23Kernel",
         AugmentationTools = augmentation_tools,
-        SkimmingTools     = [BPHY23_SelectEvent]
+        SkimmingTools     = [acc.addPublicTool(CompFactory.DerivationFramework.AnyVertexSkimmingTool(name = "BPHY23_SelectEvent", VertexContainerNames = passedCandidates))]
     ))
 
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
