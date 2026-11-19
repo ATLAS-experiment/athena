@@ -25,7 +25,7 @@ StatusCode MaterialTrackWriter::initialize() {
     cfg.volumeInfo = m_storeVolume;
     cfg.recalculateTotals = m_recalculateTotals;
 
-    m_accessor = ActsPlugins::RootMaterialTrackIo{cfg};
+    m_accessor = RootMaterialTrackIo{cfg};
     m_accessor.connectForWrite(*m_outputTree);
     ATH_CHECK(histSvc()->regTree(std::format("/{:}/{:}", m_outStream.value(), m_treeName.value()), m_outputTree));
     ATH_CHECK(m_ctxProvider.initialize(m_useTrackingGeo));
