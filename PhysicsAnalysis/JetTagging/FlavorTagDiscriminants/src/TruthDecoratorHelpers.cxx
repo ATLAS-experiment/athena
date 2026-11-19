@@ -75,7 +75,7 @@ namespace FlavorTagDiscriminants {
         int get_truth_type(const xAOD::TruthParticle* truth_particle) {
             if (!truth_particle) return TruthType::Label::NoTruth;
             // simple pdgid check for pion based on
-            // PhysicsAnalysis/MCTruthClassifier/Root/MCTruthClassifierGen.cxx#L1159
+            // Generators/TruthUtils/src/MCTruthClassifierGen.cxx#L1159
             if (std::abs(truth_particle->pdgId()) == 211) return TruthType::Label::Pion * truth_particle->charge();
             if (truth_particle->isStrangeMeson()) return TruthType::Label::Kaon * truth_particle->charge();
             if (std::abs(truth_particle->pdgId()) == 3122) return TruthType::Label::Lambda;

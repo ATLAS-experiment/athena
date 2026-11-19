@@ -24,7 +24,7 @@ CREATED:  Sep 2007
 #include "TruthUtils/HepMCHelpers.h"
 #include "TruthUtils/MagicNumbers.h"
 #include "TruthUtils/DecayProducts.h"
-#include "MCTruthClassifier/MCTruthClassifierGen.h"
+#include "TruthUtils/MCTruthClassifierGen.h"
 
 #ifndef XAOD_ANALYSIS
 #include "GaudiKernel/ToolHandle.h"

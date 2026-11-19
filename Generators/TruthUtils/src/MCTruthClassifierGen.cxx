@@ -9,8 +9,7 @@
  *                Andrii Verbytskyi <andrii.verbytskyi@mpp.mpg.de>
  */
 
-#include "MCTruthClassifier/MCTruthClassifierGen.h"
-#include "AsgDataHandles/ReadHandle.h"
+#include "TruthUtils/MCTruthClassifierGen.h"
 #include "xAODTruth/TruthVertex.h" // must precede DecayProducts.h (its TruthVertex overload is guarded by this header)
 #include "TruthUtils/MagicNumbers.h"
 #include "TruthUtils/Loops.h"
