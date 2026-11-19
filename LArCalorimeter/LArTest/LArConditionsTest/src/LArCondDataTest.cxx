@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -13,7 +13,7 @@
  *
  * $Id: LArCondDataTest.cxx,v 1.7 2009-04-27 15:53:09 gunal Exp $ */
 
-#include "LArConditionsTest/LArCondDataTest.h"
+#include "LArCondDataTest.h"
 
 #include "StoreGate/StoreGateSvc.h"
 
@@ -37,22 +37,6 @@
 #include "LArRawConditions/LArRampMC.h" 
 #include "LArRawConditions/LArConditionsChannelSet.h" 
 
-
-/////////////////////////////////////////////////////////////////////
-// CONSTRUCTOR:
-/////////////////////////////////////////////////////////////////////
-
-LArCondDataTest::LArCondDataTest(const std::string& name, ISvcLocator* pSvcLocator) :
-	AthAlgorithm(name,pSvcLocator),
-	m_onlineID(0),
-        m_emid(0),
-        m_tbin(0),m_fixShape(false)
-
-{
-    // switch for testing Filling IOV. 
-    declareProperty("Tbin",         m_tbin) ;
-    declareProperty("FixShape",         m_fixShape) ;
-}
 
 /////////////////////////////////////////////////////////////////////
 // DESTRUCTOR:

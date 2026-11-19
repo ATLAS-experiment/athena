@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "LArEventTest/DumpLArDigits.h"
+#include "DumpLArDigits.h"
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "LArRawEvent/LArDigitContainer.h"
 #include "xAODEventInfo/EventInfo.h"
@@ -10,16 +10,6 @@
 #include <stdlib.h>
 
 #include <vector>
-
-DumpLArDigits::DumpLArDigits(const std::string& name, ISvcLocator* pSvcLocator)
-  : AthAlgorithm(name, pSvcLocator),
-    m_chan(0),
-    m_onlineHelper(0),
-    m_emId(0)
-{m_count=0;
- declareProperty("LArDigitContainerName",m_key=""); 
- declareProperty("OutputFileName",m_FileName="LArDigits.txt");
-}
 
 DumpLArDigits::~DumpLArDigits() 
 {//empty
@@ -41,7 +31,7 @@ StatusCode DumpLArDigits::initialize()
 
   ATH_CHECK( m_cablingKey.initialize() );
 
-  m_outfile.open(m_FileName.c_str(),std::ios::out);
+  m_outfile.open(m_FileName.value().c_str(),std::ios::out);
 
   ATH_MSG_INFO ( "======== test-stuff initialize successfully ========" );
   return StatusCode::SUCCESS;
@@ -64,10 +54,10 @@ StatusCode DumpLArDigits::execute(const EventContext& ctx)
  const LArDigitContainer* digit_cont;
  
  if (m_key.size())
-   ATH_CHECK( evtStore()->retrieve(digit_cont,m_key) );
+   ATH_CHECK( evtStore()->retrieve(digit_cont,m_key.value()) );
  else
    ATH_CHECK( evtStore()->retrieve(digit_cont) );
- ATH_MSG_INFO ( "Retrieved LArDigitContainer from StoreGate! key=" << m_key );
+ ATH_MSG_INFO ( "Retrieved LArDigitContainer from StoreGate! key=" << m_key.value() );
  SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey, ctx};
  const LArOnOffIdMapping* cabling{*cablingHdl};
  if(!cabling){

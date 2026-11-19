@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARCALIBTEST_LARREADHADDMCOEFFFILE2
@@ -15,7 +15,7 @@
 class LArReadHadDMCoeffFile2 : public AthAlgorithm
 {
   public:
-    LArReadHadDMCoeffFile2(const std::string & name, ISvcLocator * pSvcLocator);
+    using AthAlgorithm::AthAlgorithm;
     ~LArReadHadDMCoeffFile2();
 
     StatusCode initialize(); 
@@ -25,10 +25,10 @@ class LArReadHadDMCoeffFile2 : public AthAlgorithm
     int parse_dim(std::string &sLine, CaloHadDMCoeff2::HadDMDimension &dim);
 
   private:
-    std::string m_key;
-    std::string m_hadDMCoeffFileName;
+    Gaudi::Property<std::string> m_key{this, "CorrectionKey", "HadDMCoeff"};
+    Gaudi::Property<std::string> m_hadDMCoeffFileName{this, "HadDMCoeffFileName", ""};
 
-    CaloHadDMCoeff2* m_data;
+    CaloHadDMCoeff2* m_data{nullptr};
 };
 
 #endif

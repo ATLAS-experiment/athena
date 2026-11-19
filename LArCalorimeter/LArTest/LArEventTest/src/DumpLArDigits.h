@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DUMPLARDIGITS_H
@@ -17,7 +17,7 @@
 class DumpLArDigits : public AthAlgorithm
 {
  public:
-  DumpLArDigits(const std::string & name, ISvcLocator * pSvcLocator);
+  using AthAlgorithm::AthAlgorithm;
 
   ~DumpLArDigits();
 
@@ -27,12 +27,14 @@ class DumpLArDigits : public AthAlgorithm
   StatusCode finalize();
  private:
   SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this,"CablingKey","LArOnOffIdMap","SG Key of LArOnOffIdMapping object"};
-  int m_count, m_chan;
+  int m_count{0};
+  int m_chan{0};
   //LArDigitContainer* m_larDigitCont;
-  const LArOnlineID*       m_onlineHelper; 
-  const LArEM_ID* m_emId;
+  const LArOnlineID*       m_onlineHelper{nullptr};
+  const LArEM_ID* m_emId{nullptr};
   std::ofstream m_outfile;
-  std::string m_key, m_FileName;
+  Gaudi::Property<std::string> m_key{this, "LArDigitContainerName", ""};
+  Gaudi::Property<std::string> m_FileName{this, "OutputFileName", "LArDigits.txt"};
  private:
   class mySort {
   public:

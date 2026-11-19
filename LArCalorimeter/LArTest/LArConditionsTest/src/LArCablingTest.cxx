@@ -1,24 +1,14 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "LArConditionsTest/LArCablingTest.h"
+#include "LArCablingTest.h"
 
 #include "LArIdentifier/LArOnlineID.h"
 #include "CaloIdentifier/CaloIdManager.h"
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "StoreGate/StoreGateSvc.h"
 #include <fstream>
-
-LArCablingTest::LArCablingTest(const std::string& name, ISvcLocator* pSvcLocator): 
-  AthAlgorithm(name, pSvcLocator), m_print(true),
-  m_onlineId(0),
-  m_caloCellId(0)
-{
-  declareProperty("Print",m_print=true);
-  declareProperty("TestMode",m_mode=0xF,
-		  "1: On->Off, 2: Off->On 4: disconnected, 8: FEB->ROD");
-}
 
 LArCablingTest::~LArCablingTest() {
 }

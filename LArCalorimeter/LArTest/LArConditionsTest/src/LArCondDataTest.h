@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -38,7 +38,7 @@ class LArCondDataTest : public AthAlgorithm
 public:
 
 
-    LArCondDataTest(const std::string& name, ISvcLocator* pSvcLocator);
+    using AthAlgorithm::AthAlgorithm;
     ~LArCondDataTest();
 
     StatusCode initialize();
@@ -49,10 +49,10 @@ private:
     SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this,"CablingKey","LArOnOffIdMap","SG Key of LArOnOffIdMapping object"};
     SG::ReadCondHandleKey<LArCalibLineMapping>  m_CLKey{this, "CalibLineKey", "LArCalibLineMap", "SG calib line key"};
     SG::ReadCondHandleKey<LArFebRodMapping>  m_RodKey{this, "FebRodKey", "LArFebRodMap", "SG ROD mapping key"};
-    const LArOnlineID* m_onlineID; 
-    const LArOnlineID* m_emid;
-    int m_tbin;
-    bool m_fixShape;
+    const LArOnlineID* m_onlineID{nullptr};
+    const LArOnlineID* m_emid{nullptr};
+    Gaudi::Property<int> m_tbin{this, "Tbin", 0, "switch for testing Filling IOV"};
+    Gaudi::Property<bool> m_fixShape{this, "FixShape", false};
 };
 #endif 
 

@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "LArEventTest/CaloClusterNavTest.h"
+#include "CaloClusterNavTest.h"
 
 #include "CaloEvent/CaloCellContainer.h"
 #include "CaloEvent/CaloCell.h"
@@ -11,14 +11,6 @@
 
 #include "StoreGate/StoreGateSvc.h" 
 
-
-//###############################################################################
-CaloClusterNavTest::CaloClusterNavTest(const std::string& name, 
-					       ISvcLocator* pSvcLocator) 
-  : AthAlgorithm(name, pSvcLocator)
-{
-  declareProperty("ClusterContainerNames",m_clusterContainerNames);
-}
 
 //###############################################################################
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -29,7 +29,7 @@
 #include "LArCabling/LArOnOffIdMapping.h"
 #include "LArRecConditions/LArCalibLineMapping.h"
 #include "LArRecConditions/LArFebRodMapping.h"
-#include "LArConditionsTest/LArRampPTmp.h" 
+#include "LArRampPTmp.h" 
 
 
 class LArOnlineID; 
@@ -41,7 +41,7 @@ class ATLAS_NOT_THREAD_SAFE LArConditionsTestAlg : public AthAlgorithm
 
 public:
 
-    LArConditionsTestAlg(const std::string& name, ISvcLocator* pSvcLocator);
+    using AthAlgorithm::AthAlgorithm;
     virtual ~LArConditionsTestAlg();
 
     virtual StatusCode initialize() override;

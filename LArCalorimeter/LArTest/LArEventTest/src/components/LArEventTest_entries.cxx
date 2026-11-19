@@ -1,10 +1,10 @@
-#include "LArEventTest/CheckLArFebHeader.h"
-#include "LArEventTest/DumpLArDigits.h"
-#include "LArEventTest/DumpLArRawChannels.h"
-#include "LArEventTest/FakeLArOFCs.h"
-#include "LArEventTest/FakeLArTimeOffset.h"
-#include "LArEventTest/CaloClusterNavTest.h"
-#include "LArEventTest/FindDuplicatedLArDigits.h"
+#include "../CheckLArFebHeader.h"
+#include "../DumpLArDigits.h"
+#include "../DumpLArRawChannels.h"
+#include "../FakeLArOFCs.h"
+#include "../FakeLArTimeOffset.h"
+#include "../CaloClusterNavTest.h"
+#include "../FindDuplicatedLArDigits.h"
 
 
 

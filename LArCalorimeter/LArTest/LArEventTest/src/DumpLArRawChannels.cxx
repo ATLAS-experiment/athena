@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "LArEventTest/DumpLArRawChannels.h"
+#include "DumpLArRawChannels.h"
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "xAODEventInfo/EventInfo.h"
 //#include "testpack/compdigit.h"
@@ -12,15 +12,8 @@
 
 DumpLArRawChannels::DumpLArRawChannels(const std::string& name, ISvcLocator* pSvcLocator)
   : AthAlgorithm(name, pSvcLocator),
-    m_chan(0),
-    m_onlineHelper(0),
-    m_emId(0),
-    m_thistSvc ("THistSvc",     name) 
-{m_count=0;
- declareProperty("LArRawChannelContainerName",m_key=""); 
- declareProperty("OutputFileName",m_FileName="LArRawChannels.txt");
- declareProperty("NtupStream",m_ntup);
- declareProperty("ToLog",m_toLog=true);
+    m_thistSvc ("THistSvc",     name)
+{
 }
 
 DumpLArRawChannels::~DumpLArRawChannels() 
@@ -45,7 +38,7 @@ StatusCode DumpLArRawChannels::initialize()
   ATH_CHECK( m_cablingKey.initialize() );
 
   if (!m_FileName.empty()) {
-    m_outfile.open(m_FileName.c_str(),std::ios::out);
+    m_outfile.open(m_FileName.value().c_str(),std::ios::out);
     m_toFile=true;
   }
   else 
@@ -53,7 +46,7 @@ StatusCode DumpLArRawChannels::initialize()
 
   if (m_ntup.size()) {
     m_tree= new TTree("RC","LArRawChannels");
-    const std::string ntupStream="/"+m_ntup+"/LArRawChanenls";
+    const std::string ntupStream="/"+m_ntup.value()+"/LArRawChanenls";
     ATH_CHECK(m_thistSvc->regTree(ntupStream,m_tree));
 
     m_tree->Branch("evt",&m_evt,"evt/I");
@@ -94,10 +87,10 @@ StatusCode DumpLArRawChannels::execute(const EventContext& ctx)
 
  const LArRawChannelContainer* channel_cont = nullptr;
  if (m_key.size())
-   ATH_CHECK( evtStore()->retrieve(channel_cont,m_key) );
+   ATH_CHECK( evtStore()->retrieve(channel_cont,m_key.value()) );
  else
    ATH_CHECK( evtStore()->retrieve(channel_cont) );
- ATH_MSG_INFO ( "Retrieved LArRawChannelContainer from StoreGate! key=" << m_key );
+ ATH_MSG_INFO ( "Retrieved LArRawChannelContainer from StoreGate! key=" << m_key.value() );
  //int nColl=0;
  short layer,eta,phi;
  m_chan=0;

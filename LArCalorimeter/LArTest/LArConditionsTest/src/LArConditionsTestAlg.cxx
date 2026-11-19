@@ -12,7 +12,7 @@
  * @author Hong Ma      <hma@bnl.gov>
  */
 
-#include "LArConditionsTest/LArConditionsTestAlg.h"
+#include "LArConditionsTestAlg.h"
 
 #include "LArIdentifier/LArOnlineID.h"
 #include "CaloIdentifier/CaloCell_ID.h"
@@ -24,15 +24,6 @@
 #include "StoreGate/ReadCondHandle.h"
 
 #include "AthenaKernel/errorcheck.h"
-
-/////////////////////////////////////////////////////////////////////
-// CONSTRUCTOR:
-/////////////////////////////////////////////////////////////////////
-
-LArConditionsTestAlg::LArConditionsTestAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-	AthAlgorithm(name,pSvcLocator)
-{
-}
 
 /////////////////////////////////////////////////////////////////////
 // DESTRUCTOR:

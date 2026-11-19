@@ -2,24 +2,13 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "LArCalibTest/DumpCaloBadChannels.h"
+#include "DumpCaloBadChannels.h"
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/ThreadLocalContext.h"
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "StoreGate/StoreGateSvc.h"
 #include <iostream>
 #include <fstream>
-
-DumpCaloBadChannels::DumpCaloBadChannels(const std::string & name, 
-                                         ISvcLocator * pSvcLocator) : 
-  AthAlgorithm(name,pSvcLocator),
-  m_caloBCT("CaloBadChanTool"),
-  m_cellID(0)
-
-{
-  declareProperty("FileName",m_fileName="");
-}
-
 
 DumpCaloBadChannels::~DumpCaloBadChannels() {}
 
@@ -38,14 +27,14 @@ StatusCode  DumpCaloBadChannels::finalize() {
   ATH_MSG_INFO ( "in finalize()" );
   std::ostream *out = &(std::cout); 
   std::ofstream outfile;
-  if (m_fileName.size()) {
-    outfile.open(m_fileName.c_str(),std::ios::out);
+  if (m_fileName.value().size()) {
+    outfile.open(m_fileName.value().c_str(),std::ios::out);
     if (outfile.is_open()) {
-      ATH_MSG_INFO ( "Writing to file " << m_fileName );
+      ATH_MSG_INFO ( "Writing to file " << m_fileName.value() );
       out = &outfile;
     }
     else
-      ATH_MSG_ERROR ( "Failed to open file " << m_fileName );
+      ATH_MSG_ERROR ( "Failed to open file " << m_fileName.value() );
   }
 
   const EventContext& ctx = Gaudi::Hive::currentContext();

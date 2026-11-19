@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#include "LArConditionsTest/LArConditionsTestAlg.h"
-#include "LArConditionsTest/LArCondDataTest.h"
-#include "LArConditionsTest/LArCablingTest.h"
+#include "../LArConditionsTestAlg.h"
+#include "../LArCondDataTest.h"
+#include "../LArCablingTest.h"
 #include "../LArSCIdVsIdTest.h"
 DECLARE_COMPONENT( LArConditionsTestAlg )
 DECLARE_COMPONENT( LArCondDataTest )

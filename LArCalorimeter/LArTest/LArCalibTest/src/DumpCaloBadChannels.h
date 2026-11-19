@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //Dear emacs, this is -*-c++-*-
@@ -14,7 +14,7 @@
 class DumpCaloBadChannels : public AthAlgorithm
 {
  public:
-  DumpCaloBadChannels(const std::string & name, ISvcLocator * pSvcLocator);
+  using AthAlgorithm::AthAlgorithm;
   ~DumpCaloBadChannels();
 
   StatusCode initialize(); 
@@ -22,9 +22,9 @@ class DumpCaloBadChannels : public AthAlgorithm
   StatusCode finalize();
 
  private:
-  ToolHandle<ICaloBadChanTool> m_caloBCT;
-  std::string m_fileName;
-  const CaloCell_ID* m_cellID;
+  ToolHandle<ICaloBadChanTool> m_caloBCT{"CaloBadChanTool"};
+  Gaudi::Property<std::string> m_fileName{this, "FileName", ""};
+  const CaloCell_ID* m_cellID{nullptr};
 };
 
 #endif
