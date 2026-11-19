@@ -46,365 +46,386 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
    toRelink = ["InDetTrackParticles", "InDetLargeD0TrackParticles"] if doLRT else []
    MuonReLink = [ "Muons", "MuonsLRT" ] if doLRT else []
 
-   V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(flags, BPHYDerivationName))
-   vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(flags, BPHYDerivationName))        # VKalVrt vertex fitter
-   acc.addPublicTool(vkalvrt)
-   acc.addPublicTool(V0Tools)
-   trackselect = acc.popToolsAndMerge(BPHY_InDetDetailedTrackSelectorToolCfg(flags, BPHYDerivationName))
-   acc.addPublicTool(trackselect)
-   vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags, BPHYDerivationName))
-   acc.addPublicTool(vpest)
-   PVrefit = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
-   acc.addPublicTool(PVrefit)
-   BPHY5JpsiFinder = CompFactory.Analysis.JpsiFinder(
-       name                        = "BPHY5JpsiFinder",
-       muAndMu                     = True,
-       muAndTrack                  = False,
-       TrackAndTrack               = False,
-       assumeDiMuons               = True,
-       invMassUpper                = 3600.0,
-       invMassLower                = 2600.0,
-       Chi2Cut                     = 30.,
-       oppChargesOnly              = True,
-       combOnly                    = True,
-       atLeastOneComb              = False,
-       useCombinedMeasurement      = False, # Only takes effect if combOnly=True
-       muonCollectionKey           = mainMuonInput,
-       TrackParticleCollection     = mainIDInput,
-       TrkVertexFitterTool         = vkalvrt,
-       TrackSelectorTool           = trackselect,
-       VertexPointEstimator        = vpest,
-       useMCPCuts                  = False )
-   acc.addPublicTool(BPHY5JpsiFinder )
+   # Configure common Public Tools
+   V0Tools = acc.addPublicTool(acc.popToolsAndMerge(BPHY_V0ToolCfg(flags, BPHYDerivationName)))
+   vkalvrt = acc.addPublicTool(acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(flags, BPHYDerivationName)))        # VKalVrt vertex fitter
+   trackselect = acc.addPublicTool(acc.popToolsAndMerge(BPHY_InDetDetailedTrackSelectorToolCfg(flags, BPHYDerivationName)))
+   PVrefit = acc.addPublicTool(acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)))
 
-   BPHY5JpsiSelectAndWrite = acc.popToolsAndMerge(Reco_VertexCfg(flags,name = "BPHY5JpsiSelectAndWrite",
-                                                       VertexSearchTool       = BPHY5JpsiFinder,
-                                                       OutputVtxContainerName = JpsiContainerName,
-                                                       PVContainerName        = "PrimaryVertices",
-                                                       V0Tools                = V0Tools,
-                                                       PVRefitter             = PVrefit,
-                                                       RefPVContainerName     = "SHOULDNOTBEUSED",
-                                                       RelinkTracks  =  toRelink,
-                                                       RelinkMuons   =  MuonReLink,
-                                                       DoVertexType           =1))
-   
+   augTools = []
+   augTools.append(acc.addPublicTool(acc.popToolsAndMerge(
+      Reco_VertexCfg(flags,name = "BPHY5JpsiSelectAndWrite",
+                     VertexSearchTool = CompFactory.Analysis.JpsiFinder(
+                        name = "BPHY5JpsiFinder",
+                        muAndMu = True,
+                        muAndTrack = False,
+                        TrackAndTrack = False,
+                        assumeDiMuons = True,
+                        invMassUpper = 3600.0,
+                        invMassLower = 2600.0,
+                        Chi2Cut = 30.,
+                        oppChargesOnly = True,
+                        combOnly = True,
+                        atLeastOneComb = False,
+                        useCombinedMeasurement = False, # Only takes effect if combOnly=True
+                        muonCollectionKey = mainMuonInput,
+                        TrackParticleCollection = mainIDInput,
+                        TrkVertexFitterTool = vkalvrt, # PublicToolHandle
+                        TrackSelectorTool = trackselect, # PublicToolHandle
+                        VertexPointEstimator = acc.addPublicTool(acc.popToolsAndMerge(
+                           BPHY_VertexPointEstimatorCfg(flags, BPHYDerivationName))), # PublicToolHandle
+                        useMCPCuts = False ),
+                     OutputVtxContainerName = JpsiContainerName,
+                     PVContainerName = "PrimaryVertices",
+                     V0Tools = V0Tools, # PublicToolHandle
+                     PVRefitter = PVrefit, # PublicToolHandle
+                     RefPVContainerName = "SHOULDNOTBEUSED",
+                     RelinkTracks =  toRelink,
+                     RelinkMuons =  MuonReLink,
+                     DoVertexType = 1)
+   )))
+
    ## a/ augment and select Jpsi->mumu candidates
-   BPHY5_Select_Jpsi2mumu = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
-         name                  = "BPHY5_Select_Jpsi2mumu",
-         HypothesisName        = "Jpsi",
-         InputVtxContainerName = JpsiContainerName,
-         V0Tools               = V0Tools,
-         VtxMassHypo           = 3096.916,
-         MassMin               = 2000.0,
-         MassMax               = 3600.0,
-         Chi2Max               = 200, Do3d = False,
-         DoVertexType =1))
+   augTools.append(acc.addPublicTool(acc.popToolsAndMerge(
+      Select_onia2mumuCfg(flags,
+                          name = "BPHY5_Select_Jpsi2mumu",
+                          HypothesisName = "Jpsi",
+                          InputVtxContainerName = JpsiContainerName,
+                          V0Tools = V0Tools, # PublicToolHandle
+                          VtxMassHypo = 3096.916,
+                          MassMin = 2000.0,
+                          MassMax = 3600.0,
+                          Chi2Max = 200, Do3d = False,
+                          DoVertexType = 1)
+   )))
 
-   BPHY5_AugOriginalCounts = acc.popToolsAndMerge(
-      AugOriginalCountsCfg(flags, name = "BPHY5_AugOriginalCounts"))
+   augTools.append(acc.addPublicTool(acc.popToolsAndMerge(
+      AugOriginalCountsCfg(flags, name = "BPHY5_AugOriginalCounts")
+   )))
 
-   BPHY5BsJpsiKK = CompFactory.Analysis.JpsiPlus2Tracks(name = "BPHY5BsJpsiKK",
-         kaonkaonHypothesis          = True,
-         pionpionHypothesis          = False,
-         kaonpionHypothesis          = False,
-         trkThresholdPt              = 800.0,
-         trkMaxEta                   = 3.0,
-         BMassUpper                  = 5800.0,
-         BMassLower                  = 5000.0,
-         #DiTrackMassUpper = 1019.445 + 100.,
-         #DiTrackMassLower = 1019.445 - 100.,
-         Chi2Cut                     = 15.0,
-         TrkQuadrupletMassUpper      = 6000.0,
-         TrkQuadrupletMassLower      = 4800.0,
-         JpsiContainerKey            = JpsiContainerName,
-         TrackParticleCollection     = mainIDInput,
-         MuonsUsedInJpsi             = mainMuonInput,
-         TrkVertexFitterTool         = vkalvrt,
-         TrackSelectorTool           = trackselect,
-         UseMassConstraint           = True)
-   acc.addPublicTool(BPHY5BsJpsiKK )
-   BPHY5BdJpsiKst = CompFactory.Analysis.JpsiPlus2Tracks(
-         name                    = "BPHY5BdJpsiKst",
-         kaonkaonHypothesis      = False,
-         pionpionHypothesis      = False,
-         kaonpionHypothesis      = True,
-         trkThresholdPt          = 800.0,
-         trkMaxEta               = 3.0,
-         BThresholdPt            = 5000.,
-         BMassLower              = 4300.0,
-         BMassUpper              = 6300.0,
-         JpsiContainerKey        = JpsiContainerName,
-         TrackParticleCollection = mainIDInput,
-         #MuonsUsedInJpsi      = "Muons", #Don't remove all muons, just those in J/psi candidate (see the following cut)
-         ExcludeCrossJpsiTracks  = False,   #setting this to False rejects the muons from J/psi candidate
-         TrkVertexFitterTool     = vkalvrt,
-         TrackSelectorTool     = trackselect,
-         UseMassConstraint     = True,
-         Chi2Cut                 = 15.0,
-         TrkQuadrupletMassLower  = 3500.0,
-         TrkQuadrupletMassUpper  = 6800.0,
-         )
-   acc.addPublicTool(BPHY5BdJpsiKst )
-   BPHY5BplJpsiKpl = CompFactory.Analysis.JpsiPlus1Track(name = "BPHY5BplJpsiKpl",
-         pionHypothesis          = True,
-         kaonHypothesis          = True,
-         trkThresholdPt          = 750.0,
-         trkMaxEta           = 3.0,
-         BThresholdPt            = 4000.0,
-         BMassUpper          = 7000.0,
-         BMassLower          = 4500.0,
-         Chi2Cut                         = 15.0,
-         TrkTrippletMassUpper            = 8000,
-         TrkTrippletMassLower            = 4000,
-         JpsiContainerKey        = JpsiContainerName,
-         TrackParticleCollection         = mainIDInput,
-         MuonsUsedInJpsi         = mainMuonInput,
-         TrkVertexFitterTool     = vkalvrt,
-         TrackSelectorTool       = trackselect,
-         UseMassConstraint       = True,
-         ExcludeCrossJpsiTracks              = False,
-         ExcludeJpsiMuonsOnly                = True)
-   acc.addPublicTool(BPHY5BplJpsiKpl )
-   BPHY5BJpsipipiX = CompFactory.Analysis.JpsiPlus2Tracks(name = "BPHY5BJpsipipiX",
-         kaonkaonHypothesis          = False,
-         pionpionHypothesis          = True,
-         kaonpionHypothesis          = False,
-         trkThresholdPt              = 800.0,
-         trkMaxEta                   = 3.0,
-         BMassUpper                  = 5800.0,
-         BMassLower                  = 3400.0,
-         #DiTrackMassUpper = 1019.445 + 100.,
-         #DiTrackMassLower = 1019.445 - 100.,
-         Chi2Cut                     = 15.0,
-         TrkQuadrupletMassUpper      = 5800.0,
-         TrkQuadrupletMassLower      = 3400.0,
-         JpsiContainerKey            = JpsiContainerName,
-         TrackParticleCollection     = mainIDInput,
-         MuonsUsedInJpsi             = mainMuonInput,
-         TrkVertexFitterTool     = vkalvrt,
-         TrackSelectorTool       = trackselect,
-         UseMassConstraint       = True,
-         ExcludeCrossJpsiTracks  = False,
-         ExcludeJpsiMuonsOnly    = True)
-   acc.addPublicTool(BPHY5BJpsipipiX )
-   BPHY5BsKKSelectAndWrite = acc.popToolsAndMerge(Reco_VertexCfg(flags,name = "BPHY5BsKKSelectAndWrite",
-                        VertexSearchTool         = BPHY5BsJpsiKK,
-                        OutputVtxContainerName   = BsJpsiPhiContainerName,
-                        PVContainerName          = "PrimaryVertices",
-                        V0Tools                  = V0Tools,
-                        PVRefitter               = PVrefit,
-                        RefPVContainerName       = "BPHY5RefittedPrimaryVertices",
-                        RefitPV                  = True, Do3d = False,
-                        RelinkTracks  =  toRelink,
-                        MaxPVrefit               = 10000, DoVertexType = 7))
+   if "Bs" in Decays :
+      augTools.append(acc.addPublicTool(acc.popToolsAndMerge(
+         Reco_VertexCfg(flags,name = "BPHY5BsKKSelectAndWrite",
+                        VertexSearchTool = CompFactory.Analysis.JpsiPlus2Tracks(
+                           name = "BPHY5BsJpsiKK",
+                           kaonkaonHypothesis = True,
+                           pionpionHypothesis = False,
+                           kaonpionHypothesis = False,
+                           trkThresholdPt = 800.0,
+                           trkMaxEta = 3.0,
+                           BMassUpper = 5800.0,
+                           BMassLower = 5000.0,
+                           #DiTrackMassUpper = 1019.445 + 100.,
+                           #DiTrackMassLower = 1019.445 - 100.,
+                           Chi2Cut = 15.0,
+                           TrkQuadrupletMassUpper = 6000.0,
+                           TrkQuadrupletMassLower = 4800.0,
+                           JpsiContainerKey = JpsiContainerName,
+                           TrackParticleCollection = mainIDInput,
+                           MuonsUsedInJpsi = mainMuonInput,
+                           TrkVertexFitterTool = vkalvrt, # PublicToolHandle
+                           TrackSelectorTool = trackselect, # PublicToolHandle
+                           UseMassConstraint = True),
+                        OutputVtxContainerName = BsJpsiPhiContainerName,
+                        PVContainerName = "PrimaryVertices",
+                        V0Tools = V0Tools, # PublicToolHandle
+                        PVRefitter = PVrefit, # PublicToolHandle
+                        RefPVContainerName = "BPHY5RefittedPrimaryVertices",
+                        RefitPV = True, Do3d = False,
+                        RelinkTracks =  toRelink,
+                        MaxPVrefit = 10000,
+                        DoVertexType = 7)
+      )))
 
-   BPHY5BplKplSelectAndWrite = acc.popToolsAndMerge(Reco_VertexCfg(flags,name    = "BPHY5BplKplSelectAndWrite",
-                                                              VertexSearchTool      =  BPHY5BplJpsiKpl,
-                                                              OutputVtxContainerName    = BPlusContainerName,
-                                                              PVContainerName           = "PrimaryVertices",
-                                                              V0Tools                   = V0Tools,
-                                                              PVRefitter                = PVrefit,
-                                                              RefPVContainerName        = "BPHY5RefBplJpsiKplPrimaryVertices",                                                              
-                                                              RefitPV                   = True,
-                                                              RelinkTracks  =  toRelink,
-                                                              MaxPVrefit                = 10000 ))
+      augTools.append(acc.addPublicTool(acc.popToolsAndMerge(
+         Select_onia2mumuCfg(flags,
+                             name = "BPHY5_Select_Bs2JpsiKK",
+                             HypothesisName = "Bs",
+                             InputVtxContainerName = BsJpsiPhiContainerName,
+                             V0Tools = V0Tools, # PublicToolHandle
+                             TrkMasses = [105.658, 105.658, 493.677, 493.677],
+                             VtxMassHypo = 5366.3,
+                             MassMin = 5000.0,
+                             MassMax = 5800.0, Do3d = False,
+                             Chi2Max = 200)
+      )))
 
-   BPHY5BpipiXSelectAndWrite = acc.popToolsAndMerge(Reco_VertexCfg(flags,name  = "BPHY5BpipiXSelectAndWrite",
-                                                           VertexSearchTool       = BPHY5BJpsipipiX,
-                                                           OutputVtxContainerName   = BpipiContainerName,
-                                                           PVContainerName          = "PrimaryVertices",
-                                                           V0Tools                  = V0Tools,
-                                                           PVRefitter               = PVrefit,
-                                                           RefPVContainerName       = "BPHY5RefittedBPipiPrimaryVertices",
-                                                           RefitPV                  = True, Do3d = False,
-                                                           RelinkTracks  =  toRelink,
-                                                           MaxPVrefit               = 10000, DoVertexType = 7))
+      #Do vertices without constraint for systematic reference
+      augTools.append(acc.addPublicTool(acc.popToolsAndMerge(
+         ReVertexCfg(flags,
+                     name = "BPHY5_Revertex_Bs_NoMassConst",
+                     InputVtxContainerName = BsJpsiPhiContainerName,
+                     TrackIndices = [ 0, 1, 2, 3 ],
+                     RefitPV = False,
+                     UseMassConstraint = False,
+                     TrackContainerName = mainIDInput,
+                     RelinkTracks =  toRelink,
+                     PVRefitter = PVrefit, # PublicToolHandle
+                     TrkVertexFitterTool = vkalvrt, # PublicToolHandle
+                     OutputVtxContainerName = "BPHY5BsJpsiKKCandidatesNoConstraint")
+      )))
 
-   BPHY5BdKstSelectAndWrite  = acc.popToolsAndMerge(Reco_VertexCfg(flags,
-                                 name                   = "BPHY5BdKstSelectAndWrite",
-                                 VertexSearchTool       = BPHY5BdJpsiKst,
-                                 OutputVtxContainerName = BdJpsiKstContainerName,
-                                 V0Tools                = V0Tools,
-                                 PVRefitter             = PVrefit,
-                                 PVContainerName        = "PrimaryVertices",
-                                 RefPVContainerName     = "BPHY5RefittedKstPrimaryVertices",
-                                 RefitPV                = True,
-                                 RelinkTracks  =  toRelink,
-                                 MaxPVrefit             = 10000,
-                                 DoVertexType = 7))
+      augTools.append(acc.addPublicTool(acc.popToolsAndMerge(
+         Select_onia2mumuCfg(flags,
+                             name = "BPHY5_Select_Bs2JpsiKKNoConstraint",
+                             HypothesisName = "Bs",
+                             V0Tools = V0Tools, # PublicToolHandle
+                             InputVtxContainerName = "BPHY5BsJpsiKKCandidatesNoConstraint",
+                             TrkMasses = [105.658, 105.658, 493.677, 493.677],
+                             VtxMassHypo = 5366.3,
+                             MassMin = 5000.0,
+                             MassMax = 5800.0, Do3d = False,
+                             Chi2Max = 200)
+      )))
 
-   BPHY5_Select_Bd2JpsiKst = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
-                                 name                       = "BPHY5_Select_Bd2JpsiKst",
-                                 HypothesisName             = "Bd",
-                                 InputVtxContainerName      = BdJpsiKstContainerName,
-                                 V0Tools                    = V0Tools,
-                                 TrkMasses                  = [105.658, 105.658, 493.677, 139.570],
-                                 VtxMassHypo                = 5279.6,
-                                 MassMin                    = 100.0,      #no mass cuts here
-                                 MassMax                    = 100000.0,   #no mass cuts here
-                                 Chi2Max                    = 200))
+   if "B+" in Decays :
+      augTools.append(acc.addPublicTool(acc.popToolsAndMerge(
+         Reco_VertexCfg(flags,name = "BPHY5BplKplSelectAndWrite",
+                        VertexSearchTool =  CompFactory.Analysis.JpsiPlus1Track(
+                           name = "BPHY5BplJpsiKpl",
+                           pionHypothesis = True,
+                           kaonHypothesis = True,
+                           trkThresholdPt = 750.0,
+                           trkMaxEta = 3.0,
+                           BThresholdPt = 4000.0,
+                           BMassUpper = 7000.0,
+                           BMassLower = 4500.0,
+                           Chi2Cut = 15.0,
+                           TrkTrippletMassUpper = 8000,
+                           TrkTrippletMassLower = 4000,
+                           JpsiContainerKey = JpsiContainerName,
+                           TrackParticleCollection = mainIDInput,
+                           MuonsUsedInJpsi = mainMuonInput,
+                           TrkVertexFitterTool = vkalvrt, # PublicToolHandle
+                           TrackSelectorTool = trackselect, # PublicToolHandle
+                           UseMassConstraint = True,
+                           ExcludeCrossJpsiTracks = False,
+                           ExcludeJpsiMuonsOnly = True),
+                        OutputVtxContainerName = BPlusContainerName,
+                        PVContainerName = "PrimaryVertices",
+                        V0Tools = V0Tools, # PublicToolHandle
+                        PVRefitter = PVrefit, # PublicToolHandle
+                        RefPVContainerName = "BPHY5RefBplJpsiKplPrimaryVertices",
+                        RefitPV = True,
+                        RelinkTracks =  toRelink,
+                        MaxPVrefit = 10000 )
+      )))
 
-   BPHY5_Select_Bd2JpsiKstbar = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
-                                 name                       = "BPHY5_Select_Bd2JpsiKstbar",
-                                 HypothesisName             = "Bdbar",
-                                 InputVtxContainerName      = BdJpsiKstContainerName,
-                                 V0Tools                    = V0Tools,
-                                 TrkMasses                  = [105.658, 105.658, 139.570, 493.677],
-                                 VtxMassHypo                = 5279.6,
-                                 MassMin                    = 100.0,      #no mass cuts here
-                                 MassMax                    = 100000.0,   #no mass cuts here
-                                 Chi2Max                    = 200))
+      augTools.append(acc.addPublicTool(acc.popToolsAndMerge(
+         Select_onia2mumuCfg(flags,
+                             name = "BPHY5_Select_Bpl2JpsiKpl",
+                             HypothesisName = "Bplus",
+                             InputVtxContainerName = BPlusContainerName,
+                             V0Tools = V0Tools, # PublicToolHandle
+                             TrkMasses = [105.658, 105.658, 493.677],
+                             VtxMassHypo = 5279.26,
+                             MassMin = 5279.26 - 500, Do3d = False,
+                             MassMax = 5279.26 + 500,
+                             Chi2Max = 200 )
+      )))
 
-   BPHY5_Select_Bs2JpsiKK = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
-                                 name                       = "BPHY5_Select_Bs2JpsiKK",
-                                 HypothesisName             = "Bs",
-                                 InputVtxContainerName      = BsJpsiPhiContainerName,
-                                 V0Tools                    = V0Tools,
-                                 TrkMasses                  = [105.658, 105.658, 493.677, 493.677],
-                                 VtxMassHypo                = 5366.3,
-                                 MassMin                    = 5000.0,
-                                 MassMax                    = 5800.0, Do3d = False,
-                                 Chi2Max                    = 200))
-
-   BPHY5_Select_Bpl2JpsiKpl  = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
-                                 name                       = "BPHY5_Select_Bpl2JpsiKpl",
-                                 HypothesisName             = "Bplus",
-                                 InputVtxContainerName      = BPlusContainerName,
-                                 V0Tools                    = V0Tools,
-                                 TrkMasses                  = [105.658, 105.658, 493.677],
-                                 VtxMassHypo                = 5279.26,
-                                 MassMin                    = 5279.26 - 500, Do3d = False,
-                                 MassMax                    = 5279.26 + 500,
-                                 Chi2Max                    = 200 ))
-
-   BPHY5_Select_Bpl2JpsiPi  = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
-                                 name                       = "BPHY5_Select_Bpl2JpsiPi",
-                                 HypothesisName             = "Bc",
-                                 InputVtxContainerName      = BPlusContainerName,
-                                 V0Tools                    = V0Tools,
-                                 TrkMasses                  = [105.658, 105.658, 139.570],
-                                 VtxMassHypo                = 6275.1, Do3d = False,
-                                 MassMin                    = 6275.1 - 500,
-                                 MassMax                    = 6275.1 + 500,
-                                 Chi2Max                    = 200 ))
-
-   BPHY5_Select_B2JpsipipiX = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
-                                name                       = "BPHY5_Select_B2JpsipipiX",
-                                HypothesisName             = "pipiJpsi",
-                                InputVtxContainerName      = BpipiContainerName,
-                                V0Tools                    = V0Tools,
-                                TrkMasses                  = [105.658, 105.658, 139.570, 139.570],
-                                VtxMassHypo                = 4260,
-                                MassMin                    = 3400.0,
-                                MassMax                    = 5800.0, Do3d = False,
-                                Chi2Max                    = 200))
-
-   #Do vertices without constraint for systematic reference
-   BPHY5_Revertex_Bs_NoMassConst  = acc.popToolsAndMerge(ReVertexCfg(flags,
-       name                       = "BPHY5_Revertex_Bs_NoMassConst",
-       InputVtxContainerName      = BsJpsiPhiContainerName,
-       TrackIndices               = [ 0, 1, 2, 3 ],
-       RefitPV                    = False,
-       UseMassConstraint          = False,
-       TrackContainerName         = mainIDInput,
-       RelinkTracks  =  toRelink,
-       PVRefitter                 = PVrefit,
-       TrkVertexFitterTool        = vkalvrt,
-       OutputVtxContainerName     = "BPHY5BsJpsiKKCandidatesNoConstraint"))
-
-   BPHY5_Revertex_Bd_NoMassConst  = acc.popToolsAndMerge(ReVertexCfg(flags,
-       name                       = "BPHY5_Revertex_Bd_NoMassConst",
-       InputVtxContainerName      = "BPHY5BdJpsiKstCandidates",
-       TrackIndices               = [ 0, 1, 2, 3 ],
-       RefitPV                    = False,
-       UseMassConstraint          = False,
-       TrackContainerName         = mainIDInput,
-       RelinkTracks  =  toRelink,
-       PVRefitter                 = PVrefit,
-       TrkVertexFitterTool        = vkalvrt,
-       OutputVtxContainerName     = "BPHY5BdJpsiKstCandidatesNoConstraint"))
-
-   BPHY5_Select_Bs2JpsiKKNoConstraint = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
-     name                       = "BPHY5_Select_Bs2JpsiKKNoConstraint",
-     HypothesisName             = "Bs",
-     V0Tools                    = V0Tools,
-     InputVtxContainerName      = "BPHY5BsJpsiKKCandidatesNoConstraint",
-     TrkMasses                  = [105.658, 105.658, 493.677, 493.677],
-     VtxMassHypo                = 5366.3,
-     MassMin                    = 5000.0,
-     MassMax                    = 5800.0, Do3d = False,
-     Chi2Max                    = 200))
-
-   BPHY5_Select_BdBar2JpsiKpiNoConstraint = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
-     name                       = "BPHY5_Select_BdBar2JpsiKpiNoConstraint",
-     HypothesisName             = "BdBar",
-     V0Tools                    = V0Tools,
-     InputVtxContainerName      = "BPHY5BdJpsiKstCandidatesNoConstraint",
-     TrkMasses                  = [105.658, 105.658, 139.570, 493.677],
-     VtxMassHypo                = 5279.6,
-     MassMin                    = 100.0,      #no mass cuts here
-     MassMax                    = 100000.0,   #no mass cuts here
-     Chi2Max                    = 200))
-
-   BPHY5_Select_Bd2JpsiKpiNoConstraint = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
-     name                       = "BPHY5_Select_Bd2JpsiKpiNoConstraint",
-     HypothesisName             = "Bd",
-     V0Tools                    = V0Tools,
-     InputVtxContainerName      = "BPHY5BdJpsiKstCandidatesNoConstraint",
-     TrkMasses                  = [105.658, 105.658, 493.677, 139.570],
-     VtxMassHypo                = 5279.6,
-     MassMin                    = 100.0,      #no mass cuts here
-     MassMax                    = 100000.0,   #no mass cuts here
-     Chi2Max                    = 200))
+      augTools.append(acc.addPublicTool(acc.popToolsAndMerge(
+         Select_onia2mumuCfg(flags,
+                             name = "BPHY5_Select_Bpl2JpsiPi",
+                             HypothesisName = "Bc",
+                             InputVtxContainerName = BPlusContainerName,
+                             V0Tools = V0Tools, # PublicToolHandle
+                             TrkMasses = [105.658, 105.658, 139.570],
+                             VtxMassHypo = 6275.1, Do3d = False,
+                             MassMin = 6275.1 - 500,
+                             MassMax = 6275.1 + 500,
+                             Chi2Max = 200 )
+      )))
 
 
+   if "BdKst" in Decays :
+      augTools.append(acc.addPublicTool(acc.popToolsAndMerge(
+         Reco_VertexCfg(flags,
+                        name = "BPHY5BdKstSelectAndWrite",
+                        VertexSearchTool = CompFactory.Analysis.JpsiPlus2Tracks(
+                           name = "BPHY5BdJpsiKst",
+                           kaonkaonHypothesis = False,
+                           pionpionHypothesis = False,
+                           kaonpionHypothesis = True,
+                           trkThresholdPt = 800.0,
+                           trkMaxEta = 3.0,
+                           BThresholdPt = 5000.,
+                           BMassLower = 4300.0,
+                           BMassUpper = 6300.0,
+                           JpsiContainerKey = JpsiContainerName,
+                           TrackParticleCollection = mainIDInput,
+                           #MuonsUsedInJpsi = "Muons", #Don't remove all muons, just those in J/psi candidate (see the following cut)
+                                                                        ExcludeCrossJpsiTracks = False,   #setting this to False rejects the muons from J/psi candidate
+                           TrkVertexFitterTool = vkalvrt, # PublicToolHandle
+                           TrackSelectorTool = trackselect, # PublicToolHandle
+                           UseMassConstraint = True,
+                           Chi2Cut = 15.0,
+                           TrkQuadrupletMassLower = 3500.0,
+                           TrkQuadrupletMassUpper = 6800.0,
+                        ),
+                        OutputVtxContainerName = BdJpsiKstContainerName,
+                        V0Tools = V0Tools, # PublicToolHandle
+                        PVRefitter = PVrefit, # PublicToolHandle
+                        PVContainerName = "PrimaryVertices",
+                        RefPVContainerName = "BPHY5RefittedKstPrimaryVertices",
+                        RefitPV = True,
+                        RelinkTracks =  toRelink,
+                        MaxPVrefit = 10000,
+                        DoVertexType = 7)
+      )))
+
+      augTools.append(acc.addPublicTool(acc.popToolsAndMerge(
+         Select_onia2mumuCfg(flags,
+                             name = "BPHY5_Select_Bd2JpsiKst",
+                             HypothesisName = "Bd",
+                             InputVtxContainerName = BdJpsiKstContainerName,
+                             V0Tools = V0Tools, # PublicToolHandle
+                             TrkMasses = [105.658, 105.658, 493.677, 139.570],
+                             VtxMassHypo = 5279.6,
+                             MassMin = 100.0,      #no mass cuts here
+                             MassMax = 100000.0,   #no mass cuts here
+                             Chi2Max = 200)
+      )))
+
+      augTools.append(acc.addPublicTool(acc.popToolsAndMerge(
+         Select_onia2mumuCfg(flags,
+                             name = "BPHY5_Select_Bd2JpsiKstbar",
+                             HypothesisName = "Bdbar",
+                             InputVtxContainerName = BdJpsiKstContainerName,
+                             V0Tools = V0Tools, # PublicToolHandle
+                             TrkMasses = [105.658, 105.658, 139.570, 493.677],
+                             VtxMassHypo = 5279.6,
+                             MassMin = 100.0,      #no mass cuts here
+                             MassMax = 100000.0,   #no mass cuts here
+                             Chi2Max = 200)
+      )))
+
+      #Do vertices without constraint for systematic reference
+      augTools.append(acc.addPublicTool(acc.popToolsAndMerge(
+         ReVertexCfg(flags,
+                     name = "BPHY5_Revertex_Bd_NoMassConst",
+                     InputVtxContainerName = "BPHY5BdJpsiKstCandidates",
+                     TrackIndices = [ 0, 1, 2, 3 ],
+                     RefitPV = False,
+                     UseMassConstraint = False,
+                     TrackContainerName = mainIDInput,
+                     RelinkTracks =  toRelink,
+                     PVRefitter = PVrefit, # PublicToolHandle
+                     TrkVertexFitterTool = vkalvrt, # PublicToolHandle
+                     OutputVtxContainerName = "BPHY5BdJpsiKstCandidatesNoConstraint")
+      )))
+
+      augTools.append(acc.addPublicTool(acc.popToolsAndMerge(
+         Select_onia2mumuCfg(flags,
+                             name = "BPHY5_Select_BdBar2JpsiKpiNoConstraint",
+                             HypothesisName = "BdBar",
+                             V0Tools = V0Tools, # PublicToolHandle
+                             InputVtxContainerName = "BPHY5BdJpsiKstCandidatesNoConstraint",
+                             TrkMasses = [105.658, 105.658, 139.570, 493.677],
+                             VtxMassHypo = 5279.6,
+                             MassMin = 100.0,      #no mass cuts here
+                             MassMax = 100000.0,   #no mass cuts here
+                             Chi2Max = 200)
+      )))
+
+      augTools.append(acc.addPublicTool(acc.popToolsAndMerge(
+         Select_onia2mumuCfg(flags,
+                             name = "BPHY5_Select_Bd2JpsiKpiNoConstraint",
+                             HypothesisName = "Bd",
+                             V0Tools = V0Tools, # PublicToolHandle
+                             InputVtxContainerName = "BPHY5BdJpsiKstCandidatesNoConstraint",
+                             TrkMasses = [105.658, 105.658, 493.677, 139.570],
+                             VtxMassHypo = 5279.6,
+                             MassMin = 100.0,      #no mass cuts here
+                             MassMax = 100000.0,   #no mass cuts here
+                             Chi2Max = 200)
+      )))
+
+   if "BpipiX" in Decays :
+      augTools.append(acc.addPublicTool(acc.popToolsAndMerge(
+         Reco_VertexCfg(flags,name = "BPHY5BpipiXSelectAndWrite",
+                        VertexSearchTool = CompFactory.Analysis.JpsiPlus2Tracks(
+                           name = "BPHY5BJpsipipiX",
+                           kaonkaonHypothesis = False,
+                           pionpionHypothesis = True,
+                           kaonpionHypothesis = False,
+                           trkThresholdPt = 800.0,
+                           trkMaxEta = 3.0,
+                           BMassUpper = 5800.0,
+                           BMassLower = 3400.0,
+                           #DiTrackMassUpper = 1019.445 + 100.,
+                           #DiTrackMassLower = 1019.445 - 100.,
+                           Chi2Cut = 15.0,
+                           TrkQuadrupletMassUpper = 5800.0,
+                           TrkQuadrupletMassLower = 3400.0,
+                           JpsiContainerKey = JpsiContainerName,
+                           TrackParticleCollection = mainIDInput,
+                           MuonsUsedInJpsi = mainMuonInput,
+                           TrkVertexFitterTool = vkalvrt, # PublicToolHandle
+                           TrackSelectorTool = trackselect, # PublicToolHandle
+                           UseMassConstraint = True,
+                           ExcludeCrossJpsiTracks = False,
+                           ExcludeJpsiMuonsOnly = True),
+                        OutputVtxContainerName = BpipiContainerName,
+                        PVContainerName = "PrimaryVertices",
+                        V0Tools = V0Tools, # PublicToolHandle
+                        PVRefitter = PVrefit, # PublicToolHandle
+                        RefPVContainerName = "BPHY5RefittedBPipiPrimaryVertices",
+                        RefitPV = True, Do3d = False,
+                        RelinkTracks =  toRelink,
+                        MaxPVrefit = 10000,
+                        DoVertexType = 7)
+      )))
+
+      augTools.append(acc.addPublicTool(acc.popToolsAndMerge(
+         Select_onia2mumuCfg(flags,
+                             name = "BPHY5_Select_B2JpsipipiX",
+                             HypothesisName = "pipiJpsi",
+                             InputVtxContainerName = BpipiContainerName,
+                             V0Tools = V0Tools, # PublicToolHandle
+                             TrkMasses = [105.658, 105.658, 139.570, 139.570],
+                             VtxMassHypo = 4260,
+                             MassMin = 3400.0,
+                             MassMax = 5800.0, Do3d = False,
+                             Chi2Max = 200)
+      )))
+
+   filterlist = []
    if not isSimulation: #Only Skim Data
       from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
          xAODStringSkimmingToolCfg)
 
-      BPHY5_SelectBsJpsiKKEvent = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
-         flags, name = "BPHY5_SelectBsJpsiKKEvent",
-         expression = f"count({BsJpsiPhiContainerName}.passed_Bs > 0) > 0"))
+      if "Bs" in Decays :
+         filterlist.append(acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+            flags, name = "BPHY5_SelectBsJpsiKKEvent",
+            expression = f"count({BsJpsiPhiContainerName}.passed_Bs > 0) > 0")))
 
-      BPHY5_SelectBplJpsiKplEvent = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
-         flags, name = "BPHY5_SelectBplJpsiKplEvent",
-         expression = f"count({BPlusContainerName}.passed_Bplus>0) > 0"))
-     
-      BPHY5_SelectBplJpsiKplEventBc = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
-         flags, name = "BPHY5_SelectBplJpsiKplEventBc",
-         expression = f"count({BPlusContainerName}.passed_Bc>0) > 0"))
-        
-      BPHY5_SelectBdKstarEventBd = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
-         flags, name = "BPHY5_SelectBdKstarEventBd",
-         expression = f"count({BdJpsiKstContainerName}.passed_Bd>0) > 0"))
-     
-      BPHY5_SelectBdKstarEventBdBar = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
-         flags, name = "BPHY5_SelectBdKstarEventBdbar",
-         expression = f"count({BdJpsiKstContainerName}.passed_Bdbar>0) > 0"))
+      if "B+" in Decays :
+         filterlist.append(acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+            flags, name = "BPHY5_SelectBplJpsiKplEvent",
+            expression = f"count({BPlusContainerName}.passed_Bplus>0) > 0")))
+         filterlist.append(acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+            flags, name = "BPHY5_SelectBplJpsiKplEventBc",
+            expression = f"count({BPlusContainerName}.passed_Bc>0) > 0")))
+
+      if "BdKst" in Decays :
+         filterlist.append(acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+            flags, name = "BPHY5_SelectBdKstarEventBd",
+            expression = f"count({BdJpsiKstContainerName}.passed_Bd>0) > 0")))
+         filterlist.append(acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+            flags, name = "BPHY5_SelectBdKstarEventBdbar",
+            expression = f"count({BdJpsiKstContainerName}.passed_Bdbar>0) > 0")))
 
       #====================================================================
       # Make event selection based on an OR of the input skimming tools
       #====================================================================
-      filterlist = []
-      if "Bs" in Decays : filterlist.append(BPHY5_SelectBsJpsiKKEvent)
-      if "B+" in Decays : filterlist += [ BPHY5_SelectBplJpsiKplEvent,BPHY5_SelectBplJpsiKplEventBc]
-      if "BdKst" in Decays : filterlist += [BPHY5_SelectBdKstarEventBd, BPHY5_SelectBdKstarEventBdBar]
-        
-      BPHY5SkimmingOR = CompFactory.DerivationFramework.FilterCombinationOR(
-         "BPHY5SkimmingOR", FilterList = filterlist)
-      acc.addPublicTool(BPHY5SkimmingOR)
 
-   augTools =   [BPHY5JpsiSelectAndWrite,  BPHY5_Select_Jpsi2mumu, BPHY5_AugOriginalCounts]
-   if "Bs" in Decays : augTools += [BPHY5BsKKSelectAndWrite,  BPHY5_Select_Bs2JpsiKK, BPHY5_Revertex_Bs_NoMassConst, BPHY5_Select_Bs2JpsiKKNoConstraint]
-   if "B+" in Decays : augTools += [BPHY5BplKplSelectAndWrite, BPHY5_Select_Bpl2JpsiKpl, BPHY5_Select_Bpl2JpsiPi]
-   if "BdKst" in Decays : augTools += [ BPHY5BdKstSelectAndWrite, BPHY5_Select_Bd2JpsiKst, BPHY5_Select_Bd2JpsiKstbar, BPHY5_Revertex_Bd_NoMassConst, BPHY5_Select_BdBar2JpsiKpiNoConstraint, BPHY5_Select_Bd2JpsiKpiNoConstraint]
-   if "BpipiX" in Decays : augTools+= [ BPHY5BpipiXSelectAndWrite, BPHY5_Select_B2JpsipipiX]
    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY5Kernel",
                                                     AugmentationTools = augTools,
                                                     #Only skim if not MC
-                                                    SkimmingTools     = [BPHY5SkimmingOR] if not isSimulation else [],
-                                                    ThinningTools     = []))
-   for t in  augTools : acc.addPublicTool(t)
+                                                    SkimmingTools = [acc.addPublicTool(CompFactory.DerivationFramework.FilterCombinationOR(
+         "BPHY5SkimmingOR", FilterList = filterlist))] if not isSimulation else [],
+                                                    ThinningTools = []))
    return acc
 
 
@@ -417,13 +438,13 @@ def BPHY5Cfg(flags):
    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
    BPHY5SlimmingHelper = SlimmingHelper("BPHY5SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
    from DerivationFrameworkBPhys.CommonBPhysMethodsConfig import getDefaultAllVariables
-   AllVariables  = getDefaultAllVariables()
+   AllVariables = getDefaultAllVariables()
    StaticContent = []
-    
+
    # Needed for trigger objects
-   BPHY5SlimmingHelper.IncludeMuonTriggerContent  = True
+   BPHY5SlimmingHelper.IncludeMuonTriggerContent = True
    BPHY5SlimmingHelper.IncludeBPhysTriggerContent = True
-    
+
    ## primary vertices
    AllVariables  += ["PrimaryVertices"]
    StaticContent += ["xAOD::VertexContainer#BPHY5RefittedPrimaryVertices"]
@@ -434,34 +455,34 @@ def BPHY5Cfg(flags):
    StaticContent += ["xAOD::VertexAuxContainer#BPHY5RefittedBPipiPrimaryVerticesAux."]
    StaticContent += ["xAOD::VertexContainer#BPHY5RefittedKstPrimaryVertices"]
    StaticContent += ["xAOD::VertexAuxContainer#BPHY5RefittedKstPrimaryVerticesAux."]
-    
+
    ## ID track particles
    AllVariables += ["InDetTrackParticles", "InDetLargeD0TrackParticles"] if doLRT else ["InDetTrackParticles"]
-    
-   ## combined / extrapolated muon track particles 
+
+   ## combined / extrapolated muon track particles
    ## (note: for tagged muons there is no extra TrackParticle collection since the ID tracks
    ##        are store in InDetTrackParticles collection)
    AllVariables += ["CombinedMuonTrackParticles"]
    AllVariables += ["ExtrapolatedMuonTrackParticles"]
-   
+
    ## muon container
    AllVariables += ["Muons", "MuonsLRT"] if doLRT else ["Muons"]
-    
-    
-   ## Jpsi candidates 
+
+
+   ## Jpsi candidates
    StaticContent += ["xAOD::VertexContainer#%s"        %                 JpsiContainerName]
    ## we have to disable vxTrackAtVertex branch since it is not xAOD compatible
    StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % JpsiContainerName]
-    
+
    StaticContent += ["xAOD::VertexContainer#%s"        %                 BsJpsiPhiContainerName]
    StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BsJpsiPhiContainerName]
-   
+
    StaticContent += ["xAOD::VertexContainer#%s"        %                 BPlusContainerName]
    StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPlusContainerName]
-   
+
    StaticContent += ["xAOD::VertexContainer#%s"        %                 BpipiContainerName]
    StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BpipiContainerName]
-   
+
    StaticContent += ["xAOD::VertexContainer#%s"        %                 BdJpsiKstContainerName]
    StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BdJpsiKstContainerName]
 
@@ -474,24 +495,24 @@ def BPHY5Cfg(flags):
    # Tagging information (in addition to that already requested by usual algorithms)
    AllVariables += ["GSFTrackParticles",  "MuonSpectrometerTrackParticles" ]
    tagJetCollections = ['AntiKt4LCTopoJets', 'AntiKt4EMTopoJets', 'AntiKt4PV0TrackJets']
-   
+
    AllVariables += [ "Kt4LCTopoOriginEventShape", "Kt4EMTopoOriginEventShape" ]
    SmartVar = ["Photons", "Electrons", "LRTElectrons"] #[ tagJetCollections ]
-   
+
    for jet_collection in tagJetCollections:
        AllVariables   += [jet_collection]
 
-   
-   
+
+
    # Truth information for MC only
    if isSimulation:
        AllVariables += ["TruthEvents","TruthParticles","TruthVertices","MuonTruthParticles", "egammaTruthParticles" ]
        AllVariables += ["AntiKt4TruthJets", "AntiKt4TruthWZJets" ]
        tagJetCollections += [ "AntiKt4TruthJets", "AntiKt4TruthWZJets"  ]
-   
-   
+
+
    AllVariables = list(set(AllVariables)) # remove duplicates
-   
+
    BPHY5SlimmingHelper.AllVariables = AllVariables
    BPHY5SlimmingHelper.StaticContent = StaticContent
    BPHY5SlimmingHelper.SmartCollections = SmartVar
