@@ -73,3 +73,13 @@ That can be achieved with a command analogous to this:
 lsetup panda
 pathena --trf "python -m HIClusterGeoWeights.HIClusterGeoFiller --filesInput=%IN" --inDS data18_hi.00367273.physics_CC.merge.AOD.f1030_m2048 --outDS user.$USER.data18_hi.00367273.physics_CC.merge.AOD.f1030_m2048.cluster.geo --extOutFile=HIClusterGeo_HistoFiller.root
 ```
+## Weights for MC
+
+To get the `cluster.geo.W_ETA_PHI_R.root` file for MC, one has to convert RDO to BS first, e.g.:
+```
+Reco_tf.py --inputRDOFile myRDO.pool.root --outputBSFile myBSFile.Hijing.BS --maxEvents 1
+```
+Then, `flags.IOVDb.GlobalTag` has to be changed accordingly, e.g. to `OFLCOND-MC23-SDR-RUN3-12`.
+The rest is as with data RAW files, using `HICaloGeoExtract.py`.
+
+To get the `cluster.geo.RESPONSE_OFFSET_RUNINDEX.root` file for MC, the `HIClusterGeoFiller` can run without modifications. The macro `makeHIResponse` needs a "dummy" GRL, so it will check the correct "run number" and "lumiblock".

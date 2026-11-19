@@ -16,7 +16,10 @@ def getHIClusterGeoWeightFile(flags):
         return flags.HeavyIon.Jet.HIClusterGeoWeightFile
 
     if flags.Input.isMC:
-        return 'cluster.geo.HIJING_2018.root'
+        if flags.GeoModel.Run in [LHCPeriod.Run1, LHCPeriod.Run2]:
+            return 'cluster.geo.HIJING_2018.root'
+        else:
+            return 'cluster.geo.HIJING_2024.root'
     else:
         if flags.GeoModel.Run in [LHCPeriod.Run1, LHCPeriod.Run2]:
             if flags.Input.DataYear == 2015:
