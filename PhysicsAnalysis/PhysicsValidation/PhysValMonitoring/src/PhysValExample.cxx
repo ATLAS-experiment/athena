@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // PhysValExample.cxx 
@@ -27,8 +27,6 @@
 #include "xAODTracking/TrackParticle.h" 
 #include "xAODTracking/Vertex.h" 
 #include "xAODEventInfo/EventInfo.h" 
-#include "xAODBTagging/BTagging.h" 
-#include "xAODBTagging/BTaggingUtilities.h"
 
 #include "AthenaBaseComps/AthCheckMacros.h"
 
@@ -52,8 +50,7 @@ namespace PhysVal {
     m_tauPlots(nullptr, "Summary/Tau/", "Tau"),
     m_trkvtxPlots(nullptr, "Summary/TrackAndVertex/"),
     m_evtPlots(nullptr, "EventInfo/"),
-    m_metPlots(nullptr, "Summary/MET/", "RefFinal"),
-    m_btagPlots(nullptr, "Summary/BTag/", "IP3D")
+    m_metPlots(nullptr, "Summary/MET/", "RefFinal")
   {
     
     declareProperty( "JetContainerName", m_jetName = "AntiKt4EMTopoJets" );
@@ -66,7 +63,6 @@ namespace PhysVal {
     declareProperty( "METContainerName", m_metName = "MET_RefFinal" ); 
     declareProperty( "DoExMET", m_doExMET = true ); 
     declareProperty( "DoExJet", m_doExJet = true ); 
-    declareProperty( "DoExBtag", m_doExBtag = true ); 
   }
   
   // Destructor
@@ -101,7 +97,6 @@ namespace PhysVal {
 
     if (m_detailLevel >= 10) {
       ATH_CHECK(book(m_jetPlots));
-      ATH_CHECK(book(m_btagPlots));
       ATH_CHECK(book(m_elecPlots));
       ATH_CHECK(book(m_photonPlots));
       ATH_CHECK(book(m_muonPlots));
@@ -126,21 +121,15 @@ namespace PhysVal {
     m_evtPlots.fill(event);
     
     // Jets
-    int nbtag(0);
     if (m_doExJet){
       m_jetPlots.initializeEvent();
       const xAOD::JetContainer* jets(nullptr);
       ATH_CHECK(evtStore()->retrieve(jets, m_jetName));
       for (auto jet : *jets) {
 	m_jetPlots.fill(jet,event);
-	if (m_doExBtag){
-	  const xAOD::BTagging* btag = xAOD::BTaggingUtilities::getBTagging( *jet );
-	  if (btag && btag->IP3D_loglikelihoodratio() > 1.2) ++nbtag;
-	}
       }
       m_jetPlots.fill(event);
     }
-    m_btagPlots.fill(nbtag,event);
       
     // Electrons
     m_elecPlots.initializeEvent();

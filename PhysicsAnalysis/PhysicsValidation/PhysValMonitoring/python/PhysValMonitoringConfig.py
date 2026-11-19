@@ -28,7 +28,6 @@ def PhysValExampleCfg(flags, **kwargs):
     kwargs.setdefault("ElectronContainerName", "Electrons")
 
     # Keep this disabled for now
-    kwargs.setdefault("DoExBtag", False)
     kwargs.setdefault("DoExMET", False)
     kwargs.setdefault("DoExJet", flags.PhysVal.doJet)
     kwargs.setdefault("METContainerName", "")
