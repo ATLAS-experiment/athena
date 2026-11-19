@@ -8,13 +8,12 @@
 #include "Acts/Surfaces/PlaneSurface.hpp"
 #include "Acts/Surfaces/RectangleBounds.hpp"
 #include "Acts/Surfaces/detail/PlanarHelper.hpp"
-
+#include "Acts/Utilities/detail/CombinatoricIndices.hpp"
 
 #include "MuonReadoutGeometryR4/MuonDetectorDefs.h"
 #include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
 #include "xAODMuonPrepData/UtilFunctions.h"
 
-#include "GaudiKernel/PhysicalConstants.h"
 #include "MuonTruthHelpers/MuonSimHitHelpers.h"
 #include "MuonTrackEvent/TrackingHelpers.h"
 #include "MuonSpacePoint/SpacePointHelpers.h"
@@ -31,6 +30,7 @@
 
 using namespace Acts::UnitLiterals;
 using namespace Acts::PlanarHelper;
+using namespace Muon::MuonStationIndex;
 
 namespace MuonR4{
     StatusCode MsTrackFindingAlg::initialize() {
@@ -109,7 +109,6 @@ namespace MuonR4{
         MsTrackFindingAlg::collectMeasurements(const Acts::GeometryContext& tgContext,
                                                const Acts::BoundTrackParameters& startPars, 
                                                const MsTrackSeed& seed,
-                                               const std::size_t reqStations,
                                                PseudoMeasHandle_t& auxMeasContainer) const {
         MeasVec_t pickedMeas{};
         pickedMeas.reserve(seed.nMeasurements());
@@ -117,20 +116,10 @@ namespace MuonR4{
         std::uint8_t nPhiMeasurements{0};
         AmgSymMatrix(1) phiCov{Acts::square(1._cm)};
         /// Count the number of sations
-        std::vector<Muon::MuonStationIndex::StIndex> stations{};
-        stations.reserve(seed.segments().size());
         for (const xAOD::MuonSegment* segment : seed.segments()) {
             m_calibTool->stampSignsOnMeasurements(*segment);
             /** Check if the station has not yet been processed and also  
              *  check whether there were already enough stations processed */
-            const auto stIdx = Muon::MuonStationIndex::toStationIndex(segment->chamberIndex());
-            if (!Acts::rangeContainsValue(stations, stIdx)) {
-                if (stations.size() == reqStations) {
-                    ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Requirement on "<<reqStations<<" stations satisfied.");
-                    break;
-                }
-                stations.push_back(stIdx);
-            }
             for (std::size_t m = 0; m < nMeasurements(*segment); ++m) {
                 const xAOD::UncalibratedMeasurement* meas = getMeasurement(*segment, m);
                 if (meas->type() == xAOD::UncalibMeasType::Other || 
@@ -183,11 +172,11 @@ namespace MuonR4{
             /* Place the first one between the first measurement and the start*/
             auto firstSurface = Acts::Surface::makeShared<Acts::PlaneSurface>(startTrf * 
                                     Amg::getTranslate3D(locPos + 0.5*(firstM - startPos).dot(startDir) * locDir), bounds);
-            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Create new auxilliary surface @ "
+            ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Create new auxilliary surface @ "
                         <<Amg::toString(firstSurface->localToGlobalTransform(tgContext)));
             auto lastSurface = Acts::Surface::makeShared<Acts::PlaneSurface>(startTrf * 
                                     Amg::getTranslate3D(locPos + (8._mm + (lastM - startPos).dot(startDir))* locDir), bounds);
-            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Create new auxilliary surface @ "
+            ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Create new auxilliary surface @ "
                         <<Amg::toString(lastSurface->localToGlobalTransform(tgContext)));
             constexpr auto calibIdx = ActsTrk::detail::MeasurementCalibratorBase::ProjectorType::e1DimRotNoTime;
             pickedMeas.push_back(auxMeasContainer.newMeasurement<1>(firstSurface, calibIdx, phiCov));
@@ -209,6 +198,106 @@ namespace MuonR4{
         return pickedMeas;
     }
 
+    template <std::size_t N> 
+        std::unique_ptr<ActsTrk::MutableTrackContainer> 
+        MsTrackFindingAlg::fitBestCombination(const Acts::GeometryContext& tgContext,
+                                              const Acts::MagneticFieldContext& mfContext,
+                                              const Acts::CalibrationContext& calContext,
+                                              const MsTrackSeed& seed,
+                                              std::optional<Acts::BoundTrackParameters> startPars,
+                                              PseudoMeasHandle_t& auxMeasContainer) const {
+        std::unique_ptr<ActsTrk::MutableTrackContainer> bestFit{};
+        const EventContext& ctx{*calContext.get<const EventContext*>()};
+        const auto stations = seed.stations();
+        std::array<StIndex, N> pickedStations{};
+            
+        double bestRedChi2{std::numeric_limits<double>::max()};
+        Acts::detail::CombinatoricIndices<N> stationPicker{stations.size()};
+        for (const auto& combo : stationPicker) {
+            for (std::size_t i =0 ; i < N; ++i){
+                pickedStations[i] = stations[combo[i]];
+            }
+            if constexpr(N == 2) {
+                if (Acts::rangeContainsValue(pickedStations, StIndex::BE) ||
+                    Acts::rangeContainsValue(pickedStations, StIndex::EE) ||
+                    toLayerIndex(pickedStations.front()) == toLayerIndex(pickedStations.back()) ||
+                    (Acts::rangeContainsValue(pickedStations, StIndex::EM) &&
+                     Acts::rangeContainsValue(pickedStations, StIndex::EO))){
+                    continue;
+                }
+            }
+            
+            MsTrackSeed partialSeed{seed.location(), seed.sector()};
+            for (const xAOD::MuonSegment* segment : seed.segments()) {
+                const StIndex stIdx = toStationIndex(segment->chamberIndex());
+                if (!Acts::rangeContainsValue(pickedStations, stIdx)) {
+                    continue;
+                }
+                partialSeed.addSegment(segment);
+            }
+            ATH_MSG_DEBUG(__func__<<"<"<<N<<">() "<<__LINE__<<" - Try station combination "<<pickedStations);
+            
+            if (startPars) {
+                const Amg::Vector3D startPos = startPars->position(tgContext);
+                const Acts::GeometryIdentifier volId = volumeId(xAOD::muonSurface(getMeasurement(*partialSeed.segments()[0], 0)));
+                const Acts::TrackingVolume* volume{MuonGMR4::highestAlignable(m_trackingGeometrySvc->trackingGeometry()->findVolume(volId))};
+                auto boundSurf = MuonGMR4::bottomBoundary(*volume);
+                if (!boundSurf) {
+                    ATH_MSG_WARNING(__func__<<"<"<<N<<">() "<<__LINE__<<" - Failed to find boundary surface for tracking volume");
+                    continue;
+                }
+                
+                ATH_MSG_VERBOSE(__func__<<"<"<<N<<">() "<<__LINE__<<" - Start position: "<<Amg::toString(startPos)
+                                <<", perp: "<<startPos.perp()<<", "<<startPars->referenceSurface().center(tgContext).perp()
+                                <<", surf center: "<<Amg::toString(boundSurf->center(tgContext))
+                                <<", perp: "<<boundSurf->center(tgContext).perp()
+                                <<", "<<(boundSurf->center(tgContext)-startPos).dot(startPars->direction()));
+                /// The start parameters of the partial seed are behind the first segment to fit
+                if (boundSurf->geometryId() != startPars->referenceSurface().geometryId() && 
+                    (boundSurf->center(tgContext)-startPos).dot(startPars->direction()) < 0.) {
+
+                    auto firstSurface = Acts::Surface::makeShared<Acts::PlaneSurface>(boundSurf->localToGlobalTransform(tgContext) *
+                                                                                      Amg::getTranslateZ3D(-10._cm));
+                    ATH_MSG_DEBUG(__func__<<"<"<<N<<">() "<<__LINE__<<" - Extrapolate back onto surface "
+                                    <<firstSurface->center(tgContext).perp()
+                                    <<", "<<boundSurf->center(tgContext).perp());
+                    
+                    auto extpPars = m_extrapolationTool->propagate(ctx, *startPars, *firstSurface,
+                                                                   Acts::Direction::Backward());
+                    if(extpPars.ok()) {
+                        startPars = std::move(*extpPars);
+                    }
+                }
+            } else {
+                auto seedPars = m_seedingTool->estimateStartParameters(ctx, partialSeed);
+                if (seedPars.ok()) {
+                    startPars = std::move(*seedPars);
+                }
+            }
+            if (!startPars) {
+                ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Start parameter estimation failed.");
+                continue;
+            }
+            const MeasVec_t measurements = collectMeasurements(tgContext, *startPars, partialSeed, auxMeasContainer);
+            auto fit = m_trackFitTool->fit(measurements, *startPars, tgContext, mfContext, calContext, nullptr);
+            if (!fit) {
+                ATH_MSG_DEBUG(__func__<<"<"<<N<<">() "<<__LINE__<<" - Fit failed.");
+                continue;
+            }
+            ActsTrk::MutableTrackContainer::TrackProxy track = fit->getTrack(0);
+            const std::size_t nFitStations = m_summaryTool->countMuonStations(ctx, track);
+            const double redChi2 = track.chi2() / std::max<double>(1., track.nDoF());
+            ATH_MSG_DEBUG(__func__<<"<"<<N<<">() "<<__LINE__<<" -  Combination "<<pickedStations
+                            <<" gives chi2/nDoF: "<<redChi2<<", nStations: "<<nFitStations);
+            if (nFitStations >= N && redChi2 < bestRedChi2) {
+                bestRedChi2 = redChi2;
+                bestFit = std::move(fit);
+            }
+        }
+        return bestFit;
+    }
+
+
     bool MsTrackFindingAlg::fitSeedCandidate(const Acts::GeometryContext& tgContext,
                                              const Acts::MagneticFieldContext& mfContext,
                                              const Acts::CalibrationContext& calContext,
@@ -226,8 +315,7 @@ namespace MuonR4{
             }
             return false;
         }
-        MeasVec_t measurements = collectMeasurements(tgContext, *initialPars, seed,
-                                                     seed.nStations(), auxMeasContainer);
+        MeasVec_t measurements = collectMeasurements(tgContext, *initialPars, seed, auxMeasContainer);
   
         ActsTrk::MutableTrackContainer fitAttempts{Acts::VectorTrackContainer{}, 
                                                   Acts::VectorMultiTrajectory{}};
@@ -263,70 +351,33 @@ namespace MuonR4{
         };
         /// We first combine two muon
         const Acts::Surface* target = initialPars->referenceSurface().getSharedPtr().get();
-
-        /** Fits all combinations of two stations of the seed. For each combination a sub seed is
-         *  constructed, the start parameters are re-estimated from the segments of the two stations only 
-         *  and the measurements are collected for them. Returns the successful fit with the best reduced chi2
-         *  or a nullptr if none of the combinations gave a track with at least two stations. */
-        auto fitBestStationPair = [&] () -> std::unique_ptr<ActsTrk::MutableTrackContainer> {
-            std::unique_ptr<ActsTrk::MutableTrackContainer> bestFit{};
-            double bestRedChi2{std::numeric_limits<double>::max()};
-            const auto stations = seed.stations();
-            for (std::size_t first = 0ul; first < stations.size(); ++first) {
-                for (std::size_t second = first + 1ul; second < stations.size(); ++second) {
-                    MsTrackSeed pairSeed{seed.location(), seed.sector()};
-                    pairSeed.setPosition(Amg::Vector3D{seed.position()});
-                    for (const xAOD::MuonSegment* segment : seed.segments()) {
-                        const auto stIdx = Muon::MuonStationIndex::toStationIndex(segment->chamberIndex());
-                        if (stIdx == stations[first] || stIdx == stations[second]) {
-                            pairSeed.addSegment(segment);
-                        }
-                    }
-                    ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Try station combination "
-                                    <<stations[first]<<" & "<<stations[second]);
-                    const auto pairPars = m_seedingTool->estimateStartParameters(ctx, pairSeed);
-                    if (!pairPars.ok()) {
-                        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Start parameter estimation failed.");
-                        continue;
-                    }
-                    const MeasVec_t pairMeas = collectMeasurements(tgContext, *pairPars, pairSeed, 2ul, auxMeasContainer);
-                    auto pairFit = m_trackFitTool->fit(pairMeas, *pairPars, tgContext, mfContext, calContext, target);
-                    if (!pairFit) {
-                        continue;
-                    }
-                    ActsTrk::MutableTrackContainer::TrackProxy pairTrack = pairFit->getTrack(0);
-                    const std::size_t nPairStations = m_summaryTool->countMuonStations(ctx, pairTrack);
-                    const double redChi2 = pairTrack.chi2() / std::max<double>(1., pairTrack.nDoF());
-                    ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Combination "<<stations[first]<<" & "
-                                    <<stations[second]<<" gives chi2/nDoF: "<<redChi2<<", nStations: "<<nPairStations);
-                    if (nPairStations >= 2ul && redChi2 < bestRedChi2) {
-                        bestRedChi2 = redChi2;
-                        bestFit = std::move(pairFit);
-                    }
-                }
-            }
-            return bestFit;
-        };
-
         if (!copyFit(m_trackFitTool->fit(measurements, *initialPars, 
                      tgContext, mfContext, calContext, target), seed.nStations()) && seed.nStations() > 2) {
             ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - First shot failed. Attempt iteratively over the stations. ");
             for (std::size_t nStation = 2ul; nStation <= seed.nStations(); ++nStation) {
+                auto startPars = fitAttempts.size() >  0ul ?
+                            std::make_optional<Acts::BoundTrackParameters>(fitAttempts.getTrack(fitAttempts.size() - 1ul).createParametersAtReference()) 
+                            : std::nullopt; 
                 std::unique_ptr<ActsTrk::MutableTrackContainer> fitTraject{};
-                if (nStation == 2ul && seed.nStations() == 3ul) {
-                    /// Try all pairs of stations with re-estimated start parameters
-                    ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Try all combinations of two stations.");
-                    fitTraject = fitBestStationPair();
-                } else {
-                    const Acts::BoundTrackParameters startPars = fitAttempts.size() > 0ul ?
-                            fitAttempts.getTrack(fitAttempts.size() - 1ul).createParametersAtReference() : *initialPars;
-                            
-                    measurements = collectMeasurements(tgContext, startPars, seed, nStation, auxMeasContainer);
-                    ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Include "<<nStation<<" stations.");
-                    fitTraject = m_trackFitTool->fit(measurements, startPars, 
-                                                     tgContext, mfContext, calContext, target);
+                switch (nStation) {
+                    case 2ul:
+                        fitTraject = fitBestCombination<2>(tgContext, mfContext, calContext, seed, startPars, auxMeasContainer);
+                        break;
+                    case 3ul:
+                        fitTraject = fitBestCombination<3>(tgContext, mfContext, calContext, seed, startPars, auxMeasContainer);
+                        break;
+                    case 4ul:
+                        fitTraject = fitBestCombination<4>(tgContext, mfContext, calContext, seed, startPars, auxMeasContainer);
+                        break;
+                    case 5ul:
+                        fitTraject = fitBestCombination<5>(tgContext, mfContext, calContext, seed, startPars, auxMeasContainer);
+                        break;
+                    case 6ul:
+                        fitTraject = fitBestCombination<6>(tgContext, mfContext, calContext, seed, startPars, auxMeasContainer);
+                        break;
+                    default:
+                        ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - A seven station track is extraordinary\n"<<seed);
                 }
-
                 if (!copyFit(std::move(fitTraject), nStation)) {
                     break;
                 }
@@ -362,9 +413,8 @@ namespace MuonR4{
          *  SegmentContainer from which the seeds are built */
         {
             fitAttempts.addColumn<std::vector<const xAOD::MuonSegment*>>("muonSegLinks");
-            auto appendMe = seed.segments();
             auto& toAppend = track.component<std::vector<const xAOD::MuonSegment*>>("muonSegLinks");
-            toAppend.insert(toAppend.end(), appendMe.begin(), appendMe.end());
+            toAppend.insert_range(toAppend.end(), seed.segments());
         }
         outContainer.ensureDynamicColumns(fitAttempts);
         auto destProxy = outContainer.getTrack(outContainer.addTrack());

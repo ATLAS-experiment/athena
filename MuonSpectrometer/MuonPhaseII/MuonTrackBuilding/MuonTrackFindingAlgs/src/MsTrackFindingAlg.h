@@ -16,12 +16,11 @@
 
 #include "xAODMuon/MuonSegmentContainer.h"
 #include "MuonTrackEvent/MsTrackSeed.h"
-#include "MuonRecToolInterfacesR4/ITrackSummaryTool.h"
-
 
 #include "ActsEvent/TrackContainer.h"
 #include "ActsEvent/ContextUtility.h"
 #include "ActsEvent/AuxiliaryMeasurementHandler.h"
+#include "ActsEvent/TrackContainerHandlesHelper.h"
 
 #include "ActsToolInterfaces/IFitterTool.h"
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
@@ -31,12 +30,20 @@
 #include "MuonRecToolInterfacesR4/ISpacePointCalibrator.h"
 #include "MuonRecToolInterfacesR4/ITrackVisualizationTool.h"
 #include "MuonRecToolInterfacesR4/ITrackSeedingTool.h"
-
-#include "ActsEvent/TrackContainerHandlesHelper.h"
-#include "GaudiKernel/SystemOfUnits.h"
+#include "MuonRecToolInterfacesR4/ITrackSummaryTool.h"
 
 
 namespace MuonR4{
+    /**  @brief The MSTrackFindingAlg combines the built MS segments to track seeds and then attempts to fit the hits on a seed. 
+     *          In the standard case, the track seed is formed by expressing all segments on a common virtual cylinder and 
+     *          to search for accumulation points on that surface. The SeedingTool is also repsonsible to provide an initial
+     *          estimate on the track parameters in terms of direction and trajectory curvature. The measurements are then 
+     *          extracted from the segments associated with the seed an a track fit is attempted. Failed seeds are retried 
+     *          by selecting any combination of N-1 segments and then to fit each of them. The best result is then
+     *          taken for the next iteration.
+     * 
+     *          Track candidates are then extrapolated to the Calorimeter exit volume to express the parameters there
+     *          Failed extrapolation cases may be discarded depending on the configuration. */
     class MsTrackFindingAlg : public AthReentrantAlgorithm {
         public:
             using AthReentrantAlgorithm::AthReentrantAlgorithm;
@@ -47,9 +54,11 @@ namespace MuonR4{
             virtual StatusCode initialize() override final;
             /** @brief Standard algorithm execution hook */
             virtual StatusCode execute(const EventContext& ctx) const override final;
-
+            /** @brief Abrivation for the result of bound track parameters */
             using OptBoundPars_t = Acts::Result<Acts::BoundTrackParameters>;
+            /** @brief Abrivation for a vector of measurements */
             using MeasVec_t = std::vector<const xAOD::UncalibratedMeasurement*>;
+            /** @brief Auxiliary object to create the pseudo measurements */
             using PseudoMeasHandle_t = ActsTrk::AuxiliaryMeasurementHandler::MeasurementProvider;
         private:
             /** @brief Attempts to fit the track seed candidate to a full track and returns whether the
@@ -69,17 +78,39 @@ namespace MuonR4{
                                   ActsTrk::MutableTrackContainer& outContainer,
                                   PseudoMeasHandle_t& auxMeasContainer) const;
             
-            
+            template <std::size_t N> 
+            std::unique_ptr<ActsTrk::MutableTrackContainer> 
+                fitBestCombination(const Acts::GeometryContext& tgContext,
+                                   const Acts::MagneticFieldContext& mfContext,
+                                   const Acts::CalibrationContext& calContext,
+                                   const MsTrackSeed& seed,
+                                   std::optional<Acts::BoundTrackParameters> startPars,
+                                   PseudoMeasHandle_t& auxMeasContainer) const;
+            /** @brief Collect all measurements from the segments associated with the seed
+             *         If there are less than 2 phi measurements auxiliary measurements are
+             *         inserted to stabilize the later fit result
+             *  @param tgContext: The geometry context to place later the auxiliary surface
+             *  @param startPars: The track start parameters in use
+             *  @param seed: The seed in use from which associated segments the measurments are taken
+             *  @param auxMeasContainer: Mutable refernce to the auxiliary container */
             MeasVec_t collectMeasurements(const Acts::GeometryContext& tgContext,
                                           const Acts::BoundTrackParameters& startPars,
                                           const MsTrackSeed& seed,
-                                          const std::size_t nStations,
                                           PseudoMeasHandle_t& auxMeasContainer) const;
-            /** @brief T */
+            /** @brief Evaluate whether the fit result is acceptable in terms of chi2   
+             *         and whether the fitted track contains precision hits on N stations
+             *  @param ctx: EventContext to access the conditions data in the track summary
+             *              evaluation
+             * @param fitResult: The fit container to test
+             * @param reqStation: The threshold on the number of stations that need to contain
+             *                     a precision hit.*/
             bool goodFit(const EventContext& ctx,
                          std::unique_ptr<ActsTrk::MutableTrackContainer>& fitResult,
                          const std::size_t reqStations) const;
-                         
+            /** @brief Extrapolate the tracks back to the calo exit and update the track parameters
+             *          accoringly. If the extrapolation fails, a false is returned
+             *  @param ctx: EventContext to access the GeometryContext and the magnetic field
+             *  @param track: The track to be expressed at the calorimeter entrance */            
             bool expressAtCaloExit(const EventContext& ctx,
                                    ActsTrk::MutableTrackContainer::TrackProxy track) const;
             /** @brief IdHelperSvc to decode the Identifiers */
@@ -112,6 +143,7 @@ namespace MuonR4{
             ToolHandle<MuonR4::ITrackSummaryTool> m_summaryTool{this, "SummaryTool" , ""};
             /** @brief Key to the output track container */
             SG::WriteHandleKey<ActsTrk::TrackContainer> m_writeKey{this, "TrackWriteKey", "MuonMsTracks"};
+
     };      
 }
 
