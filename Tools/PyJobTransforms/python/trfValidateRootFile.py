@@ -100,6 +100,23 @@ def checkNTupleEventWise(ntuple, printInterval = 150000):
 
     return 0
 
+def checkNTupleFieldWiseCluster(clusterDescriptor, subFields, model):
+    size = int(clusterDescriptor.GetNEntries())
+    if msg.isEnabledFor(logging.DEBUG):
+        msg.debug(f"    cluster #{clusterDescriptor.GetId()}"
+                  f" firstEntryIndex={clusterDescriptor.GetFirstEntryIndex()}"
+                  f" nEntries={size}")
+    clusterRange = ROOT.RNTupleLocalRange(clusterDescriptor.GetId(), 0, size)
+    for field in subFields:
+        if msg.isEnabledFor(logging.DEBUG):
+            msg.debug(f"fieldName={field.GetFieldName()} typeName={field.GetTypeName()}")
+        bulk = model.CreateBulk(field.GetFieldName())
+        values = bulk.ReadBulk(clusterRange)
+        if msg.isEnabledFor(logging.DEBUG):
+            msg.debug(f"        values array at {values}")
+        # Be sure that this gets destroyed before field.
+        del bulk
+    return
 def checkNTupleFieldWise(ntuple):
     """For each cluster, bulk read each top level field.
     """
@@ -119,22 +136,10 @@ def checkNTupleFieldWise(ntuple):
         fieldZero = model.GetConstFieldZero()
         subFields = fieldZero.GetConstSubfields()
         msg.debug(f"Top level fields number {subFields.size()}")
-        for clusterDescriptor in descriptor.GetClusterIterable():
-            size = int(clusterDescriptor.GetNEntries())
-            if msg.isEnabledFor(logging.DEBUG):
-                msg.debug(f"    cluster #{clusterDescriptor.GetId()}"
-                          f" firstEntryIndex={clusterDescriptor.GetFirstEntryIndex()}"
-                          f" nEntries={size}")
-            clusterRange = ROOT.RNTupleLocalRange(clusterDescriptor.GetId(), 0, size)
-            for field in subFields:
-                if msg.isEnabledFor(logging.DEBUG):
-                    msg.debug(f"fieldName={field.GetFieldName()} typeName={field.GetTypeName()}")
-                bulk = model.CreateBulk(field.GetFieldName())
-                values = bulk.ReadBulk(clusterRange)
-                if msg.isEnabledFor(logging.DEBUG):
-                    msg.debug(f"        values array at {values}")
-                # Be sure that this gets destroyed before field.
-                del bulk
+        for cg in descriptor.GetClusterGroupIterable():
+            for cid in cg.GetClusterIds():
+                clusterDescriptor = descriptor.GetClusterDescriptor(cid)
+                checkNTupleFieldWiseCluster(clusterDescriptor, subFields, model)
 
     except RException as err:
         from traceback import format_exception
