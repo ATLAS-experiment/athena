@@ -152,24 +152,22 @@ public:
 using IMCTruthClassifier::particleTruthClassifier;
   
 protected:
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::TruthParticle* thePart, IMCTruthClassifier::Info* infoin) const override final {
-    IMCTruthClassifier::Info tmpinfo;
-    IMCTruthClassifier::Info& info = (infoin) ? *infoin : tmpinfo;
-
+  virtual Result particleTruthClassifier(const EventContext& ctx, const xAOD::TruthParticle* thePart) const override final {
+    using namespace MCTruthPartClassifier;
     if (!thePart) {
-      return std::make_pair(MCTruthPartClassifier::Unknown, MCTruthPartClassifier::NonDefined);
+      return {Unknown, NonDefined, nullptr, UnknownOutCome};
     }
-    info.genPart = thePart;
 
     // retrieve collection and get a pointer
-    SG::ReadHandle<xAOD::TruthParticleContainer> truthParticleContainerReadHandle(m_truthParticleContainerKey, info.eventContext);
+    SG::ReadHandle<xAOD::TruthParticleContainer> truthParticleContainerReadHandle(m_truthParticleContainerKey, ctx);
     if (!truthParticleContainerReadHandle.isValid()) {
       ATH_MSG_WARNING(" Invalid ReadHandle for xAOD::TruthParticleContainer with key: " << truthParticleContainerReadHandle.key());
-      return std::make_pair(MCTruthPartClassifier::Unknown, MCTruthPartClassifier::NonDefined);
+      return {Unknown, NonDefined, thePart, UnknownOutCome};
     }
 
-    return MCTruthPartClassifier::classifyTruthParticle(*truthParticleContainerReadHandle, thePart, info.particleOutCome);
+    ParticleOutCome outCome = UnknownOutCome;
+    const auto [type, origin] = classifyTruthParticle(*truthParticleContainerReadHandle, thePart, outCome);
+    return {type, origin, thePart, outCome};
   }
 
 public:
@@ -178,24 +176,19 @@ public:
   const xAOD::TruthParticle* getGenPart(const xAOD::TrackParticle*) const;
 #ifndef XAOD_ANALYSIS
   //Main method for egamma clusters to Truth Particle association
-  const xAOD::TruthParticle* egammaClusMatch(const xAOD::CaloCluster*,bool,IMCTruthClassifier::Info* info) const;
+  const xAOD::TruthParticle* egammaClusMatch(const EventContext& ctx, const xAOD::CaloCluster*, bool isFwrdEle) const;
 #endif
 
 protected:
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::TrackParticle*,IMCTruthClassifier::Info* info) const override final;
+  virtual Result particleTruthClassifier(const EventContext& ctx, const xAOD::TrackParticle*) const override final;
 
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::Electron*,IMCTruthClassifier::Info* info) const override final;
+  virtual Result particleTruthClassifier(const EventContext& ctx, const xAOD::Electron*) const override final;
 
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::Photon*,IMCTruthClassifier::Info* info) const override final;
+  virtual Result particleTruthClassifier(const EventContext& ctx, const xAOD::Photon*) const override final;
 
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::Muon*,IMCTruthClassifier::Info* info) const override final;
+  virtual Result particleTruthClassifier(const EventContext& ctx, const xAOD::Muon*) const override final;
 
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::CaloCluster*,IMCTruthClassifier::Info* info) const override final;
+  virtual Result particleTruthClassifier(const EventContext& ctx, const xAOD::CaloCluster*) const override final;
 
 #endif
 

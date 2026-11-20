@@ -21,6 +21,7 @@
 #include <unordered_map>
 #include <vector>
 #include <optional>
+#include <tuple>
 
 #ifndef GENERATIONBASE
 #include "xAODCaloEvent/CaloClusterFwd.h"
@@ -34,71 +35,42 @@ class IMCTruthClassifier : virtual public asg::IAsgTool
 {
   ASG_TOOL_INTERFACE(IMCTruthClassifier)
 protected:
-  // Additional information that can be returned by the classifier.
-  // Originally, these were all held in member variables in the classifier,
-  // but that prevents the classifier methods from being made const.
-  class Info
-  {
-  public:
-    Info() : eventContext(Gaudi::Hive::currentContext()) {}
-    Info(const EventContext& ctx) : eventContext(ctx) {}
-
-    ~Info() = default;
-
-    const EventContext& eventContext;
-    const xAOD::TruthParticle* genPart = nullptr;
-
-    MCTruthPartClassifier::ParticleOutCome particleOutCome = MCTruthPartClassifier::UnknownOutCome;
-
-  };
+  // Full result of a classification: type, origin, the truth particle that was
+  // classified (for a reconstructed object, the one it was matched to) and its outcome.
+  using Result = std::tuple<MCTruthPartClassifier::ParticleType,
+                            MCTruthPartClassifier::ParticleOrigin,
+                            const xAOD::TruthParticle*,
+                            MCTruthPartClassifier::ParticleOutCome>;
 public:
   /** Virtual destructor */
   virtual ~IMCTruthClassifier() = default;
 
 // Methods for Truth Particle classification
 protected:
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::TruthParticle*, IMCTruthClassifier::Info* info) const = 0;
+  virtual Result particleTruthClassifier(const EventContext& ctx, const xAOD::TruthParticle*) const = 0;
 
 #ifndef GENERATIONBASE
   // Methods for Reco Particle classification
   // Rely on the Reco to Truth association and then the Truth classification
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::TrackParticle*, IMCTruthClassifier::Info* info) const = 0;
-
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::Electron*, IMCTruthClassifier::Info* info) const = 0;
-
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::Photon*, IMCTruthClassifier::Info* info) const = 0;
-
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::Muon*, IMCTruthClassifier::Info* info) const = 0;
-
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::CaloCluster*, IMCTruthClassifier::Info* info) const = 0;
-
+  virtual Result particleTruthClassifier(const EventContext& ctx, const xAOD::TrackParticle*) const = 0;
+  virtual Result particleTruthClassifier(const EventContext& ctx, const xAOD::Electron*) const = 0;
+  virtual Result particleTruthClassifier(const EventContext& ctx, const xAOD::Photon*) const = 0;
+  virtual Result particleTruthClassifier(const EventContext& ctx, const xAOD::Muon*) const = 0;
+  virtual Result particleTruthClassifier(const EventContext& ctx, const xAOD::CaloCluster*) const = 0;
 #endif
 public:
-  /// Returns more info than the particleTruthClassifier 
-  template <typename T> std::tuple<MCTruthPartClassifier::ParticleType, 
-                                   MCTruthPartClassifier::ParticleOrigin,
-                                   const xAOD::TruthParticle*, 
-                                   MCTruthPartClassifier::ParticleOutCome> 
-  particleTruthClassifier_full(const T* p, std::optional<std::reference_wrapper<const EventContext>> ctx = std::nullopt)  const {
-    IMCTruthClassifier::Info info = ctx ? IMCTruthClassifier::Info(ctx->get()) : IMCTruthClassifier::Info();
-    auto classification = particleTruthClassifier(p, &info);
-    return {classification.first,classification.second,info.genPart,info.particleOutCome};
+  /// Returns more info than the particleTruthClassifier
+  template <typename T> Result
+  particleTruthClassifier_full(const T* p, std::optional<std::reference_wrapper<const EventContext>> ctx = std::nullopt) const {
+    return particleTruthClassifier(ctx ? ctx->get() : Gaudi::Hive::currentContext(), p);
   }
 
-  template <typename T> std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>  
-  particleTruthClassifier(const T* p, std::optional<std::reference_wrapper<const EventContext>> ctx = std::nullopt) const 
+  template <typename T> std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
+  particleTruthClassifier(const T* p, std::optional<std::reference_wrapper<const EventContext>> ctx = std::nullopt) const
   {
-	  if (!ctx) return particleTruthClassifier(p, nullptr);
-	  IMCTruthClassifier::Info info(ctx->get());
-	  return particleTruthClassifier(p, &info);
+    const Result r = particleTruthClassifier_full(p, ctx);
+    return {std::get<0>(r), std::get<1>(r)};
   }
-
 };
 
 #endif // MCTRUTHCLASSIFIER_IMCTRUTHCLASSIFIER_H

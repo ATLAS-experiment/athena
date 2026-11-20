@@ -7,106 +7,91 @@
 #include "MCTruthClassifier/MCTruthClassifier.h"
 using namespace MCTruthPartClassifier;
 
-std::pair<ParticleType, ParticleOrigin>
-MCTruthClassifier::particleTruthClassifier(const xAOD::TrackParticle* trkPtr, IMCTruthClassifier::Info* info /*= nullptr*/) const
+IMCTruthClassifier::Result
+MCTruthClassifier::particleTruthClassifier(const EventContext& ctx, const xAOD::TrackParticle* trkPtr) const
 {
   ATH_MSG_DEBUG("Executing trackClassifier");
-  ParticleType parttype = Unknown;
-  ParticleOrigin partorig = NonDefined;
   const xAOD::TruthParticle* genPart = getGenPart(trkPtr);
-  if (info) info->genPart = genPart;
-  if (!genPart) return std::make_pair(parttype, partorig);
+  if (!genPart) return {Unknown, NonDefined, nullptr, UnknownOutCome};
   ATH_MSG_DEBUG("trackClassifier  succeeded ");
-  return particleTruthClassifier(genPart, info);
+  return particleTruthClassifier(ctx, genPart);
 }
 
-std::pair<ParticleType, ParticleOrigin>
-MCTruthClassifier::particleTruthClassifier(const xAOD::Electron* elec, IMCTruthClassifier::Info* info /*= nullptr*/) const
+IMCTruthClassifier::Result
+MCTruthClassifier::particleTruthClassifier(const EventContext& ctx, const xAOD::Electron* elec) const
 {
   ATH_MSG_DEBUG("Executing egamma electron Classifier");
-  ParticleType parttype = Unknown;
-  ParticleOrigin partorig = NonDefined;
   const xAOD::TruthParticle* genPart = nullptr;
   const xAOD::TrackParticle* trkPtr = elec->trackParticle();
   if (elec->author() != xAOD::EgammaParameters::AuthorFwdElectron ||trkPtr) {
     // Central electron or forward electron with track (when reco
     // implemented in the future)
     if (!trkPtr){
-      return std::make_pair(parttype, partorig);
+      return {Unknown, NonDefined, nullptr, UnknownOutCome};
     }
     genPart = getGenPart(trkPtr);
   } else {
 #ifndef XAOD_ANALYSIS // cluster matching available only in Athena
     const xAOD::CaloCluster* clus = elec->caloCluster();
-    genPart = egammaClusMatch(clus, true, info);
+    genPart = egammaClusMatch(ctx, clus, true);
 #else
     ATH_MSG_WARNING("Forward Electron classification using extrapolation to Calo is available only in Athena , check your enviroment. ");
 #endif
   }
 
-  if (info)  info->genPart = genPart;
-  if (!genPart) return std::make_pair(parttype, partorig);
+  if (!genPart) return {Unknown, NonDefined, nullptr, UnknownOutCome};
   ATH_MSG_DEBUG("egamma electron Classifier  succeeded ");
-  return particleTruthClassifier(genPart, info);
+  return particleTruthClassifier(ctx, genPart);
 }
 
-std::pair<ParticleType, ParticleOrigin>
-MCTruthClassifier::particleTruthClassifier(const xAOD::Photon* phot, IMCTruthClassifier::Info* info /*= nullptr*/) const
+IMCTruthClassifier::Result
+MCTruthClassifier::particleTruthClassifier(const EventContext& ctx, const xAOD::Photon* phot) const
 {
   ATH_MSG_DEBUG("Executing egamma photon Classifier");
-  ParticleType parttype = Unknown;
-  ParticleOrigin partorig = NonDefined;
   const xAOD::CaloCluster* clus = phot->caloCluster();
-  if (!clus) return std::make_pair(parttype, partorig);
-  if (std::fabs(clus->eta()) > 10.0 || std::fabs(clus->phi()) > 6.28 || (clus->et()) <= 0.)  return std::make_pair(parttype, partorig);
+  if (!clus) return {Unknown, NonDefined, nullptr, UnknownOutCome};
+  if (std::fabs(clus->eta()) > 10.0 || std::fabs(clus->phi()) > 6.28 || (clus->et()) <= 0.)  return {Unknown, NonDefined, nullptr, UnknownOutCome};
 
   const xAOD::TruthParticle* genPart = nullptr;
 #ifndef XAOD_ANALYSIS // Fwd electron available only in Athena
-  genPart = egammaClusMatch(clus, false, info);
+  genPart = egammaClusMatch(ctx, clus, false);
 #else
   ATH_MSG_WARNING("Photon  Classification using extrapolation to Calo is  available only in Athena , check your enviroment. ");
 #endif
-  if (!genPart) return std::make_pair(parttype, partorig);
-  if (info) info->genPart = genPart;
+  if (!genPart) return {Unknown, NonDefined, nullptr, UnknownOutCome};
   ATH_MSG_DEBUG("egamma photon  Classifier  succeeded ");
-  return particleTruthClassifier(genPart, info);
+  return particleTruthClassifier(ctx, genPart);
 }
 
-std::pair<ParticleType, ParticleOrigin>
-MCTruthClassifier::particleTruthClassifier(const xAOD::Muon* mu, IMCTruthClassifier::Info* info /*= nullptr*/) const
+IMCTruthClassifier::Result
+MCTruthClassifier::particleTruthClassifier(const EventContext& ctx, const xAOD::Muon* mu) const
 {
   ATH_MSG_DEBUG("Executing muon  Classifier");
-  ParticleType parttype = Unknown;
-  ParticleOrigin partorig = NonDefined;
   const xAOD::TrackParticle* trkPtr = mu->trackParticle(xAOD::Muon::TrackParticleType::Primary);
   
-  if (!trkPtr) return std::make_pair(parttype, partorig);
+  if (!trkPtr) return {Unknown, NonDefined, nullptr, UnknownOutCome};
 
   const xAOD::TruthParticle* genPart = getGenPart(trkPtr);
-  if (!genPart) return std::make_pair(parttype, partorig);
-  if (info) info->genPart = genPart;
+  if (!genPart) return {Unknown, NonDefined, nullptr, UnknownOutCome};
   ATH_MSG_DEBUG("muon Classifier  succeeded ");
-  return particleTruthClassifier(genPart, info);
+  return particleTruthClassifier(ctx, genPart);
 }
 
-std::pair<ParticleType, ParticleOrigin>
-MCTruthClassifier::particleTruthClassifier(const xAOD::CaloCluster* clus, IMCTruthClassifier::Info* info /*= nullptr*/) const
+IMCTruthClassifier::Result
+MCTruthClassifier::particleTruthClassifier(const EventContext& ctx, const xAOD::CaloCluster* clus) const
 {
   ATH_MSG_DEBUG("Executing egamma photon Classifier with cluster Input");
-  ParticleType parttype = Unknown;
-  ParticleOrigin partorig = NonDefined;
-  if (!clus) return std::make_pair(parttype, partorig);
-  if (std::fabs(clus->eta()) > 10.0 || std::fabs(clus->phi()) > M_PI || (clus->et()) <= 0.) return std::make_pair(parttype, partorig);
+  if (!clus) return {Unknown, NonDefined, nullptr, UnknownOutCome};
+  if (std::fabs(clus->eta()) > 10.0 || std::fabs(clus->phi()) > M_PI || (clus->et()) <= 0.) return {Unknown, NonDefined, nullptr, UnknownOutCome};
   const xAOD::TruthParticle* genPart = nullptr;
 #ifndef XAOD_ANALYSIS // Fwd electron available only in Athena
-  genPart = egammaClusMatch(clus, false, info);
+  genPart = egammaClusMatch(ctx, clus, false);
 #else
   ATH_MSG_WARNING("Cluster  Classification using extrapolation to Calo is available only in Athena , check your enviroment. ");
 #endif
-  if (!genPart) return std::make_pair(parttype, partorig);
+  if (!genPart) return {Unknown, NonDefined, nullptr, UnknownOutCome};
   ATH_MSG_DEBUG("Calo Cluster  Classifier  succeeded ");
-  if (info) info->genPart = genPart;
-  return particleTruthClassifier(genPart, info);
+  return particleTruthClassifier(ctx, genPart);
 }
 
 const xAOD::TruthParticle*
