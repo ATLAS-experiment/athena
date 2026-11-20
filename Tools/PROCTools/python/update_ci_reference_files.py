@@ -353,7 +353,7 @@ def strip_href(href):
     value = value[:value.find('<')]
     return value
 
-def process_CI_Builds_Summary(project):
+def process_CI_Builds_Summary(project, api_token):
     # Each entry is one column in the table. 11th is the tests column.
     # URL to tests page is in form: 
     # <a href="/testsview/?nightly=MR-CI-builds&rel=MR-66303-2023-10-10-19-08&ar=x86_64-centos7-gcc112-opt&proj=AthGeneration">0 (0)</a>
@@ -363,19 +363,23 @@ def process_CI_Builds_Summary(project):
     if test_error_counts > 0:
         # Okay, we have an error!
         project_url = 'https://bigpanda.cern.ch'+strip_url(project[11])
-        headers = {'Accept': 'application/json'} 
+        headers = {
+            'Authorization': f"Token {api_token}",
+            'Accept': 'application/json'}
         r = requests.get(project_url+'&json', headers=headers)
         data = r.json()["rows_s"]
         process_CI_Tests_json(data[1:])
 
-def extract_links_from_json(url):
-    headers = {'Accept': 'application/json'} 
+def extract_links_from_json(url, api_token):
+    headers = {
+        'Authorization': f"Token {api_token}",
+        'Accept': 'application/json'}
     r = requests.get(url+'&json', headers=headers)
     data = r.json()["rows_s"]
     # First row is header. 
     # Currently this is: 'Release', 'Platform', 'Project', 'git branch<BR>(link to MR)', 'Job time stamp', 'git clone', 'Externals build', 'CMake config', 'Build time', 'Comp. Errors (w/warnings)', 'Test time', 'CI tests errors (w/warnings)', 'Host'
     for project in data[1:]:
-        process_CI_Builds_Summary(project)
+        process_CI_Builds_Summary(project, api_token)
 
 
 def handle_shared_refs():
@@ -445,6 +449,7 @@ if __name__ == '__main__':
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('url', help='URL to CITest (put in quotes))')
     parser.add_argument('--test-run',help='Update local text files, but do not actually touch EOS.', action='store_true')
+    parser.add_argument('--token',help='Personal API token of the Release Coordinator, to retrieve from https://bigpanda.cern.ch/profile/', type=str)
     args = parser.parse_args()
     print('Update reference files for URL: {}'.format(args.url))
  
@@ -458,7 +463,7 @@ if __name__ == '__main__':
         print(' -> Running in test mode so will not touch EOS, but will only modify files locally (these changes can easily be reverted with "git checkout" etc).')
     
     print('========================')
-    extract_links_from_json(args.url)
+    extract_links_from_json(args.url, args.token)
     handle_shared_refs()
     mr_url = summarise_failing_tests(not args.test_run)
     if not mr_url:
