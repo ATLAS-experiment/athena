@@ -6,6 +6,7 @@
 #include "StoreGate/WriteDecorHandle.h"
 #include "TruthUtils/HepMCHelpers.h"
 
+#include <algorithm>
 #include <format>
 #include <limits>
 #include <set>
@@ -516,7 +517,8 @@ void TruthParentDecoratorAlg::addTruthContainer(Barcodex& barcodex,IPMap& ipmap,
   // insert a particle into the record, return the child set
   // ATLASRECTS-8290: this should be replaced with ->uid()
   auto insert = [this, &barcodex, &ipmap](const auto* p) -> auto& {
-    ipmap[m_uid(*p)].insert(p);
+    auto& dups = ipmap[m_uid(*p)];
+    if (std::ranges::find(dups, p) == dups.end()) dups.push_back(p);
     return barcodex[m_uid(*p)];
   };
 
