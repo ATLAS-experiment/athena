@@ -67,7 +67,8 @@ class CorrectPFOTool : public JetConstituentModifierBase{
   ToolHandle<CP::IWeightPFOTool> m_weightPFOTool;
 
   SG::ReadHandleKey<xAOD::VertexContainer> m_vertexContainer_key;
-  SG::ReadDecorHandleKey<xAOD::IParticleContainer> m_constituentCopyIndexKey{this, "ConstituentCopyIndexKey", "ConstituentCopyIndex", "Decoration storing the index of the vertex associated with each neutral PFO copy"};
+  Gaudi::Property<std::string> m_constituentCopyIndexDecor{this, "ConstituentCopyIndexDecor", "ConstituentCopyIndex", "Decoration storing the index of the vertex associated with each neutral PFO copy"};
+  SG::ReadDecorHandleKey<xAOD::IParticleContainer> m_constituentCopyIndexKey{this, "ConstituentCopyIndexKey", "", "Decoration storing the index of the vertex associated with each neutral PFO copy"};
   
 };
 
