@@ -623,7 +623,7 @@ inline bool CaloTopoClusterMaker::passCellTimeCut(const CaloCell* pCell, const C
 	  if ( pNCell ) {
 	    if ( pNCell->energy() > m_xtalk2Eratio1*pCell->energy() ) {
 	      if ( (!(pNCell->provenance() & pmask)) || std::abs(pNCell->time()) < m_seedThresholdOnTAbs) {
-		isInTime = ((pCell->time() > -m_seedThresholdOnTAbs) && (pCell->time() < m_seedThresholdOnTAbs + m_xtalkDeltaT));
+		isInTime = ((pCell->time() > -m_seedThresholdOnTAbs) && (pCell->time() < m_seedThresholdOnTAbs + m_xtalkDeltaT.value()));
 		if ( isInTime ) {
 		  // exit after first phi neighbour in case that already made
 		  // the time-cut pass
@@ -642,7 +642,7 @@ inline bool CaloTopoClusterMaker::passCellTimeCut(const CaloCell* pCell, const C
                 if (p2NCell) {
                   if (p2NCell->energy() > m_xtalk2Eratio2*pCell->energy()) {
                       if ( (!(p2NCell->provenance() & pmask)) || std::abs(p2NCell->time()) < m_seedThresholdOnTAbs) {
-                          isInTime = ((pCell->time() > -m_seedThresholdOnTAbs) && (pCell->time() < m_seedThresholdOnTAbs + m_xtalkDeltaT));
+                          isInTime = ((pCell->time() > -m_seedThresholdOnTAbs) && (pCell->time() < m_seedThresholdOnTAbs + m_xtalkDeltaT.value()));
                           if (isInTime) break;
                       }
                   }
@@ -665,7 +665,7 @@ inline bool CaloTopoClusterMaker::passCellTimeCut(const CaloCell* pCell, const C
             if ( pNCell ) {
                 if ( pNCell->energy() > m_xtalkEtaEratio*pCell->energy() ) {
                  if ( (!(pNCell->provenance() & pmask)) || std::abs(pNCell->time()) < m_seedThresholdOnTAbs) {
-                    isInTime = ((pCell->time() > -m_seedThresholdOnTAbs) && (pCell->time() < m_seedThresholdOnTAbs + m_xtalkDeltaT));
+                    isInTime = ((pCell->time() > -m_seedThresholdOnTAbs) && (pCell->time() < m_seedThresholdOnTAbs + m_xtalkDeltaT.value()));
                     if ( isInTime ) {
                      // exit after first phi neighbour in case that already made
                      // the time-cut pass
@@ -688,7 +688,7 @@ inline bool CaloTopoClusterMaker::passCellTimeCut(const CaloCell* pCell, const C
            if ( pNCell ) {
                if ( pNCell->energy() > m_xtalk2DEratio*pCell->energy() ) {
                    if ( (!(pNCell->provenance() & pmask)) || std::abs(pNCell->time()) < m_seedThresholdOnTAbs) {
-                        isInTime = ((pCell->time() > -m_seedThresholdOnTAbs) && (pCell->time() < m_seedThresholdOnTAbs + m_xtalkDeltaT));
+                        isInTime = ((pCell->time() > -m_seedThresholdOnTAbs) && (pCell->time() < m_seedThresholdOnTAbs + m_xtalkDeltaT.value()));
                         if ( isInTime )  break;
                    }
                }
@@ -708,7 +708,7 @@ inline bool CaloTopoClusterMaker::passCellTimeCut(const CaloCell* pCell, const C
            if ( pNCell ) {
             if ( pNCell->energy() > m_xtalk3Eratio*pCell->energy() ) {
               if ( (!(pNCell->provenance() & pmask)) || std::abs(pNCell->time()) < m_seedThresholdOnTAbs) {
-                 isInTime = ((pCell->time() > -m_seedThresholdOnTAbs) && (pCell->time() < m_seedThresholdOnTAbs + m_xtalkDeltaT));
+                 isInTime = ((pCell->time() > -m_seedThresholdOnTAbs) && (pCell->time() < m_seedThresholdOnTAbs + m_xtalkDeltaT.value()));
                  if (isInTime) break;
               }   
             }  // Eratio cut at 10
