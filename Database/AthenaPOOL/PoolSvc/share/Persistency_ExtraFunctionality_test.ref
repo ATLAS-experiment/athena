@@ -1,7 +1,7 @@
 Persistency_Ext...    INFO Creating FileCatalog
 Persistency_Ext...    INFO Starting test
 Persistency_Ext...    INFO Loading shared libraries:
-Persistency_Ext...    INFO  - loading library test_TestDictionaryDict
+Persistency_Ext...    INFO  - loading library test_PoolSvcTestDictionaryDict
 Persistency_Ext...    INFO Writing objects in the database using ROOT_Key storage type.
 Persistency_Ext...    INFO Creating the persistency service
 Persistency_Ext...    INFO Writing 100 TestClassSTLContainersExt objects

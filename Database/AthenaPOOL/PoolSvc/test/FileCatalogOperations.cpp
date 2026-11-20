@@ -46,7 +46,7 @@ TestDriver::TestDriver( const std::string& catname )
 int TestDriver::execute()
 {
   ATH_MSG_INFO("Starting test");
-  loadLibraries( {"test_TestDictionaryDict"} );
+  loadLibraries( {"test_PoolSvcTestDictionaryDict"} );
 
   ATH_MSG_INFO("Writing objects in the database.");
   write();

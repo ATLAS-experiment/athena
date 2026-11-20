@@ -2,6 +2,7 @@
 
 # Declare the package name:
 atlas_subdir( PoolSvc )
+find_package( CppUnit )
 
 
 atlas_add_library( PoolSvcLib
@@ -36,7 +37,7 @@ atlas_add_test( FCcmd
 set( _testDictDir ${CMAKE_CURRENT_SOURCE_DIR}/test/TestDictionary )
 
 # dictionary with basic classes for the tests
-atlas_add_dictionary( test_TestDictionaryDict
+atlas_add_dictionary( test_PoolSvcTestDictionaryDict
    test/TestDictionary/dict_all.h 
    test/TestDictionary/classes.xml
    INCLUDE_DIRS ${_testDictDir}
@@ -54,7 +55,7 @@ function( _add_test name )
       ENVIRONMENT "ROOT_INCLUDE_PATH=$ENV{ROOT_INCLUDE_PATH}:${_testDictDir}"
       PROPERTIES TIMEOUT 300
       LOG_IGNORE_PATTERN "POOL_CATALOG is not defined|using default|New file created|FID|0x[0-9a-f]{4,}|APRFileCatalog.*DEBUG|RNTuple.*(DEBUG|VERBOSE)"
-      DEPENDS test_TestDictionaryDict $ARG_DEPENDS )
+      DEPENDS test_PoolSvcTestDictionaryDict ${ARG_DEPENDS} )
 endfunction( _add_test )
 
 _add_test( Persistency_Functionality )

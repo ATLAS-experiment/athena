@@ -36,7 +36,7 @@ TestDriver::TestDriver(const std::string& filename, const std::string& catname)
 int TestDriver::execute()
 {
    ATH_MSG_INFO( "Starting test" );
-   loadLibraries( {"test_TestDictionaryDict"} );
+   loadLibraries( {"test_PoolSvcTestDictionaryDict"} );
 
    ATH_MSG_INFO( "Writing parameters in the database." );
    write();
