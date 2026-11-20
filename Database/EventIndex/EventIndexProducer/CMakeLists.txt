@@ -11,20 +11,6 @@ find_package( jmespath )
 find_package( s3transfer )
 find_package( stomppy )
 
-# Set up a custom script that could run protoc in an environment not yet set
-# up for running it. And then update the protobuf::protoc imported target
-# (created by FindProtobuf.cmake) to use this script instead of the executable
-# itself.
-if( Protobuf_FOUND )
-   set( _customProtocScript
-      "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/atlas_protoc.sh" )
-   configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/cmake/atlas_protoc.sh.in"
-      "${_customProtocScript}" @ONLY )
-   set_target_properties( protobuf::protoc PROPERTIES
-      IMPORTED_LOCATION "${_customProtocScript}" )
-   unset( _customProtocScript )
-endif()
-
 # Generate and install the EventIndex proto file(s).
 if( Protobuf_FOUND )
    protobuf_generate(
