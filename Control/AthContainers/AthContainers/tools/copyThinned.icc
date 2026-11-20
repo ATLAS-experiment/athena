@@ -149,7 +149,7 @@ copyThinned1 (const CONTAINER& orig,
  */
 template <class CONTAINER>
 std::unique_ptr<CONTAINER>
-copyThinned (CONTAINER& orig,
+copyThinned (const CONTAINER& orig,
              const SG::ThinningInfo* info)
 {
   return copyThinned1 (orig, &orig, info);
