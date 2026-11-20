@@ -459,12 +459,22 @@ def generate_from_gridpack(runArgs=None, flags=None, extlhapath=None, gridpack_c
             mglog.info('Found '+MADGRAPH_GRIDPACK_LOCATION+'/bin/gridrun, starting generation.')
         generate_prep(MADGRAPH_GRIDPACK_LOCATION)
         granularity=1
-        mglog.info("Now generating {} events with random seed {} and granularity {}".format(int(nevents),int(random_seed),granularity))
+        mg5_version_tuple = tuple(map(int, get_mg5_version().split(".")))
+        if mg5_version_tuple[:3] > (3, 6, 2):
+          nprocs = int(os.environ['ATHENA_CORE_NUMBER'])
+          # Hard-coded for now to match previous defaults; to be configured programmaticaly
+          maxevts = 2500
+          mglog.info("Now generating {} events with random seed {}, granularity {}, nprocs {}, and maxevts {}".format(int(nevents),int(random_seed),granularity,nprocs,maxevts))
+        else:
+          mglog.info("Now generating {} events with random seed {} and granularity {}".format(int(nevents),int(random_seed),granularity))
         # not sure whether this is needed but it is done in the old "run.sh" script
         new_ld_path=":".join([os.environ['LD_LIBRARY_PATH'],os.getcwd()+'/'+MADGRAPH_GRIDPACK_LOCATION+'/madevent/lib',os.getcwd()+'/'+MADGRAPH_GRIDPACK_LOCATION+'/HELAS/lib'])
         os.environ['LD_LIBRARY_PATH']=new_ld_path
         MADGRAPH_COMMAND_STACK+=["export LD_LIBRARY_PATH="+":".join(['${LD_LIBRARY_PATH}',new_ld_path])]
-        generate = stack_subprocess([python,MADGRAPH_GRIDPACK_LOCATION+'/bin/gridrun',str(int(nevents)),str(int(random_seed)),str(granularity)],stdin=subprocess.PIPE,stderr=subprocess.PIPE if _should_catch_errors() else None)        
+        if mg5_version_tuple[:3] > (3, 6, 2):
+          generate = stack_subprocess([python,MADGRAPH_GRIDPACK_LOCATION+'/bin/gridrun',str(int(nevents)),str(int(random_seed)),str(granularity),str(nprocs),str(maxevts)],stdin=subprocess.PIPE,stderr=subprocess.PIPE if _should_catch_errors() else None)
+        else:
+          generate = stack_subprocess([python,MADGRAPH_GRIDPACK_LOCATION+'/bin/gridrun',str(int(nevents)),str(int(random_seed)),str(granularity)],stdin=subprocess.PIPE,stderr=subprocess.PIPE if _should_catch_errors() else None)
         (out,err) = generate.communicate()
         error_check(err,generate.returncode)
         gp_events=MADGRAPH_GRIDPACK_LOCATION+"/Events/GridRun_{}/unweighted_events.lhe.gz".format(int(random_seed))
