@@ -137,6 +137,7 @@ private:
 StatusCode convertMeasurementsOnGPU(
     cudaStream_t stream
   , vecmem::memory_resource & mr
+  , vecmem::memory_resource & host_mr
   , vecmem::copy const & copy
   , traccc::itk_detector::view_type const & detector_view
   , traccc::detector_conditions_description::const_view const & detector_conditions_view

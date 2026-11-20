@@ -124,6 +124,7 @@ __global__ void convertTracccToAthenaMeasurements(
 StatusCode convertMeasurementsOnGPU(
     cudaStream_t stream
   , vecmem::memory_resource & mr
+  , vecmem::memory_resource & host_mr
   , vecmem::copy const & copy
   , traccc::itk_detector::view_type const & detector_view
   , traccc::detector_conditions_description::const_view const & detector_conditions_view
@@ -176,25 +177,27 @@ StatusCode convertMeasurementsOnGPU(
 
   // Rretrieve counts from indices last value + last value
   // (exclusive scan: last value is sum_0^(last-1))
-  unsigned int last_pixel_value = 0, last_strip_value = 0;
-  CUDA_ERROR_CHECK(cudaMemcpy(&output_n_pixels,
+  // Allocate pinned memory to do the async transfers
+  vecmem::data::vector_buffer<unsigned int> last_count_buffer(4, host_mr);
+  unsigned int * const last_pixel = last_count_buffer.ptr();
+  unsigned int * const last_strip = last_count_buffer.ptr() + 1;
+  unsigned int * const count_pixel = last_count_buffer.ptr() + 2;
+  unsigned int * const count_strip = last_count_buffer.ptr() + 3;
+  CUDA_ERROR_CHECK(cudaMemcpyAsync(count_pixel,
     &index_pixels_device[nb_measurements - 1],
-    sizeof(unsigned int),
-    cudaMemcpyDeviceToHost));
-  CUDA_ERROR_CHECK(cudaMemcpy(&output_n_strips,
+    sizeof(unsigned int), cudaMemcpyDeviceToHost, stream));
+  CUDA_ERROR_CHECK(cudaMemcpyAsync(count_strip,
     &index_strips_device[nb_measurements - 1],
-    sizeof(unsigned int),
-    cudaMemcpyDeviceToHost));
-  CUDA_ERROR_CHECK(cudaMemcpy(&last_pixel_value,
+    sizeof(unsigned int), cudaMemcpyDeviceToHost, stream));
+  CUDA_ERROR_CHECK(cudaMemcpyAsync(last_pixel,
     state_pixels.ptr() +  nb_measurements - 1,
-    sizeof(unsigned int),
-    cudaMemcpyDeviceToHost));
-  CUDA_ERROR_CHECK(cudaMemcpy(&last_strip_value,
+    sizeof(unsigned int), cudaMemcpyDeviceToHost, stream));
+  CUDA_ERROR_CHECK(cudaMemcpyAsync(last_strip,
     state_strips.ptr() +  nb_measurements - 1,
-    sizeof(unsigned int),
-    cudaMemcpyDeviceToHost));
-  output_n_pixels += last_pixel_value;
-  output_n_strips += last_strip_value;
+    sizeof(unsigned int), cudaMemcpyDeviceToHost, stream));
+  CUDA_ERROR_CHECK(cudaStreamSynchronize(stream));
+  output_n_pixels = *count_pixel + *last_pixel;
+  output_n_strips = *count_strip + *last_strip;
 
   // Allocate output buffer now that we now their size
   output_pixel_meas = std::make_unique<DevicePixelMeasurementContainer::buffer>(output_n_pixels, mr);
