@@ -49,7 +49,9 @@ T_AthenaPoolxAODCnv<XAOD, TPCNVS...>::createPersistentWithKey( XAOD* trans,
 {
   AthenaPoolCnvSvc::debugCreatePersistent (ClassID_traits<XAOD>::ID());
   const SG::ThinningInfo* info = SG::getThinningInfo (key);
-  return SG::copyThinned (*trans, info).release();
+  const XAOD* copy = SG::copyThinnedConst (*trans, info).release();
+  XAOD* copy_nc ATLAS_THREAD_SAFE = const_cast<XAOD*>(copy);
+  return copy_nc;
 }
 
 

@@ -57,7 +57,7 @@ namespace SG {
  */
 template <class CONTAINER>
 std::unique_ptr<CONTAINER>
-copyThinned (CONTAINER& orig,
+copyThinned (const CONTAINER& orig,
              const SG::ThinningInfo* info);
 
 
