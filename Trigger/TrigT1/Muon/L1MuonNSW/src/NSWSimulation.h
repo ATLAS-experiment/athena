@@ -21,8 +21,16 @@
  * @class NSWSimulation
  * @brief Algorithm to process New Small Wheel digits and produce Run 4 L1Muon trigger candidates.
  *
- * It runs the MM trigger processor emulation (MMTriggerTool) and, for the moment, still writes
- * dummy candidates. The encoding of the MM candidates into the output is the next step.
+ * Run 4 counterpart of the Run 3 NSWL1::NSWL1Simulation: it calls the MM trigger tool
+ * (and later the sTGC one) and encodes every candidate into one L1NSWCandData segment word.
+ *
+ * Like Run 3, all candidates are written: no duplicate removal and no cap at 8 per board and BC.
+ * The frame header fields are:
+ *   boardID     = 16*side + (sector-1)  (provisional, see NSWEncoding.h)
+ *   fiberID     = 0                     (the 2-fibre split is not emulated)
+ *   l1NSegments = number of segments written for this (boardID, BC), may exceed 4
+ *   l1Overflow  = that number > 8, i.e. the hardware would have overflowed
+ *   l1Bcid      = BC of the candidate as in Run 3 (strip-time BC, not an LHC BCID)
  */
 
 namespace L1Muon {
@@ -49,6 +57,13 @@ namespace L1Muon {
     Gaudi::Property<bool> m_doMM{this, "DoMM", true, "Run the MM trigger simulation"};
     ToolHandle<L1MM::IL1MMTriggerTool> m_mmTrigger{this, "MMTriggerTool", "L1Muon::L1MM::MMTriggerTool",
                                                    "Tool simulating the MM trigger processor"};
+
+    /// Segment encoding (Run 4 interface document, EDMS 2377909, Section 4.2)
+    Gaudi::Property<double> m_dThetaStep{this, "DThetaStep", 0.001, "Delta theta LSB [rad]"};
+    Gaudi::Property<double> m_dThetaRange{this, "DThetaRange", 0.015,
+                                          "|Delta theta| covered by the 4 magnitude bits [rad] (Run 3: +-15 mrad)"};
+    Gaudi::Property<unsigned int> m_maxSegmentsPerBoard{this, "MaxSegmentsPerBoard", 8,
+                                                        "Hardware capacity per board and BC, used for l1Overflow only"};
 
     ToolHandle<GenericMonitoringTool> m_monTool{this, "MonTool", "", "Monitoring Tool"};
   };

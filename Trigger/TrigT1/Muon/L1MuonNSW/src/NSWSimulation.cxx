@@ -3,11 +3,15 @@
 */
 
 #include "NSWSimulation.h"
+#include "NSWEncoding.h"
 
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
 
+#include <algorithm>
+#include <map>
 #include <memory>
+#include <utility>
 #include <vector>
 
 namespace L1Muon {
@@ -42,7 +46,7 @@ namespace L1Muon {
     ATH_MSG_DEBUG("Number of sTGC Digits: " << stgcDigits->size());
     ATH_MSG_DEBUG("Number of NSW Digits: " << (mmDigits->size() + stgcDigits->size()));
 
-    // MM trigger. The candidates are not written yet: the encoding into the output comes next.
+    // MM trigger
     std::vector<L1MM::MMCandidate> mmCandidates;
     if (m_doMM) {
       ATH_CHECK(m_mmTrigger->runTrigger(ctx, mmCandidates, nullptr));
@@ -55,48 +59,50 @@ namespace L1Muon {
     auto nMMCandidates = Monitored::Scalar<unsigned int>("nMMCandidates", mmCandidates.size());
     Monitored::Group(m_monTool, nMMDigits, nsTGCDigits, nMMCandidates);
 
+    // Group the candidates per (boardID, BC), keeping the order of the trigger tool.
+    // No duplicate removal, no cap: every candidate becomes one segment (as in Run 3).
+    std::map<std::pair<uint16_t, int>, std::vector<const L1MM::MMCandidate*>> frames;
+    for (const L1MM::MMCandidate& cand : mmCandidates) {
+      frames[{NSWEncoding::boardID(cand.sectorPhi, cand.side == L1MM::SideType::C), cand.BC}].push_back(&cand);
+    }
+
     SG::WriteHandle<xAOD::L1NSWCandDataContainer> output(m_outputKey, ctx);
 
     auto container = std::make_unique<xAOD::L1NSWCandDataContainer>();
     auto auxContainer = std::make_unique<xAOD::L1NSWCandDataAuxContainer>();
     container->setStore(auxContainer.get());
 
-    // Dummy candidates
-    xAOD::L1NSWCandData* cand0 = container->push_back(std::make_unique<xAOD::L1NSWCandData>());
-    cand0->setL1Bcid(ctx.eventID().bunch_crossing_id());
-    cand0->setL1NSegments(2);
-    cand0->setL1Overflow(false);
-    cand0->setBoardID(1);
-    cand0->setFiberID(0);
-    cand0->setSegment(100, 50, 2, 4);
+    unsigned int nDthOutOfRange{0}, nEtaOutOfRange{0}, nOverflowFrames{0};
+    for (const auto& [frameKey, cands] : frames) {
+      const auto& [board, bc] = frameKey;
+      const unsigned int nSeg = cands.size();
+      const bool overflow = nSeg > m_maxSegmentsPerBoard;
+      if (overflow) ++nOverflowFrames;
 
-    xAOD::L1NSWCandData* cand1 = container->push_back(std::make_unique<xAOD::L1NSWCandData>());
-    cand1->setL1Bcid(ctx.eventID().bunch_crossing_id());
-    cand1->setL1NSegments(2);
-    cand1->setL1Overflow(false);
-    cand1->setBoardID(1);
-    cand1->setFiberID(0);
-    cand1->setSegment(250, 120, 5, 3);
+      for (const L1MM::MMCandidate* cand : cands) {
+        bool etaOk{true}, dthOk{true};
+        const uint16_t etaIdx = NSWEncoding::etaIndex(cand->eta, etaOk);
+        const uint16_t phiIdx = NSWEncoding::phiIndex(cand->phiGlobal);
+        const uint8_t dthIdx = NSWEncoding::dthetaIndex(cand->dtheta, m_dThetaStep, m_dThetaRange, dthOk);
+        if (!etaOk) ++nEtaOutOfRange;
+        if (!dthOk) ++nDthOutOfRange;
 
-    if (msgLvl(MSG::DEBUG)) {
-      uint16_t eta0  = cand0->segEtaIndex();
-      uint16_t phi0  = cand0->segPhiIndex();
-      uint8_t  dth0  = cand0->segDeltaThetaIndex();
-      uint8_t  qual0 = cand0->segQuality();
-
-      uint16_t eta1  = cand1->segEtaIndex();
-      uint16_t phi1  = cand1->segPhiIndex();
-      uint8_t  dth1  = cand1->segDeltaThetaIndex();
-      uint8_t  qual1 = cand1->segQuality();
-
-      ATH_MSG_DEBUG("Verification check:"
-		    << "\n  Cand0 -> Eta: " << eta0 << ", Phi: " << phi0
-		    << ", DeltaTheta: " << static_cast<int>(dth0) << ", Quality: " << static_cast<int>(qual0)
-		    << "\n  Cand1 -> Eta: " << eta1 << ", Phi: " << phi1
-		    << ", DeltaTheta: " << static_cast<int>(dth1) << ", Quality: " << static_cast<int>(qual1));
+        xAOD::L1NSWCandData* seg = container->push_back(std::make_unique<xAOD::L1NSWCandData>());
+        // Frame header fields (identical for all segments of this (board, BC))
+        seg->setL1Bcid(static_cast<uint16_t>(bc) & 0xFFF);
+        seg->setBoardID(board);
+        seg->setFiberID(0);
+        seg->setL1NSegments(static_cast<uint8_t>(std::min(nSeg, 255u)));
+        seg->setL1Overflow(overflow);
+        // The segment
+        seg->setSegment(etaIdx, phiIdx, dthIdx, NSWEncoding::kQualityMM);
+      }
     }
-    ATH_MSG_DEBUG(*cand0);
-    ATH_MSG_DEBUG(*cand1);
+
+    ATH_MSG_DEBUG("NSW segments: " << container->size() << " written in " << frames.size() << " (board, BC) frames"
+                  << ", frames with > " << m_maxSegmentsPerBoard.value() << " segments: " << nOverflowFrames
+                  << ", |dtheta| out of range (saturated): " << nDthOutOfRange
+                  << ", eta out of range: " << nEtaOutOfRange);
 
     ATH_CHECK(output.record(std::move(container), std::move(auxContainer)));
 
