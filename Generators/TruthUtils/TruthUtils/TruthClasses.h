@@ -133,11 +133,11 @@ namespace MCTruthPartClassifier {
 
   /**
    * @brief Outcome of a (simulated) truth particle: what happened to it after being produced,
-   * determined from its decay or end vertex (second member of IMCTruthClassifier::Info).
+   * determined from its decay or end vertex (fourth member of IMCTruthClassifier::Result).
    * The defOutComeOf<X> functions in TruthClassifiers.h assign it for electrons, muons, taus and photons.
    */
   enum ParticleOutCome : unsigned int {
-    NonDefinedOutCome  =  0, ///< UNUSED: never assigned; the default of IMCTruthClassifier::Info::particleOutCome is UnknownOutCome
+    NonDefinedOutCome  =  0, ///< UNUSED: never assigned; the default of the outcome of IMCTruthClassifier::Result is UnknownOutCome
     UnknownOutCome     =  1, ///< End vertex exists, but its content matches none of the patterns below
     UnConverted        =  2, ///< Photon without an end vertex: it did not convert
     Converted          =  3, ///< Photon converted: end vertex has exactly one e+ and one e-
