@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -23,6 +23,9 @@ template <class S>
 class SurfaceDeleter
 {
 public:
+  SurfaceDeleter() = default;
+  template <class U>
+  SurfaceDeleter (const SurfaceDeleter<U>&) {}
   void operator() (const S* p) { 
     if (p && p->isFree()) { delete p; }
   }
