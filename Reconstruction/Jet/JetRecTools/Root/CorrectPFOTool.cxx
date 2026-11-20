@@ -49,16 +49,24 @@ StatusCode CorrectPFOTool::initialize() {
     ATH_MSG_INFO("Running CorrectPFOTool by vertex:" << m_doByVertex);
   }
 
-  ATH_CHECK(m_constituentCopyIndexKey.initialize(m_doByVertex));
+  if(!m_constituentCopyIndexKey.key().empty()) {
+    ATH_MSG_ERROR("CorrectPFOTool: ConstituentCopyIndexKey is not empty: " << m_constituentCopyIndexKey.key() << " Use ConstituentCopyIndexDecor to set decoration!");
+    return StatusCode::FAILURE;
+  }
+
+  if (!m_doByVertex) {
+    renounce(m_constituentCopyIndexKey);
+  }
+
   
   return StatusCode::SUCCESS;
 }
 
 StatusCode CorrectPFOTool::configure_decor_handle_keys() {
   if(m_doByVertex){
-    ATH_CHECK(
-      m_constituentCopyIndexKey.assign(
-        m_outputNeutralContainer + "." + m_constituentCopyIndexKey.key()));
+    ATH_CHECK(m_constituentCopyIndexKey.assign(
+      m_outputNeutralContainer + "." + m_constituentCopyIndexDecor.value()));
+    ATH_CHECK(m_constituentCopyIndexKey.initialize());
   }
   return StatusCode::SUCCESS;
 }
@@ -175,20 +183,16 @@ StatusCode CorrectPFOTool::correctPFO(xAOD::FlowElementContainer& cont, const Ev
 StatusCode CorrectPFOTool::correctPFOByVertex(xAOD::PFOContainer& cont, const EventContext& ctx) const {
   SG::ReadDecorHandle<xAOD::IParticleContainer, unsigned> copyIndex_handle(m_constituentCopyIndexKey, ctx);
   
-  if (!copyIndex_handle.isAvailable()) {
-    ATH_MSG_ERROR("ConstituentCopyIndex decoration is not available on the PFO container");
-    return StatusCode::FAILURE;
-  }
   // Retrieve Primary Vertices
   auto handle = SG::makeHandle(m_vertexContainer_key, ctx);
   if (!handle.isValid()){
-      ATH_MSG_WARNING(" This event has no primary vertex container" );
+      ATH_MSG_ERROR(" This event has no primary vertex container" );
       return StatusCode::FAILURE;
   }
     
   const xAOD::VertexContainer* pvtxs = handle.cptr();
   if(pvtxs->empty()){
-      ATH_MSG_WARNING(" Failed to retrieve valid primary vertex container" );
+      ATH_MSG_ERROR(" Failed to retrieve valid primary vertex container" );
       return StatusCode::FAILURE;
   } 
   
@@ -202,8 +206,8 @@ StatusCode CorrectPFOTool::correctPFOByVertex(xAOD::PFOContainer& cont, const Ev
         const unsigned iVtx = copyIndex_handle(*ppfo);
         if (iVtx >= pvtxs->size())
         {
-          ATH_MSG_WARNING("Encountered a neutral per-vertex PFO object with an index beyond the size of the vertex container");
-          continue;
+          ATH_MSG_ERROR("Encountered a neutral per-vertex PFO object with an index beyond the size of the vertex container");
+          return StatusCode::FAILURE;
         }
         const xAOD::Vertex* vtx = pvtxs->at(iVtx);
         // Determine the correct four-vector interpretation for a neutral PFO associated with this vertex
@@ -234,22 +238,17 @@ StatusCode CorrectPFOTool::correctPFOByVertex(xAOD::FlowElementContainer& cont, 
   ATH_MSG_DEBUG("Using correctPFOByVertex");
   
   SG::ReadDecorHandle<xAOD::IParticleContainer, unsigned> copyIndex_handle(m_constituentCopyIndexKey, ctx);
-  
-  if (!copyIndex_handle.isAvailable()) {
-    ATH_MSG_ERROR("ConstituentCopyIndex decoration is not available on the FlowElement container");
-    return StatusCode::FAILURE;
-  }
 
   // Retrieve Primary Vertices
   auto handle = SG::makeHandle(m_vertexContainer_key, ctx);
   if (!handle.isValid()){
-      ATH_MSG_WARNING(" This event has no primary vertex container" );
+      ATH_MSG_ERROR(" This event has no primary vertex container" );
       return StatusCode::FAILURE;
   }
     
   const xAOD::VertexContainer* pvtxs = handle.cptr();
   if(pvtxs->empty()){
-      ATH_MSG_WARNING(" Failed to retrieve valid primary vertex container" );
+      ATH_MSG_ERROR(" Failed to retrieve valid primary vertex container" );
       return StatusCode::FAILURE;
   } 
   
@@ -263,8 +262,8 @@ StatusCode CorrectPFOTool::correctPFOByVertex(xAOD::FlowElementContainer& cont, 
         const unsigned iVtx = copyIndex_handle(*ppfo);
         if (iVtx >= pvtxs->size())
         {
-          ATH_MSG_WARNING("Encountered a neutral per-vertex PFO object with an index beyond the size of the vertex container");
-          continue;
+          ATH_MSG_ERROR("Encountered a neutral per-vertex PFO object with an index beyond the size of the vertex container");
+          return StatusCode::FAILURE;
         }
         const xAOD::Vertex* vtx = pvtxs->at(iVtx);
         // Determine the correct four-vector interpretation for a neutral PFO associated with this vertex
