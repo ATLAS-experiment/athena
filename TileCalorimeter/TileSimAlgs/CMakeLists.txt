@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TileSimAlgs )
@@ -12,7 +12,7 @@ atlas_add_component( TileSimAlgs
                      src/Tile*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${ROOT_LIBRARIES} ${CLHEP_LIBRARIES} AthenaBaseComps EventContainers PileUpToolsLib GaudiKernel TileIdentifier TileSimEvent CaloDetDescrLib CaloEvent CaloIdentifier AthAllocators AthenaKernel StoreGateLib TileCalibBlobObjs TileConditionsLib TileDetDescr TileEvent TilePulseSimulator TileRecUtilsLib PathResolver CommissionEvent)
+                     LINK_LIBRARIES ${ROOT_LIBRARIES} ${CLHEP_LIBRARIES} AthenaBaseComps EventContainers PileUpToolsLib GaudiKernel TileIdentifier TileSimEvent CaloDetDescrLib CaloEvent CaloIdentifier AthAllocators AthenaKernel StoreGateLib TrigConfData TileCalibBlobObjs TileConditionsLib TileDetDescr TileEvent TilePulseSimulator TileRecUtilsLib PathResolver CommissionEvent)
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

@@ -37,6 +37,7 @@
 //Random number service
 #include "AthenaKernel/IAthRNGSvc.h"
 #include "AthenaKernel/RNGWrapper.h"
+#include "StoreGate/ReadCondHandle.h"
 
 #include <CLHEP/Random/Randomize.h>
 #include <CLHEP/Units/SystemOfUnits.h>
@@ -57,6 +58,7 @@ using CLHEP::RandGaussQ;
 using CLHEP::RandFlat;
 
 constexpr double MAX_PULSE_TIME_OFFSET = 12.5; // ns
+constexpr unsigned int LHC_BCIDS = 3564;
 
 //
 // Constructor
@@ -115,6 +117,19 @@ StatusCode TileDigitsFromPulse::initialize() {
 
         ATH_CHECK(m_rawChannelContainerKey.initialize());
 	ATH_MSG_INFO("Output raw channel container: " << m_rawChannelContainerKey.key());
+
+	ATH_CHECK(m_bunchGroupKey.initialize(m_useBunchPattern));
+	if (m_useBunchPattern) {
+		if (!m_simPulseChain || m_simQIE) {
+			ATH_MSG_FATAL("Bunch-pattern simulation requires continuous readout with QIE disabled");
+			return StatusCode::FAILURE;
+		}
+		if (m_initialBCID >= LHC_BCIDS) {
+			ATH_MSG_FATAL("InitialBCID must be in the range 0 to " << LHC_BCIDS - 1);
+			return StatusCode::FAILURE;
+		}
+		m_currentBCID = m_initialBCID;
+	}
 
 
 	//Build pulse shapes
@@ -266,7 +281,7 @@ StatusCode TileDigitsFromPulse::initialize() {
 				drawerState.resize(48, std::array<double, 2>{0.0, 0.0});
 			}
 		}
-	} else {
+	} else if (!m_useBunchPattern) {
 		for (int ros = 1; ros < 5; ++ros) { // initialize the vector of PU amplitudes
 			for (int drawer = 0; drawer < 64; ++drawer){
 				for (int channel = 0; channel < 48; ++channel) {
@@ -295,6 +310,27 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 
 	ATH_MSG_DEBUG("in execute()");
 
+	bool isPairedBC = true;
+	if (m_useBunchPattern) {
+		SG::ReadCondHandle<TrigConf::L1BunchGroupSet> bunchGroupHandle(m_bunchGroupKey, ctx);
+		if (!bunchGroupHandle.isValid() || *bunchGroupHandle == nullptr) {
+			ATH_MSG_ERROR("Could not retrieve " << m_bunchGroupKey.key());
+			return StatusCode::FAILURE;
+		}
+
+		const TrigConf::L1BunchGroupSet* bunchGroupSet = *bunchGroupHandle;
+		if (bunchGroupSet->size() <= 1) {
+			ATH_MSG_ERROR("Missing paired bunch group in " << m_bunchGroupKey.key());
+			return StatusCode::FAILURE;
+		}
+		const auto& pairedBunches = bunchGroupSet->getBunchGroup(1);
+		if (!pairedBunches || pairedBunches->size() == 0) {
+			ATH_MSG_ERROR("Missing or empty paired bunch group in " << m_bunchGroupKey.key());
+			return StatusCode::FAILURE;
+		}
+
+		isPairedBC = pairedBunches->contains(m_currentBCID);
+	}
 
 	// Prepare RNG service
 	ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, m_randomStreamName);
@@ -559,9 +595,11 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 					          m_ootAmp = 0.0;
 					          m_ootOffset = 0.0;
 
-						  if (m_random->Rndm() < m_itAPulseProb){
-						    n_inTimeAmp = m_useItADist ? m_itDist->GetRandom() : m_inTimeAmp.value();
-						  } else{
+						  if (isPairedBC && m_random->Rndm() < m_itAPulseProb) {
+						    n_inTimeAmp = m_useItADist
+						        ? m_itDist->GetRandom()
+						        : m_inTimeAmp.value();
+						  } else {
 						    n_inTimeAmp = 0;
 						  }
 
@@ -600,7 +638,7 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 						      truthPulseTimeOffset = pulseTiming->at(m_nPul_eff);
 
 						    // Fill the new BC at the front
-						    addPileUpSample(gain, ros, drawer, channel);
+						    if (isPairedBC) addPileUpSample(gain, ros, drawer, channel);
 						    m_PUAmp[ros-1][drawer][channel].front() += n_inTimeAmp; // Add amplitude from in-time pulse to true-amp vector
 						    if (pulseTiming && m_PUAmp[ros-1][drawer][channel].front() != 0.0)
 						      pulseTiming->front() = generatePulseTimeOffset();
@@ -706,6 +744,7 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
         ATH_CHECK( digitsCnt.record(std::move(digitsContainer)) );
 
 	ATH_MSG_DEBUG("Execution completed");
+	if (m_useBunchPattern) m_currentBCID = (m_currentBCID + 1) % LHC_BCIDS;
 
 	return StatusCode::SUCCESS;
 }
