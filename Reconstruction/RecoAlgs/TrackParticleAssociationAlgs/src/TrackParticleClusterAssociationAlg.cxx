@@ -152,44 +152,43 @@ TrackParticleClusterAssociationAlg::associatedClusters(const Trk::CaloExtension 
   double uncertEta = 0.;
   double uncertPhi = 0.;
   if(pars->covariance()) {
-    uncertEta = -2.*sin(pars->position().theta()) / (cos(2.*pars->position().theta())-1.) * sqrt((*pars->covariance())(Trk::theta,Trk::theta));
+    uncertEta = std::sqrt((*pars->covariance())(Trk::theta, Trk::theta)) / std::sin(pars->position().theta());
     uncertPhi = sqrt((*pars->covariance())(Trk::phi,Trk::phi));
   } 
   double uncertExtrp = uncertEta*uncertEta + uncertPhi*uncertPhi;
 
-  float dr2Cut0 = m_dr*m_dr;
+  const float dr2Cut0 = m_dr * m_dr;
   // to access the pre-calculated width :
   static const SG::ConstAccessor<float> sig_acc("sigmaWidth");
 
   for(const xAOD::CaloCluster * cl : allClusters){
 
-    float dPhi = P4Helpers::deltaPhi( cl->phi(), phi);
-    
-    float cl_eta {99};
-    if (m_doDetEta)
-    {
-        SG::ReadDecorHandle<xAOD::CaloClusterContainer, float> detEta(m_detectorEtaDecor, ctx);
-        cl_eta = detEta(*cl);
-    }
-    else
-        cl_eta = cl->eta();
+    const float dPhi = P4Helpers::deltaPhi(cl->phi(), phi);
 
-    float dEta = cl_eta - eta;
-    float dr2  = dPhi*dPhi+ dEta*dEta;
-    float dr2Cut = dr2Cut0;
-    
-    if(m_useCovariance) {                        
-      
-      double sigmaWidth = sig_acc(*cl);          
-      double uncertClus  = 2.*sigmaWidth*sigmaWidth;
-      if(uncertExtrp>uncertClus){
-	ATH_MSG_DEBUG("Extrapolation uncertainty larger than cluster width! Returning without association.");
-	continue;
-      }
-      
-      dr2Cut = (sigmaWidth+uncertEta)*(sigmaWidth+uncertEta)+(sigmaWidth+uncertPhi)*(sigmaWidth+uncertPhi);   
+    float cl_eta {99};
+    if (m_doDetEta) {
+      SG::ReadDecorHandle<xAOD::CaloClusterContainer, float> detEta(m_detectorEtaDecor, ctx);
+      cl_eta = detEta(*cl);
+    } else {
+      cl_eta = cl->eta();
     }
-    if( dr2 < dr2Cut ) clusters.push_back( cl );    
+
+    const float dEta = cl_eta - eta;
+    const float dr2  = dPhi * dPhi + dEta * dEta;
+
+    if (m_useCovariance) {
+      const double sigmaWidth = sig_acc(*cl);
+      const double uncertClus = 2. * sigmaWidth * sigmaWidth;
+      if (uncertExtrp > uncertClus) {
+        ATH_MSG_DEBUG("Extrapolation uncertainty larger than cluster width! Skipping cluster.");
+        continue;
+      }
+      if (dr2 >= (sigmaWidth + uncertEta) * (sigmaWidth + uncertEta) + (sigmaWidth + uncertPhi) * (sigmaWidth + uncertPhi)) continue;
+
+    } else {
+      if (dr2 >= dr2Cut0) continue;
+    }
+    clusters.push_back(cl);
   }
 
   return clusters;
