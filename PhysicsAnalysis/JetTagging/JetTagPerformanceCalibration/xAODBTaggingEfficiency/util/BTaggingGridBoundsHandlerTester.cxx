@@ -7,6 +7,7 @@
 #include <nlohmann/json.hpp>
 #include <map>
 #include <vector>
+#include <iostream>
 #include <memory>
 #include <ostream>
 #include <stdexcept>
@@ -58,7 +59,10 @@ std::string getJetInfo(const xAOD::Jet & jet){
   return os.str();
 }
 
-std::unique_ptr<BTaggingGridBoundsHandler<BTaggingBoundsHandler>> getGriBoundsHandler(const json &jsonConfig, const bool errorExpected = false, const std::string &errorMsgExpected =""){
+std::unique_ptr<BTaggingGridBoundsHandler<BTaggingBoundsHandler>> getGriBoundsHandler(
+  const json &jsonConfig, 
+  BTaggingBoundsHandler::JetQuantityGetter *funcGetJetQuantity, 
+  const bool errorExpected = false, const std::string &errorMsgExpected =""){
   // Make sure that the json config contains the key listBins 
   if (!jsonConfig.contains("listBins")){
     throw std::runtime_error("json config does not contain key listBins");
@@ -74,7 +78,7 @@ std::unique_ptr<BTaggingGridBoundsHandler<BTaggingBoundsHandler>> getGriBoundsHa
 
   for (const auto &binConfig : listBins) {
     try {
-      vecBoundsHandlers.push_back(BTaggingBoundsHandler(binConfig, &getJetQuantity));
+      vecBoundsHandlers.push_back(BTaggingBoundsHandler(binConfig, funcGetJetQuantity));
       // Useful for debugging
       // Get the latest handler that was just added 
       // const BTaggingBoundsHandler &handler = vecBoundsHandlers[vecBoundsHandlers.size() -1];
@@ -133,6 +137,19 @@ std::unique_ptr<BTaggingGridBoundsHandler<BTaggingBoundsHandler>> getGriBoundsHa
   return gridBoundHandlerPtr;
 }
 
+std::string makeRegularBinsGrid(const std::vector<int>& pT, const std::vector<int>& mass){
+  std::string out;
+  for (size_t i = 0; i < pT.size() - 1 ; ++i)
+    for (size_t j = 0; j < mass.size() - 1; ++j) {
+      if (!out.empty()) { 
+        out += ",\n";
+      }
+      out += "{ \"binVariables\": { \"pT\": [" + std::to_string(pT[i]) + ", " + std::to_string(pT[i + 1]) +
+             "], \"mass\": [" + std::to_string(mass[j]) + ", " + std::to_string(mass[j + 1]) + "] } }";
+  }
+  return out;
+}
+
 int test1 ATLAS_NOT_THREAD_SAFE (int /* argc */ , char* /* argv */ [] ) {
   // Change type returned by the ANA_CHECK function in case of error 
   // NB: this is needed here because the main() function should return an integer
@@ -148,16 +165,31 @@ int test1 ATLAS_NOT_THREAD_SAFE (int /* argc */ , char* /* argv */ [] ) {
   POOL::Init();
   #endif
 
+
+  // The handlers only store a pointer to the jet quantity getter
+  // so it must outlive all the handlers: it is created here and kept alive until the end of the test
+  // (it also ensures that all the handlers share the same getter as required to compare them)
+  std::unique_ptr<BTaggingBoundsHandler::JetQuantityGetter> funcGetJetQuantity = std::make_unique<BTaggingBoundsHandler::JetQuantityGetter>(&getJetQuantity);
+
   // To visualize the grids below use an AI agent to schematize it 
   // or refer to the MR: https://gitlab.cern.ch/atlas/athena/-/merge_requests/92159
   // NB: the grid are not at all representative of 
   // any binning used within the FTAG group 
   // it is ONLY for testing purposes 
 
+  // The generated grid is regular between pT=250-1000 GeV and mass=50-250 GeV in the sense it can be defined with 
+  // a pT and mass vectors 
+  json jsonGridContiguousRegularBinning = json::parse(
+    "{ \"listBins\": [" + 
+    makeRegularBinsGrid(
+      {250, 270, 290, 310, 330, 350, 370, 400, 500, 600, 700, 800, 900, 1000},
+      {50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240, 250}
+    ) + "]}");
+
   // The grid below is an irregular grid it covers the full phase space 
-  // covering the pT = 250-1000 GeV and mass = 50-250 GeV ranges
+  // for pT = 250-1000 GeV and mass = 50-250 GeV ranges
   // i.e. it does not have any hole and no overlapping bins 
-  json jsonGridContiguousBinning = json::parse(R"###({
+  json jsonGridContiguousIrregularBinning = json::parse(R"###({
     "listBins": [
       { "binVariables": { "pT": [250, 270 ], "mass": [50,  75 ] } },
       { "binVariables": { "pT": [270, 300 ], "mass": [50,  100] } },
@@ -260,22 +292,26 @@ int test1 ATLAS_NOT_THREAD_SAFE (int /* argc */ , char* /* argv */ [] ) {
   using GridBoundsHandlerUniquePtr = std::unique_ptr<BTaggingGridBoundsHandler<BTaggingBoundsHandler>>;
 
   // Normal retrieval no error expected 
-  GridBoundsHandlerUniquePtr gridHandlerContiguousBinning = getGriBoundsHandler( jsonGridContiguousBinning );
-  GridBoundsHandlerUniquePtr gridHandlerdHole = getGriBoundsHandler( jsonGridHole );
+  GridBoundsHandlerUniquePtr gridHandlerContiguousRegularBinning = getGriBoundsHandler( jsonGridContiguousRegularBinning, funcGetJetQuantity.get() );
+  GridBoundsHandlerUniquePtr gridHandlerContiguousIrregularBinning = getGriBoundsHandler( jsonGridContiguousIrregularBinning, funcGetJetQuantity.get() );
+  GridBoundsHandlerUniquePtr gridHandlerdHole = getGriBoundsHandler( jsonGridHole, funcGetJetQuantity.get() );
 
   // Issue expected 
   const std::string errorMsgExpectedGridOverlap = "Handler overlap issue found, Overlapping bins for GridBoundsHandler initialization: BTaggingBoundsHandler(pT: [250, 285], mass: [100, 175]) and BTaggingBoundsHandler(pT: [275, 400], mass: [150, 175])";
-  GridBoundsHandlerUniquePtr gridHandlerOverlap = getGriBoundsHandler( jsonGridOverlap, true, errorMsgExpectedGridOverlap);
+  GridBoundsHandlerUniquePtr gridHandlerOverlap = getGriBoundsHandler( jsonGridOverlap, funcGetJetQuantity.get(), true, errorMsgExpectedGridOverlap);
 
   const std::string errorMsgExpectedGridAdditionalVarForOneBin = "Handler overlap issue found, Cannot check overlap of handlers with a different number of variables: BTaggingBoundsHandler(pT: [250, 270], mass: [50, 75]) versus BTaggingBoundsHandler(pT: [750, 1000], mass: [80, 100], abseta: [0, 2.5])";
-  GridBoundsHandlerUniquePtr gridAdditionalVarForOneBin = getGriBoundsHandler( jsonGridAdditionalVarForOneBin, true, errorMsgExpectedGridAdditionalVarForOneBin);
+  GridBoundsHandlerUniquePtr gridAdditionalVarForOneBin = getGriBoundsHandler( jsonGridAdditionalVarForOneBin, funcGetJetQuantity.get(), true, errorMsgExpectedGridAdditionalVarForOneBin);
 
   // Make sure the valid pointers are not null pointers 
-  if (!gridHandlerContiguousBinning){
-     throw std::runtime_error("gridHandlerContiguousBinning should never be a null pointer as the grid is invalid");
+  if (!gridHandlerContiguousRegularBinning){
+    throw std::runtime_error("gridHandlerContiguousRegularBinning should never be a null pointer as the grid is invalid");
+  }
+  if (!gridHandlerContiguousIrregularBinning){
+    throw std::runtime_error("gridHandlerContiguousIrregularBinning should never be a null pointer as the grid is invalid");
   }
   if (!gridHandlerdHole){
-     throw std::runtime_error("gridHandlerdHole should never be a null pointer as the grid is invalid");
+    throw std::runtime_error("gridHandlerdHole should never be a null pointer as the grid is invalid");
   }
 
   // Make sure the problematic pointers should be null pointers 
@@ -327,8 +363,9 @@ int test1 ATLAS_NOT_THREAD_SAFE (int /* argc */ , char* /* argv */ [] ) {
       // Print jet inforamtion 
       ANA_MSG_INFO("Checking bounds handlers for jet=" << getJetInfo(jet));
 
-      // Retrieve the corresponding handlers  
-      const BTaggingBoundsHandler* handlerContiguousBinning = gridHandlerContiguousBinning->getHandlerPtr(jet);
+      // Retrieve the corresponding handlers
+      const BTaggingBoundsHandler* handlerContiguousRegularBinning = gridHandlerContiguousRegularBinning->getHandlerPtr(jet);
+      const BTaggingBoundsHandler* handlerContiguousIrregularBinning = gridHandlerContiguousIrregularBinning->getHandlerPtr(jet);
       const BTaggingBoundsHandler* handlerHole = gridHandlerdHole->getHandlerPtr(jet);
 
       // The jet is within the valid grid i.e. if that boolean is true the handlers should NOT be null pointers
@@ -337,11 +374,17 @@ int test1 ATLAS_NOT_THREAD_SAFE (int /* argc */ , char* /* argv */ [] ) {
       // The jet falls in the hole of the gridHandlerdHole i.e. if that boolean is true then the handlerHole is expected to be a null pointer 
       bool jetIsWithinHoleOfGridHandlerHole = (jet.pt()/1000. >= pTMinHole) && (jet.pt()/1000 < pTMaxHole) && (jet.m()/1000 >= massMinHole) && (jet.m()/1000 < massMaxHole);
 
-      if (!handlerContiguousBinning && jetIsWithinValidGrid){
+      if (!handlerContiguousRegularBinning && jetIsWithinValidGrid){
         // The handler is a null pointer
         // If the handler is a null pointer while the jet is within the valid grid 
         // it means there is a logical issue in the implementation of the BTaggingGridBoundsHandler class
-        throw std::runtime_error("handlerContiguousBinning should never be a null pointer for a jet within the valid grid: jet=" + getJetInfo(jet));
+        throw std::runtime_error("handlerContiguousRegularBinning should never be a null pointer for a jet within the valid grid: jet=" + getJetInfo(jet));
+      }
+      if (!handlerContiguousIrregularBinning && jetIsWithinValidGrid){
+        // The handler is a null pointer
+        // If the handler is a null pointer while the jet is within the valid grid 
+        // it means there is a logical issue in the implementation of the BTaggingGridBoundsHandler class
+        throw std::runtime_error("handlerContiguousIrregularBinning should never be a null pointer for a jet within the valid grid: jet=" + getJetInfo(jet));
       }
       if (!handlerHole && jetIsWithinValidGrid && !jetIsWithinHoleOfGridHandlerHole){
         // The handler is a null pointer
@@ -350,11 +393,17 @@ int test1 ATLAS_NOT_THREAD_SAFE (int /* argc */ , char* /* argv */ [] ) {
         throw std::runtime_error("handlerHole should never be a null pointer for a jet within the valid grid except if the jet falls in the hole of that grid: jet=" + getJetInfo(jet));
       }
 
-      if (handlerContiguousBinning && !jetIsWithinValidGrid){
+      if (handlerContiguousRegularBinning && !jetIsWithinValidGrid){
         // The handler is a null pointer
         // If the handler is a null pointer while the jet is within the valid grid 
         // it means there is a logical issue in the implementation of the BTaggingGridBoundsHandler class
-        throw std::runtime_error("handlerContiguousBinning should be a null pointer for a jet outside of the valid grid: jet=" + getJetInfo(jet) + " and handlerContiguousBinning=" + handlerContiguousBinning->to_string());
+        throw std::runtime_error("handlerContiguousRegularBinning should be a null pointer for a jet outside of the valid grid: jet=" + getJetInfo(jet) + " and handlerContiguousRegularBinning=" + handlerContiguousRegularBinning->to_string());
+      }
+      if (handlerContiguousIrregularBinning && !jetIsWithinValidGrid){
+        // The handler is a null pointer
+        // If the handler is a null pointer while the jet is within the valid grid 
+        // it means there is a logical issue in the implementation of the BTaggingGridBoundsHandler class
+        throw std::runtime_error("handlerContiguousIrregularBinning should be a null pointer for a jet outside of the valid grid: jet=" + getJetInfo(jet) + " and handlerContiguousIrregularBinning=" + handlerContiguousIrregularBinning->to_string());
       }
       if (handlerHole && !jetIsWithinValidGrid){
         // The handler is a not null pointer while jet is outside of the valid grid 
@@ -370,11 +419,14 @@ int test1 ATLAS_NOT_THREAD_SAFE (int /* argc */ , char* /* argv */ [] ) {
 
       // Check that the jet is indeed falling in the handler that was returned by the grid 
       // If that's not the case there is a logical in the implementation of the BTaggingGridBoundsHandler class 
-      if (handlerContiguousBinning && !handlerContiguousBinning->isJetWithinBounds(jet)){
-        throw std::runtime_error( "jet and handlerContiguousBinning are not matching: jet=" +  getJetInfo(jet) + " and handlerContiguousBinning=" + handlerContiguousBinning->to_string() );
+      if (handlerContiguousRegularBinning && !handlerContiguousRegularBinning->isJetWithinBounds(jet)){
+        throw std::runtime_error( "jet and handlerContiguousRegularBinning are not matching: jet=" +  getJetInfo(jet) + " and handlerContiguousRegularBinning=" + handlerContiguousRegularBinning->to_string() );
+      }
+      if (handlerContiguousIrregularBinning && !handlerContiguousIrregularBinning->isJetWithinBounds(jet)){
+        throw std::runtime_error( "jet and handlerContiguousIrregularBinning are not matching: jet=" +  getJetInfo(jet) + " and handlerContiguousIrregularBinning=" + handlerContiguousIrregularBinning->to_string() );
       }
       if (handlerHole && !handlerHole->isJetWithinBounds(jet)){
-        throw std::runtime_error( "jet and handlerContiguousBinning are not matching: jet=" +  getJetInfo(jet) + " and handlerHole=" + handlerHole->to_string() );
+        throw std::runtime_error( "jet and handlerContiguousIrregularBinning are not matching: jet=" +  getJetInfo(jet) + " and handlerHole=" + handlerHole->to_string() );
       }
     }
   }

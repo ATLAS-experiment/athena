@@ -34,14 +34,14 @@
 
 class BTaggingBoundsHandler {
   // The grid needs the bounds of the handlers to build its look-up table
-  template<class handlerClass> friend class BTaggingGridHandler;
+  template<class handlerClass> friend class BTaggingGridBoundsHandler;
 
   public:
     // Function returning the value of a given variable for a jet e.g. the jet pT in GeV
     using JetQuantityGetter = std::function<float(const xAOD::Jet&, BTaggingToolUtil::varType)>;
     using json = nlohmann::ordered_json;
 
-    BTaggingBoundsHandler(const json& jsonConfig, JetQuantityGetter funcGetJetQuantity);
+    BTaggingBoundsHandler(const json& jsonConfig, JetQuantityGetter *funcGetJetQuantity);
 
     // Prevent handler from being copied forcing passing them by (const) references or using pointers
     // It ensures that the code is efficient memory wise as no duplicate can be created
@@ -52,6 +52,10 @@ class BTaggingBoundsHandler {
     BTaggingBoundsHandler& operator=(const BTaggingBoundsHandler&) = delete;
     virtual ~BTaggingBoundsHandler() = default;
 
+    // Returns the list of variables of the handler 
+    std::vector<BTaggingToolUtil::varType> getListVariables() const;
+
+    // Check if jet falls in the bounds of the handler 
     bool isJetWithinBounds(const xAOD::Jet& jet) const;
 
     // Two handlers i.e. N-dimensional bins overlap if their bounds overlap
@@ -81,8 +85,8 @@ class BTaggingBoundsHandler {
     }
     
     protected:
-      // Function used to retrieve the jet values to compare to the bounds
-      JetQuantityGetter m_funcGetJetQuantity;
+      // Pointer to the function used to retrieve the jet values to compare to the bounds
+      JetQuantityGetter *m_funcGetJetQuantity = nullptr;
 
       // Structure for storing a min and max value for a given variable
       // The varBounds structure also defines an ordering
@@ -107,6 +111,21 @@ class BTaggingBoundsHandler {
         // Define also equal and not equal operator within tolerance
         bool operator==(const varBounds& o) const;
         bool operator!=(const varBounds& o) const { return !(*this == o); }
+
+        // Comparison with a value
+        // varBounds < value if the interval ends at or below the value
+        // value < varBounds if the value is below the start of the interval
+        // Hence the value is "equivalent" to the varBounds if lowerBound <= value < upperBound
+        // This allows to look up a value in a std::map<varBounds, ..., std::less<>> using find(value)
+        // provided the varBounds stored in the map are disjoint
+        // Exact comparisons are used to be consistent with isJetWithinBounds
+        bool operator<(float value) const { return upperBound <= value; }
+        friend bool operator<(float value, const varBounds& b) { return value < b.lowerBound; }
+        // Greater than operators defined from the operators above 
+        // varBounds > value if the value is below the start of the interval
+        // value > varBounds if the interval ends at or below the value
+        bool operator>(float value) const { return value < *this; }
+        friend bool operator>(float value, const varBounds& b) { return b < value; }
       };
 
       // Map that will contain the variable type and the bounds 
