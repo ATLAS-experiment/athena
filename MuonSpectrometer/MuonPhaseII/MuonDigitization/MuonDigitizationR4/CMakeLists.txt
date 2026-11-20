@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 ################################################################################
 # Package: MuonDigitizationR4
@@ -17,7 +17,6 @@ atlas_add_library( MuonDigitizationR4
 
 # Component(s) in the package:
 atlas_add_component( MuonDigitizationR4Comp
-                     src/MuonDigitizer.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES AthenaBaseComps AthenaKernel PileUpToolsLib)
+                     LINK_LIBRARIES AthenaBaseComps AthenaKernel PileUpToolsLib MuonDigitizationR4 )
 
