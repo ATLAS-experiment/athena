@@ -12,7 +12,9 @@
 /* Algo that compares a Phase-II Pixel RDO container to a Pixel RDO container
  * and succeeds if and only if the contents match. The input containers are
  * copied and sorted to not take into account the respective orders of
- * collections into the container and of RDOs into the collections. 
+ * collections into the container and of RDOs into the collections.
+ *
+ * \author Fabrice Le Goff <fabrice.le.goff@cern.ch>
  */
 
 class PixelPhaseIIRDOValidationAlg : public PixelRDOValidationCommons
@@ -23,7 +25,7 @@ public:
 
 private:
   virtual StatusCode makeSortedReferenceRDOs(const EventContext & ctx,
-   TSortedRDOContainer & reference_rdos, size_t & nb_reference_rdos)
+    TSortedRDOContainer & reference_rdos, size_t & nb_reference_rdos)
     const override;
   virtual StatusCode makeSortedMonitoredRDOs(const EventContext & ctx,
     TSortedRDOContainer & monitored_rdos, size_t & nb_monitored_rdos)

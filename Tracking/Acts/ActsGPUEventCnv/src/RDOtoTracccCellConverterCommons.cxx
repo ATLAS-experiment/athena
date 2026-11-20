@@ -31,6 +31,8 @@ RDOtoTracccCellConverterCommons::RDOtoTracccCellConverterCommons(
       "Whether to sort traccc cells on CPU or GPU"}
   , m_UsePixelToTForCellActivation{&parent, "UsePixelToTForCellActivation", true,
       "Use Pixel hit time over threshold value to set traccc cell activation value, otherwise defaults to 1"}
+  , m_convertPixelRDOs{&parent, "ConvertPixelRDOs", true, "whether Pixel RDOs are converted"}
+  , m_convertStripRDOs{&parent, "ConvertStripRDOs", true, "whether Strip RDOs are converted"}
   , m_stripRDOTimeBinStr{&parent, "timeBins", "Allowed time bins pattern for Strip RDOs"}
 {
 }

@@ -41,6 +41,7 @@ class GeometryIdMapping {
     m_detrayToAthena.reserve(nSurfaces);
     m_actsToDetray.reserve(nSurfaces);
     m_athenaToDetray.reserve(nSurfaces);
+    m_athenaToDetDescIndex.reserve(nSurfaces);
   }
 
   /// Register one detray surface, it has to have a corresponding ACTS surface 
@@ -61,6 +62,10 @@ class GeometryIdMapping {
 
   void addDetDescIndex(detray_id_type detray_id, unsigned int index) {
     m_detrayToDetDescIndex[detray_id] = index;
+    auto ath_opt = detrayToAthena(detray_id);
+    if (ath_opt.has_value()) {
+      m_athenaToDetDescIndex[ath_opt->get_compact()] = index;
+    }
   }
 
   /// @name detray_id <-> acts_id
@@ -103,6 +108,10 @@ class GeometryIdMapping {
     auto it = m_detrayToDetDescIndex.find(detray_id);
     return it == m_detrayToDetDescIndex.end() ? std::nullopt : std::optional(it->second);
   }
+  std::optional<size_t> athenaToDetDescIndex(const Identifier& athenaId) const {
+    auto it = m_athenaToDetDescIndex.find(athenaId.get_compact());
+    return it == m_athenaToDetDescIndex.end() ? std::nullopt : std::optional(it->second);
+  }
 
   std::size_t size() const { return m_detrayToActs.size(); }
   const std::unordered_map<detray_id_type, Identifier::value_type>&
@@ -115,6 +124,7 @@ class GeometryIdMapping {
   std::unordered_map<acts_id_type, detray_id_type> m_actsToDetray;
   std::unordered_map<Identifier::value_type, detray_id_type> m_athenaToDetray;
   std::unordered_map<detray_id_type, size_t> m_detrayToDetDescIndex;
+  std::unordered_map<Identifier::value_type, detray_id_type> m_athenaToDetDescIndex;
 };
 
 }  // namespace ActsTrk

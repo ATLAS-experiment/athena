@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/ITkPixelEncodingAlg.h"
@@ -14,6 +14,10 @@
 #include "src/ITkPixelCsvWaferIdAlg.h"
 #include "src/PixelRDOValidationAlg.h"
 #include "src/PixelPhaseIIRDOValidationAlg.h"
+#include "src/PixelPhaseIIRDOVsPhaseIIRDOValidationAlg.h"
+#ifdef ITKPIXEL_WITH_CUDA
+#include "src/cuda/ITkPixelDecodingTracccCellsCUDAAlg.h"
+#endif
 
 //This is a converter - needs special macro
 DECLARE_CONVERTER( ITkPixelRawContByteStreamCnv )
@@ -30,3 +34,7 @@ DECLARE_COMPONENT( ITkPixelDataRateMonTool )
 DECLARE_COMPONENT( ITkPixelCsvWaferIdAlg )
 DECLARE_COMPONENT( PixelRDOValidationAlg )
 DECLARE_COMPONENT( PixelPhaseIIRDOValidationAlg )
+DECLARE_COMPONENT( PixelPhaseIIRDOVsPhaseIIRDOValidationAlg )
+#ifdef ITKPIXEL_WITH_CUDA
+DECLARE_COMPONENT( ITkPixelDecodingTracccCellsCUDAAlg )
+#endif

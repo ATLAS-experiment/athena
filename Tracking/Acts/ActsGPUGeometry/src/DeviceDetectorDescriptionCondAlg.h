@@ -9,7 +9,7 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
 
-#include "IDeviceDetectorDescriptionSvc.h"
+#include "ActsGPUInterfaces/IDeviceDetectorDescriptionSvc.h"
 #include "InDetCondTools/ISiLorentzAngleTool.h"
 
 #include "AthDeviceInterfaces/IMemoryResourcesTool.h"

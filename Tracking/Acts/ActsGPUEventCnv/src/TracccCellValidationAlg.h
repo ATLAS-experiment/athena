@@ -9,6 +9,7 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "AthDeviceInterfaces/IMemoryResourceTool.h"
 #include "AthDeviceInterfaces/ICopyTool.h"
+#include <Gaudi/Property.h>
 
 namespace ActsTrk {
 
@@ -39,6 +40,9 @@ private:
     this, "HostMR", "", "Host memory resource provider"};
   ToolHandle<AthDevice::ICopyTool> m_deviceCopy{
     this, "DeviceCopyTool", "", "Device copy provider"};
+
+  Gaudi::Property<bool> m_SortBeforeCompare{
+    this, "SortBeforeCompare", false, "Compare a sorted version of the containers"};  
 };
 
 } // namespace ActsTrk

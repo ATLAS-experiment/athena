@@ -25,6 +25,16 @@ find_package( tdaq-common COMPONENTS eformat )
 find_package( Boost COMPONENTS unit_test_framework )
 find_package( itksw_endec )
 
+set( ITKPIXEL_CUDA_SOURCES )
+set( ITKPIXEL_CUDA_LIBRARIES )
+if( CMAKE_CUDA_COMPILER )
+  find_package( CUDAToolkit )
+  find_package( vecmem COMPONENTS CUDA )
+  list( APPEND ITKPIXEL_CUDA_SOURCES src/cuda/*.h src/cuda/*.cxx src/cuda/*.cu src/cuda/*.cuh)
+  list( APPEND ITKPIXEL_CUDA_LIBRARIES CUDA::cudart vecmem::cuda
+    AthDeviceInterfacesLib AthCUDAInterfacesLib ActsGPUEventLib)
+endif()
+
 # Component(s) in the package:
 atlas_add_library( ITkPixelByteStreamCnvLib
    ITkPixelByteStreamCnv/*.h
@@ -34,13 +44,20 @@ atlas_add_library( ITkPixelByteStreamCnvLib
    LINK_LIBRARIES GaudiKernel PathResolver ByteStreamData InDetByteStreamErrors InDetRawData )
 
 atlas_add_component( ITkPixelByteStreamCnv
-   src/*.h src/*.cxx src/components/*.cxx
+   src/*.h src/*.cxx src/components/*.cxx ${ITKPIXEL_CUDA_SOURCES}
    INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS}
    LINK_LIBRARIES ${TDAQ-COMMON_LIBRARIES} itksw::pix_endec ByteStreamData AthenaKernel EventContainers
    GaudiKernel InDetRawData AthenaBaseComps AthContainers CxxUtils StoreGateLib
    ByteStreamCnvSvcBaseLib InDetIdentifier ITkPixelCablingLib PixelReadoutGeometryLib IRegionSelector
-   xAODEventInfo TrigSteeringEvent InDetByteStreamErrors  ITkPixelByteStreamCnvLib)
+   xAODEventInfo TrigSteeringEvent InDetByteStreamErrors ITkPixelByteStreamCnvLib
+   ${ITKPIXEL_CUDA_LIBRARIES})
 
+if( CMAKE_CUDA_COMPILER )
+  target_compile_definitions( ITkPixelByteStreamCnv PRIVATE ITKPIXEL_WITH_CUDA )
+  set_target_properties( ITkPixelByteStreamCnv PROPERTIES
+    CUDA_STANDARD 20
+    CUDA_STANDARD_REQUIRED TRUE )
+endif()
 
 atlas_add_test(ITkPixQCoreEncodingLUT_test
   SOURCES test/ITkPixQCoreEncodingLUT_test.cxx
@@ -74,3 +91,19 @@ atlas_add_test(PixelEncodingDecodingPhaseIIRDOTest
   SCRIPT ITkPixelEncodingDecodingPhaseIIRDOTest.py
   POST_EXEC_SCRIPT noerror.sh
   PROPERTIES SKIP_RETURN_CODE 2)
+
+if( CMAKE_CUDA_COMPILER )
+  atlas_add_test( ITkPixelDecodingToTracccCellsCUDA
+    PRE_EXEC_SCRIPT "nvidia-check.sh || exit 2"
+    ENVIRONMENT "PATHRESOLVER_DEVAREARESPONSE=WARNING"
+    SCRIPT athena.py ${CMAKE_CURRENT_SOURCE_DIR}/test/ITkPixelDecodingToTracccCellsGPU.py Device.Backend=DeviceBackend.CUDA
+    POST_EXEC_SCRIPT noerror.sh
+    PROPERTIES SKIP_RETURN_CODE 2 )
+
+    atlas_add_test( ITkPixelDecodingToPhaseIIRDOCUDA
+    PRE_EXEC_SCRIPT "nvidia-check.sh || exit 2"
+    ENVIRONMENT "PATHRESOLVER_DEVAREARESPONSE=WARNING"
+    SCRIPT athena.py ${CMAKE_CURRENT_SOURCE_DIR}/test/ITkPixelDecodingToPhaseIIRDOGPU.py Device.Backend=DeviceBackend.CUDA
+    POST_EXEC_SCRIPT noerror.sh
+    PROPERTIES SKIP_RETURN_CODE 2 )
+endif()

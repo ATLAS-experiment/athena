@@ -89,4 +89,11 @@ atlas_add_test( TracccMeasurementConversion
   SCRIPT athena.py ${CMAKE_CURRENT_SOURCE_DIR}/test/TracccMeasurementConversionTest.py Device.Backend=DeviceBackend.CUDA
   POST_EXEC_SCRIPT noerror.sh
   PROPERTIES SKIP_RETURN_CODE 2 )
+
+  atlas_add_test( TracccCellsToPhaseIIRDOs
+  PRE_EXEC_SCRIPT "nvidia-check.sh || exit 2"
+  ENVIRONMENT "PATHRESOLVER_DEVAREARESPONSE=WARNING"
+  SCRIPT athena.py ${CMAKE_CURRENT_SOURCE_DIR}/test/TracccCellsToPhaseIIRDOTest.py Device.Backend=DeviceBackend.CUDA
+  POST_EXEC_SCRIPT noerror.sh
+  PROPERTIES SKIP_RETURN_CODE 2 )
 endif()

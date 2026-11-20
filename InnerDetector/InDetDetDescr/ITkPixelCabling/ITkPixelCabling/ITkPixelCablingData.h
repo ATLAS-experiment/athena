@@ -10,6 +10,12 @@
   * @brief Data object containing the offline-online mapping for ITkPixels
   */
 
+#ifdef __CUDACC__
+#define ITKSW_CUDA_D __device__
+#else
+#define ITKSW_CUDA_D
+#endif
+
 #include "ITkPixelCabling/ITkPixelOnlineId.h"
 
 // Athena includes
@@ -89,45 +95,45 @@ namespace ITkPixelCabling {
     //and row in [0, 383]. A quad is 2x2 chips, hence the total dimensions
     //of 800 columns and 768 rows, again indexed from 0, i. e. col in [0, 799]
     //and row in [0, 767].
-    static constexpr TransformFn nominalQuadTable[4] = {
+    ITKSW_CUDA_D static constexpr TransformFn nominalQuadTable[4] = {
         []([[maybe_unused]] uint16_t& col, uint16_t& row){row = 383 - row;},
         []([[maybe_unused]] uint16_t& col, uint16_t& row){row = 383 - row; col += 400;},
         []([[maybe_unused]] uint16_t& col, uint16_t& row){row = 767 - row;},
         []([[maybe_unused]] uint16_t& col, uint16_t& row){row = 767 - row; col += 400;}
     };
 
-    static constexpr TransformFn ibTransformFn =
+    ITKSW_CUDA_D static constexpr TransformFn ibTransformFn =
         [](uint16_t& col, uint16_t& row){
             row = 2 * (383 - row) + (col & 1);
             col >>= 1;
         };
 
-    static constexpr TransformFn iecTransformFn = 
+    ITKSW_CUDA_D static constexpr TransformFn iecTransformFn = 
         [](uint16_t& col, uint16_t& row) {
             std::swap(col, row);
         };
     
-    static constexpr TransformFn nominalQuadInverseTable[4] = {
+    ITKSW_CUDA_D static constexpr TransformFn nominalQuadInverseTable[4] = {
         []([[maybe_unused]] uint16_t& col, uint16_t& row){row = 383 - row;},
         []([[maybe_unused]] uint16_t& col, uint16_t& row){row = 383 - row; col -= 400;},
         []([[maybe_unused]] uint16_t& col, uint16_t& row){row = 767 - row;},
         []([[maybe_unused]] uint16_t& col, uint16_t& row){row = 767 - row; col -= 400;}
     };
 
-    static constexpr TransformFn ibInverseTransformFn =
+    ITKSW_CUDA_D static constexpr TransformFn ibInverseTransformFn =
         [](uint16_t& col, uint16_t& row) {
             const uint16_t parity = row & 1;
             row = 383 - (row >> 1);
             col = (col << 1) | parity;
         };
 
-    static constexpr TransformFn iecInverseTransformFn =
+    ITKSW_CUDA_D static constexpr TransformFn iecInverseTransformFn =
         [](uint16_t& col, uint16_t& row) {
             std::swap(col, row);
         };
 
 
-    static inline void chipToModuleTransform(const TransformType& transform, const uint8_t& chipID, uint16_t& col, uint16_t& row){
+    ITKSW_CUDA_D static inline void chipToModuleTransform(const TransformType& transform, const uint8_t& chipID, uint16_t& col, uint16_t& row){
         switch (transform){
             case TransformType::NominalQuad:
                 nominalQuadTable[chipID](col, row);
@@ -143,7 +149,7 @@ namespace ITkPixelCabling {
         }
     }
 
-    static inline void chipToModuleInverseTransform(const TransformType& transform, const uint8_t& chipID, uint16_t& col, uint16_t& row){
+    ITKSW_CUDA_D static inline void chipToModuleInverseTransform(const TransformType& transform, const uint8_t& chipID, uint16_t& col, uint16_t& row){
         switch (transform){
             case TransformType::NominalQuad:
                 nominalQuadInverseTable[chipID](col, row);

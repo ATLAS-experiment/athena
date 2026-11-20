@@ -64,9 +64,10 @@ struct RDOtoTracccCellConverterCommons : public AthMessaging
   Gaudi::Property<std::string> m_hostDesignObjectName;
   const traccc::detector_design_description::host* m_hostDesign{nullptr};
 
-
   Gaudi::Property<bool> m_CPUCellSorting;
   Gaudi::Property<bool> m_UsePixelToTForCellActivation;
+  Gaudi::Property<bool> m_convertPixelRDOs;
+  Gaudi::Property<bool> m_convertStripRDOs;
 
   // Returns the input cells sorted in a object setup with host_copy
   traccc::edm::silicon_cell_collection::buffer sortCells(

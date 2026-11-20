@@ -11,6 +11,7 @@ from AthDeviceComps.AthDeviceCompsConfig import (
 )
 from AthenaConfiguration.Enums import BeamType
 from AthCUDAServices.AthCUDAServicesConfig import StreamToolCfg
+from ActsGPUGeometry.ActsGPUGeometryConfig import DeviceDetectorDescriptionSvcCfg
 
 # ============================================================
 # Algorithm configurations
@@ -223,4 +224,20 @@ def SeedValidationAlgCfg(flags,
     acc = ComponentAccumulator()
     acc.addEventAlgo(
         CompFactory.ActsTrk.SeedValidationAlg(name, **kwargs))
+    return acc
+
+def TracccCellsToPhaseIIRDOConverterAlgCfg(flags,
+        name="TracccCellsToPhaseIIRDOConverterAlgCfg",
+        **kwargs)-> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault("TracccCells", "TracccCells")
+    kwargs.setdefault("PixelRDOs", "ITkPixelRDOs")
+    kwargs.setdefault("StripRDOs", "ITkStripRDOs")
+    kwargs.setdefault("HostMR", acc.popToolsAndMerge(HostMemoryResourceToolCfg(flags)))
+    kwargs.setdefault("CopiesTool", acc.popToolsAndMerge(CopiesToolCfg(flags)))
+    kwargs.setdefault("DeviceDetectorDescriptionSvc", acc.getPrimaryAndMerge(DeviceDetectorDescriptionSvcCfg(flags)))
+    acc.addEventAlgo(
+        CompFactory.ActsTrk.TracccCellsToPhaseIIRDOConverterAlg(name, **kwargs))
+
     return acc

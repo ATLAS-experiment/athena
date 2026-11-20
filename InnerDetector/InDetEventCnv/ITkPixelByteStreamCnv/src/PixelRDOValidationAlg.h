@@ -13,6 +13,8 @@
  * contents match. The input containers are copied and sorted to not take into
  * account the respective orders of collections into the container and
  * of RDOs into the collections. 
+ *
+ * \author Fabrice Le Goff <fabrice.le.goff@cern.ch>
  */
 
 class PixelRDOValidationAlg : public PixelRDOValidationCommons

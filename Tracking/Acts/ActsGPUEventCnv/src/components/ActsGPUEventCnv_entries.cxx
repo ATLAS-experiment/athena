@@ -12,6 +12,7 @@
 #include "../xAODToTracccSpacePointConverterAlg.h"
 #include "../ClusterValidationAlg.h"
 #include "../SeedValidationAlg.h"
+#include "../TracccCellsToPhaseIIRDOConverterAlg.h"
 
 
 DECLARE_COMPONENT( ActsTrk::RDOtoTracccCellConverterAlg )
@@ -24,6 +25,7 @@ DECLARE_COMPONENT( ActsTrk::xAODToTracccMeasurementConverterAlg )
 DECLARE_COMPONENT( ActsTrk::xAODToTracccSpacePointConverterAlg )
 DECLARE_COMPONENT( ActsTrk::ClusterValidationAlg )
 DECLARE_COMPONENT( ActsTrk::SeedValidationAlg )
+DECLARE_COMPONENT( ActsTrk::TracccCellsToPhaseIIRDOConverterAlg )
 
 
 #ifdef ACTSGPUEVENTCNV_WITH_CUDA_COMPONENTS
