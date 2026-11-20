@@ -175,50 +175,6 @@ namespace PixelCallbacks{
             const PixelID* m_idHelper{};
             MsgStream& m_msg_source;
     };
-
-    //This prints the decoded hits on the screen,
-    //useful for testing purposes
-    class TestEventCallback {
-        public:
-            TestEventCallback(MsgStream& src): m_msg_source(src) {};
-            ~TestEventCallback() = default;
-          
-            inline void evt_init(uint8_t tag) {
-                m_msg_source << MSG::DEBUG << "evt_init(" << tag << ")" << std::endl;
-            }
-        
-            inline void evt_next(uint8_t tag) {
-                m_msg_source << MSG::DEBUG << "evt_next(" << tag << ")" << std::endl;
-            }
-        
-            inline void evt_done() {
-                m_msg_source << MSG::DEBUG << "evt_done()" << std::endl;
-            }
-        
-            inline void add_hit(uint16_t col, uint16_t row, uint16_t tot) {
-                m_msg_source << MSG::DEBUG << "add_hit(" << col << "," << row << "," << tot << ")" << std::endl;
-            }
-        
-            inline void add_hmap(uint8_t qcol, uint8_t qrow, uint16_t hmap, uint64_t tots) {
-                m_msg_source << MSG::DEBUG << "add_hmap(qcol=" << qcol << ",qrow=" << qrow
-                    << ",hmap=" << hmap << ",tots=" << tots << ")" << std::endl;
-            }
-        
-            inline void add_qcore(uint8_t qcol, uint8_t qrow, uint64_t qtot) {
-                m_msg_source << MSG::DEBUG << "add_qcore(qcol=" << qcol << ",qrow=" << qrow
-                    << ",qtot=" << qtot << ")" << std::endl;
-            }
-        
-            inline itksw::pix::endec::intf::ErrorRecoveryStrategy on_error(itksw::pix::endec::intf::EventError error, std::optional<itksw::pix::endec::ErrorContext>) {
-                m_msg_source << MSG::DEBUG << "on_error(" << error.to_string() << ")" << std::endl;
-                return itksw::pix::endec::intf::ErrorRecoveryStrategy::CONTINUE_DECODING;
-            }
-            
-            MsgStream& m_msg_source;
-  
-    };
 }
 
-
 #endif
-

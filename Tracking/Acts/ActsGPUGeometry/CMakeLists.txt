@@ -27,6 +27,7 @@ atlas_add_component( ActsGPUGeometry
     SiSpacePointFormationLib
     PixelReadoutGeometryLib
     SCT_ReadoutGeometry
+    ActsGPUInterfacesLib
 )
 
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

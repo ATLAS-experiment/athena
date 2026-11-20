@@ -12,6 +12,7 @@
 #include "InDetIdentifier/PixelID.h"
 
 // Common parts of the Pixel RDO validation Algs
+// \author Fabrice Le Goff <fabrice.le.goff@cern.ch>
 
 using TSortedRDOContainer = std::map<Identifier, std::map<Identifier, unsigned int>>;
 

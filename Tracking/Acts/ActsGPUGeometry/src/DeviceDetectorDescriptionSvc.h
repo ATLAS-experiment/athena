@@ -8,7 +8,7 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/StoreGateSvc.h"
 
-#include "IDeviceDetectorDescriptionSvc.h"
+#include "ActsGPUInterfaces/IDeviceDetectorDescriptionSvc.h"
 #include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 
 #include "AthDeviceInterfaces/IMemoryResourcesTool.h"

@@ -5,6 +5,7 @@
 #include "ITkPixelDecodingPhaseIIRDOAlg.h"
 #include "eformat/ROBFragment.h"
 #include "itksw/pix/endec/DecCore.hpp"
+#include "ITkPixelPhaseIIRDOCallback.h"
 
 #define ENABLE_TIMING = true;
 #ifdef ENABLE_TIMING

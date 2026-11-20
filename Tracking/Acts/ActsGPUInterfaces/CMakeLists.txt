@@ -5,6 +5,7 @@ atlas_subdir( ActsGPUInterfaces )
 
 # External dependencies.
 find_package(vecmem)
+find_package(Acts COMPONENTS Core)
 
 # Component(s) in the package.
 atlas_add_library( ActsGPUInterfacesLib
@@ -14,4 +15,6 @@ atlas_add_library( ActsGPUInterfacesLib
                    GaudiKernel
                    Identifier
                    vecmem::core
+                   Acts::Core
+                   detray::core
                  )

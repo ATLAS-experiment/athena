@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -87,6 +87,28 @@ def ITkPixelDecodingPhaseIIRDOAlgCfg(flags,
 
     return acc
 
+def ITkPixelDecodingTracccCellsCUDAAlgCfg(flags,
+        name = "ITkPixelDecodingTracccCellsCUDAAlg",
+        **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
+    acc.merge(ITkPixelReadoutGeometryCfg(flags))
+
+    acc.merge(addITkPixelCabling(flags))
+
+    from AthCUDAServices.AthCUDAServicesConfig import (
+        GPUSystemInfoSvcCfg, MemoryResourcesToolCfg, CopiesToolCfg, StreamToolCfg)
+    acc.merge(GPUSystemInfoSvcCfg(flags))
+    kwargs.setdefault("TracccCells", "TracccCells")
+    kwargs.setdefault("MemoryResources", acc.popToolsAndMerge(MemoryResourcesToolCfg(flags)))
+    kwargs.setdefault("CopiesTool", acc.popToolsAndMerge(CopiesToolCfg(flags)))
+    kwargs.setdefault("StreamTool", acc.popToolsAndMerge(StreamToolCfg(flags)))
+    kwargs.setdefault("GeoIdMappingObjectName", "TracccGeometryIdMapping")
+
+    acc.addEventAlgo(CompFactory.ITkPixelDecodingTracccCellsCUDAAlg(name, **kwargs))
+
+    return acc
 
 def ITkPixelEncodingAlgCfg(flags, name = "ITkPixelEncodingAlg",
                            doMonitoring = False,
@@ -157,12 +179,17 @@ def ITkPixelCsvWaferIdAlgCfg(flags,
     acc.addEventAlgo(CompFactory.ITkPixelCsvWaferIdAlg(name, **kwargs))
     return acc
 
-def PixelRDOValidationAlgCfg(flags, name="PixelRDOValidationAlgCfg", **kwargs):
+def PixelRDOValidationAlgCfg(flags, name="PixelRDOValidationAlg", **kwargs):
     acc = ComponentAccumulator()
     acc.addEventAlgo(CompFactory.PixelRDOValidationAlg(name, **kwargs))
     return acc
 
-def PixelPhaseIIRDOValidationAlgCfg(flags, name="PixelPhaseIIRDOValidationAlgCfg", **kwargs):
+def PixelPhaseIIRDOValidationAlgCfg(flags, name="PixelPhaseIIRDOValidationAlg", **kwargs):
     acc = ComponentAccumulator()
     acc.addEventAlgo(CompFactory.PixelPhaseIIRDOValidationAlg(name, **kwargs))
+    return acc
+
+def PixelPhaseIIRDOVsPhaseIIRDOValidationAlgCfg(flags, name="PixelPhaseIIRDOVsPhaseIIRDOValidationAlg", **kwargs):
+    acc = ComponentAccumulator()
+    acc.addEventAlgo(CompFactory.PixelPhaseIIRDOVsPhaseIIRDOValidationAlg(name, **kwargs))
     return acc
