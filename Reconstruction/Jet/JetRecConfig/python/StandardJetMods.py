@@ -303,8 +303,10 @@ stdJetModifiers.update(
     JetTaggingTruthLabel = JetModifier("JetTaggingTruthLabel", "truthlabeler_{mods}",
                                        filterfn=isMC,
                                        createfn=ParticleJetToolsConfig.getJetTruthLabelTool,
-                                       prereqs=lambda modspec,jetdef: ParticleJetToolsConfig.getJetTruthLabelToolPrereqs(jetdef, modspec)
-                                      ),
+                                       prereqs=lambda modspec, jetdef:
+                                            list(ParticleJetToolsConfig.getJetTruthLabelToolPrereqs(jetdef, modspec))
+                                            + (['mod:jetiso'] if 'AntiKt4' in jetdef.fullname() else [])
+                                       ),
 
     JetPileupLabel = JetModifier("JetPileupLabel", "pileuplabeler_{mods}",
                                  filterfn=isMC,
