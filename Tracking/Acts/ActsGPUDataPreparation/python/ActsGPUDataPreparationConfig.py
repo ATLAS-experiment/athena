@@ -2,9 +2,13 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import BeamType
 
 from AthDeviceComps.AthDeviceCompsConfig import MemoryResourcesToolCfg, CopyToolCfg, DeviceMemoryResourceToolCfg
 from AthDeviceComps.DeviceConfigFlags import DeviceBackend
+from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
+from InDetConfig.SiSpacePointFormationConfig import ITkSiElementPropertiesTableCondAlgCfg
+from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
 
 # ============================================================
 # Tool configurations
@@ -157,4 +161,51 @@ def DeviceSPFormationAlgCfg(flags,
 
     acc.addEventAlgo(
         CompFactory.ActsTrk.DeviceSPFormationAlg(name, **kwargs))
+    return acc
+
+
+def CUDAStripSPFormationToolCfg(flags, name="CUDAStripSPFormationTool", **kwargs):
+    """Configure only the CUDA strip SP algorithm provider."""
+    from AthCUDAServices.AthCUDAServicesConfig import StreamToolCfg
+
+    acc = ComponentAccumulator()
+    kwargs.setdefault("MemoryResourcesTool", acc.popToolsAndMerge(MemoryResourcesToolCfg(flags)))
+    kwargs.setdefault("CopyProviderTool", acc.popToolsAndMerge(CopyToolCfg(flags)))
+    kwargs.setdefault("StreamTool", acc.popToolsAndMerge(StreamToolCfg(flags)))
+    acc.setPrivateTools(CompFactory.ActsTrk.CUDAStripSPFormationAlgProviderTool(name, **kwargs))
+    return acc
+
+
+def StripSpacepointInputsCondAlgCfg(flags, name="StripSpacepointInputsCondAlg", **kwargs):
+    """Build and upload immutable inputs for the alignment/topology IOV."""
+    if flags.Device.Backend is not DeviceBackend.CUDA:
+        raise ValueError(f"Unsupported Strip SP backend: {flags.Device.Backend}")
+    acc = ComponentAccumulator()
+    acc.merge(ITkStripReadoutGeometryCfg(flags))
+    acc.merge(ITkSiElementPropertiesTableCondAlgCfg(flags))
+    if "SPFormationAlgProviderTool" not in kwargs:
+        kwargs["SPFormationAlgProviderTool"] = acc.popToolsAndMerge(
+            CUDAStripSPFormationToolCfg(flags, name + "Provider"))
+    acc.addCondAlgo(CompFactory.ActsTrk.StripSpacepointInputsCondAlg(name, **kwargs))
+    return acc
+
+
+def DeviceStripSPFormationAlgCfg(flags, name="DeviceStripSPFormationAlg", **kwargs):
+    """Configure strip SP formation without host conversion or output streams."""
+    if flags.Device.Backend is not DeviceBackend.CUDA:
+        raise ValueError(f"Unsupported Strip SP backend: {flags.Device.Backend}")
+    if flags.Beam.Type is not BeamType.Collisions:
+        raise ValueError("GPU Strip SP formation currently supports collision beam spots")
+    acc = ComponentAccumulator()
+    # Geometry keys belong to the conditions producer, not the event Algorithm.
+    inputsKey = kwargs.setdefault("InputStripSPConditions", "TracccStripSpacepointConditions")
+    conditions = {key: kwargs.pop(key) for key in
+                  ("StripDetectorElements", "StripProperties", "GeoIdMapping") if key in kwargs}
+    conditions["OutputStripSPConditions"] = inputsKey
+    acc.merge(StripSpacepointInputsCondAlgCfg(flags, **conditions))
+    acc.merge(BeamSpotCondAlgCfg(flags))
+    if "SPFormationAlgProviderTool" not in kwargs:
+        kwargs["SPFormationAlgProviderTool"] = acc.popToolsAndMerge(
+            CUDAStripSPFormationToolCfg(flags, name + "Provider"))
+    acc.addEventAlgo(CompFactory.ActsTrk.DeviceStripSPFormationAlg(name, **kwargs))
     return acc

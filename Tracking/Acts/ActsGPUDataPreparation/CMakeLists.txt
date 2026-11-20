@@ -25,6 +25,9 @@ set( _libraries
   ActsGPUEventLib
   ActsGPUInterfacesLib
   PixelReadoutGeometryLib
+  BeamSpotConditionsData
+  InDetReadoutGeometry
+  SiSpacePointFormationLib
   SCT_ReadoutGeometry
 )
 
@@ -94,3 +97,13 @@ if (TARGET traccc::hip)
     POST_EXEC_SCRIPT noerror.sh
     PROPERTIES SKIP_RETURN_CODE 2)
 endif()
+
+# Exercise the Conditions Store and CDO ownership without requiring a GPU.
+atlas_install_joboptions( test/StripSpacepointConditions_test.txt )
+atlas_add_test( StripSpacepointConditions
+  SOURCES test/StripSpacepointConditions_test.cxx
+  INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src
+  LINK_LIBRARIES AthenaKernel StoreGateLib SGTools TestTools GaudiKernel
+    traccc::core vecmem::core
+  POST_EXEC_SCRIPT noerror.sh
+)
