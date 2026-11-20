@@ -113,7 +113,8 @@ StatusCode TracccMeasurementDeviceConverterAlg::execute(const EventContext& ctx)
   // ---- Conversion on GPU
   DevicePixelMeasurementContainer::view::size_type n_pixels = 0;
   DeviceStripMeasurementContainer::view::size_type n_strips = 0;
-  ATH_CHECK(convertMeasurementsOnGPU(cuda_stream, m_mrTool->mainMR(), *device_copy,
+  ATH_CHECK(convertMeasurementsOnGPU(cuda_stream, m_mrTool->mainMR(),
+    *m_mrTool->hostMR(), *device_copy,
     m_detector->as_view<traccc::itk_detector>(), detector_conditions,
     n_meas, *traccc_measurements, n_pixels, n_strips,
     converted_pixel_meas_device_buffer, converted_strip_meas_device_buffer));
