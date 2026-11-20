@@ -222,11 +222,16 @@ def getArgumentParser(legacy_args=False, **kwargs):
     if __athenaCLI:
         g = parser.add_argument_group('System options')
 
-        g.add_argument('--tcmalloc', action='store_true', dest='tcmalloc', default=True,
-                       help='use tcmalloc.so for memory allocation [DEFAULT]')
+        g_alloc = g.add_mutually_exclusive_group(required=False)
 
-        g.add_argument('--stdcmalloc', action='store_false', dest='tcmalloc',
-                       help='use libc malloc for memory allocation')
+        g_alloc.add_argument('--tcmalloc', action='store_true', default=True,
+                             help='use tcmalloc for memory allocation [DEFAULT]')
+
+        g_alloc.add_argument('--jemalloc', action='store_true',
+                             help='use jemalloc for memory allocation')
+
+        g_alloc.add_argument('--stdcmalloc', action='store_true',
+                             help='use libc malloc for memory allocation')
 
         g.add_argument('--stdcmath', action='store_true', default=True,
                        help='use libc malloc for memory allocation [DEFAULT]')

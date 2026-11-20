@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Set up the project.
 cmake_minimum_required( VERSION 3.25 )
@@ -31,6 +31,7 @@ find_package( BLAS )
 find_package( libffi )
 find_package( gl2ps )
 find_package( autopep8 )
+find_package( jemalloc )
 
 # Set the project into "GENERATIONBASE mode".
 set( GENERATIONBASE TRUE CACHE BOOL

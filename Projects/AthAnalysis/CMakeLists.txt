@@ -34,6 +34,7 @@ find_package( requests )
 find_package( libffi )
 find_package( gl2ps )
 find_package( autopep8 )
+find_package( jemalloc )
 
 # Compile flag(s).
 add_definitions( -DXAOD_ANALYSIS )

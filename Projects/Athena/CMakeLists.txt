@@ -137,6 +137,7 @@ find_package( heaptrack )
 find_package( libffi )
 find_package( gl2ps )
 find_package( autopep8 )
+find_package( jemalloc )
 
 # Set up the correct runtime environment for OpenBLAS.
 set( OpenBlasEnvironment_DIR "${CMAKE_SOURCE_DIR}/cmake"

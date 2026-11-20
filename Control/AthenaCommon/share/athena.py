@@ -9,6 +9,7 @@
 
 # defaults
 export USETCMALLOC=0
+export USEJEMALLOC=0
 export USEIMF=0
 export USEEXCTRACE=0
 export USEEXCABORT=1
@@ -22,8 +23,9 @@ fi
 for a in "$@"
 do
     case "$a" in
-        --stdcmalloc)    USETCMALLOC=0;;
-        --tcmalloc)      USETCMALLOC=1;;
+        --stdcmalloc)    USETCMALLOC=0;USEJEMALLOC=0;;
+        --tcmalloc)      USETCMALLOC=1;USEJEMALLOC=0;;
+        --jemalloc)      USETCMALLOC=0;USEJEMALLOC=1;;
         --stdcmath)      USEIMF=0;;
         --imf)           USEIMF=1;;
         --exctrace)      USEEXCTRACE=1;;
