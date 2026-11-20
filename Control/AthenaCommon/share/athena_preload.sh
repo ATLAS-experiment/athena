@@ -1,12 +1,13 @@
 #!/bin/sh
 #
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # Script to set $LD_PRELOAD, steered by the following environment variables:
 #
 #   $TCMALLOCDIR            : tcmalloc directory (enables tcmalloc if set)
 #   $USETCMALLOC            : use tcmalloc (instead of std malloc)
 #   $USETCMALLOCMINIMAL     : use minimal version of tcmalloc
+#   $USEJEMALLOC            : use jemalloc
 #   $ATLASMKLLIBDIR_PRELOAD : location of Intel math library
 #   $USEIMF                 : use Intel math library
 #   $USEEXCTRACE            : preload exception trace collector
@@ -63,6 +64,18 @@ if [ "$USETCMALLOC" = "1" ] || [ "$USETCMALLOC" = "true" ] ; then
         echo "Preloading tcmalloc_minimal.so"
         ld_preload "$TCMALLOCDIR/libtcmalloc_minimal.so"
     fi
+fi
+
+#
+# jemalloc
+#
+if [ "$USEJEMALLOC" = "1" ] || [ "$USEJEMALLOC" = "true" ] ; then
+    if [ ! -e "$ATLAS_JEMALLOC_LIBRARY" ]; then
+        echo "ERROR: $ATLAS_JEMALLOC_LIBRARY does not exist"
+        exit 1
+    fi
+    echo "Preloading jemalloc.so"
+    ld_preload "$ATLAS_JEMALLOC_LIBRARY"
 fi
 
 #

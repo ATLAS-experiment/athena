@@ -9,14 +9,16 @@
 
 # defaults
 export USETCMALLOC=1
+export USEJEMALLOC=0
 export USEIMF=1
 
 # parse command line arguments
 for a in ${@}
 do
     case "$a" in
-        --stdcmalloc)    USETCMALLOC=0;;
-        --tcmalloc)      USETCMALLOC=1;;
+        --stdcmalloc)    USETCMALLOC=0;USEJEMALLOC=0;;
+        --tcmalloc)      USETCMALLOC=1;USEJEMALLOC=0;;
+        --jemalloc)      USETCMALLOC=0;USEJEMALLOC=1;;
         --stdcmath)      USEIMF=0;;
         --imf)           USEIMF=1;;
         --preloadlib*)   export ATHENA_ADD_PRELOAD=${a#*=};;
@@ -1285,8 +1287,12 @@ def main():
    ## Performance and debugging
    g = parser.add_argument_group('Performance and debugging')
    g.add_argument('--perfmon', action='store_true', help='enable PerfMon')
-   g.add_argument('--tcmalloc', action='store_true', default=True, help='use tcmalloc')
-   g.add_argument('--stdcmalloc', action='store_true', help='use stdcmalloc')
+
+   g_alloc = g.add_mutually_exclusive_group(required=False)
+   g_alloc.add_argument('--tcmalloc', action='store_true', default=True, help='use tcmalloc')
+   g_alloc.add_argument('--jemalloc', action='store_true', help='use jemalloc')
+   g_alloc.add_argument('--stdcmalloc', action='store_true', help='use stdcmalloc')
+
    g.add_argument('--stdcmath', action='store_true', help='use stdcmath library')
    g.add_argument('--imf', action='store_true', default=True, help='use Intel math library')
    g.add_argument('--timeout', metavar='MSEC', type=int, default=None,
