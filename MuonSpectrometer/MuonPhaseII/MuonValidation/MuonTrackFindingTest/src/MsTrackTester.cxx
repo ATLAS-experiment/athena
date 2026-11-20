@@ -266,10 +266,12 @@ namespace MuonValR4 {
                     qTimesP->push_back(m_seedingTool->estimateQtimesP(tgContext, *truthSeed, magField) / Gaudi::Units::GeV);
                     return length;
                 }));
-            /// Production vertex of the truth muon [mm]; prodR = -1 if the vertex is missing
+
+            /// Production vertex of the truth muon [mm]; prodR = -1 if the vertex is missing (is -1 really the best value? ...)
             for (const auto var :{ "d0", "z0", "prodZ", "prodR"}) {
                 m_trkTruthLinks.emplace_back(m_truthKey, var);
-                m_truthTrks->addVariable<float>(var);
+                m_truthTrks->addVariable<float>(-99999.f, var);
+
             }
             m_tree.addBranch(m_truthTrks);
             m_trkTruthLinks.emplace_back(m_truthSegmentKey, "truthParticleLink");
