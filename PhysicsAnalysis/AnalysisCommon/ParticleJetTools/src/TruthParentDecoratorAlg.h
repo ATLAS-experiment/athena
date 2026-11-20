@@ -36,7 +36,8 @@ class TruthParentDecoratorAlg: public AthReentrantAlgorithm
 {
 public:
   using Barcodex = std::map<int, std::set<int>>;
-  using IPMap = std::map<int, std::set<const xAOD::TruthParticle*>>;
+  // duplicates kept in the order the containers are read, so the choice among them is reproducible
+  using IPMap = std::map<int, std::vector<const xAOD::TruthParticle*>>;
   using JC = xAOD::IParticleContainer;
   using J = xAOD::IParticle;
   using TPC = xAOD::TruthParticleContainer;
