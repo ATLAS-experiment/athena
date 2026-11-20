@@ -15,6 +15,9 @@ DECLARE_COMPONENT(ActsTrk::CUDAClusterizationAlgProviderTool)
 #include "src/cuda/CUDASPFormationAlgProviderTool.h"
 DECLARE_COMPONENT(ActsTrk::CUDASPFormationAlgProviderTool)
 
+#include "src/cuda/CUDAStripSPFormationAlgProviderTool.h"
+DECLARE_COMPONENT(ActsTrk::CUDAStripSPFormationAlgProviderTool)
+
 #endif  // ACTSTRACK_HAVE_CUDA
 
 #ifdef ACTSTRACK_HAVE_HIP
@@ -26,3 +29,9 @@ DECLARE_COMPONENT(ActsTrk::HIPClusterizationAlgProviderTool)
 DECLARE_COMPONENT(ActsTrk::HIPSPFormationAlgProviderTool)
 
 #endif  // ACTSTRACK_HAVE_HIP
+
+#include "src/DeviceStripSPFormationAlg.h"
+DECLARE_COMPONENT(ActsTrk::DeviceStripSPFormationAlg)
+
+#include "src/StripSpacepointInputsCondAlg.h"
+DECLARE_COMPONENT(ActsTrk::StripSpacepointInputsCondAlg)
