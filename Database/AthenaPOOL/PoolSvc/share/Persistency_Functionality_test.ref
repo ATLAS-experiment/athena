@@ -1,7 +1,7 @@
 Persistency_Fun...    INFO Creating FileCatalog
 Persistency_Fun...    INFO Starting test
 Persistency_Fun...    INFO Loading shared libraries:
-Persistency_Fun...    INFO  - loading library test_TestDictionaryDict
+Persistency_Fun...    INFO  - loading library test_PoolSvcTestDictionaryDict
 Persistency_Fun...    INFO Writing objects in the database using ROOT_Key storage type.
 Persistency_Fun...    INFO Creating the persistency service
 Persistency_Fun...    INFO Writing 100 objects of each type

@@ -41,7 +41,7 @@ int TestDriver::execute()
 {
    ATH_MSG_INFO("Starting test");
 
-   loadLibraries( {"test_TestDictionaryDict"} );
+   loadLibraries( {"test_PoolSvcTestDictionaryDict"} );
    runTestForStorageType(pool::ROOTKEY_StorageType);
    ATH_MSG_INFO("--------------------------------");
    runTestForStorageType(pool::ROOTTREE_StorageType);

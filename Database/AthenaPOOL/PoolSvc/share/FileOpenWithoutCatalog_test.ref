@@ -1,7 +1,7 @@
 FileOpenWithout...    INFO Creating FileCatalog
 FileOpenWithout...    INFO Starting test
 FileOpenWithout...    INFO Loading shared libraries:
-FileOpenWithout...    INFO  - loading library test_TestDictionaryDict
+FileOpenWithout...    INFO  - loading library test_PoolSvcTestDictionaryDict
 FileOpenWithout...    INFO Writing objects in the database.
 FileOpenWithout...    INFO Creating the persistency service
 FileOpenWithout...    INFO Writing 100 objects.
