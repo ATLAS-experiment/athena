@@ -49,6 +49,8 @@ StatusCode JetTruthLabelingTool::initialize(){
   m_split12_truthKey = m_truthJetCollectionKey.key() + ".Split12";
   m_split23_truthKey = m_truthJetCollectionKey.key() + ".Split23";
 
+  m_jetTruthIsolKey = SG::ReadDecorHandleKey<xAOD::JetContainer>(m_truthJetCollectionKey, m_jetTruthIsolKey.key());
+
   if(!m_isTruthJetCol){
     m_label_recoKey  = m_jetContainerName + "." + m_truthLabelName;
     m_NB_recoKey     = m_jetContainerName + "." + m_truthLabelName + "_NB";
@@ -60,6 +62,7 @@ StatusCode JetTruthLabelingTool::initialize(){
     m_matchedTruthJetPt_recoKey = m_jetContainerName + "." + m_truthLabelName + "_TruthMatch_pt";
     m_matchedTruthJetRapidity_recoKey = m_jetContainerName + "." + m_truthLabelName + "_TruthMatch_rapidity";
     m_matchedTruthJetPhi_recoKey = m_jetContainerName + "." + m_truthLabelName + "_TruthMatch_phi";
+    m_matchedTruthJetIso_recoKey = m_jetContainerName + "." + m_truthLabelName + "_TruthMatch_iso";
     m_matchedTruthJetDR_recoKey = m_jetContainerName + "." + m_truthLabelName + "_TruthMatch_dR";
 
     if (!m_doLargeRLabels) { //Simple naming for small R
@@ -68,6 +71,7 @@ StatusCode JetTruthLabelingTool::initialize(){
         m_matchedTruthJetPt_recoKey = m_jetContainerName + "." + "TruthMatch_pt";
         m_matchedTruthJetRapidity_recoKey = m_jetContainerName + "." + "TruthMatch_rapidity";
         m_matchedTruthJetPhi_recoKey = m_jetContainerName + "." + "TruthMatch_phi";
+        m_matchedTruthJetIso_recoKey = m_jetContainerName + "." + "TruthMatch_iso";
         m_matchedTruthJetDR_recoKey = m_jetContainerName + "." + "TruthMatch_dR";
         m_matchedPileupTag_recoKey = m_jetContainerName + "." + "TruthMatch_PileupLabel";
         m_sumPtMatchedHSJets_recoKey = m_jetContainerName + "." + "TruthMatch_HSSumPt";
@@ -92,6 +96,8 @@ StatusCode JetTruthLabelingTool::initialize(){
   ATH_CHECK(m_split12_truthKey.initialize(m_truthLabelConfig == TruthLabelConfiguration::R21Precision_2022v1 || m_truthLabelConfig == TruthLabelConfiguration::R10TruthLabel_R22v1 || m_truthLabelConfig == TruthLabelConfiguration::R10WZTruthLabel_R22v1));
   ATH_CHECK(m_split23_truthKey.initialize(m_truthLabelConfig == TruthLabelConfiguration::R21Precision_2022v1 || m_truthLabelConfig == TruthLabelConfiguration::R10TruthLabel_R22v1 || m_truthLabelConfig == TruthLabelConfiguration::R10WZTruthLabel_R22v1));
 
+  ATH_CHECK(m_jetTruthIsolKey.initialize());
+
   ATH_CHECK(m_label_recoKey.initialize(!m_isTruthJetCol));
   ATH_CHECK(m_NB_recoKey.initialize(!m_isTruthJetCol));
   ATH_CHECK(m_truthSplit12_recoKey.initialize(!m_isTruthJetCol && (m_truthLabelConfig == TruthLabelConfiguration::R21Precision_2022v1 || m_truthLabelConfig == TruthLabelConfiguration::R10TruthLabel_R22v1 || m_truthLabelConfig == TruthLabelConfiguration::R10WZTruthLabel_R22v1) ));
@@ -102,6 +108,7 @@ StatusCode JetTruthLabelingTool::initialize(){
   ATH_CHECK(m_matchedTruthJetPt_recoKey.initialize(!m_isTruthJetCol));
   ATH_CHECK(m_matchedTruthJetRapidity_recoKey.initialize(!m_isTruthJetCol));
   ATH_CHECK(m_matchedTruthJetPhi_recoKey.initialize(!m_isTruthJetCol));
+  ATH_CHECK(m_matchedTruthJetIso_recoKey.initialize(!m_isTruthJetCol));
   ATH_CHECK(m_matchedTruthJetDR_recoKey.initialize(!m_isTruthJetCol));
 
   ATH_CHECK(m_matchedPileupTag_recoKey.initialize(!m_isTruthJetCol && !m_doLargeRLabels));
@@ -149,6 +156,7 @@ JetTruthLabelingTool::DecorHandles::DecorHandles
   maybeInit (matchedTruthJetPtHandle,   tool.m_matchedTruthJetPt_recoKey);
   maybeInit (matchedTruthJetRapidityHandle, tool.m_matchedTruthJetRapidity_recoKey);
   maybeInit (matchedTruthJetPhiHandle, tool.m_matchedTruthJetPhi_recoKey);
+  maybeInit (matchedTruthJetIsoHandle, tool.m_matchedTruthJetIso_recoKey);
   maybeInit (matchedTruthJetDRHandle, tool.m_matchedTruthJetDR_recoKey);
 
   maybeInit (matchedPileupTagHandle, tool.m_matchedPileupTag_recoKey);
@@ -244,6 +252,8 @@ StatusCode JetTruthLabelingTool::labelRecoJets(DecorHandles& dh,
       }
   }
   
+  SG::ReadDecorHandle<xAOD::JetContainer, float> jetTruthIsolHandle(m_jetTruthIsolKey, ctx);
+
   SG::ReadHandle<xAOD::JetContainer> truthGroomedJets;
   if ( m_getTruthGroomedJetValues ) {
     truthGroomedJets = SG::makeHandle(m_truthGroomedJetCollectionKey, ctx);
@@ -298,6 +308,7 @@ StatusCode JetTruthLabelingTool::labelRecoJets(DecorHandles& dh,
     // (and thus a well-defined four-vector)
     if (jet->numConstituents() > 0) {
         for (const xAOD::Jet* truthJet : *truthJets) { // Truth jet loop
+         
             // Calculate DR
             float dR = jet->p4().DeltaR(truthJet->p4(),true);
             // If parent jet has been retrieved, calculate dR w.r.t. it instead
@@ -444,6 +455,7 @@ StatusCode JetTruthLabelingTool::labelRecoJets(DecorHandles& dh,
     float truthJetPt = -9999;
     float truthJetRapidity = -9;
     float truthJetPhi = -9999;
+    float truthJetIso = -2;
     float deltaR = -2;
 
     const xAOD::JetContainer* truthJetCont = truthJets.cptr();
@@ -497,6 +509,11 @@ StatusCode JetTruthLabelingTool::labelRecoJets(DecorHandles& dh,
         truthJetRapidity = matchTruthJet->rapidity();
         truthJetPhi = matchTruthJet->phi();
         deltaR = dRmin;
+        if (!m_doLargeRLabels) {
+            if (pileupTag <= 2) {
+                truthJetIso = jetTruthIsolHandle(*matchTruthJet);
+            }
+        }
     }
 
     // Save Groomed Truth Jet variables
@@ -552,6 +569,7 @@ StatusCode JetTruthLabelingTool::labelRecoJets(DecorHandles& dh,
     (*dh.matchedTruthJetDRHandle)(*jet) = deltaR;
 
     if (!m_doLargeRLabels && usePileupJets) {
+        (*dh.matchedTruthJetIsoHandle)(*jet) = truthJetIso;
         (*dh.matchedPileupTagHandle)(*jet) = pileupTag;
         (*dh.sumPtMatchedHSJetsHandle)(*jet) = sumPtMatchedHSJets;
         (*dh.sumPtMatchedOOTJetsHandle)(*jet) = sumPtMatchedOOTJets;

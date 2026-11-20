@@ -13,6 +13,7 @@
 #include "AsgDataHandles/WriteDecorHandleKey.h"
 #include "AsgDataHandles/WriteDecorHandle.h"
 
+#include "xAODJet/Jet.h"
 #include "xAODJet/JetContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODEventInfo/EventInfo.h"
@@ -96,6 +97,7 @@ protected:
     FloatHandleOp_t matchedTruthJetPtHandle;
     FloatHandleOp_t matchedTruthJetRapidityHandle;
     FloatHandleOp_t matchedTruthJetPhiHandle;
+    FloatHandleOp_t matchedTruthJetIsoHandle;
     FloatHandleOp_t matchedTruthJetEHandle;
     FloatHandleOp_t matchedTruthJetDRHandle;
     FloatHandleOp_t matchedTruthJetGFHandle;
@@ -157,6 +159,8 @@ protected:
   SG::ReadDecorHandleKey<xAOD::JetContainer> m_split12_truthKey{this, "Split12_TruthKey", "", "Do not configure manually!"};
   SG::ReadDecorHandleKey<xAOD::JetContainer> m_split23_truthKey{this, "Split23_TruthKey", "", "Do not configure manually!"};
 
+  SG::ReadDecorHandleKey<xAOD::JetContainer> m_jetTruthIsolKey{this, "JetTruthIsolName", "IsoFixedCone5Pt", "SG key for the matched truth jet ElementLink attribute"};
+
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_label_recoKey{this, "label_RecoKey", "", "Do not configure manually!"};
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_NB_recoKey{this, "NB_RecoKey", "", "Do not configure manually!"};
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_truthSplit12_recoKey{this, "TruthSplit12_RecoKey", "", "Do not configure manually!"};
@@ -167,6 +171,7 @@ protected:
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_matchedTruthJetPt_recoKey{this, "TruthMatch_pt_RecoKey", "", "Do not configure manually!"};
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_matchedTruthJetRapidity_recoKey{ this, "TruthMatch_rapidity_RecoKey", "", "Do not configure manually!" };
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_matchedTruthJetPhi_recoKey{ this, "TruthMatch_phi_RecoKey", "", "Do not configure manually!" };
+  SG::WriteDecorHandleKey<xAOD::JetContainer> m_matchedTruthJetIso_recoKey{ this, "TruthMatch_iso_RecoKey", "", "Do not configure manually!" };
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_matchedTruthJetDR_recoKey{ this, "TruthMatch_dR_RecoKey", "", "Do not configure manually!" };
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_matchedPileupTag_recoKey{ this, "TruthMatch_PileupLabel_RecoKey", "", "Do not configure manually!" };
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_sumPtMatchedHSJets_recoKey{ this, "TruthMatch_HSSumPt_RecoKey", "", "Do not configure manually!" };
