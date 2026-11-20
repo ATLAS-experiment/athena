@@ -147,10 +147,13 @@ def boolvec (v):
     return out
 
 
-# For root 6.08, need to use __cppname__ rather than __name__
+# For root 6.08, need to use __cpp_name__ rather than __name__
 # for the name of a type if it's there.
+# With cppjit, we also need to edit out defaulted template arguments.
+_rules = ROOT.CxxUtils.ClassName.Rules()
+_rules.add ("DataVector<$T, $B>", "DataVector<$T>")
 def typename(t):
-    return getattr (t, '__cpp_name__', t.__name__)
+    return _rules.apply (getattr (t, '__cpp_name__', t.__name__))
 
 ### library methods ------------------------------------------------------------
 
@@ -3369,7 +3372,11 @@ def dump_auxitem (x, auxid, f = sys.stdout):
     if ac_cl:
         ac = ac_cl(reg.getName(auxid))
         try:
-            val = ac(x)
+            if atomic:
+                # Work around a cppjit issue.
+                val = ac.__call__[type(x).__cpp_name__](x)
+            else:
+                val = ac(x)
         except TypeError:
             # Can happen due to schema evolution
             val = '<unavailable 5>'
@@ -3513,6 +3520,7 @@ dumpspecs = [
     ['InDetRawDataContainer<InDetRawDataCollection<TRT_RDORawData> >', dump_TRT_RawDataContainer],
     ['InDetRawDataContainer<InDetRawDataCollection<SCT_RDORawData> >', dump_SCT_RawDataContainer],
     ['std::multimap<const InDet::SiCluster*,const InDet::SiCluster*,InDet::compare_SiCluster>', dump_PixelGangedClusterAmbiguities],
+    ['std::multimap<const InDet::SiCluster*,const InDet::SiCluster*,InDet::compare_SiCluster,std::allocator<std::pair<const InDet::SiCluster*const,const InDet::SiCluster*> > >', dump_PixelGangedClusterAmbiguities],
     ['TileDigitsContainer',                  dump_TileDigitsContainer],
     ['TileContainer<TileL2>',                dump_TileL2],
     ['TileContainer<TileTTL1>',              dump_TileTTL1],
