@@ -12,7 +12,6 @@
 #include "AthContainers/CurrentContext.h"
 #ifndef XAOD_STANDALONE
 # include "AthenaKernel/proxyDictFromEventContext.h"
-# include "SGTools/CurrentEventStore.h"
 #endif  // not XAOD_STANDALONE
 
 // ROOT include(s).
@@ -56,7 +55,6 @@ Event::~Event() {
   }
 #ifndef XAOD_STANDALONE
   if (Atlas::proxyDictFromEventContext() == this) {
-    SG::CurrentEventStore::setStore(nullptr);
     Atlas::setProxyDictInEventContext(nullptr);
   }
 #endif  // not XAOD_STANDALONE
@@ -68,7 +66,6 @@ void Event::setActive() const {
   Event* nc_this ATLAS_THREAD_SAFE = const_cast<Event*>(this);
   TActiveEvent::setEvent(static_cast<TVirtualEvent*>(nc_this));
 #ifndef XAOD_STANDALONE
-  SG::CurrentEventStore::setStore(nc_this);
   Atlas::setProxyDictInEventContext(nc_this);
 #endif  // not XAOD_STANDALONE
 }

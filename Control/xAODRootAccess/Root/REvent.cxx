@@ -29,7 +29,7 @@
 #include "xAODCore/tools/IOStats.h"
 #include "xAODCore/tools/ReadStats.h"
 #ifndef XAOD_STANDALONE
-# include "SGTools/CurrentEventStore.h"
+# include "SGTools/WithEventContext.h"
 #endif
 
 // ROOT include(s).
@@ -936,7 +936,7 @@ StatusCode REvent::connectObject(const std::string& key, ::Bool_t silent) {
 
   // Make sure that the current object is the "active event":
 #ifndef XAOD_STANDALONE
-  SG::CurrentEventStore::Push save (SG::CurrentEventStore::store());
+  SG::WithEventContext saveContext;
 #endif
   setActive();
 
