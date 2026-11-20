@@ -26,6 +26,10 @@ StatusCode BTaggingLargeREfficiencyJsonTool::initialize()
     m_minPt = BTaggingToolUtil::MeVToGeV( m_minPt ); 
   }
 
+  // Getter of the jet quantities used by the handlers to check if the jet falls into their bounds
+  m_funcGetJetQuantity = std::make_unique<BTaggingBoundsHandler::JetQuantityGetter>(
+    std::bind_front(&BTaggingLargeREfficiencyJsonTool::getJetQuantity, this));
+
   // Retrieve selection tool 
   ATH_MSG_INFO("Initialize BTagging Efficiency Json Tool: retrieving corresponding selection tool");
   ANA_CHECK (m_selTool.retrieve());
@@ -131,11 +135,7 @@ StatusCode BTaggingLargeREfficiencyJsonTool::initialize()
     ATH_MSG_ERROR("JSON contains labelMappingMCMC but no mc-mc entry found for the WP used.");
     return StatusCode::FAILURE;
   }
-
-  // Getter of the jet quantities used by the handlers to check if the jet falls into their bounds
-  const BTaggingBoundsHandler::JetQuantityGetter funcGetJetQuantity =
-    std::bind_front(&BTaggingLargeREfficiencyJsonTool::getJetQuantity, this);
-
+  
   if (json_config_OP.contains("mc_mc")) {
     // Get the MC-MC json configuration related config
     const auto &json_config_OPMCMC = json_config_OP["mc_mc"];
@@ -180,7 +180,7 @@ StatusCode BTaggingLargeREfficiencyJsonTool::initialize()
           std::vector<LargeRMCMCHandler> tmpVecLargeRMCMCHandler; 
           for (const auto& entry : mcmcAtLabel[m_mcGenerator.value()]) {
             try {
-              tmpVecLargeRMCMCHandler.push_back(LargeRMCMCHandler(entry, funcGetJetQuantity));
+              tmpVecLargeRMCMCHandler.push_back(LargeRMCMCHandler(entry, m_funcGetJetQuantity.get()));
               // // Useful for debugging
               // // Get the latest handler that was just added 
               // const LargeRMCMCHandler &handler = tmpVecLargeRMCMCHandler[tmpVecLargeRMCMCHandler.size() -1];
@@ -394,10 +394,10 @@ float BTaggingLargeREfficiencyJsonTool::getJetQuantity(const xAOD::Jet& jet, con
 }
 
 BTaggingLargeREfficiencyJsonTool::LargeRMCMCHandler::LargeRMCMCHandler(
-    const json& jsonConfig, JetQuantityGetter funcGetJetQuantity)
+    const json& jsonConfig, JetQuantityGetter* funcGetJetQuantity)
   // The bounds are loaded by the parent class, the json config should have an entry called content that should contain the MC-MC SF
   // e.g. jsonConfig = { "binVariables": {"pT": [250, 300 ] , "mass": [50 , 75]}, "content":  {"SF": 0.9, uncerts:{ "SF_uncert_1": 0.1, "SF_uncert_2": 0.03}} }
-  : BTaggingBoundsHandler(jsonConfig, std::move(funcGetJetQuantity))
+  : BTaggingBoundsHandler(jsonConfig, funcGetJetQuantity)
 { 
 
   // Check that the jsonConfig contains the entry "content" 

@@ -65,7 +65,7 @@ class BTaggingLargeREfficiencyJsonTool: public asg::AsgTool,
   
   class LargeRMCMCHandler : public BTaggingBoundsHandler {
     public:
-      LargeRMCMCHandler(const nlohmann::ordered_json& jsonConfig, JetQuantityGetter funcGetJetQuantity);
+      LargeRMCMCHandler(const nlohmann::ordered_json& jsonConfig, JetQuantityGetter* funcGetJetQuantity);
       // Prevent handler from being copied forcing passing them by (const) references or using pointers.
       // It ensures that the code is efficient memory wise as no duplicate can be created 
       // The handlers should only be stored in vectors or maps and used directly basically 
@@ -83,6 +83,10 @@ class BTaggingLargeREfficiencyJsonTool: public asg::AsgTool,
       float m_MCMCSF = std::numeric_limits<float>::lowest();
       float m_MCEff  = std::numeric_limits<float>::lowest();
   };
+
+  // Function to access jet quantity 
+  // Need by the handler 
+  std::unique_ptr<BTaggingBoundsHandler::JetQuantityGetter> m_funcGetJetQuantity;
 
   // SF maps
   std::map<std::string, std::vector<float>> m_sfMap;
