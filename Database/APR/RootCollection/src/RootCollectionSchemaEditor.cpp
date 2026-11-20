@@ -218,7 +218,7 @@ readSchema()
       for( int i = 0; i < m_tree->GetNbranches(); i++ ) {
          TBranch* branch = (TBranch*)m_tree->GetListOfBranches()->UncheckedAt(i);
          std::string column_name = branch->GetName();
-         std::string column_type = branch->GetTitle();
+         std::string column_type = (column_name == "index_ref" ? "long long/L" : branch->GetTitle());
          m_poolOut << coral::Debug << "  + adding column: " << column_name <<  corENDL;
          m_poolOut << coral::Debug << "      column type: " << column_type <<  corENDL;
          if( column_type.substr(0,5) != "Token" ) {
