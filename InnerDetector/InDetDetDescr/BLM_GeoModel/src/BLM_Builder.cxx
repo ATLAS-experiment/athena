@@ -23,46 +23,6 @@
 
 #include "GaudiKernel/SystemOfUnits.h"
 
-//================ Constructor =================================================
-
-InDetDD::BLM_Builder::BLM_Builder(const std::string& t,
-				  const std::string& n,
-				  const IInterface*  p )
-  : base_class(t,n,p)
-{
-  //default settings
-  //          Z                              R                               PHI                        ROT_X                      ROT_Y                        ROT_Z                  DIAM_TRANS_X               DIAM_TRANS_Y              DIAM_TRANS_Z
-  m_module0.push_back(3383.5);     m_module0.push_back(62.825);    m_module0.push_back(17);    m_module0.push_back(180);   m_module0.push_back(0);    m_module0.push_back(287);    m_module0.push_back(0);    m_module0.push_back(0);    m_module0.push_back(0);
-  m_moduleI.push_back(3383.5);     m_moduleI.push_back(62.825);    m_moduleI.push_back(45);    m_moduleI.push_back(180);   m_moduleI.push_back(0);    m_moduleI.push_back(315);    m_moduleI.push_back(0);    m_moduleI.push_back(0);    m_moduleI.push_back(0);
-  m_moduleII.push_back(3383.5);    m_moduleII.push_back(62.825);   m_moduleII.push_back(73);   m_moduleII.push_back(180);  m_moduleII.push_back(0);   m_moduleII.push_back(343);   m_moduleII.push_back(0);   m_moduleII.push_back(0);   m_moduleII.push_back(0);
-  m_moduleIII.push_back(3383.5);   m_moduleIII.push_back(62.825);  m_moduleIII.push_back(197); m_moduleIII.push_back(180); m_moduleIII.push_back(0);  m_moduleIII.push_back(107);  m_moduleIII.push_back(0);  m_moduleIII.push_back(0);  m_moduleIII.push_back(0);
-  m_moduleIV.push_back(3383.5);    m_moduleIV.push_back(62.825);   m_moduleIV.push_back(225);  m_moduleIV.push_back(180);  m_moduleIV.push_back(0);   m_moduleIV.push_back(135);   m_moduleIV.push_back(0);   m_moduleIV.push_back(0);   m_moduleIV.push_back(0);
-  m_moduleV.push_back(3383.5);     m_moduleV.push_back(62.825);    m_moduleV.push_back(253);   m_moduleV.push_back(180);   m_moduleV.push_back(0);    m_moduleV.push_back(163);    m_moduleV.push_back(0);    m_moduleV.push_back(0);    m_moduleV.push_back(0);
-  m_moduleVI.push_back(-3383.5);   m_moduleVI.push_back(62.825);   m_moduleVI.push_back(17);   m_moduleVI.push_back(0);    m_moduleVI.push_back(0);   m_moduleVI.push_back(107);   m_moduleVI.push_back(0);   m_moduleVI.push_back(0);   m_moduleVI.push_back(0);
-  m_moduleVII.push_back(-3383.5);  m_moduleVII.push_back(62.825);  m_moduleVII.push_back(45);  m_moduleVII.push_back(0);   m_moduleVII.push_back(0);  m_moduleVII.push_back(135);  m_moduleVII.push_back(0);  m_moduleVII.push_back(0);  m_moduleVII.push_back(0);
-  m_moduleVIII.push_back(-3383.5); m_moduleVIII.push_back(62.825); m_moduleVIII.push_back(73); m_moduleVIII.push_back(0);  m_moduleVIII.push_back(0); m_moduleVIII.push_back(163); m_moduleVIII.push_back(0); m_moduleVIII.push_back(0); m_moduleVIII.push_back(0);
-  m_moduleIX.push_back(-3383.5);   m_moduleIX.push_back(62.825);   m_moduleIX.push_back(197);  m_moduleIX.push_back(0);    m_moduleIX.push_back(0);   m_moduleIX.push_back(287);   m_moduleIX.push_back(0);   m_moduleIX.push_back(0);   m_moduleIX.push_back(0);
-  m_moduleX.push_back(-3383.5);    m_moduleX.push_back(62.825);    m_moduleX.push_back(225);   m_moduleX.push_back(0);     m_moduleX.push_back(0);    m_moduleX.push_back(315);    m_moduleX.push_back(0);    m_moduleX.push_back(0);    m_moduleX.push_back(0);
-  m_moduleXI.push_back(-3383.5);   m_moduleXI.push_back(62.825);   m_moduleXI.push_back(253);  m_moduleXI.push_back(0);    m_moduleXI.push_back(0);   m_moduleXI.push_back(343);   m_moduleXI.push_back(0);   m_moduleXI.push_back(0);   m_moduleXI.push_back(0);
-
-  //  template for property declaration
-  declareProperty("Modul0", m_module0);
-  declareProperty("ModulI", m_moduleI);
-  declareProperty("ModulII", m_moduleII);
-  declareProperty("ModulIII", m_moduleIII);
-  declareProperty("ModulIV", m_moduleIV);
-  declareProperty("ModulV", m_moduleV);
-  declareProperty("ModulVI", m_moduleVI);
-  declareProperty("ModulVII", m_moduleVII);
-  declareProperty("ModulVIII", m_moduleVIII);
-  declareProperty("ModulIX", m_moduleIX);
-  declareProperty("ModulX", m_moduleX);
-  declareProperty("ModulXI", m_moduleXI);
-  declareProperty("ModulesOn", m_moduleon=0xFFFF);
-  declareProperty("BLMon", m_blmon=true);
-  declareProperty("DBparameters", m_BDparameters=true);
-}
-
 //================ Initialisation =================================================
 
 StatusCode InDetDD::BLM_Builder::initialize()
@@ -182,18 +142,18 @@ StatusCode InDetDD::BLM_Builder::build(GeoVPhysVol* pv)
 	      //this module is not sopoused to be built
 	      continue;
 	    }
-	  if(moduleNo == 0)      module_property = &m_module0;
-	  else if(moduleNo == 1) module_property = &m_moduleI;
-	  else if(moduleNo == 2) module_property = &m_moduleII;
-	  else if(moduleNo == 3) module_property = &m_moduleIII;
-	  else if(moduleNo == 4) module_property = &m_moduleIV;
-	  else if(moduleNo == 5) module_property = &m_moduleV;
-	  else if(moduleNo == 6) module_property = &m_moduleVI;
-	  else if(moduleNo == 7) module_property = &m_moduleVII;
-	  else if(moduleNo == 8) module_property = &m_moduleVIII;
-	  else if(moduleNo == 9) module_property = &m_moduleIX;
-	  else if(moduleNo == 10) module_property = &m_moduleX;
-	  else if(moduleNo == 11) module_property = &m_moduleXI;
+	  if(moduleNo == 0)      module_property = &m_module0.value();
+	  else if(moduleNo == 1) module_property = &m_moduleI.value();
+	  else if(moduleNo == 2) module_property = &m_moduleII.value();
+	  else if(moduleNo == 3) module_property = &m_moduleIII.value();
+	  else if(moduleNo == 4) module_property = &m_moduleIV.value();
+	  else if(moduleNo == 5) module_property = &m_moduleV.value();
+	  else if(moduleNo == 6) module_property = &m_moduleVI.value();
+	  else if(moduleNo == 7) module_property = &m_moduleVII.value();
+	  else if(moduleNo == 8) module_property = &m_moduleVIII.value();
+	  else if(moduleNo == 9) module_property = &m_moduleIX.value();
+	  else if(moduleNo == 10) module_property = &m_moduleX.value();
+	  else if(moduleNo == 11) module_property = &m_moduleXI.value();
 
 	  //set the BLM_GeometryManeger
 	  manager->ModuleOn(moduleNo);
