@@ -2,9 +2,9 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "BLM_GeoModel/BLM_Builder.h"
-#include "BLM_GeoModel/BLM_GeometryManager.h"
-#include "BLM_GeoModel/BLM_Module.h"
+#include "BLM_Builder.h"
+#include "BLM_GeometryManager.h"
+#include "BLM_Module.h"
 
 #include "GeoModelUtilities/DecodeVersionKey.h"
 #include "GeoModelInterfaces/StoredMaterialManager.h"

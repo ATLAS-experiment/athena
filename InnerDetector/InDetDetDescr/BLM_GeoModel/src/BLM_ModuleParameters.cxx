@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
-#include "BLM_GeoModel/BLM_ModuleParameters.h"
+#include "BLM_ModuleParameters.h"
 
 void BLM_ModuleParameters::Set(int module_number, const std::vector<double>* module_property)
 {

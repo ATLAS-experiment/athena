@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "BCM_GeoModel/BCM_GeometryManager.h"
+#include "BCM_GeometryManager.h"
 
 BCM_GeometryManager::BCM_GeometryManager()
 {

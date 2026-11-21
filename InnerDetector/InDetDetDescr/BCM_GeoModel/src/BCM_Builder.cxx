@@ -2,9 +2,9 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "BCM_GeoModel/BCM_Builder.h"
-#include "BCM_GeoModel/BCM_GeometryManager.h"
-#include "BCM_GeoModel/BCM_Module.h"
+#include "BCM_Builder.h"
+#include "BCM_GeometryManager.h"
+#include "BCM_Module.h"
 
 #include "GeoModelKernel/GeoFullPhysVol.h"
 #include "GeoModelKernel/GeoTransform.h"
