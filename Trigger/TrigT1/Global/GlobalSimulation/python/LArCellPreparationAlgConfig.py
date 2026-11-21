@@ -10,6 +10,9 @@ def LArCellPreparationAlgCfg(
     
     cfg = ComponentAccumulator()
 
+    from LArGeoAlgsNV.LArGMConfig import LArGMCfg
+    cfg.merge(LArGMCfg(flags))
+
     # this alg needs totalNoise conditions ... configure the condalg for that:
     from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
     cfg.merge(CaloNoiseCondAlgCfg(flags,"totalNoise"))

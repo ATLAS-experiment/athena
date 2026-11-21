@@ -126,6 +126,17 @@ parser.add_argument('--postHelp',default=None,nargs="*",help="Displays configura
 sys.argv = ["--help" if x=="-h" else x for x in sys.argv]
 preHelpArgs = sys.argv[0:sys.argv.index("--help")] if "--help" in sys.argv else sys.argv
 postHelpArgs = sys.argv[sys.argv.index("--help"):] if "--help" in sys.argv else []
+
+# add capability to specify the --filesInput as space separated list
+if "--filesInput" in preHelpArgs:
+    idx = preHelpArgs.index("--filesInput")
+    # Collect values until the next argument starting with '--'
+    end = idx + 1
+    while end < len(preHelpArgs) and not preHelpArgs[end].startswith("--"):
+      end += 1
+    # Replace the space-separated values with a comma-separated value
+    preHelpArgs[idx + 1:end] = [",".join(preHelpArgs[idx + 1:end])]
+
 args,unknown_args = flags.fillFromArgs(parser=parser,return_unknown=True,listOfArgs=preHelpArgs[1:])
 # check for files in unknown_args list ... will assume are plugins
 # this is copied from Include.py ... seems if I try import it, I get CA behaviour blockage
@@ -753,15 +764,48 @@ if flags.Trigger.L1.doeFex and (args.evtNumber is not None):
 
 # example of adding user algorithm
 # cfg.addEventAlgo(CompFactory.AnotherPackageAlg(),sequenceName="AthAlgSeq")
+from collections import defaultdict
+def applyPostConfig(skipUnapplied=False):
+  for conf in args.postConfig:
+    compName,propNameAndVal=conf.split(".",1)
+    propName,propVal=propNameAndVal.split("=",1)
+    try:
+      ast.literal_eval(propVal)
+    except Exception:  # Can't determine type, assume we got an un-quoted string
+      propVal=f"\"{propVal}\""
+      propNameAndVal = f"{propName}={propVal}"
+    applied = False
+    availableComps = defaultdict(list)
+    for comp in [c for c in cfg._allComponents()]+cfg.getServices():
+      availableComps[comp.getType()] += [comp.getName()]
+      if comp.getName()==compName or comp.getType()==compName or comp.toStringProperty()==compName:
+        applied = True
+        try:
+          if not skipUnapplied: log.info("Setting "+compName+" property: "+propNameAndVal)
+          exec(f"comp.{propNameAndVal}")
+        except AttributeError as e:
+          log.fatal("Unknown property of " + compName +" : " + propNameAndVal)
+          log.fatal("See next line for available properties:")
+          print(comp)
+          raise e
+        break
+    if not applied and not skipUnapplied:
+      print("Available comps:")
+      for k,v in availableComps.items():
+        print(k+":",*v,sep="\n\t")
+      raise ValueError(f"postConfig {conf} had no effect ... typo? See list above of available components")
 
 from AthenaCommon.Include import include
 from AthenaCommon.Configurable import ConfigurableCABehavior
 with ConfigurableCABehavior():
   for inc in args.postInclude:
     try:
+      prevLevel = int(topLog.getEffectiveLevel())
+      prevLogLevel = log.getEffectiveLevel()
       topLog.setLevel(logging.INFO) # take back to info level before doing postInclude
       include(inc)
-      topLog.setLevel(logging.WARNING)
+      topLog.setLevel(prevLevel)
+      log.setLevel(prevLogLevel) # ensure logging level restored (seems sometimes stuck overriden)
     except Exception as e:
       import traceback
       print(f"Exception from {inc}")
@@ -776,38 +820,10 @@ with ConfigurableCABehavior():
       traceback.print_exception(type(e), e, tb)
       exit(1)
 
-for conf in args.postConfig:
-  compName,propNameAndVal=conf.split(".",1)
-  propName,propVal=propNameAndVal.split("=",1)
-  try:
-    ast.literal_eval(propVal)
-  except Exception:  # Can't determine type, assume we got an un-quoted string
-    propVal=f"\"{propVal}\""
-    propNameAndVal = f"{propName}={propVal}"
-  applied = False
-  from collections import defaultdict
-  availableComps = defaultdict(list)
-  for comp in [c for c in cfg._allComponents()]+cfg.getServices():
-    availableComps[comp.getType()] += [comp.getName()]
-    if comp.getName()==compName or comp.getType()==compName or comp.toStringProperty()==compName:
-      applied = True
-      try:
-        log.info("Setting "+compName+" property: "+propNameAndVal)
-        exec(f"comp.{propNameAndVal}")
-      except AttributeError as e:
-        log.fatal("Unknown property of " + compName +" : " + propNameAndVal)
-        log.fatal("See next line for available properties:")
-        print(comp)
-        raise e
-      break
-  if not applied:
-    print("Available comps:")
-    for k,v in availableComps.items():
-      print(k,":",*v,sep="\n\t")
-    raise ValueError(f"postConfig {conf} had no effect ... typo? See list above of available components")
+
+applyPostConfig(skipUnapplied=False)
 
 if args.postHelp is not None:
-  from collections import defaultdict
   availableComps = defaultdict(list)
   for comp in [c for c in cfg._allComponents()]+cfg.getServices():
     availableComps[comp.getType()] += [comp.getName()]

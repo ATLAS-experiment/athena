@@ -24,7 +24,7 @@ def setup(flags):
     flags.addFlag("GlobalSim.poolOutputs",[])
 
     from AthenaConfiguration.ComponentFactory import CompFactory
-    excludeAlgs = ["LArCellPreparationAlg", "GlobalSimulationAlg", "PU1SuppTestBenchAlg", "LArCellMuxAlg", "Egamma1_OnlineMapNbhoodAlg"]
+    excludeAlgs = ["GlobalSimulationAlg", "PU1SuppTestBenchAlg", "LArCellMuxAlg", "Egamma1_OnlineMapNbhoodAlg"]
     availableAlgs = [f[:-3] for f in CompFactory.GlobalSim._getEntries()[-1] if f.endswith('Alg') and f not in excludeAlgs]
 
 
@@ -32,21 +32,20 @@ def setup(flags):
         # declare additional parser arguments, and parse!
         import argparse
         parser = argparse.ArgumentParser(prog='l1global-minisim',formatter_class=argparse.RawTextHelpFormatter)
-        parser.add_argument('--presim',nargs='+',default=[],choices=["efex","jfex","gfex","muon"],help="What to pre-simulate")
+        parser.add_argument('--presim',nargs='+',default=[],choices=["efex","jfex","gfex","muon","lasp"],help="What to pre-simulate")
         parser.add_argument('--algs',nargs='*',default=[],help=f"algs to run. Available are: {', '.join(availableAlgs)}")
-        parser.add_argument('--filesInput',nargs='*',default=[],help="inputs. If nibbler, specify as <key>:<path>. <key> can be storegate key or algorithm input property (<alg>.<input>)") # just here for help dialog
-        parser.add_argument('--filesOutput',nargs='*',default=[],help="outputs to save, specify similarly to inputs")
+        parser.add_argument('--filesInput',nargs='*',default=[],help="If nibbler, specify as <key>:<path>. <key> can be storegate key or algorithm input property (<alg>.<input>)") # just here for help dialog
+        parser.add_argument('--filesOutput',nargs='*',default=[],help="outputs to save, specify similarly to inputs, but <key> can also be comma separated list when piping to a pool file")
         if "--help" in flags.L1CaloAthMon.UnknownArgs:
             # before parsing, set the epilog to list of alg parameters
-            epilog = "Availble Algorithm Parameters:\n"
+            epilog = "Available Algorithm Parameters (specify in '--postConfig' using \"<algName>.<propName>=<val>\" syntax)  :\n"
             from GaudiKernel.DataHandle import DataHandle
-            from AthenaCommon import CfgMgr
             for algType in availableAlgs:
                 epilog += f"  {algType}:\n"
-                propDocs = getattr(CfgMgr,f"GlobalSim__{algType}Alg")._propertyDocDct
-                for propName,propVal in getattr(CompFactory.GlobalSim,algType+"Alg").getDefaultProperties().items():
+                configurable = getattr(CompFactory.GlobalSim,algType+"Alg")
+                for propName,propVal in configurable.getDefaultProperties().items():
                     # skip properties that aren't part of the algorithm itself
-                    description = propDocs[propName]
+                    description = configurable._descriptors[propName].__doc__
                     if f"[GlobalSim::{algType}Alg]" not in description: continue
                     description = description.replace(f"[GlobalSim::{algType}Alg]","")
                     epilog += f"    .{propName}: {description}\n"
@@ -60,6 +59,7 @@ def setup(flags):
         if "jfex" in args.presim: flags.Trigger.L1.dojFex=True
         if "gfex" in args.presim: flags.Trigger.L1.dogFex=True
         if "muon" in args.presim: flags.Trigger.L1.doMuon=True
+        if "lasp" in args.presim: flags.GlobalSim.Algs += ["LArCellPreparation"]
         flags.Trigger.enableL1CaloPhase1=any([flags.Trigger.L1.doeFex,flags.Trigger.L1.dojFex,flags.Trigger.L1.dogFex])
 
     # determine inputs required (while checking algs exist)
@@ -77,13 +77,12 @@ def setup(flags):
             exit(-1)
         # now iterate through read and write handles
         from GaudiKernel.DataHandle import DataHandle
-        from AthenaCommon import CfgMgr
-        propDocs = getattr(CfgMgr,f"GlobalSim__{algType}Alg")._propertyDocDct
-        for propName,propVal in getattr(CompFactory.GlobalSim,algType+"Alg").getDefaultProperties().items():
+        configurable = getattr(CompFactory.GlobalSim,algType+"Alg")
+        for propName,propVal in configurable.getDefaultProperties().items():
             if not isinstance(propVal,DataHandle): continue # skip non-handle properties
             sgKey = propVal.Path.split('+')[-1]
             # try to get the "type" from the property description
-            for item in propDocs[propName].split(";"):
+            for item in configurable._descriptors[propName].__doc__.split(";"):
                 item = item.strip()
                 if item.startswith("type="):
                     knownTypes[sgKey] = item[len("type="):]
@@ -177,8 +176,13 @@ cfg.addSequence(CompFactory.AthSequencer(sequenceName,StopOverride=True),parentN
 algos = []
 for alg in flags.GlobalSim.Algs:
     algType,algName = (alg.split("/") if "/" in alg else [alg,alg])
-    theAlg = getattr(CompFactory.GlobalSim,algType+"Alg")(algName)
-    algos += [theAlg]
+    if algType=="LArCellPreparation" and algType==algName:
+        # default LArCellPreparation ... use config method, don't add to algos
+        from GlobalSimulation.LArCellPreparationAlgConfig import LArCellPreparationAlgCfg
+        cfg.merge( LArCellPreparationAlgCfg(flags,name=algName), sequenceName=sequenceName )
+    else:
+        theAlg = getattr(CompFactory.GlobalSim,algType+"Alg")(algName)
+        algos += [theAlg]
 
 
 # add any readers for processing txt files
@@ -230,50 +234,169 @@ for f in flags.GlobalSim.txtOutputs:
 
 # ----------------
 
+# at this point need to apply any postConfig to set properties on algs, in case they affect output stream setup
+applyPostConfig(skipUnapplied=True)
+
 # add the GraphSvc to visualize job
 cfg.addService( CompFactory.GlobalSim.GraphSvc(SequenceNameFilter=sequenceName,OutputLevel=3), create=True )
 
+# get all inputs and outputs
+
+allInputs = {}
+allOutputs = {} # list of all outputs created during the job (i.e. writehandlekeys)
+
+# get possible outputs from L1Calo presim:
+from GaudiKernel.DataHandle import DataHandle
+from GaudiConfig2 import Configurable
+
+def getInOutputs(c,prefix=""):
+    ins,outs = {},{}
+    if prefix=="": prefix=c.name
+    for prop,defaultVal in c.getDefaultProperties().items():
+        propVal = getattr(c,prop)
+        if isinstance(propVal,DataHandle) and propVal.Mode=='W':
+            outs[prefix+"."+prop] = (propVal,c._descriptors[prop].__doc__,"+" in defaultVal.Path) # returns tuple of property and doc string
+        elif isinstance(propVal,DataHandle) and propVal.Mode=='R':
+            ins[prefix+"."+prop] = (propVal,c._descriptors[prop].__doc__,"+" in defaultVal.Path)
+        elif isinstance(propVal,Configurable):
+            sins,souts = getInOutputs(propVal,prefix+"."+prop) # recurse into subtools etc
+            ins.update(sins)
+            outs.update(souts)
+    return ins,outs
+for alg in cfg.getEventAlgos("L1Sim")+cfg.getEventAlgos(sequenceName):
+    if alg is None: continue # if there is no L1Sim, seems getEventAlgos returns [None]
+    inputs,outputs = getInOutputs(alg)
+    allInputs.update(inputs)
+    allOutputs.update(outputs)
+
+
 if len(flags.GlobalSim.poolOutputs):
     # we have pool file outputting ... build the output streams
-
-    allOutputs = {} # list of all outputs created during the job (i.e. writehandlekeys)
-
-    # get possible outputs from L1Calo presim:
-    from GaudiKernel.DataHandle import DataHandle
-    from GaudiConfig2 import Configurable
-    def getOutputs(c,prefix=""):
-        out = {}
-        for prop in c.getDefaultProperties().keys():
-            propVal = getattr(c,prop)
-            if isinstance(propVal,DataHandle) and propVal.Mode=='W':
-                out[prefix+"."+prop] = propVal
-            elif isinstance(propVal,Configurable):
-                out.update(getOutputs(propVal,prefix+"."+prop)) # recurse into subtools etc
-        return out
-    for alg in cfg.getEventAlgos("L1Sim")+cfg.getEventAlgos(sequenceName):
-        if alg is None: continue # if there is no L1Sim, seems getEventAlgos returns [None]
-        outputs = getOutputs(alg,alg.name)
-        allOutputs.update(outputs)
+    from AthenaCommon.Logging import logging
+    log = logging.getLogger('plugin_miniSim')
 
     # build item lists
     itemLists = {}
     import ROOT
     for output in flags.GlobalSim.poolOutputs:
-        what,stream = output.split(":")
+        whats,stream = output.split(":")
         if stream not in itemLists: itemLists[stream] = []
-        if what in allOutputs:
-            p = allOutputs[what]
-            theType = ROOT.TClass.GetClass(p.Type).GetName()
-            for a in ROOT.gROOT.GetListOfTypes():
-                if a.GetFullTypeName() == theType and "_v" not in a.GetName():
-                    theType = a.GetName()
-                    break
-            itemLists[stream] += [f"{theType}#{p.Path.split('+')[-1]}",f"{'xAOD::AuxContainerBase' if theType=='xAOD::BaseContainer' else theType.replace('Container','AuxContainer')}#{p.Path.split('+')[-1]}Aux."]
+        for what in whats.split(","): # supports comma-separated list of outputs into same stream
+            if what in allOutputs:
+                p = allOutputs[what][0]
+                theType = ROOT.TClass.GetClass(p.Type).GetName()
+                for a in ROOT.gROOT.GetListOfTypes():
+                    if a.GetFullTypeName() == theType and "_v" not in a.GetName():
+                        theType = a.GetName()
+                        break
+                itemLists[stream] += [f"{theType}#{p.Path.split('+')[-1]}",f"{'xAOD::AuxContainerBase' if theType=='xAOD::BaseContainer' else theType.replace('Container','AuxContainer')}#{p.Path.split('+')[-1]}Aux."]
+            else:
+                log.fatal(f"Unrecognised output: {what}")
+                exit(-1)
 
     # register streams
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     for stream,items in itemLists.items():
-        print(stream,":",items)
-        cfg.merge(OutputStreamCfg(flags, stream, ItemList=items,takeItemsFromInput=False,disableEventTag=True))
+        log.info(stream+" : "+" ".join(items))
+        cfg.merge(OutputStreamCfg(flags, stream, ItemList=items,
+                                  MetadataItemList=["IOVMetaDataContainer#*"],
+                                  takeItemsFromInput=False,disableEventTag=True))
         cfg.getEventAlgo(f"Stream{stream}").WritingTool.SubLevelBranchName = "<key>"
+
+    # create TagInfo metadata to store all properties of all algorithms relevant
+    allProps = {}
+    def fillProps(c,prefix=""):
+        if prefix=="": prefix=c.name
+        for prop in c.getDefaultProperties().keys():
+            if prop in ["Cardinality","Enable","Asynchronous","FilterCircularDependencies","ExtraInputs","ExtraOutputs","MonitorService","NeededResources","ErrorMax","OutputLevel","RegisterForContextService","Timeline","EvtStore","DetStore","AuditFinalize","AuditExecute","AuditInitialize","AuditReinitialize","AuditRestart","AuditStart","AuditStop"]: continue
+            propVal = getattr(c,prop)
+            if isinstance(propVal,Configurable):
+                fillProps(propVal,prefix+"."+prop) # recurse into subtools etc
+            else:
+                allProps["l1global-minisim/"+prefix+"."+prop] = str(propVal).split("+",1)[-1] if isinstance(propVal,DataHandle) else str(propVal)
+    for alg in cfg.getEventAlgos("L1Sim")+cfg.getEventAlgos(sequenceName)+cfg.getEventAlgos("AthOutSeq")+cfg.getCondAlgos():
+        if alg is None: continue # if there is no algo, seems getEventAlgos returns [None]
+        fillProps(alg)
+
+    from EventInfoMgt.TagInfoMgrConfig import TagInfoMgrCfg
+    cfg.merge(TagInfoMgrCfg(flags,allProps))
+
+# use inputs and outputs to build a graph
+
+# create a node for every algorithm in our sequence
+with open("newgraph.dot", "w") as f:
+    createdObjs = set()
+    f.write("digraph datadeps {\n  rankdir=\"LR\";\n")
+
+    for alg in cfg.getEventAlgos(sequenceName):
+        if alg is None: continue
+        label = alg.getType() + (('/'+alg.name) if alg.name != alg.getType else '')
+        color = None
+        if alg.getType() == "GlobalSim::TOBTextReader":
+            label = str(alg.InputFile).split("/")[-1]
+            color = 'blue'
+        elif alg.getType() == "GlobalSim::TOBTextWriter":
+            label = str(alg.OutputFile).split("/")[-1]
+            color = 'blue'
+        f.write(f"  \"Alg_{alg.name}\" [label=\"{label}\", shape=box{', color='+color if color is not None else ''}]\n")
+        for propName,(propHandle,propDoc,notDecor) in allInputs.items():
+            if propName.split(".")[0] != alg.name: continue
+            # got an input
+            p = propHandle.Path.split('+')[-1]
+            if p == "": continue # skip blank keys
+            if not notDecor: print("Decor = ",propName,propHandle.Path)
+            if p not in createdObjs:
+                # create a node for this object
+                f.write(f"  \"{p}\" [label=\"{p}\", shape=plaintext]\n")
+                createdObjs.add(p)
+            # join input to alg node
+            f.write(f" \"{p}\" -> \"Alg_{alg.name}\" [label=\"{propName.split('.',1)[-1]}\"];\n")
+        for propName,(propHandle,propDoc,notDecor) in allOutputs.items():
+            if propName.split(".")[0] != alg.name: continue
+            # got an output
+            p = propHandle.Path.split('+')[-1]
+            if p == "": continue # skip blank keys
+            if not notDecor: print("Decor = ",propName,propHandle.Path)
+            if p not in createdObjs:
+                # create a node for this object
+                f.write(f"  \"{p}\" [label=\"{p}\", shape=plaintext]\n")
+                createdObjs.add(p)
+            # join alg output node
+            f.write(f" \"Alg_{alg.name}\" ->  \"{p}\"  [label=\"{propName.split('.',1)[-1]}\"];\n")
+
+    # add any presim outputs
+    presimOutputs = {}
+    for alg in cfg.getEventAlgos("L1Sim"):
+        if alg is None: continue
+        for propName,(propHandle,propDoc,notDecor) in allOutputs.items():
+            if propName.split(".")[0] != alg.name: continue
+            p = propHandle.Path.split('+')[-1]
+            if p == "": continue # skip blank keys
+            if not notDecor: continue # skip decoration outputs
+            if p not in createdObjs:
+                # create a node for this object
+                f.write(f"  \"{p}\" [label=\"{p}\", shape=plaintext]\n")
+                createdObjs.add(p)
+            presimOutputs[propName] = p
+    if len(presimOutputs):
+        f.write(f"  \"presim\" [label=\"presim\", shape=box, color=purple]\n")
+        if len(flags.Input.Files)>0:
+            f.write(f"  \"presim_input\" [label=\"{flags.Input.Files[0].split('/')[-1]}\", shape=box, color=blue]\n")
+            f.write(f" \"presim_input\" ->  \"presim\";\n")
+        for l,v in presimOutputs.items():
+            f.write(f" \"presim\" ->  \"{v}\"  [label=\"{l}\"];\n")
+
+    # add output streams
+    for alg in cfg.getEventAlgos("AthOutSeq"):
+        if alg is None: continue
+        # go through objects in ItemList ... if find any objects we created, add a node and join
+        myItems = set()
+        for item in alg.ItemList:
+            if item.split('#')[-1] in createdObjs:
+                myItems.add(item.split('#')[-1])
+        if len(myItems):
+            f.write(f"  \"Stream_{alg.name}\" [label=\"{alg.OutputFile}\", shape=box, color=red]\n")
+            for item in myItems:
+                f.write(f" \"{item}\" -> \"Stream_{alg.name}\";\n")
+    f.write("}\n")
 

@@ -15,6 +15,9 @@
 #include "CaloIdentifier/CaloIdManager.h"
 #include "xAODEventInfo/EventInfo.h"
 
+#include "GlobalSimulation/BitSpec.h"
+#include "xAODCore/AuxContainerBase.h"
+
 #include "TMath.h"
 #include <fstream>
 #include <vector>
@@ -37,6 +40,17 @@ namespace GlobalSim {
     ATH_CHECK(detStore()->retrieve(m_calocell_id, "CaloCell_ID"));
     
     ATH_CHECK(m_totalNoiseKey.initialize());
+
+    // if a bitspec has been given, use it for the encoding
+    if(!m_stripCellsBitSpec.empty()) {
+        ATH_MSG_INFO("Using " << m_stripCellsBitSpec.value() << " BitSpec");
+        // this requires the parameters of the MLE are given by static data members with the types below
+        m_numberOfEnergyBits = GlobalSim::BitSpecFunction<int()>(m_stripCellsBitSpec.value() + "::sBITS")();
+        m_valueLSB = GlobalSim::BitSpecFunction<int()>(m_stripCellsBitSpec.value() + "::sLSB")();
+        m_valueGainFactor = GlobalSim::BitSpecFunction<int()>(m_stripCellsBitSpec.value() + "::sGAIN")();
+
+    }
+
 
     ATH_MSG_INFO("Active energy encoding scheme for LAr cells is " << m_numberOfEnergyBits.value() << " energy bits with " << m_valueLSB.value() << " MeV for the least significant bit and a gain factor of " << m_valueGainFactor.value());
 
@@ -124,7 +138,9 @@ namespace GlobalSim {
     // Constructing the GlobalLArCellContainer
     m_gblLArCellContainerTemplate = std::make_unique<GlobalSim::GlobalLArCellContainer>(feb2MuxAssoc);
     m_gblLArCellContainerTemplate->setMaxCellsPerFeb2(m_maxCellsPerFEB);
-  
+
+    CHECK(m_stripCellsOutKey.initialize(SG::AllowEmpty));
+
     return StatusCode::SUCCESS;
   }
 
@@ -176,9 +192,17 @@ namespace GlobalSim {
 
         if (cell->badcell()) continue;
 
-        std::pair<float, boost::dynamic_bitset<>> gep_energy = encodeEnergy(cell->energy() / TMath::CosH(cell->eta()));
 
-        gblLArCell.setEnergy(gep_energy.first, std::move(gep_energy.second));
+        if(m_stripCellsOutKey.empty()) {
+            std::pair<float, boost::dynamic_bitset<>> gep_energy = encodeEnergy(
+                    cell->energy() / TMath::CosH(cell->eta()));
+            gblLArCell.setEnergy(gep_energy.first, std::move(gep_energy.second));
+        } else {
+            // postponing MLE to later on, when we construct the strip cells
+            gblLArCell.setEnergy(cell->energy() / TMath::CosH(cell->eta()));
+        }
+
+
         gblLArCell.setSigma(sigma);
         gblLArCell.setPosition(cell->eta(), cell->phi());
 	gblLArCell.setSize(cell->caloDDE()->deta(), cell->caloDDE()->dphi());
@@ -216,6 +240,33 @@ namespace GlobalSim {
         gblLArCellContainer->setFeb2Flags(feb2Name, inOverflow, inError);
     }
     ATH_MSG_DEBUG("Global is receiving a total of " << gblLArCellContainer->size() << " LAr cells in this event");
+
+    if(!m_stripCellsOutKey.empty()) {
+        // writing out the LArStripCells (EMB1 and EME1) as BitSpec TOBs
+        // to do this, we actually just record the raw et, eta, and phi values into an SG::AuxElement
+        // when clients/consumers read the container, they read it with their BitSpec
+
+        auto stripCells = SG::makeHandle(m_stripCellsOutKey, ctx);
+        CHECK( stripCells.record( std::make_unique<xAOD::BaseContainer>(), std::make_unique<xAOD::AuxContainerBase>()) );
+
+        static const SG::Accessor<float> et("et");
+        static const SG::Accessor<float> eta("eta");
+        static const SG::Accessor<float> phi("phi");
+
+        for(const auto& cell : *gblLArCellContainer) {
+            stripCells->push_back( std::make_unique<SG::AuxElement>() );
+            auto stripCell = stripCells->back();
+            et(*stripCell) = cell->getEnergy();
+            eta(*stripCell) = cell->eta();
+            phi(*stripCell) = cell->phi();
+            // now do the encoding, as postponed from earlier so we could store the raw energy in the cell
+            std::pair<float, boost::dynamic_bitset<>> gep_energy = encodeEnergy(
+                    cell->getEnergy() / TMath::CosH(cell->eta()));
+            cell->setEnergy(gep_energy.first, std::move(gep_energy.second));
+        }
+
+
+    }
 
     SG::WriteHandle<GlobalSim::GlobalLArCellContainer> h_gblLArCellContainer = SG::makeHandle(m_LArCellContainerKey, ctx);
     ATH_CHECK( h_gblLArCellContainer.record( std::move(gblLArCellContainer) ) );
