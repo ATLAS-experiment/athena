@@ -292,7 +292,15 @@ def initConfigFlags():
     # Some flags from https://gitlab.cern.ch/atlas/athena/blob/master/Tracking/TrkDetDescr/TrkDetDescrSvc/python/TrkDetDescrJobProperties.py
     # (many, e.g. those that set properties of one tool are not needed)
     acf.addFlag('TrackingGeometry.MagneticFileMode', 6) # TODO: unused?
-    acf.addFlag('TrackingGeometry.MaterialSource', 'COOL', help='material source (COOL, Input or None)')
+    # Run4 geometry from the SQLite geometry DB (DD2): no material for the legacy tracking geometry.
+    # Stays from COOL for AthAnalysis
+    if isGaudiEnv() and acf.Common.Project is not Project.AthAnalysis:
+        acf.addFlag('TrackingGeometry.MaterialSource', lambda prevFlags:
+                    'None' if (prevFlags.GeoModel.SQLiteDB and prevFlags.GeoModel.Run >= LHCPeriod.Run4)
+                    else 'COOL',
+                    help='material source (COOL, Input or None)')
+    else:
+        acf.addFlag('TrackingGeometry.MaterialSource', 'COOL', help='material source (COOL, Input or None)')
 
 #Detector Flags:
     def __detector():
