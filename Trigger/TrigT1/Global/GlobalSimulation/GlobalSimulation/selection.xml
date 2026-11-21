@@ -3,6 +3,7 @@
          the list: the pack and unpack functions are built from these names
          through the interpreter, so a spec absent here cannot be used. -->
 
+    <class pattern="GlobalSimDetail::*"/>
     <class pattern="GlobalSim::*"/>
     <exclusion>
         <class pattern="GlobalSim::Bit*"/>

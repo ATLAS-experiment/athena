@@ -21,6 +21,32 @@
 
 #include "AthContainers/AuxElement.h"
 
+#include "TClass.h"
+#include "TInterpreter.h"
+#include "TDataMember.h"
+#include "TMethod.h"
+#include "TMethodArg.h"
+#include "TList.h"
+#include <iostream>
+
+namespace GlobalSimDetail {
+    struct DynamicMethod {
+        virtual ~DynamicMethod() = default;
+    };
+
+    template<typename Signature>
+    struct DynamicMethodImpl;
+
+    template<typename R, typename... Args>
+    struct DynamicMethodImpl<R(Args...)> : DynamicMethod {
+        std::function<R(Args...)> fn;
+
+        template<typename Callable>
+        DynamicMethodImpl(Callable&& callable)
+                : fn(std::forward<Callable>(callable)) {}
+    };
+}
+
 namespace GlobalSim {
 
 // ============================================================================
@@ -136,7 +162,7 @@ namespace GlobalSim {
         }
 
         static constexpr std::int64_t signedMax() {
-            if constexpr (N == 64) return std::numeric_limits<std::int64_t>::max();
+            if constexpr (N >= 64) return std::numeric_limits<std::int64_t>::max();
             else return (std::int64_t{1} << (N - 1)) - 1;
         }
 
@@ -162,6 +188,20 @@ namespace GlobalSim {
         }
 
     public:
+        using IntType = std::conditional_t<Signed, std::int64_t, std::uint64_t>;
+        constexpr IntType code() const {
+            if constexpr (Signed) {
+                auto value = this->to_ullong();
+                if (this->test(N - 1)) {
+                   value -= (std::uint64_t{1} << N);
+                }
+                return static_cast<std::int64_t>(value);
+            } else {
+                return static_cast<std::uint64_t>(this->to_ullong());
+            }
+        }
+
+
         // convenience max and min definition aliases
         static constexpr auto max = [] {
             if constexpr (Signed) return signedMax();
@@ -260,7 +300,7 @@ namespace GlobalSim {
                         }
                     } else {
                         m_encoder = [scale, offset, lower_inc](Value v) {
-                            return bits_type{static_cast<uint64_t>(lower_inc ? std::floor((v - offset) / scale) : (
+                            return bits_type{static_cast<int64_t>(lower_inc ? std::floor((v - offset) / scale) : (
                                     std::ceil((v - offset) / scale) - 1))};
                         };
                     }
@@ -710,6 +750,10 @@ namespace GlobalSim {
             return result;
         }
 
+        static bitset_type bits(const SG::AuxElement& ae) {
+            return packFields(allFields(), ae);
+        }
+
     protected:
         // ------------------------------------------------------------------------
         // Validate all fields.
@@ -772,6 +816,120 @@ namespace GlobalSim {
         }
 
     };
+
+
+
+
+
+
+
+    template<typename Signature>
+    std::function<Signature> BitSpecFunction(
+            const std::string& classAndMethodName,
+            const std::string& extra="")
+    {
+        // the className is everything before the last "::"
+        auto idx = classAndMethodName.rfind("::");
+        if(idx==std::string::npos) {
+            throw std::runtime_error("Cannot determine BitSpec class from: " + classAndMethodName);
+        }
+
+        std::string className = classAndMethodName.substr(0,idx);
+        std::string methodName = classAndMethodName.substr(idx+2);
+        auto cls = TClass::GetClass(
+                ("GlobalSim::" + className).c_str()
+        );
+
+        if (!cls)
+            throw std::runtime_error("Unknown BitSpec " + className);
+
+        // if have a "." in methodName then we are dealing with a field method
+        std::string fieldName = "";
+        if(auto idxDot = methodName.find("."); idxDot != std::string::npos) {
+            fieldName = methodName.substr(0,idxDot);
+            methodName = methodName.substr(idxDot+1);
+        }
+
+        TClass* fieldClass = cls;
+        if(!fieldName.empty()) {
+            auto dm = cls->GetDataMember(fieldName.c_str());
+
+            if (!dm)
+                throw std::runtime_error("Unknown field " + fieldName);
+            fieldClass = TClass::GetClass(dm->GetTypeName());
+            if (!fieldClass)
+                throw std::runtime_error("Unknown field type");
+        }
+
+
+
+        auto m = fieldClass->GetMethodAllAny(methodName.c_str());
+
+        std::string types;
+
+        if (!m) {
+            // method may actually be a data member ...
+            auto dm = dynamic_cast<TDataMember*>(fieldClass->GetListOfAllPublicDataMembers()->FindObject(methodName.c_str()));
+            if(!dm) {
+                throw std::runtime_error("Unknown method or member " + methodName);
+            }
+            types = dm->GetTypeName();
+        } else {
+            types = m->GetReturnTypeNormalizedName();
+        }
+
+        std::string attrName = extra.substr(0,extra.find("("));
+        if(!attrName.empty()) {
+            // will actually return call to attribute method, assumed with no arguments
+            auto mClass = TClass::GetClass(types.c_str());
+            if(!mClass || !mClass->GetMethodAllAny(attrName.c_str())) {
+                throw std::runtime_error("Unknown attribute " + attrName);
+            }
+            types = mClass->GetMethodAllAny(attrName.c_str())->GetReturnTypeNormalizedName();
+        }
+
+
+        types += "(";
+
+        if(m) {
+            bool first = true;
+            for (auto a: *m->GetListOfMethodArgs()) {
+                if (!first)
+                    types += ", ";
+                first = false;
+                types += static_cast<TMethodArg *>(a)->GetTypeNormalizedName();
+            }
+        }
+        types += ")";
+
+        // Ask Cling to instantiate the appropriately typed callable.
+        const std::string code =
+                "new GlobalSimDetail::DynamicMethodImpl<" + types + ">("
+                "[](auto&&... args) { return GlobalSim::" + classAndMethodName +
+                        ((m) ? "(std::forward<decltype(args)>(args)...)" : "") + (extra.empty() ? "" : ("."+extra)) +"; "
+                "});";
+
+        const Longptr_t address = gInterpreter->ProcessLine(code.c_str());
+
+        if (!address)
+            throw std::runtime_error("Cling failed to construct callable:\n" + code);
+
+        std::unique_ptr<GlobalSimDetail::DynamicMethod> method(
+                reinterpret_cast<GlobalSimDetail::DynamicMethod*>(address)
+        );
+
+        using MethodType = GlobalSimDetail::DynamicMethodImpl<Signature>;
+
+        auto* typed = dynamic_cast<MethodType*>(method.get());
+
+        if (!typed)
+            throw std::runtime_error(
+                    "Requested function signature does not match dictionary signature:\n" + code
+            );
+
+        return typed->fn;
+    }
+
 
 }
 

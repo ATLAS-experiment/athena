@@ -18,14 +18,29 @@ TEST( GlobalSimObjectTest, Bitset ) {
     // test clamped unsigned bitset
     Bitset<8,true,false> cubs{300ull};
     ASSERT_EQ( cubs.to_ulong() , 255ul );
+    ASSERT_EQ( cubs.code(), 255ul );
 
     // clamped signed bitset
     Bitset<8,true,true> csbs1{300ull};
     ASSERT_EQ( csbs1.to_ulong() , 127ul );
+    ASSERT_EQ( csbs1.code(), 127l );
 
     Bitset<8,true,true> csbs2{-300ll};
     ASSERT_EQ( csbs2.to_ulong() , 128ul ); // since this is -128 in unsigned
+    ASSERT_EQ( csbs2.code(), -128l );
 
+}
+
+TEST( GlobalSimObjectTest, BitFieldTests ) {
+    using namespace GlobalSim;
+
+    // an unsigned, clamped bitfield, with a simple linear encoding where centre=0 so that codes correspond to lower
+    BitField<0, 3, float> bf4{{.name="bf4", .auxvar="bf4", .description="4-bit field", .scale=0.1, .centre=0}};
+    ASSERT_EQ( bf4.maxCode, 15 );
+    ASSERT_EQ( bf4.encode(1.05).to_ulong(), 10 );
+    ASSERT_EQ( bf4.encode(-1).code(), 0 ); // clamped, so negative energies should clamp to lowest code
+    ASSERT_EQ( bf4.encode(150).code(), 15 ); // clamped, so highest energies should clamp to highest code
+    ASSERT_EQ( bf4.decode(bf4.encode(0.15)), 0.1f ); // centre=0, so will return rounded down value
 }
 
 TEST( GlobalSimObjectTest, test1 ) {
@@ -76,6 +91,15 @@ TEST( GlobalSimObjectTest, test1 ) {
     ASSERT_EQ( obj.f4.value(), 2 );
     SG::ConstAccessor<uint8_t> acc("auxvar3"); // how to access an auxvar of type uint8_t
     ASSERT_EQ( acc(ae), 2 << obj.f4.auxspec.shift ); // auxspec.shift is bitspec metadata
+
+    // constructing std::functions to dynamically call methods of BitSpecs
+
+    auto myFunc = GlobalSim::BitSpecFunction<uint64_t(float)>("TestSpec::f1.encode","code()");
+    ASSERT_EQ( myFunc(55.23), TestSpec::f1.encode(55.23).code() );
+
+    auto myFunc2 = GlobalSim::BitSpecFunction<unsigned int()>("TestSpec::f1.width"); // can also evaluate a static data member
+    ASSERT_EQ( myFunc2(), TestSpec::f1.width );
+
 
 }
 

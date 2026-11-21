@@ -24,6 +24,8 @@
 #include <vector>
 #include <boost/dynamic_bitset.hpp>
 
+#include "xAODCore/BaseContainer.h"
+
 //forward declarations for ID helpers                                                                                 
 class CaloCell_ID;
 
@@ -80,6 +82,13 @@ namespace GlobalSim {
 
     /** @brief Key to writing the GlobalLArCellContainer to StoreGate */
     SG::WriteHandleKey<GlobalSim::GlobalLArCellContainer> m_LArCellContainerKey{this, "GlobalLArCellsKey", "GlobalLArCells", "Key for the output container of the LAr cells sent to Global"};
+
+
+    // Note: at some point may decide to combine these properties or switch to templating to specify tob type
+    // benefit of templating will be avoiding use of dynamic method access BitSpecFunctions
+    SG::WriteHandleKey<xAOD::BaseContainer> m_stripCellsOutKey{this, "strip_cells", "", "Key for the output container of LArStripCells"};
+    Gaudi::Property<std::string> m_stripCellsBitSpec{this,"StripBitSpec","v1::LArStripCell","The name of the BitSpec for strip cells. If specified, will use this class for the MLE"};
+
 
   };
 
