@@ -40,19 +40,16 @@ inline const xAOD::TruthParticle* get_initial_particle(
 std::vector<const xAOD::TruthParticle*> get_all_initial_particles(
     const std::vector<const xAOD::TruthParticle*>& truth_particles
 ) {
-  std::unordered_set<const xAOD::TruthParticle*> pv_parts;
+  // keep the input order: iterating over an unordered_set gives an order that depends on memory addresses
+  std::unordered_set<const xAOD::TruthParticle*> seen_particles;
+  std::vector<const xAOD::TruthParticle*> initial_particles;
 
   for ( const auto& part : truth_particles ) {
     auto initial_part = get_initial_particle(part);
-    if ( initial_part ) {
-      pv_parts.insert(initial_part);
+    // insert() reports false for a particle already seen, so each one is added once
+    if ( initial_part && seen_particles.insert(initial_part).second ) {
+      initial_particles.push_back(initial_part);
     }
-  }
-
-  std::vector<const xAOD::TruthParticle*> initial_particles;
-  initial_particles.reserve(pv_parts.size());
-  for ( const auto& part : pv_parts ) {
-    initial_particles.push_back(part);
   }
   return initial_particles;
 
