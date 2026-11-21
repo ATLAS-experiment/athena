@@ -20,39 +20,6 @@
 
 #include "GaudiKernel/SystemOfUnits.h"
 
-//================ Constructor =================================================
-
-InDetDD::BCM_Builder::BCM_Builder(const std::string& t,
-				  const std::string& n,
-				  const IInterface*  p )
-  : base_class(t,n,p)
-{
-
-  //default settings
-  //                 TRANS_X                        TRANS_Y                        TRANS_Z                          ROT_X                       ROT_Y                      ROT_Z                   DIMENSION_Z               DIAM_TRANS_Y                   DIAM_TRANS_Z             DIAM_DIAM_X                 DIAM_DIAM_Y                  DIAM_DIAM_Z                LAMEL_OFFSET_H                   LAMEL_OFFSET_I                 LAMEL_OFFSET_J
-  m_module0.push_back(95.744);   m_module0.push_back(0);         m_module0.push_back(1882.4);    m_module0.push_back(0);     m_module0.push_back(45);    m_module0.push_back(0);     m_module0.push_back(0.4);   m_module0.push_back(0);   m_module0.push_back(-59.785);   m_module0.push_back(0.2);   m_module0.push_back(0);   m_module0.push_back(-0.4);   m_module0.push_back(34.860);   m_module0.push_back(29.509);   m_module0.push_back(20.205);   //F410
-  m_moduleI.push_back(0);        m_moduleI.push_back(95.744);    m_moduleI.push_back(1882.4);    m_moduleI.push_back(0);     m_moduleI.push_back(45);    m_moduleI.push_back(90);    m_moduleI.push_back(0.4);   m_moduleI.push_back(0);   m_moduleI.push_back(-59.785);   m_moduleI.push_back(0.2);   m_moduleI.push_back(0);   m_moduleI.push_back(-0.4);   m_moduleI.push_back(34.860);   m_moduleI.push_back(29.509);   m_moduleI.push_back(20.205);   //F405
-  m_moduleII.push_back(-95.744); m_moduleII.push_back(0);        m_moduleII.push_back(1882.4);   m_moduleII.push_back(0);    m_moduleII.push_back(45);   m_moduleII.push_back(180);  m_moduleII.push_back(0.4);  m_moduleII.push_back(0);  m_moduleII.push_back(-59.785);  m_moduleII.push_back(0.2);  m_moduleII.push_back(0);  m_moduleII.push_back(-0.4);  m_moduleII.push_back(34.860);  m_moduleII.push_back(29.509);  m_moduleII.push_back(20.205);  //F413
-  m_moduleIII.push_back(0);      m_moduleIII.push_back(-95.744); m_moduleIII.push_back(1882.4);  m_moduleIII.push_back(0);   m_moduleIII.push_back(45);  m_moduleIII.push_back(270); m_moduleIII.push_back(0.4); m_moduleIII.push_back(0); m_moduleIII.push_back(-59.785); m_moduleIII.push_back(0.2); m_moduleIII.push_back(0); m_moduleIII.push_back(-0.4); m_moduleIII.push_back(34.860); m_moduleIII.push_back(29.509); m_moduleIII.push_back(20.205); //F404
-  m_moduleIV.push_back(95.744);  m_moduleIV.push_back(0);        m_moduleIV.push_back(-1882.4);  m_moduleIV.push_back(180);  m_moduleIV.push_back(-45);  m_moduleIV.push_back(0);    m_moduleIV.push_back(1.4);  m_moduleIV.push_back(0);  m_moduleIV.push_back(-59.785);  m_moduleIV.push_back(0.2);  m_moduleIV.push_back(0);  m_moduleIV.push_back(-0.4);  m_moduleIV.push_back(34.860);  m_moduleIV.push_back(29.509);  m_moduleIV.push_back(20.205);  //F424
-  m_moduleV.push_back(0);        m_moduleV.push_back(95.744);    m_moduleV.push_back(-1882.4);   m_moduleV.push_back(180);   m_moduleV.push_back(-45);   m_moduleV.push_back(90);    m_moduleV.push_back(1.4);   m_moduleV.push_back(0);   m_moduleV.push_back(-59.785);   m_moduleV.push_back(0.2);   m_moduleV.push_back(0);   m_moduleV.push_back(-0.4);   m_moduleV.push_back(34.860);   m_moduleV.push_back(29.509);   m_moduleV.push_back(20.205);   //F420
-  m_moduleVI.push_back(-95.744); m_moduleVI.push_back(0);        m_moduleVI.push_back(-1882.4);  m_moduleVI.push_back(180);  m_moduleVI.push_back(-45);  m_moduleVI.push_back(180);  m_moduleVI.push_back(1.4);  m_moduleVI.push_back(0);  m_moduleVI.push_back(-59.785);  m_moduleVI.push_back(0.2);  m_moduleVI.push_back(0);  m_moduleVI.push_back(-0.4);  m_moduleVI.push_back(34.860);  m_moduleVI.push_back(29.509);  m_moduleVI.push_back(20.205);  //F422
-  m_moduleVII.push_back(0);      m_moduleVII.push_back(-95.744); m_moduleVII.push_back(-1882.4); m_moduleVII.push_back(180); m_moduleVII.push_back(-45); m_moduleVII.push_back(270); m_moduleVII.push_back(0.4); m_moduleVII.push_back(0); m_moduleVII.push_back(-59.785); m_moduleVII.push_back(0.2); m_moduleVII.push_back(0); m_moduleVII.push_back(-0.4); m_moduleVII.push_back(34.860); m_moduleVII.push_back(29.509); m_moduleVII.push_back(20.205); //F408
-
-  //  template for property decalration
-  declareProperty("Modul0", m_module0);
-  declareProperty("ModulI", m_moduleI);
-  declareProperty("ModulII", m_moduleII);
-  declareProperty("ModulIII", m_moduleIII);
-  declareProperty("ModulIV", m_moduleIV);
-  declareProperty("ModulV", m_moduleV);
-  declareProperty("ModulVI", m_moduleVI);
-  declareProperty("ModulVII", m_moduleVII);
-  declareProperty("ModulesOn", m_moduleon=255);
-  declareProperty("BCMon", m_bcmon=true);
-  declareProperty("DBparameters", m_BDparameters=true);
-}
-
 //================ Initialisation =================================================
 
 StatusCode InDetDD::BCM_Builder::initialize()
@@ -176,14 +143,14 @@ StatusCode InDetDD::BCM_Builder::build(GeoVPhysVol* pv)
 	      //this module is not sopoused to be built
 	      continue;
 	    }
-	  if(moduleNo == 0)      module_property = &m_module0;
-	  else if(moduleNo == 1) module_property = &m_moduleI;
-	  else if(moduleNo == 2) module_property = &m_moduleII;
-	  else if(moduleNo == 3) module_property = &m_moduleIII;
-	  else if(moduleNo == 4) module_property = &m_moduleIV;
-	  else if(moduleNo == 5) module_property = &m_moduleV;
-	  else if(moduleNo == 6) module_property = &m_moduleVI;
-	  else if(moduleNo == 7) module_property = &m_moduleVII;
+	  if(moduleNo == 0)      module_property = &m_module0.value();
+	  else if(moduleNo == 1) module_property = &m_moduleI.value();
+	  else if(moduleNo == 2) module_property = &m_moduleII.value();
+	  else if(moduleNo == 3) module_property = &m_moduleIII.value();
+	  else if(moduleNo == 4) module_property = &m_moduleIV.value();
+	  else if(moduleNo == 5) module_property = &m_moduleV.value();
+	  else if(moduleNo == 6) module_property = &m_moduleVI.value();
+	  else if(moduleNo == 7) module_property = &m_moduleVII.value();
 	  	  
 	  //set the BCM_GeometryManeger
 	  manager->ModuleOn(moduleNo);
