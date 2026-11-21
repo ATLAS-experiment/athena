@@ -36,7 +36,7 @@ GlobalSequentialCorrection::GlobalSequentialCorrection()
     m_config(nullptr), m_jetAlgo(""), m_depthString("auto"), m_calibAreaTag(""), m_dev(false),
     m_binSize(0.1), m_depth(0), 
     m_trackWIDTHMaxEtaBin(25), m_nTrkMaxEtaBin(25), m_Tile0MaxEtaBin(17), m_EM3MaxEtaBin(35), m_chargedFractionMaxEtaBin(27), m_caloWIDTHMaxEtaBin(35), m_N90ConstituentsMaxEtaBin(35),
-    m_TileGap3MaxEtaBin(16), m_punchThroughMinPt(50), m_useOriginVertex(false)
+    m_TileGap3MaxEtaBin(16), m_punchThroughMinPt(50), m_punchThroughMinNseg(20), m_useOriginVertex(false)
    
 { }
 
@@ -45,7 +45,7 @@ GlobalSequentialCorrection::GlobalSequentialCorrection(const std::string& name, 
     m_config(config), m_jetAlgo(std::move(jetAlgo)), m_depthString(depth), m_calibAreaTag(std::move(calibAreaTag)), m_dev(dev),
     m_binSize(0.1), m_depth(0),
     m_trackWIDTHMaxEtaBin(25), m_nTrkMaxEtaBin(25), m_Tile0MaxEtaBin(17), m_EM3MaxEtaBin(35), m_chargedFractionMaxEtaBin(27), m_caloWIDTHMaxEtaBin(35), m_N90ConstituentsMaxEtaBin(35), 
-    m_TileGap3MaxEtaBin(16), m_punchThroughMinPt(50), m_useOriginVertex(useOriginVertex)
+    m_TileGap3MaxEtaBin(16), m_punchThroughMinPt(50),  m_punchThroughMinNseg(20), m_useOriginVertex(useOriginVertex)
    
 { }
 
@@ -83,6 +83,12 @@ StatusCode GlobalSequentialCorrection::initialize() {
 
   // For AFII calibrations, EM3 correction should be applied up to |eta|=3.2
   m_EM3MaxEtaBin = m_config->GetValue("EM3MaxEtaBin", 35);
+
+  // What is the Nsegments threshold for the punch-through correction? Either 20 or 10
+  m_punchThroughMinNseg = m_config->GetValue("PunchThrough_minNseg", 20);
+  // Use GhostMuonSegmentCount or only unassociated muon segments?
+  m_ghostMuSegCountName = m_config->GetValue("MuonSegmentName", "GhostMuonSegmentCount");
+  m_ghostMuSegCountAcc = SG::ConstAccessor<int>(m_ghostMuSegCountName);
 
   if ( m_jetAlgo.EqualTo("") ) { ATH_MSG_FATAL("No jet algorithm specified. Aborting."); return StatusCode::FAILURE; }
 
@@ -357,7 +363,7 @@ double GlobalSequentialCorrection::getPunchThroughResponse(double E, double eta_
   //Check that the punch through eta binning defined in the config appears reasonable, otherwise throw an error.
   if (m_punchThroughEtaBins.empty() || m_respFactorsPunchThrough.size() != m_punchThroughEtaBins.size()-1) 
     ATH_MSG_WARNING("Please check that the punch through eta binning is properly set in your config file");
-  if ( eta_det >= m_punchThroughEtaBins.back() || Nsegments < 20 ) return 1;
+  if ( eta_det >= m_punchThroughEtaBins.back() || Nsegments < m_punchThroughMinNseg ) return 1;
   for (uint i=0; i<m_punchThroughEtaBins.size()-1; ++i) {
     if(eta_det >= m_punchThroughEtaBins[i] && eta_det < m_punchThroughEtaBins[i+1]) etabin = i;
   }
@@ -499,11 +505,10 @@ StatusCode GlobalSequentialCorrection::calibrate(xAOD::Jet& jet, JetEventInfo& j
   //Nsegments number of ghost associated muon segments behind each jet
   int Nsegments = 0;
   if(m_depth & ApplyPunchThrough){
-    static const SG::ConstAccessor<int> GhostMuonSegmentCountAcc ("GhostMuonSegmentCount");
-    if( GhostMuonSegmentCountAcc.isAvailable(jet) ) {
-      Nsegments = GhostMuonSegmentCountAcc(jet);
+    if( m_ghostMuSegCountAcc.isAvailable(jet) ) {
+      Nsegments = m_ghostMuSegCountAcc(jet);
     } else {
-      ATH_MSG_WARNING("GhostMuonSegmentCount is not available, Nsegments=0 will be used, so NO PunchThrough Correction will be applied!");
+      ATH_MSG_WARNING(m_ghostMuSegCountName << " is not available, Nsegments=0 will be used, so NO PunchThrough Correction will be applied!");
     }
   }
 

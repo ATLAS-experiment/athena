@@ -90,6 +90,11 @@ class GlobalSequentialCorrection
   uint m_depth, m_trackWIDTHMaxEtaBin, m_nTrkMaxEtaBin, m_Tile0MaxEtaBin, m_EM3MaxEtaBin, m_chargedFractionMaxEtaBin, m_caloWIDTHMaxEtaBin, m_N90ConstituentsMaxEtaBin, m_TileGap3MaxEtaBin;
   VecD m_punchThroughEtaBins;
   double m_punchThroughMinPt;
+
+  int m_punchThroughMinNseg;
+  std::string m_ghostMuSegCountName{"GhostMuonSegmentCount"};
+  SG::ConstAccessor<int> m_ghostMuSegCountAcc {m_ghostMuSegCountName};
+
   bool m_turnOffTrackCorrections{false};
   bool m_PFlow{false};
   bool m_caloBased{false};

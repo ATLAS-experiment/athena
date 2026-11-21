@@ -60,7 +60,10 @@ private:
   /// Properties for the punch-through correction:
   Gaudi::Property<bool> m_applyPunchThrough {this, "applyPunchThrough", false, "Boolean to turn on punch-through corretion"};
   Gaudi::Property<std::vector<double>> m_punchThroughEtaBins {this, "PunchThroughEtaBins", {}, "Eta bins for punch through correction"};
-  Gaudi::Property<float> m_punchThroughMinPt{ this, "punchThroughMinPt", 50000., "Threshold for punch-through correction"};
+  Gaudi::Property<float> m_punchThroughMinPt{ this, "PunchThroughMinPt", 50000., "pT threshold for punch-through correction"};
+  Gaudi::Property<float> m_punchThroughMinNseg{ this, "PunchThroughMinNseg", 20, "Nsegments threshold for punch-through correction"};
+  Gaudi::Property<std::string> m_ghostMuSegCountName {this, "MuonSegmentCountName","GhostMuonSegmentCount", "Name of ghost muon segment count decoration"};
+  SG::ConstAccessor<int> m_ghostMuSegCountAcc {m_ghostMuSegCountName};
 
   /// Functions for retrieving the correction factors
   float getChargedFractionResponse(const xAOD::Jet& jet, const JetHelper::JetContext& jc, uint etabin) const;
