@@ -65,6 +65,8 @@ class JetTriggerMatchingBlock (ConfigBlock):
                         info="Add L1 matching decorations")
         self.addOption ('runHLTMatching', True, type=bool,
                         info="Add HLT matching decorations")
+        self.addOption ('runRun2HLTEmulation', True, type=bool,
+                        info="Run HLT jet trigger emulation for Run 2")
         self.addOption ('l1dR', 0.4, type=float,
                         info="ΔR cone for the L1 (jFEX) trigger matching "
                         "(sets CP::JetTriggerDecoratorAlg.l1dR_cut). Default 0.4 "
@@ -95,6 +97,21 @@ class JetTriggerMatchingBlock (ConfigBlock):
 
             alg.trigger = chain
 
+            alg.HLTJets = "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJets"
+
+            if "a10" in chain:
+                if "a10r" in chain:
+                    alg.HLTJets = ("HLT_xAOD__JetContainer_a10r_tcemsubjesFS"
+                                   if config.campaign() is Campaign.MC20a or config.dataYear()<=2016
+                                   else "HLT_xAOD__JetContainer_a10r_tcemsubjesISFS")
+                else:
+                    if config.dataYear()==2015:
+                        alg.HLTJets = "HLT_xAOD__JetContainer_a10tclcwsubFS"
+                    elif config.campaign() is Campaign.MC20a or config.dataYear()==2016:
+                        alg.HLTJets = "HLT_xAOD__JetContainer_a10tclcwsubjesFS"
+                    else:
+                        alg.HLTJets = "HLT_xAOD__JetContainer_a10ttclcwjesFS"
+
             # To add missing HLT jets -- only for buggy triggers
             # These extra jets are added because of bug in trigger navigation
             # Will be removed once bug fixed at DAOD level
@@ -120,8 +137,8 @@ class JetTriggerMatchingBlock (ConfigBlock):
             alg.l1dR_cut = self.l1dR
             alg.hltDR_cut = self.hltDR
 
-            if config.geometry() is LHCPeriod.Run2 and self.runHLTMatching:
-
+            if (config.geometry() is LHCPeriod.Run2 and self.runHLTMatching
+                and self.runRun2HLTEmulation):
                 alg.useEmulationTool = True
                 configure_emulationTool(alg, config, [chain])
 
