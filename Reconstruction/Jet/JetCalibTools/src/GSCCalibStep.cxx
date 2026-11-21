@@ -39,6 +39,7 @@ StatusCode GSCCalibStep::initialize() {
   }
   if(m_applyPunchThrough){
     ATH_CHECK( m_histTool_PunchThrough.retrieve());
+    m_ghostMuSegCountAcc = SG::ConstAccessor<int>(m_ghostMuSegCountName);
   }
 
   ATH_CHECK(m_vertexContainer_key.initialize());
@@ -133,10 +134,9 @@ StatusCode GSCCalibStep::calibrate(xAOD::JetContainer& jets) const {
 
     // get Muon segments
     int Nsegments = 0;
-    static const SG::ConstAccessor<int> GhostMuonSegmentCountAcc ("GhostMuonSegmentCount");
-    if(GhostMuonSegmentCountAcc.isAvailable(*jet))
+    if(m_ghostMuSegCountAcc.isAvailable(*jet))
     {
-        Nsegments = GhostMuonSegmentCountAcc(*jet);
+        Nsegments = m_ghostMuSegCountAcc(*jet);
         ATH_MSG_DEBUG("Nsegments found set to: " << Nsegments);
     }
     jc.setValue("Nsegments", Nsegments);
@@ -220,7 +220,7 @@ float GSCCalibStep::getPunchThroughResponse(const xAOD::Jet& jet, const JetHelpe
   int etabin=-99;
   if (m_punchThroughEtaBins.empty() || m_histTool_PunchThrough.size() != m_punchThroughEtaBins.size()-1)
     ATH_MSG_WARNING("Please check that the punch through eta binning is properly set in your config file");
-  if ( eta_det >= m_punchThroughEtaBins[m_punchThroughEtaBins.size()-1] || jc.getValue<int>("Nsegments") < 20 ) return 1;
+  if ( eta_det >= m_punchThroughEtaBins[m_punchThroughEtaBins.size()-1] || jc.getValue<int>("Nsegments") < m_punchThroughMinNseg ) return 1;
   for (uint i=0; i<m_punchThroughEtaBins.size()-1; ++i) {
     if(eta_det >= m_punchThroughEtaBins[i] && eta_det < m_punchThroughEtaBins[i+1]) etabin = i;
   }
