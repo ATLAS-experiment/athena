@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -19,8 +19,8 @@
 #include "GaudiKernel/Service.h"
 #include "AthenaBaseComps/AthService.h"
 #include "GaudiKernel/IInterface.h" 
+#include "GeoModelInterfaces/IGeoDbTagSvc.h"
 
-class IGeoDbTagSvc;
 class IRDBAccessSvc;
 
 class IBLParameterSvc
@@ -28,9 +28,7 @@ class IBLParameterSvc
 {
 public:
  // Standard Constructor
-    IBLParameterSvc(const std::string& name, ISvcLocator* svc);
-   // Standard Destructor
-    virtual ~IBLParameterSvc();
+    using base_class::base_class;
   
     virtual StatusCode initialize() override;
     virtual StatusCode finalize() override;
@@ -78,16 +76,16 @@ public:
 protected:
            
 private:
-  bool m_IBLpresent,m_DBMpresent;
-  int m_LayerColumnsPerFE,m_LayerRowsPerFE,m_LayerFEsPerHalfModule_planar,m_LayerFEsPerHalfModule_3d,m_layout;
+  bool m_IBLpresent{},m_DBMpresent{};
+  int m_LayerColumnsPerFE{},m_LayerRowsPerFE{},m_LayerFEsPerHalfModule_planar{},m_LayerFEsPerHalfModule_3d{},m_layout{};
   std::vector<int> m_LayerFEsPerHalfModule;
 
-  ServiceHandle< IGeoDbTagSvc > m_geoDbTagSvc;
-  bool m_disablePixMapCondDB;
-  bool m_disableSpecialPixels;
-  bool m_disableAlignable;
-  bool m_disableAllClusterSplitting;
-  bool m_disableDCS;
+  ServiceHandle< IGeoDbTagSvc > m_geoDbTagSvc{this, "GeoDbTagSvc", "GeoDbTagSvc"};
+  Gaudi::Property<bool> m_disablePixMapCondDB{this, "DisablePixMapCondDB", false};
+  Gaudi::Property<bool> m_disableSpecialPixels{this, "DisableSpecialPixels", false};
+  Gaudi::Property<bool> m_disableAlignable{this, "DisableAlignable", false};
+  Gaudi::Property<bool> m_disableAllClusterSplitting{this, "DisableAllClusterSplitting", false};
+  Gaudi::Property<bool> m_disableDCS{this, "DisableDCS", true};
 
   StatusCode setIblParameters(); 
 };
