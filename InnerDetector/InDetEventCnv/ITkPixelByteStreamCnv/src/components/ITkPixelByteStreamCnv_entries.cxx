@@ -14,6 +14,7 @@
 #include "src/ITkPixelCsvWaferIdAlg.h"
 #include "src/PixelRDOValidationAlg.h"
 #include "src/PixelPhaseIIRDOValidationAlg.h"
+#include "ITkPixelByteStreamCnv/ITkPixelDecodingTool.h"
 #include "src/PixelPhaseIIRDOVsPhaseIIRDOValidationAlg.h"
 #ifdef ITKPIXEL_WITH_CUDA
 #include "src/cuda/ITkPixelDecodingTracccCellsCUDAAlg.h"
@@ -34,6 +35,7 @@ DECLARE_COMPONENT( ITkPixelDataRateMonTool )
 DECLARE_COMPONENT( ITkPixelCsvWaferIdAlg )
 DECLARE_COMPONENT( PixelRDOValidationAlg )
 DECLARE_COMPONENT( PixelPhaseIIRDOValidationAlg )
+DECLARE_COMPONENT( ITkPixelDecodingTool )
 DECLARE_COMPONENT( PixelPhaseIIRDOVsPhaseIIRDOValidationAlg )
 #ifdef ITKPIXEL_WITH_CUDA
 DECLARE_COMPONENT( ITkPixelDecodingTracccCellsCUDAAlg )

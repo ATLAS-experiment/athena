@@ -8,17 +8,14 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/UpdateHandleKey.h"
-#include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h"
-#include "IRegionSelector/IRegSelTool.h"
-#include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
 #include "InDetIdentifier/PixelID.h"
 #include "Identifier/Identifier.h"
 #include "InDetRawData/PixelRDO_Container.h"
 #include "InDetRawData/PixelRDO_Collection.h"
 #include "ITkPixelCabling/ITkPixelCablingData.h"
+#include "ITkPixelByteStreamCnv/ITkPixelDecodingTool.h"
 #include "itksw/pix/endec/intf/Errors.hpp"
 #include "itksw/pix/endec/DecStreamDefs.hpp"
 #include <Gaudi/Property.h>
@@ -35,8 +32,7 @@
 class ITkPixelDecodingAlg : public AthReentrantAlgorithm 
 {
   public:
-
-    ITkPixelDecodingAlg(const std::string &name, ISvcLocator *pSvcLocator);
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual StatusCode initialize() override;
   
@@ -47,30 +43,13 @@ class ITkPixelDecodingAlg : public AthReentrantAlgorithm
   
   private:
 
-    typedef std::vector< std::vector<uint32_t >> ITkPacketCollection;
-
-    ServiceHandle<IROBDataProviderSvc>    m_robDataProviderSvc{ this, "ROBDataProvider", "ROBDataProviderSvc" };
-
-    SG::ReadCondHandleKey<ITkPixelCablingData> m_pixelCablingKey{this, "PixelCablingKey", "ITkPixelCablingData", "Cond Key of Pixel Cabling"};
+    ToolHandle<ITkPixelDecodingTool> m_decodingTool{this,
+        "PixelDecodingTool", "ITkPixelDecodingTool", "The decoding tool"};
 
     SG::WriteHandleKey<PixelRDO_Container> m_pixelRDOKey{this,    "pixelRDOKey", "ITkPixelRDOs", "StoreGate Key of Pixel RDOs"};
     
-    Gaudi::Property<bool> m_FailOnDecodingError{this, "FailOnDecodingError",
-        false, "Whether the algortihm should fail on decoding error"};
-
-    /** Boolean to determine if the algorithm should be run in RoI seeded mode. */
-    Gaudi::Property<bool> m_roiSeeded{this, "isRoI_Seeded", false, "Use RoI"};
-
-    /** Region Selector tool, used when running RoI seeded. */
-    ToolHandle<IRegSelTool> m_regionSelector{this, "RegSelTool", "RegSelTool/RegSel_ITkPixel"};
-
-    /** Read handle for Trigger ROI descriptor collection, used when running RoI seeded. */
-    SG::ReadHandleKey<TrigRoiDescriptorCollection> m_roiCollectionKey{this, "RoIs", "", "RoIs to read in"};
-
     /** Update handle for an external Pixel RDO cache, shared between separate RoI views. */
     SG::UpdateHandleKey<PixelRDO_Cache> m_pixelRDOCacheKey{this, "RDOCacheKey", "", "Optional external cache"};
-
-    std::vector<uint32_t> m_sourceIDs;
 
     const PixelID* m_idHelper{};
 

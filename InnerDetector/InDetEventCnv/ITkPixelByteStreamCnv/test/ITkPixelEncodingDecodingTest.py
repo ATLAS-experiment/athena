@@ -7,7 +7,7 @@
 # And it checks that the resultins RDOs are the same as the input.
 
 import sys
-from AthenaCommon.Constants import DEBUG
+from AthenaCommon.Constants import DEBUG, INFO
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.TestDefaults import (
    defaultGeometryTags, defaultConditionsTags, defaultTestFiles)
@@ -27,11 +27,14 @@ if __name__=="__main__":
    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
    flags.Input.Files = defaultTestFiles.RDO_RUN4
 
-   flags.Exec.MaxEvents = 10
+   flags.Exec.MaxEvents = 1
+   outlevel = DEBUG
    if PERFORMANCE_TESTING:
       flags.PerfMon.doFullMonMT = True
       flags.Exec.MaxEvents = 100
+      outlevel = INFO
 
+   flags.fillFromArgs()
    flags.lock()
 
    cfg = MainServicesCfg(flags)
@@ -47,14 +50,16 @@ if __name__=="__main__":
    cfg.merge(ByteStreamToRawEventAlgCfg(flags, RawContainers = ["ITkPixelRawCont"]))
 
    # Decode BS to RDOs
-   cfg.merge(ITkPixelDecodingAlgCfg(flags, OutputLevel=DEBUG,
-      pixelRDOKey = "decoded_rdos", FailOnDecodingError = False))
+   cfg.merge(ITkPixelDecodingAlgCfg(flags,
+      pixelRDOKey = "decoded_rdos", FailOnDecodingError = True,
+      OutputLevel = outlevel
+      ))
 
    # Check that decoded RDOs are the same as the original ones
    cfg.merge(PixelRDOValidationAlgCfg(flags,
       ReferenceRDOs = 'ITkPixelRDOs',
       MonitoredRDOs = 'decoded_rdos',
-      OutputLevel = DEBUG
+      OutputLevel = outlevel
       ))
 
    if PERFORMANCE_TESTING:
