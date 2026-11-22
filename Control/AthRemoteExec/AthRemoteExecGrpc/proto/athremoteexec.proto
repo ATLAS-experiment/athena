@@ -1,0 +1,84 @@
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+
+// gRPC implementation for C++ inteface (see AthRemoteExecWire/Protocol.h)
+
+syntax = "proto3";
+
+package athremoteexec.v1;
+
+service SequenceExecutor {
+  // Execute one preconfigured sequence ("fragment") and return its outputs.
+  rpc Execute (ExecuteRequest) returns (ExecuteReply);
+  // Discover the menu of fragments this server was configured with.
+  rpc ListSequences (ListSequencesRequest) returns (ListSequencesReply);
+}
+
+// The outcome of a request the server actually looked at.
+// See @c Status in AthRemoteExecWire/Protocol.h
+enum Status {
+  STATUS_UNSPECIFIED = 0;
+  STATUS_OK = 1;
+  STATUS_UNKNOWN_SEQUENCE = 2;  // no fragment by that name
+  STATUS_INVALID_REQUEST = 3;   // payload did not match the fragment's inputs
+  STATUS_ALG_FAILURE = 4;       // a payload algorithm failed
+  STATUS_TIMEOUT = 5;
+
+  // 6 was STATUS_OVERLOADED, 7 was STATUS_SHUTTING_DOWN; both are now
+  // transport statuses. Reserved so the numbers are never reused.
+  reserved 6, 7;
+  reserved "STATUS_OVERLOADED", "STATUS_SHUTTING_DOWN";
+}
+
+// Which event this request is for.
+// See @c EventId in AthRemoteExecWire/Protocol.h
+message EventId {
+  optional uint32 run_number   = 1;
+  optional uint64 event_number = 2;
+  optional uint32 lumi_block   = 3;
+  optional uint32 time_stamp   = 4;
+  uint32 time_stamp_ns_offset  = 5;
+  uint32 bunch_crossing_id     = 6;
+}
+
+message ExecuteRequest {
+  string sequence = 1;
+  repeated Payload inputs = 2;
+  uint64 request_id = 3;
+  EventId event_id = 4;
+}
+
+message ExecuteReply {
+  Status status = 1;
+  string diagnostics = 2;
+  repeated Payload outputs = 3;
+  uint64 request_id = 4;
+}
+
+// Data that is sent, along with its identifiers.
+// See @c Payload in AthRemoteExecWire/Protocol.h
+message Payload {
+  string key      = 1;
+  string encoding = 2;
+  string schema   = 3;
+  bytes  data     = 4;
+}
+
+message ListSequencesRequest {}
+
+message ListSequencesReply {
+  repeated SequenceInfo sequences = 1;
+}
+
+/// Information what kind of data is expected, in which RPC protocol, and the
+/// meaning of the data. See @c BoundaryInfo in AthRemoteExecWire/Protocol.h
+message BoundaryInfo {
+  string key      = 1;
+  string encoding = 2;
+  string schema   = 3;
+}
+
+message SequenceInfo {
+  string name = 1;
+  repeated BoundaryInfo inputs = 2;
+  repeated BoundaryInfo outputs = 3;
+}
