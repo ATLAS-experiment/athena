@@ -19,6 +19,7 @@ namespace ActsTrk {
     ATH_CHECK(m_detEleCollKey.initialize());
     ATH_CHECK(m_inputSeedContainerKey.initialize());
     ATH_CHECK(m_outputTrackParamsCollectionKey.initialize());
+    ATH_CHECK(m_outputSeedMeasurementsKey.initialize(!m_outputSeedMeasurementsKey.empty()));
 
     if (m_useTopSpRZboundary.size() != 2) {
       ATH_MSG_FATAL("useTopSpRZboundary must have 2 elements, but has " << m_useTopSpRZboundary.size());
@@ -49,8 +50,40 @@ namespace ActsTrk {
     const ActsTrk::SeedContainer &seeds = *seedContainerHandle;
     const InDetDD::SiDetectorElementCollection &detElements = *detEleHandle.cptr();
 
+    // The measurements of each seed, index-aligned with the track parameters
+    ActsTrk::SeedMeasurementsContainer *seedMeasurements = nullptr;
+    if (!m_outputSeedMeasurementsKey.empty()) {
+      SG::WriteHandle<ActsTrk::SeedMeasurementsContainer> seedMeasurementsHandle = SG::makeHandle(m_outputSeedMeasurementsKey, ctx);
+      ATH_CHECK(seedMeasurementsHandle.record(std::make_unique<ActsTrk::SeedMeasurementsContainer>()));
+      seedMeasurements = seedMeasurementsHandle.ptr();
+      seedMeasurements->reserve(seeds.size(), 3 * seeds.size());
+    }
+    std::vector<const xAOD::UncalibratedMeasurement*> measurements;
+    std::vector<const xAOD::UncalibratedMeasurement*> duplicateDetectionMeasurements;
+    const ITrackParamsEstimationTool::SpacePointIndicesFun_t spacePointIndicesFun = m_paramEstimationTool->spacePointIndicesFun();
+
     for (std::size_t iseed = 0; iseed < seeds.size(); ++iseed) {
       ActsTrk::Seed seed = seeds[iseed];
+
+      if (seedMeasurements) {
+        const auto& sps = seed.sp();
+        measurements.clear();
+        for (const xAOD::SpacePoint *sp : sps) {
+          measurements.insert(measurements.end(), sp->measurements().begin(), sp->measurements().end());
+        }
+        if (sps.size() <= 3) {
+          seedMeasurements->push_back(measurements);
+        } else {
+          // As in the track finding, only the measurements of the three space points
+          // used for the parameter estimation are used to detect duplicate seeds
+          duplicateDetectionMeasurements.clear();
+          for (std::size_t isp : spacePointIndicesFun(sps, searchStartSp(seed))) {
+            const xAOD::SpacePoint *sp = sps.at(isp);
+            duplicateDetectionMeasurements.insert(duplicateDetectionMeasurements.end(), sp->measurements().begin(), sp->measurements().end());
+          }
+          seedMeasurements->push_back(measurements, duplicateDetectionMeasurements);
+        }
+      }
 
       auto retrieveSurfaceFunction = 
         [this, &detElements] (const xAOD::SpacePoint& sp, std::size_t measIndex) -> const Acts::Surface& { 
