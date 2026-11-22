@@ -22,16 +22,7 @@ find_package( lwtnn )
 # Build a shared library:
 atlas_add_library( BoostedJetTaggersLib
   BoostedJetTaggers/*.h
-  Root/JSSTaggerBase.cxx
-  Root/JSSMLTool.cxx
-  Root/JSSTaggerUtils.cxx
-  Root/JSSWTopTaggerDNN.cxx
-  Root/JSSWTopTaggerANN.cxx
-  Root/SmoothedWZTagger.cxx
-  Root/SmoothedTopTagger.cxx
-  Root/qgTagger.cxx
-  Root/LundNetTagger.cxx
-  Root/ScaleFactors.cxx
+  Root/*.cxx
    PUBLIC_HEADERS BoostedJetTaggers
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} ${FASTJET_LIBRARIES}
