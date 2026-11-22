@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACKWRITEFASTSIM_StoppedParticleFastSimTool_h
@@ -16,8 +16,7 @@ class StoppedParticleFastSimTool: public FastSimulationBase
 {
 public:
 
-  StoppedParticleFastSimTool(const std::string& type, const std::string& name, const IInterface *parent);
-  ~StoppedParticleFastSimTool() {}
+  using FastSimulationBase::FastSimulationBase;
   StatusCode initialize() override final;
 protected:
   /** Method to make the actual fast simulation model itself, which
@@ -25,7 +24,7 @@ protected:
    base classes. */
   virtual G4VFastSimulationModel* makeFastSimModel() override final;
 private:
-  ToolHandle<ISensitiveDetector> m_trackFastSimSDTool;
+  PublicToolHandle<ISensitiveDetector> m_trackFastSimSDTool{this, "TrackFastSimSDTool", "TrackFastSimSDTool"};
 };
 
 #endif // TRACKWRITEFASTSIM_StoppedParticleFastSimTool_h
