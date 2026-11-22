@@ -3,7 +3,7 @@
 */
 
 #include "StoppedParticleFastSimTool.h"
-#include "TrackWriteFastSim/StoppedParticleFastSim.h"
+#include "StoppedParticleFastSim.h"
 
 StatusCode StoppedParticleFastSimTool::initialize()
 {

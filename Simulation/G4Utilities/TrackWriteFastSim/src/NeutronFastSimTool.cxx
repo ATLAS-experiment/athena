@@ -4,7 +4,7 @@
 
 #include "NeutronFastSimTool.h"
 
-#include "TrackWriteFastSim/NeutronFastSim.h"
+#include "NeutronFastSim.h"
 
 G4VFastSimulationModel* NeutronFastSimTool::makeFastSimModel()
 {
