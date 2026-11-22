@@ -44,6 +44,8 @@
 #include <iterator>
 #include <ranges>
 #include <variant>
+#include <span>
+#include <array>
 
 namespace {
 
@@ -60,22 +62,20 @@ namespace {
     return firstMeasurement;
   }
 
-  // Collect the measurement keys of the space points that the parameter
-  // estimation uses, as the seed keys of the Acts::SeedDeduplicator.
+  // Collect the measurement keys of the seed duplicate measurements
+  // (ICkfSeedSource::duplicateMeasurements), as the seed keys of the Acts::SeedDeduplicator.
   const std::vector<Acts::SeedDeduplicator::MeasurementKey>&
-  collectSeedKeys(const ActsTrk::Seed& seed,
-                  const ActsTrk::ITrackParamsEstimationTool::SpacePointIndicesFun_t& spacePointIndicesFun,
-                  std::size_t spIndex,
+  collectSeedKeys(const ActsTrk::detail::ICkfSeedSource& seeds,
+                  std::size_t iseed,
                   const ActsTrk::detail::MeasurementIndex& measurementIndex,
+                  ActsTrk::detail::SeedMeasurements& seedMeasurements,
                   std::vector<Acts::SeedDeduplicator::MeasurementKey>& seedKeys) {
     seedKeys.clear();
-    const auto& sps = seed.sp();
-    for (std::size_t isp : spacePointIndicesFun(sps, spIndex)) {
-      for (const xAOD::UncalibratedMeasurement* meas : sps.at(isp)->measurements()) {
-        const std::size_t hitIndex = measurementIndex.index(*meas);
-        if (hitIndex < measurementIndex.size()) {
-          seedKeys.push_back(static_cast<Acts::SeedDeduplicator::MeasurementKey>(hitIndex));
-        }
+    seeds.duplicateMeasurements(iseed, seedMeasurements);
+    for (const xAOD::UncalibratedMeasurement* meas : seedMeasurements) {
+      const std::size_t hitIndex = measurementIndex.index(*meas);
+      if (hitIndex < measurementIndex.size()) {
+        seedKeys.push_back(static_cast<Acts::SeedDeduplicator::MeasurementKey>(hitIndex));
       }
     }
     return seedKeys;
@@ -154,6 +154,8 @@ namespace ActsTrk
 
     ATH_CHECK(m_paramEstimationTool.retrieve());
     ATH_CHECK(m_seedContainerKeys.initialize());
+    ATH_CHECK(m_initialParametersKeys.initialize());
+    ATH_CHECK(m_seedMeasurementsKeys.initialize());
     ATH_CHECK(m_uncalibratedMeasurementContainerKeys.initialize());
     ATH_CHECK(m_volumeIdToDetectorElementCollMapKey.initialize());
     ATH_CHECK(m_detElStatus.initialize());
@@ -163,7 +165,26 @@ namespace ActsTrk
     m_storeDestinies = not m_seedDestiny.empty();
     ATH_CHECK(m_seedDestiny.initialize(m_storeDestinies));
 
-    if (m_paramEstimationTool.size() != m_seedContainerKeys.size()) {
+    if (useInitialParameters()) {
+      if (!m_seedContainerKeys.empty()) {
+        ATH_MSG_FATAL("Seeds are given both by SeedContainerKeys and InitialParametersKeys, only one of them can be used");
+        return StatusCode::FAILURE;
+      }
+      if (m_seedMeasurementsKeys.size() != m_initialParametersKeys.size()) {
+        ATH_MSG_FATAL("There are " << m_initialParametersKeys.size() << " InitialParametersKeys, but " << m_seedMeasurementsKeys.size() << " SeedMeasurementsKeys");
+        return StatusCode::FAILURE;
+      }
+      if (m_autoReverseSearch) {
+        ATH_MSG_FATAL("autoReverseSearch needs the seed space points and cannot be used with InitialParametersKeys");
+        return StatusCode::FAILURE;
+      }
+      if (!m_paramEstimationTool.empty()) {
+        ATH_MSG_WARNING("The TrackParamsEstimationTool is not used, since the initial parameters are given by InitialParametersKeys");
+      }
+    } else if (!m_seedMeasurementsKeys.empty()) {
+      ATH_MSG_FATAL("SeedMeasurementsKeys are only used together with InitialParametersKeys");
+      return StatusCode::FAILURE;
+    } else if (m_paramEstimationTool.size() != m_seedContainerKeys.size()) {
       ATH_MSG_FATAL("There are " << m_seedContainerKeys.size() << " SeedContainerKeys. Each needs its own TrackParamsEstimationTool, but there are " << m_paramEstimationTool.size());
     }
 
@@ -197,8 +218,8 @@ namespace ActsTrk
     }
 
     if (m_storeDestinies) {
-      if (m_seedDestiny.size() != m_seedContainerKeys.size()) {
-        ATH_MSG_ERROR("There are " << m_seedDestiny.size() << " seed destiny collections, but " << m_seedContainerKeys.size() << " seed collections");
+      if (m_seedDestiny.size() != nSeedInputs()) {
+        ATH_MSG_ERROR("There are " << m_seedDestiny.size() << " seed destiny collections, but " << nSeedInputs() << " seed collections");
         return StatusCode::FAILURE;
       }
     }
@@ -238,17 +259,48 @@ namespace ActsTrk
       caloClusterROIs = caloClusterROIsHandle.cptr();
     }
 
-    // SEED TRIPLETS
-    std::vector<const ActsTrk::SeedContainer *> seedContainers;
+    // SEED SOURCES: provide the initial parameters and the seed measurements to the CKF
+    std::vector<std::unique_ptr<detail::ICkfSeedSource>> seedSources;
     std::size_t total_seeds = 0;
-    ATH_CHECK(getContainersFromKeys(ctx, m_seedContainerKeys, seedContainers, total_seeds));
+    if (useInitialParameters()) {
+      // INITIAL PARAMETERS + SEED MEASUREMENTS
+      std::vector<const ActsTrk::BoundTrackParametersContainer *> parameterContainers;
+      std::vector<const ActsTrk::SeedMeasurementsContainer *> seedMeasurementsContainers;
+      std::size_t total_seed_measurements = 0;
+      ATH_CHECK(getContainersFromKeys(ctx, m_initialParametersKeys, parameterContainers, total_seeds));
+      ATH_CHECK(getContainersFromKeys(ctx, m_seedMeasurementsKeys, seedMeasurementsContainers, total_seed_measurements));
+      seedSources.reserve(parameterContainers.size());
+      for (std::size_t icontainer = 0; icontainer < parameterContainers.size(); ++icontainer) {
+        if (parameterContainers[icontainer]->size() != seedMeasurementsContainers[icontainer]->size()) {
+          ATH_MSG_ERROR("There are " << parameterContainers[icontainer]->size() << " initial parameters in " << m_initialParametersKeys[icontainer].key()
+                        << ", but " << seedMeasurementsContainers[icontainer]->size() << " seeds in " << m_seedMeasurementsKeys[icontainer].key());
+          return StatusCode::FAILURE;
+        }
+        seedSources.push_back(std::make_unique<detail::ParameterSeedSource>(*parameterContainers[icontainer],
+                                                                            *seedMeasurementsContainers[icontainer]));
+      }
+    } else {
+      // SEED TRIPLETS
+      std::vector<const ActsTrk::SeedContainer *> seedContainers;
+      ATH_CHECK(getContainersFromKeys(ctx, m_seedContainerKeys, seedContainers, total_seeds));
+      seedSources.reserve(seedContainers.size());
+      for (std::size_t icontainer = 0; icontainer < seedContainers.size(); ++icontainer) {
+        seedSources.push_back(std::make_unique<detail::SpacePointSeedSource>(*seedContainers[icontainer],
+                                                                             *m_paramEstimationTool[icontainer],
+                                                                             *m_trackingGeometrySvc->surfaceIdMap(),
+                                                                             *m_trackingGeometrySvc->trackingGeometry(),
+                                                                             [this](const ActsTrk::Seed &seed) -> std::size_t {
+                                                                               return searchStartSp(seed);
+                                                                             }));
+      }
+    }
 
     // DESTINIES
     std::vector< std::unique_ptr< std::vector<int> > > destinies {};
     if (m_storeDestinies) {
-      destinies.reserve( seedContainers.size() );
-      for (std::size_t i(0); i<seedContainers.size(); ++i) {
-        destinies.push_back( std::make_unique< std::vector<int> >( seedContainers.at(i)->size(), DestinyType::UNKNOWN) );
+      destinies.reserve( seedSources.size() );
+      for (std::size_t i(0); i<seedSources.size(); ++i) {
+        destinies.push_back( std::make_unique< std::vector<int> >( seedSources.at(i)->size(), DestinyType::UNKNOWN) );
       }
     }
 
@@ -351,7 +403,7 @@ namespace ActsTrk
     if (m_ambi) trackCategories.emplace();  // only needed if m_ambiStrategy == END_OF_TF
 
     // Perform the track finding for all initial parameters.
-    for (std::size_t icontainer = 0; icontainer < seedContainers.size(); ++icontainer)
+    for (std::size_t icontainer = 0; icontainer < seedSources.size(); ++icontainer)
       {
         ATH_CHECK(findTracks(ctx,
                              detContext,
@@ -361,10 +413,10 @@ namespace ActsTrk
                              *(volumeIdToDetectorElementCollMap.cptr()),
                              sharedHits,
                              seedDeduplicator,
-                             *seedContainers.at(icontainer),
+                             *seedSources.at(icontainer),
                              actsTracksContainer,
                              icontainer,
-                             icontainer < m_seedLabels.size() ? m_seedLabels[icontainer].c_str() : m_seedContainerKeys[icontainer].key().c_str(),
+                             icontainer < m_seedLabels.size() ? m_seedLabels[icontainer].c_str() : seedInputKey(icontainer).c_str(),
                              event_stat,
                              m_storeDestinies ? destinies.at(icontainer).get() : nullptr,
                              *pSurface.get(),
@@ -496,7 +548,7 @@ namespace ActsTrk
                               const ActsTrk::ActsVolumeIdToDetectorElementCollectionMap &volumeIdMap,
                               detail::SharedHitCounter &sharedHits,
                               Acts::SeedDeduplicator &seedDeduplicator,
-                              const ActsTrk::SeedContainer &seeds,
+                              const detail::ICkfSeedSource &seeds,
                               detail::RecoTrackContainer &actsTracksContainer,
                               std::size_t typeIndex,
                               const char *seedType,
@@ -566,49 +618,24 @@ namespace ActsTrk
 
 
     std::size_t nPrinted = 0;
+    detail::SeedMeasurements seedMeasurements;
 
-    // Function for Estimate Track Parameters
-    auto retrieveSurfaceFunction =
-       [detectorElementToGeometryIdMapPtr=m_trackingGeometrySvc->surfaceIdMap(),
-        actsTrackingGeometryPtr=m_trackingGeometrySvc->trackingGeometry().get()] (const xAOD::SpacePoint& sp, std::size_t measIndex) -> const Acts::Surface& {
-        const xAOD::UncalibratedMeasurement* meas = sp.measurements().at(measIndex);
-        const auto geoid_iter = detectorElementToGeometryIdMapPtr->find(ActsTrk::makeDetectorElementKey(meas->type(), meas->identifierHash()));
-        if (geoid_iter == detectorElementToGeometryIdMapPtr->end()) {
-           throw std::runtime_error("measurement not linked to Acts surface.");
-        }
-        const Acts::Surface *surface = DetectorElementToActsGeometryIdMap::getSurface(*geoid_iter);
-        if (surface == nullptr) {
-           surface = actsTrackingGeometryPtr->findSurface( DetectorElementToActsGeometryIdMap::getValue(*geoid_iter) );
-        }
-        assert(surface);
-        return *surface;
-      };
-
-
-
-    // The seed keys of the duplicate check: the measurements of the space
-    // points that the parameter estimation uses
-    const ITrackParamsEstimationTool::SpacePointIndicesFun_t spacePointIndicesFun =
-      m_paramEstimationTool[typeIndex]->spacePointIndicesFun();
+    // The seed keys of the duplicate check: the seed duplicate measurements
     std::vector<Acts::SeedDeduplicator::MeasurementKey> seedKeys;
 
     // Loop over the track finding results for all initial parameters
     for (unsigned int iseed = 0; iseed < seeds.size(); ++iseed)
       {
-        // Get the seed
-        const ActsTrk::Seed seed = seeds[iseed];
-
+        
         category_i = typeIndex * (m_statEtaBins.size() + 1);
         tracksContainerTemp.clear();
 
-        const std::size_t spIndex = searchStartSp(seed);
-
         // Check if the seed is a duplicate seed
         const bool isDupSeed = m_skipDuplicateSeeds &&
-          seedDeduplicator.isDuplicate(collectSeedKeys(seed, spacePointIndicesFun, spIndex, measurementIndex, seedKeys));
+          seedDeduplicator.isDuplicate(collectSeedKeys(seeds, iseed, measurementIndex, seedMeasurements, seedKeys));
         if (isDupSeed) {
           ATH_MSG_DEBUG("skip " << seedType << " seed " << iseed << " - already found");
-          category_i = getSeedCategory(typeIndex, seed);
+          category_i = getStatCategory(typeIndex, seeds.statEta(iseed));
           ++event_stat[category_i][kNTotalSeeds];
           ++event_stat[category_i][kNDuplicateSeeds];
           if (m_storeDestinies) destiny->at(iseed) = DestinyType::DUPLICATE;
@@ -617,17 +644,12 @@ namespace ActsTrk
 
         // Get first estimate of parameters from the seed
         const auto& [optTrackParams, estimationStatus] =
-          m_paramEstimationTool[typeIndex]->estimateTrackParameters(seed,
-                                                                    spIndex,
-                                                                    detContext.geometry,
-                                                                    detContext.magField,
-                                                                    detContext.calib,
-                                                                    retrieveSurfaceFunction);
+          seeds.initialParameters(iseed, detContext.geometry, detContext.magField, detContext.calib);
 
         if (!optTrackParams) {
           ATH_MSG_DEBUG("Failed to estimate track parameters for seed " << iseed);
           if (!isDupSeed) {
-            category_i = getSeedCategory(typeIndex, seed);
+            category_i = getStatCategory(typeIndex, seeds.statEta(iseed));
             ++event_stat[category_i][kNTotalSeeds];
             ++event_stat[category_i][kNNoEstimatedParams];
             if (m_storeDestinies) destiny->at(iseed) = DestinyType::FAILURE;
@@ -657,7 +679,7 @@ namespace ActsTrk
         }
 
         // Above the bottom SP: first pass inward, then outward; a failed refit starts at the bottom SP
-        const bool searchInward = spIndex > 0 && estimationStatus != ITrackParamsEstimationTool::kSeedRefitFailed;
+        const bool searchInward = seeds.searchInward(iseed) && estimationStatus != ITrackParamsEstimationTool::kSeedRefitFailed;
         options.propagatorPlainOptions.direction = searchInward ? Acts::Direction::Backward() : Acts::Direction::Forward();
         secondOptions.propagatorPlainOptions.direction = options.propagatorPlainOptions.direction.invert();
         options.targetSurface = searchInward ? &pSurface : nullptr;
@@ -666,9 +688,13 @@ namespace ActsTrk
         // @TODO introduce additional enums to distinguish Acts CKF from other implementations?
         //
 
-        auto measurementRangesForced =
-            m_forceTrackOnSeed ? measurements.createMeasurementRangesForced(seed, measurementIndex)
-                               : std::unique_ptr<ActsTrk::detail::MeasurementRangeListFlat>();
+        std::unique_ptr<ActsTrk::detail::MeasurementRangeListFlat> measurementRangesForced;
+        if (m_forceTrackOnSeed) {
+          seeds.seedMeasurements(iseed, seedMeasurements);
+          measurementRangesForced = measurements.createMeasurementRangesForced(std::span(seedMeasurements.data(), seedMeasurements.size()),
+                                                                               measurementIndex);
+        }
+
         measurementSelector->setMeasurementRangesForced(measurementRangesForced.get());
         if (bremOptions.has_value()) {
             bremOptions.value().measurementSelector->setMeasurementRangesForced(measurementRangesForced.get());
@@ -775,18 +801,9 @@ namespace ActsTrk
     seedDeduplicator.addTrack(trackKeys);
   }
 
-  std::size_t TrackFindingAlg::getSeedCategory(std::size_t typeIndex,
-                                               const ActsTrk::Seed& seed) const
-  {
-    const xAOD::SpacePoint* sp = seed.sp().front();
-    const xAOD::SpacePoint::ConstVectorMap pos = sp->globalPosition();
-    double etaSeed = std::atanh(pos[2] / pos.norm());
-    return getStatCategory(typeIndex, etaSeed);
-  }
-
   void TrackFindingAlg::printSeed(unsigned int iseed,
                                   const DetectorContextHolder& detContext,
-                                  const ActsTrk::SeedContainer& seeds,
+                                  const detail::ICkfSeedSource& seeds,
                                   const Acts::BoundTrackParameters &seedParameters,
                                   const detail::MeasurementIndex &measurementIndex,
                                   std::size_t& nPrinted,
@@ -795,11 +812,15 @@ namespace ActsTrk
   {
     if (not m_trackStatePrinter.isSet()) return;
 
+    // the printer needs the space points, which are not available for all seed sources
+    const ActsTrk::SeedContainer *seedContainer = seeds.seedContainer();
+    if (seedContainer == nullptr) return;
+
     if (nPrinted == 0) {
       ATH_MSG_INFO("CKF results for " << seeds.size() << ' ' << seedType << " seeds:");
     }
     ++nPrinted;
-    m_trackStatePrinter->printSeed(detContext.geometry, seeds[iseed], seedParameters, measurementIndex, iseed, isKF);
+    m_trackStatePrinter->printSeed(detContext.geometry, (*seedContainer)[iseed], seedParameters, measurementIndex, iseed, isKF);
   }
 
 namespace {
