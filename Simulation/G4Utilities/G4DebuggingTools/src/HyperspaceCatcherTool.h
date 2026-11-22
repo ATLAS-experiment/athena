@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4DEBUGGINGTOOLS_G4UA__HYPERSPACECATCHERTOOL_H
@@ -18,7 +18,7 @@ namespace G4UA
 
   public:
 
-    HyperspaceCatcherTool(const std::string& type, const std::string& name,const IInterface* parent);
+    using UserActionToolBase<HyperspaceCatcher>::UserActionToolBase;
 
   protected:
 
@@ -27,7 +27,8 @@ namespace G4UA
 
   private:
 
-    HyperspaceCatcher::Config m_config;
+    Gaudi::Property<int> m_treatmentLevel{this, "TreatmentLevel", 0};
+    Gaudi::Property<int> m_killAfter{this, "KillAfter", 0};
 
   }; // class HyperspaceCatcherTool
 

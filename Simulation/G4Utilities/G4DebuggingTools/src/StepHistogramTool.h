@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4DEBUGGINGTOOLS_G4UA__STEPHISTOGRAMTOOL_H
@@ -24,8 +24,7 @@ namespace G4UA{
   {
 
   public:
-    /// standard tool ctor
-    StepHistogramTool(const std::string& type, const std::string& name,const IInterface* parent);
+    using UserActionToolBase<StepHistogram>::UserActionToolBase;
     /// return the event action
 
     // initialize
@@ -39,9 +38,10 @@ namespace G4UA{
     makeAndFillAction(G4AtlasUserActions&) override final;
 
   private:
-    StepHistogram::Config m_config;
+    Gaudi::Property<bool> m_do2DHistograms{this, "do2DHistograms", false};
+    Gaudi::Property<bool> m_doGeneralHistograms{this, "doGeneralHistograms", false};
 
-    ServiceHandle<ITHistSvc> m_histSvc;
+    ServiceHandle<ITHistSvc> m_histSvc{this, "THistSvc", "THistSvc"};
 
     void BookHistograms(StepHistogram::HistoMapMap_t &hMap, const char* suffix, const char* subfolder = "");
     

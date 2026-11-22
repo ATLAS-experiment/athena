@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VolumeDebuggerTool.h"
@@ -7,28 +7,22 @@
 namespace G4UA
 {
 
-  VolumeDebuggerTool::VolumeDebuggerTool(const std::string& type,
-                                         const std::string& name,
-                                         const IInterface* parent)
-    : UserActionToolBase<VolumeDebugger>(type, name, parent)
-  {
-    declareProperty("OutputPath", m_config.path);
-    declareProperty("TargetVolume", m_config.targetVolume);
-    declareProperty("Resolution", m_config.res);
-    declareProperty("Tolerance", m_config.tol);
-    declareProperty("Verbose", m_config.verbose);
-    declareProperty("RunGeoTest", m_config.volumeCheck);
-    declareProperty("MaxCopiesToCheck", m_config.targetMaxCopiesToCheck);
-    declareProperty("DumpGDML", m_config.dumpGDML);
-    declareProperty("DumpPhysicsRegions", m_config.dumpPhysicsRegions);
-    declareProperty("PrintGeometry", m_config.printGeo);
-  }
-
   std::unique_ptr<VolumeDebugger>
   VolumeDebuggerTool::makeAndFillAction(G4AtlasUserActions& actionList)
   {
     ATH_MSG_DEBUG("Constructing a VolumeDebugger");
-    auto action = std::make_unique<VolumeDebugger>(m_config);
+    VolumeDebugger::Config config;
+    config.path = m_path;
+    config.targetVolume = m_targetVolume;
+    config.res = m_res;
+    config.tol = m_tol;
+    config.verbose = m_verbose;
+    config.volumeCheck = m_volumeCheck;
+    config.targetMaxCopiesToCheck = m_targetMaxCopiesToCheck;
+    config.dumpGDML = m_dumpGDML;
+    config.dumpPhysicsRegions = m_dumpPhysicsRegions;
+    config.printGeo = m_printGeo;
+    auto action = std::make_unique<VolumeDebugger>(config);
     actionList.runActions.push_back( action.get() );
     return action;
   }

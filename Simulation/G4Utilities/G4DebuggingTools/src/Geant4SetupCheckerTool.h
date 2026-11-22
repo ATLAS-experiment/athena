@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4DEBUGGINGTOOLS_G4UA__GEANT4SETUPCHECKERTOOL_H
@@ -20,17 +20,16 @@ namespace G4UA
   {
 
     public:
-      /// Standard constructor
-      Geant4SetupCheckerTool(const std::string& type, const std::string& name,const IInterface* parent);
+      using UserActionToolBase<Geant4SetupChecker>::UserActionToolBase;
     protected:
       /// Create an action for this thread
       virtual std::unique_ptr<Geant4SetupChecker>
       makeAndFillAction(G4AtlasUserActions&) override final;
     private:
       /// File location for reference file
-      std::string m_file_location;
+      Gaudi::Property<std::string> m_file_location{this, "ReferenceFile", "reference_file.txt"};
       /// Test the setup or write a reference file?
-      bool m_test;
+      Gaudi::Property<bool> m_test{this, "RunTest", true};
   }; // class Geant4SetupCheckerTool
 
 } // namespace G4UA
