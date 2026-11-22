@@ -40,15 +40,53 @@ def ITkPixelTranslatorAlgCfg(flags, name = "ITkPixelTranslatorAlg", **kwargs) ->
 
     return acc
 
-def ITkPixelDecodingAlgCfg(flags, name = "ITkPixelDecodingAlg", **kwargs) -> ComponentAccumulator:
+def ITkPixelDecodingToolCfg(flags, name = "ITkPixelDecodingTool",
+        ExpectedDataSize = 2000000,
+        FailOnDecodingError = False,
+        **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    acc.merge(addITkPixelCabling(flags))
+
+    acc.setPrivateTools(CompFactory.ITkPixelDecodingTool(name,
+        ExpectedDataSize = ExpectedDataSize,
+        FailOnDecodingError = FailOnDecodingError,
+        **kwargs))
+
+    return acc
+
+def ITkPixelDecodingAlgCfg(flags, name = "ITkPixelDecodingAlg",
+        pixelRDOKey = "ITkPixelRDOs",
+        FailOnDecodingError = False,
+        ExpectedDataSize = 2000000,
+        RegSelTool = None,
+        RoIs = None,
+        isRoI_Seeded = False,
+        RDOCacheKey = "",
+        **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
     from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
     acc.merge(ITkPixelReadoutGeometryCfg(flags))
 
-    acc.merge(addITkPixelCabling(flags))
+    tool_args = kwargs
+    if isRoI_Seeded:
+        import copy
+        tool_args = copy.deepcopy(kwargs)
+        tool_args["RegSelTool"] = RegSelTool
+        tool_args["RoIs"] = RoIs
+        tool_args["isRoI_Seeded"] = isRoI_Seeded
 
-    acc.addEventAlgo(CompFactory.ITkPixelDecodingAlg(name, **kwargs))
+    kwargs.setdefault("PixelDecodingTool", acc.popToolsAndMerge(
+        ITkPixelDecodingToolCfg(flags,
+            FailOnDecodingError = FailOnDecodingError,            
+            ExpectedDataSize = ExpectedDataSize,
+            **tool_args)))
+
+    acc.addEventAlgo(CompFactory.ITkPixelDecodingAlg(name,
+        pixelRDOKey = pixelRDOKey,
+        RDOCacheKey = RDOCacheKey,
+        **kwargs))
 
     return acc
 
@@ -70,20 +108,38 @@ def TrigITkPixelDecodingAlgCfg(flags, suffix, RoIs) -> ComponentAccumulator:
     acc.merge(ITkPixelDecodingAlgCfg(flags, name="ITkPixelDecodingAlg"+suffix, **trigargs))
     return acc
 
-def ITkPixelDecodingPhaseIIRDOAlgCfg(flags,
-                                    name = "ITkPixelDecodingPhaseIIRDOAlg",
-                                    nRDOs = 1300000,
-                                    **kwargs) -> ComponentAccumulator:
+def ITkPixelDecodingPhaseIIRDOAlgCfg(flags, name = "ITkPixelDecodingPhaseIIRDOAlg",
+        nRDOs = 1300000,
+        pixelRDOKey = "ITkPixelRDOs",
+        FailOnDecodingError = False,
+        ExpectedDataSize = 2000000,
+        RegSelTool = None,
+        RoIs = None,
+        isRoI_Seeded = False,
+        **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
     from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
     acc.merge(ITkPixelReadoutGeometryCfg(flags))
 
-    kwargs.setdefault("nRDOs", nRDOs)
+    tool_args = kwargs
+    if isRoI_Seeded:
+        import copy
+        tool_args = copy.deepcopy(kwargs)
+        tool_args["RegSelTool"] = RegSelTool
+        tool_args["RoIs"] = RoIs
+        tool_args["isRoI_Seeded"] = isRoI_Seeded
 
-    acc.merge(addITkPixelCabling(flags))
+    kwargs.setdefault("PixelDecodingTool", acc.popToolsAndMerge(
+        ITkPixelDecodingToolCfg(flags,
+            FailOnDecodingError = FailOnDecodingError,            
+            ExpectedDataSize = ExpectedDataSize,
+            **tool_args)))
 
-    acc.addEventAlgo(CompFactory.ITkPixelDecodingPhaseIIRDOAlg(name, **kwargs))
+    acc.addEventAlgo(CompFactory.ITkPixelDecodingPhaseIIRDOAlg(name,
+        pixelRDOKey = pixelRDOKey,
+        nRDOs = nRDOs,
+        **kwargs))
 
     return acc
 

@@ -14,12 +14,11 @@
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/MsgStream.h"
-#include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h"
 #include "InDetIdentifier/PixelID.h"
 #include "Identifier/Identifier.h"
 #include "InDetRawData/PhaseIIPixelRawDataContainerMT.h"
 #include "InDetRawData/PixelRDO_Collection.h"
-#include "ITkPixelCabling/ITkPixelCablingData.h"
+#include "ITkPixelByteStreamCnv/ITkPixelDecodingTool.h"
 #include <chrono>
 #include <cstdint> //for uint8_t etc.
 
@@ -37,31 +36,20 @@ class ITkPixelDecodingPhaseIIRDOAlg : public AthReentrantAlgorithm
 {
   public:
 
-    ITkPixelDecodingPhaseIIRDOAlg(const std::string &name, ISvcLocator *pSvcLocator);
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual StatusCode initialize() override;
   
     virtual StatusCode execute (const EventContext& ctx) const override;
   
-    virtual StatusCode finalize() override;
-
-  
   private:
 
-    typedef std::vector< std::vector<uint32_t >> ITkPacketCollection;
-
-    ServiceHandle<IROBDataProviderSvc> m_robDataProviderSvc
-        { this, "ROBDataProvider", "ROBDataProviderSvc" };
-
-    SG::ReadCondHandleKey<ITkPixelCablingData> m_pixelCablingKey
-        {this, "PixelCablingKey", "ITkPixelCablingData", "Cond Key of Pixel Cabling"};
+    ToolHandle<ITkPixelDecodingTool> m_decodingTool{this,
+        "PixelDecodingTool", "ITkPixelDecodingTool", "The decoding tool"};
 
     SG::WriteHandleKey<PhaseIIPixelRawDataContainer> m_pixelRDOKey
         {this,    "pixelRDOKey", "PixelRDOs", "StoreGate Key of Pixel RDOs"};
 
-    Gaudi::Property<bool> m_FailOnDecodingError{this, "FailOnDecodingError",
-        false, "Whether the algortihm should fail on decoding error"};
-    
     const PixelID* m_idHelper{};
 
     const Gaudi::Property<uint32_t> m_n_rdos_est{this, "nRDOs", 1200000,
