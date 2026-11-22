@@ -1,0 +1,22 @@
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+//
+// The demonstration of fragment's own payload schema.
+
+syntax = "proto3";
+
+package athexremoteexec.demo.v1;
+
+// A set of named integers.
+message Ints {
+  message Entry {
+    string name  = 1;
+    int64  value = 2;
+  }
+  repeated Entry entry = 1;
+}
+
+// One named vector of doubles.
+message Doubles {
+  string name = 1;
+  repeated double value = 2;
+}
