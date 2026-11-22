@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4PROFILINGTOOLS_G4UA__TESTACTIONVPTIMERTOOL_H
@@ -24,9 +24,7 @@ namespace G4UA
   {
 
   public:
-    /// Standard constructor
-    TestActionVPTimerTool(const std::string& type, const std::string& name,
-                          const IInterface* parent);
+    using UserActionToolBase<TestActionVPTimer>::UserActionToolBase;
 
     /// Triggers report merging from threads
     virtual StatusCode finalize() override;
@@ -39,7 +37,11 @@ namespace G4UA
   private:
 
     /// holds the runtime configuration
-    TestActionVPTimer::Config m_config;
+    Gaudi::Property<int> m_dCALO{this, "CaloDepth", 2};
+    Gaudi::Property<int> m_dBeam{this, "BeamPipeDepth", 2};
+    Gaudi::Property<int> m_dIDET{this, "InDetDepth", 2};
+    Gaudi::Property<int> m_dMUON{this, "MuonDepth", 2};
+    Gaudi::Property<std::string> m_dDetail{this, "DetailDepth", "", "Path to set detailed depth"};
     /// holds data to be reported at end of run
     TestActionVPTimer::Report m_report;
 
