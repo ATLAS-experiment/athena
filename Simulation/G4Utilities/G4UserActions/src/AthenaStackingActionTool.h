@@ -1,12 +1,9 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4ATLASALG_ATLASSTACKINGACTIONTOOL_H
 #define G4ATLASALG_ATLASSTACKINGACTIONTOOL_H
-
-// STL includes
-#include <string>
 
 // G4Atlas includes
 #include "G4AtlasInterfaces/IUserActionTool.h"
@@ -29,9 +26,7 @@ namespace G4UA
 
     public:
 
-      /// Standard constructor
-      AthenaStackingActionTool(const std::string& type, const std::string& name,
-                               const IInterface* parent);
+      using UserActionToolBase<AthenaStackingAction>::UserActionToolBase;
 
       /// Initialize the tool
       virtual StatusCode initialize() override final;
@@ -45,10 +40,26 @@ namespace G4UA
     private:
 
       /// Configuration parameters
-      AthenaStackingAction::Config m_config;
+      Gaudi::Property<bool> m_killAllNeutrinos{this, "KillAllNeutrinos", false,
+          "Toggle killing of all neutrinos"};
+      Gaudi::Property<double> m_photonEnergyCut{this, "PhotonEnergyCut", -1.,
+          "Energy threshold for tracking photons"};
+      Gaudi::Property<bool> m_applyNRR{this, "ApplyNRR", false,
+          "Apply the Neutron Russian Roulette"};
+      Gaudi::Property<double> m_russianRouletteNeutronThreshold{this, "NRRThreshold", -1.,
+          "Energy threshold for the Neutron Russian Roulette"};
+      Gaudi::Property<double> m_russianRouletteNeutronWeight{this, "NRRWeight", -1.,
+          "Weight for the Neutron Russian Roulette"};
+      Gaudi::Property<bool> m_applyPRR{this, "ApplyPRR", false,
+          "Apply the Photon Russian Roulette"};
+      Gaudi::Property<double> m_russianRoulettePhotonThreshold{this, "PRRThreshold", -1.,
+          "Energy threshold for the Photon Russian Roulette"};
+      Gaudi::Property<double> m_russianRoulettePhotonWeight{this, "PRRWeight", -1.,
+          "Weight for the Photon Russian Roulette"};
+      Gaudi::Property<bool> m_isISFJob{this, "IsISFJob", false, ""};
 
       /// Use the debug version of the stacking action
-      bool m_useDebugAction;
+      Gaudi::Property<bool> m_useDebugAction{this, "UseDebugAction", false};
 
   }; // class AthenaStackingActionTool
 

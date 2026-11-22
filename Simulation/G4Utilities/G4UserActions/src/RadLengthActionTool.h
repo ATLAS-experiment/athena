@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4USERACTIONS_G4UA__RADLENGTHACTIONTOOL_H
@@ -24,8 +24,7 @@ namespace G4UA{
 
   public:
 
-    /// standard tool ctor
-    RadLengthActionTool(const std::string& type, const std::string& name,const IInterface* parent);
+    using UserActionToolBase<RadLengthAction>::UserActionToolBase;
 
   protected:
 
@@ -36,7 +35,7 @@ namespace G4UA{
   private:
 
     /// holds the python configuration
-    RadLengthAction::Config m_config;
+    Gaudi::Property<int> m_volumeDepthLevel{this, "VolumeDepthLevel", 1, "Depth of volume, how many daughters should be taken into account"};
 
   }; // class RadLengthActionTool
 

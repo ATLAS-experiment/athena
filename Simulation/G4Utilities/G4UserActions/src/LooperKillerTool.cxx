@@ -1,26 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LooperKillerTool.h"
 
 namespace G4UA
 {
-
-  //---------------------------------------------------------------------------
-  // Constructor
-  //---------------------------------------------------------------------------
-  LooperKillerTool::LooperKillerTool(const std::string& type, const std::string& name,
-                                 const IInterface* parent)
-    : UserActionToolBase<LooperKiller>(type, name, parent)
-  {
-    declareProperty("MaxSteps", m_config.MaxSteps);
-    declareProperty("PrintSteps",m_config.PrintSteps);
-    declareProperty("VerboseLevel", m_config.VerboseLevel);
-    declareProperty("AbortEvent", m_config.AbortEvent);
-    declareProperty("SetError", m_config.SetError);
-    declareProperty("BSM_Only", m_config.BSM_Only);
-  }
 
   //---------------------------------------------------------------------------
   // Initialize - temporarily here for debugging
@@ -41,11 +26,11 @@ namespace G4UA
                          &LooperKiller::Report::merge);
 
     ATH_MSG_INFO( "******* Report from "<< name()<< " *******");
-    ATH_MSG_INFO(" Set to kill tracks over " << m_config.MaxSteps << " steps");
-    ATH_MSG_INFO(" and give " << m_config.PrintSteps << " steps of verbose output");
+    ATH_MSG_INFO(" Set to kill tracks over " << m_maxSteps.value() << " steps");
+    ATH_MSG_INFO(" and give " << m_printSteps.value() << " steps of verbose output");
     ATH_MSG_INFO(" We killed " << report.killed_tracks << " tracks this run.");
-    ATH_MSG_INFO(" Was set to " << (m_config.AbortEvent?"":"not ") << "abort events and ");
-    ATH_MSG_INFO( (m_config.SetError?"":"not ") << "set an error state." );
+    ATH_MSG_INFO(" Was set to " << (m_abortEvent?"":"not ") << "abort events and ");
+    ATH_MSG_INFO( (m_setError?"":"not ") << "set an error state." );
 
     return StatusCode::SUCCESS;
   }
@@ -58,7 +43,14 @@ namespace G4UA
   LooperKillerTool::makeAndFillAction(G4AtlasUserActions& actionList)
   {
     ATH_MSG_DEBUG("Making a LooperKiller action");
-    auto action =  std::make_unique<LooperKiller>(m_config);
+    LooperKiller::Config config;
+    config.MaxSteps = m_maxSteps;
+    config.PrintSteps = m_printSteps;
+    config.VerboseLevel = m_verboseLevel;
+    config.AbortEvent = m_abortEvent;
+    config.SetError = m_setError;
+    config.BSM_Only = m_bsmOnly;
+    auto action =  std::make_unique<LooperKiller>(config);
     actionList.steppingActions.push_back( action.get() );
     return action;
   }

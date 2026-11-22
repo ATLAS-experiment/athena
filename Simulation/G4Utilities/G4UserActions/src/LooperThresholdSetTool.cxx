@@ -1,24 +1,11 @@
 /*
-   Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "LooperThresholdSetTool.h"
 
 namespace G4UA
 {
-
-//---------------------------------------------------------------------------
-// Constructor
-//---------------------------------------------------------------------------
-LooperThresholdSetTool::LooperThresholdSetTool(const std::string& type, const std::string& name,
-                                               const IInterface* parent) :
-        UserActionToolBase<LooperThresholdSet>(type, name, parent),
-        m_config()
-{
-        declareProperty("WarningEnergy", m_config.WarningEnergy);
-        declareProperty("ImportantEnergy", m_config.ImportantEnergy);
-        declareProperty("NumberOfTrials", m_config.NumberOfTrials);
-}
 
 //---------------------------------------------------------------------------
 // Initialize - temporarily here for debugging
@@ -43,7 +30,11 @@ std::unique_ptr<LooperThresholdSet>
 LooperThresholdSetTool::makeAndFillAction(G4AtlasUserActions& actionList)
 {
         ATH_MSG_DEBUG("Making a LooperThresholdSet action");
-        auto action =  std::make_unique<LooperThresholdSet>(m_config);
+        LooperThresholdSet::Config config;
+        config.WarningEnergy = m_warningEnergy;
+        config.ImportantEnergy = m_importantEnergy;
+        config.NumberOfTrials = m_numberOfTrials;
+        auto action =  std::make_unique<LooperThresholdSet>(config);
         actionList.runActions.push_back( action.get() );
         return action;
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4USERACTIONS_G4UA__FASTIDKILLERTOOL_H
@@ -20,9 +20,7 @@ namespace G4UA
 
     public:
 
-      /// Standard constructor
-      FastIDKillerTool(const std::string& type, const std::string& name,
-                       const IInterface* parent);
+      using UserActionToolBase<FastIDKiller>::UserActionToolBase;
 
       virtual StatusCode finalize() override;
 
@@ -34,7 +32,10 @@ namespace G4UA
 
     private:
 
-      FastIDKiller::Config m_config;
+      Gaudi::Property<float> m_R{this, "R", 1150., "ID outer radius"};
+      Gaudi::Property<float> m_Z{this, "Z", 3490., "ID maximum Z coordinate"};
+      Gaudi::Property<float> m_energyCut{this, "energyCut", 100000000., "Energy threshold"};
+      Gaudi::Property<bool> m_isDalek{this, "isDalek", false, "Use FastIDKiller as DALEK (Domain Actuated Low Energy Killer)"};
 
   }; // class FastIDKillerTool
 

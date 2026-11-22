@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4USERACTIONS_G4UA__HITWRAPPERTOOL_H
@@ -20,9 +20,7 @@ namespace G4UA
 
     public:
 
-      /// Standard constructor
-      HitWrapperTool(const std::string& type, const std::string& name,
-                     const IInterface* parent);
+      using UserActionToolBase<HitWrapper>::UserActionToolBase;
 
     protected:
 
@@ -32,7 +30,7 @@ namespace G4UA
 
     private:
 
-      HitWrapper::Config m_config;
+      Gaudi::Property<float> m_time{this, "Time", 25.};
 
   }; // class HitWrapperTool
 

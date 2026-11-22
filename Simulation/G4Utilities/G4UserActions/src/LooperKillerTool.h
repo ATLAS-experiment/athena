@@ -1,12 +1,9 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4USERACTIONS_G4UA_LOOPERKILLERTOOL_H
 #define G4USERACTIONS_G4UA_LOOPERKILLERTOOL_H
-
-// System includes
-#include <string>
 
 // Infrastructure includes
 #include "G4AtlasTools/UserActionToolBase.h"
@@ -29,9 +26,7 @@ namespace G4UA
 
     public:
 
-      /// Standard constructor
-      LooperKillerTool(const std::string& type, const std::string& name,
-		       const IInterface* parent);
+      using UserActionToolBase<LooperKiller>::UserActionToolBase;
 
       virtual StatusCode initialize() override;
       virtual StatusCode finalize() override;
@@ -45,7 +40,12 @@ namespace G4UA
     private:
 
       /// Configuration parameters
-      G4UA::LooperKiller::Config m_config;
+      Gaudi::Property<int> m_maxSteps{this, "MaxSteps", 1000000};
+      Gaudi::Property<int> m_printSteps{this, "PrintSteps", 100};
+      Gaudi::Property<int> m_verboseLevel{this, "VerboseLevel", 1};
+      Gaudi::Property<bool> m_abortEvent{this, "AbortEvent", true};
+      Gaudi::Property<bool> m_setError{this, "SetError", false};
+      Gaudi::Property<bool> m_bsmOnly{this, "BSM_Only", false};
 
   }; // class LooperKillerTool
 
