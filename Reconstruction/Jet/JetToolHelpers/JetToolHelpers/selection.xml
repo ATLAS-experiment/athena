@@ -1,4 +1,5 @@
 <lcgdict>
+    <class name="JetHelper::FuncInput1D" />
     <class name="JetHelper::HistoInput1D" />
     <class name="JetHelper::HistoInput2D" />
     <class name="JetHelper::HistoInput3D" />

@@ -56,3 +56,13 @@ def HistoInputCfg(flags, Tname, inputFile, histName, varX, **kwargs):
     else:
         return CompFactory.JetHelper.HistoInput1D(tname, **kwargs)
  
+def FuncInputCfg(flags, Tname, varX, **FuncInputProperties):
+    """Provides Function reader.
+    Callers are expected to pass properties of FuncInput1D (Formula, Parameters, ...) as optional arguments
+    """
+    # setup the var tool to handle the input variable to the function:
+    varTool1 = VarToolCfg(flags, varX)
+    FuncInputProperties['varTool1'] = varTool1
+
+    tname = Tname+"_"+varTool1.Name
+    return CompFactory.JetHelper.FuncInput1D(tname, **FuncInputProperties)

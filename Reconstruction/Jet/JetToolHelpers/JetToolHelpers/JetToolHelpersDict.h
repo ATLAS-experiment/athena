@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETTOOLHELPERS_JETTOOLHELPERSDICT_H
@@ -9,6 +9,7 @@
 #define EIGEN_DONT_VECTORIZE
 #endif // __GCCXML__
 
+#include "JetToolHelpers/FuncInput1D.h"
 #include "JetToolHelpers/HistoInput1D.h"
 #include "JetToolHelpers/HistoInput2D.h"
 #include "JetToolHelpers/HistoInput3D.h"
