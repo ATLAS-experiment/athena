@@ -67,7 +67,7 @@ TEST(ProtocolConvertTest, ExecuteRequestConversion) {
   inputPayload.encoding = "inputEncoding";
   inputPayload.schema = "inputSchema";
   inputPayload.data = "inputData";
-  request.inputs.push_back(inputPayload);
+  request.inputs.push_back(std::move(inputPayload));
 
   // Set event id
   request.eventId.runNumber = 123;
@@ -124,7 +124,7 @@ TEST(ProtocolConvertTest, ExecuteReplyConversion) {
   outputPayload.encoding = "outputEncoding";
   outputPayload.schema = "outputSchema";
   outputPayload.data = "outputData";
-  reply.outputs.push_back(outputPayload);
+  reply.outputs.push_back(std::move(outputPayload));
 
   athremoteexec::v1::ExecuteReply protoReply;
   toProto(reply, protoReply);
@@ -154,13 +154,13 @@ TEST(ProtocolConvertTest, SequenceInfoConversion) {
   inputBoundary.key = "inputKey";
   inputBoundary.encoding = "inputEncoding";
   inputBoundary.schema = "inputSchema";
-  info.inputs.push_back(inputBoundary);
+  info.inputs.push_back(std::move(inputBoundary));
 
   BoundaryInfo outputBoundary;
   outputBoundary.key = "outputKey";
   outputBoundary.encoding = "outputEncoding";
   outputBoundary.schema = "outputSchema";
-  info.outputs.push_back(outputBoundary);
+  info.outputs.push_back(std::move(outputBoundary));
 
   athremoteexec::v1::SequenceInfo protoInfo;
   toProto(info, protoInfo);

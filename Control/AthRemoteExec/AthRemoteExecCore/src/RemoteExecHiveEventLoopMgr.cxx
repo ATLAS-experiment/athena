@@ -323,13 +323,12 @@ void RemoteExecHiveEventLoopMgr::drainPending() {
     leftover.swap(m_incoming);
     uncollected.swap(m_finishedEvents);
   }
-
+  const std::string msgStr{"the server stopped before this request was served"};
   for (const std::unique_ptr<Server::Job>& job : leftover) {
     // Reply to clients so they won't stay stuck waiting
     ATH_MSG_WARNING("Request {} ({}) was still queued when the loop stopped",
                     job->request.requestId, job->request.sequence);
-    respondDirect(job->request, job, AthRemoteExec::Status::ShuttingDown,
-                  "the server stopped before this request was served");
+    respondDirect(job->request, job, AthRemoteExec::Status::ShuttingDown, msgStr);
   }
 
   // Destroy finished events

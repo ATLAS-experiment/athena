@@ -238,7 +238,7 @@ int main(int argc, const char* argv[]) {
     check(stub->ListSequences(&context, request, &reply).ok(),
           "ListSequences succeeds");
 
-    std::set<std::string> offered;
+    std::set<std::string, std::less<>> offered;
     for (const athremoteexec::v1::SequenceInfo& info : reply.sequences()) {
       offered.insert(info.name());
       if (info.name() == "RemoteExecSeqChain") {
@@ -302,9 +302,10 @@ int main(int argc, const char* argv[]) {
                chain.has_value() && *chain == i + 110 &&
                replies[i].request_id() == static_cast<uint64_t>(100 + i);
     }
+    const std::string totalStr{"total"};
+    const std::string sumStr{"sum"};
     for (int i = 0; i < nSum; ++i) {
-      const std::optional<int64_t> sum =
-          intOf(replies[nChain + i], "total", "sum");
+      const std::optional<int64_t> sum = intOf(replies[nChain + i], totalStr, sumStr);
       allOk &=
           replies[nChain + i].status() == athremoteexec::v1::STATUS_OK &&
           sum.has_value() && *sum == i + 1000 &&
