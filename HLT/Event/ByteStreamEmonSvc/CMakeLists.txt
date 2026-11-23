@@ -7,11 +7,13 @@ atlas_subdir( ByteStreamEmonSvc )
 find_package( Boost COMPONENTS regex unit_test_framework )
 find_package( tdaq COMPONENTS emon ohroot owl is omniORB4 omnithread oh )
 find_package( ROOT COMPONENTS Hist )
+find_package( tdaq-common COMPONENTS eformat webdaq webdaq-noroot )
+find_package( nlohmann_json )
 
 # Component(s) in the package:
 atlas_add_component( ByteStreamEmonSvc
                      src/*.cxx src/components/*.cxx
-                     INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${TDAQ-COMMON_INCLUDE_DIRS} ${TDAQ_INCLUDE_DIRS}
+                     INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${TDAQ-COMMON_INCLUDE_DIRS} ${TDAQ_INCLUDE_DIRS} nlohmann_json::nlohmann_json
                      LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} ${TDAQ-COMMON_LIBRARIES} ${TDAQ_LIBRARIES} AthenaBaseComps ByteStreamData CxxUtils GaudiKernel StoreGateLib PersistentDataModel ByteStreamCnvSvcBaseLib xAODEventInfo TrigConfData )
 
 # Install files from the package:
