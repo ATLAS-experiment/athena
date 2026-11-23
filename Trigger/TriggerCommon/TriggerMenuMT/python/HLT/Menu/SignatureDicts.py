@@ -168,7 +168,7 @@ JetChainParts = {
     'recoAlg'      : # Jet clustering algorithm
       ['a2', 'a4', 'a10', 'a10r', 'a10t', 'a10sd'],
     'constitType'  : # Jet input type
-      ['tc','pf'], # 'ufo' might be added at some point
+      ['tc','pf','ufo'],
     'clusterCalib' : # Topocluster calibration
       ['em', 'lcw'],
     'constitMod'   : # Constituent modifiers

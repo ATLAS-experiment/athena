@@ -18,6 +18,7 @@ from .Physics_pp_run4 import ( SingleTauGroup,
                                   SupportPhIGroup,
                                   MultiJetGroup,
                                   MultiBjetGroup,
+                                  SingleJetGroup,
                                 )
 
 DevGroup = ['Development']
@@ -52,6 +53,8 @@ def getDevSignatures():
         ChainProp(name='EF_j0_pf_ftf_preselHZ208MAXMULT20cXX6c20_L14jJ40', l1SeedThresholds=['FSNOSEED'], groups=MultiJetGroup+DevGroup),
         ChainProp(name='EF_j0_pf_ftf_preselHZ177MAXMULT20cXX6c20_L14jJ40', l1SeedThresholds=['FSNOSEED'], groups=MultiJetGroup+DevGroup),
         ChainProp(name='EF_j0_pf_ftf_preselHZ152MAXMULT20cXX6c20_L14jJ40', l1SeedThresholds=['FSNOSEED'], groups=MultiJetGroup+DevGroup),
+        # Large-R UFO jets
+        ChainProp(name='EF_j460C_a10sd_cssk_ufo_nojcalib_ftf_preselj225_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup)
     ]
     
     chains['Bjet'] = [
