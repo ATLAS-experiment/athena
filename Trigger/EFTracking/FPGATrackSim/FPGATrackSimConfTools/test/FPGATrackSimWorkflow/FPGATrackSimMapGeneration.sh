@@ -17,6 +17,7 @@ python -m FPGATrackSimConfTools.FPGATrackSimMapMakerConfig \
     KeyString="plane 0" \
     GeoModel.AtlasVersion=${GEO_TAG} \
     IOVDb.GlobalTag=${conditions} \
+    Acts.TrackingGeometry.UseBlueprint=False \
     --evtMax=200
 }
 

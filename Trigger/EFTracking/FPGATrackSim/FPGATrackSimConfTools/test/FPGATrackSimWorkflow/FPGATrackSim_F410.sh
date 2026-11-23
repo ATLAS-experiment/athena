@@ -53,7 +53,8 @@ python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
     Trigger.FPGATrackSim.outputMonitorFile="monitoring_${TEST_LABEL}.root" \
     Trigger.FPGATrackSim.doOverlapRemoval=True \
     Trigger.FPGATrackSim.writeOfflPRDInfo=True \
-    Trigger.FPGATrackSim.writeAdditionalOutputData=False
+    Trigger.FPGATrackSim.writeAdditionalOutputData=False \
+    Acts.TrackingGeometry.UseBlueprint=False
 }
 run_F410
 if [ -z $ArtJobType ];then # skip file check for ART (this has already been done in CI)

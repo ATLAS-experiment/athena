@@ -32,7 +32,8 @@ run_LayerStudyFirst(){
         Trigger.FPGATrackSim.GenScan.rin=30 \
         Trigger.FPGATrackSim.GenScan.rout=300 \
         Trigger.FPGATrackSim.GenScan.parMin="[-1000, -1000, 0.0, 0.0, -10]" \
-        Trigger.FPGATrackSim.GenScan.parMax="[1000, 1000, 1.0, 1.0, 10]"
+        Trigger.FPGATrackSim.GenScan.parMax="[1000, 1000, 1.0, 1.0, 10]" \
+        Acts.TrackingGeometry.UseBlueprint=False
 }
 
 echo "... Running ${TEST_LABEL} analysis"
