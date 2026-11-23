@@ -34,6 +34,7 @@ namespace xAOD{
             }
             /** @brief Destructor */
             ~ContainerDecorator()  {
+                //coverity[UNCAUGHT_EXCEPT]
                 initDefault();
             }
             /** @brief Default move constructor */

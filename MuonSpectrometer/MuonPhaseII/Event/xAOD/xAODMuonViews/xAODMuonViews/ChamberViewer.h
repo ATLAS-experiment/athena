@@ -85,7 +85,7 @@ namespace xAOD{
                     m_container{container},
                     m_idHelperSvc{idHelperSvc},
                     m_mode{mode} {                   
-                    next();
+                    std::ignore = next();
                 }
                 /** @brief Delete the copy constructor */
                 ChamberViewer(const ChamberViewer& other) = delete;

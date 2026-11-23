@@ -4,7 +4,6 @@
 #ifndef MUONSPACEPOINT_MUONSPACEPOINTHELPERS_ICC
 #define MUONSPACEPOINT_MUONSPACEPOINTHELPERS_ICC
 
-#include "MuonSpacePoint/SpacePointHelpers.h"
 
 #include <sstream>
 
