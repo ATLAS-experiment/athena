@@ -808,6 +808,7 @@ namespace {
 
       if constexpr (std::is_same_v<T, xAOD::CaloCluster>) {
         if (auto getter = getterFromCaloClusters(name)){
+          if (name == "usedInChargedFlow") return {*getter, {name}};
           return {*getter, {}};
         }
       }

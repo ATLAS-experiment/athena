@@ -22,6 +22,7 @@ namespace FlavorTagInference {
     ATH_CHECK(m_constituentKey.initialize(!m_constituentKey.empty()));
     ATH_CHECK(m_electronKey.initialize(!m_electronKey.empty()));
     ATH_CHECK(m_muonKey.initialize(!m_muonKey.empty()));
+    ATH_CHECK(m_caloClusterKey.initialize(!m_caloClusterKey.empty()));
 
     ATH_CHECK(m_decorator.retrieve());
 
@@ -89,6 +90,19 @@ namespace FlavorTagInference {
       ATH_MSG_DEBUG("Adding muon accessor: " + full);
       m_muonAux.emplace_back(this, key, full, "");
       ATH_CHECK(m_muonAux.back().initialize());
+    }
+    // calo cluster inputs
+    size_t n_calo_inputs = deps.caloClusterInputs.size();
+    if (n_calo_inputs > 0 && m_caloClusterKey.empty()) {
+      ATH_MSG_ERROR("using calo clusters without defining the input container");
+      return StatusCode::FAILURE;
+    }
+    m_caloClusterAux.reserve(n_calo_inputs);
+    for (const std::string& key: deps.caloClusterInputs) {
+      const std::string full = m_caloClusterKey.key() + "." + key;
+      ATH_MSG_DEBUG("Adding calo cluster accessor: " + full);
+      m_caloClusterAux.emplace_back(this, key, full, "");
+      ATH_CHECK(m_caloClusterAux.back().initialize());
     }
     // jet outputs
     std::set<std::string> keys = deps.bTagOutputs;

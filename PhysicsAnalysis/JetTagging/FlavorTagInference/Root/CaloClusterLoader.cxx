@@ -36,6 +36,7 @@ namespace FlavorTagInference {
         m_seqGetter(getter_utils::SeqGetter<xAOD::CaloCluster>(
           cfg.inputs, options))
     {
+        m_deps.caloClusterInputs = m_seqGetter.getDependencies();
         m_used_remap = m_seqGetter.getUsedRemap();
         m_name = cfg.name;
         m_skipInvalidLinks = options.skip_invalid_links;
@@ -94,7 +95,9 @@ namespace FlavorTagInference {
         }
 
         // Sort by pt descending
-        std::sort(clusters.begin(), clusters.end(), std::greater<>());
+        // keep the link order for equal pt, the pointer order is not reproducible
+        std::stable_sort(clusters.begin(), clusters.end(),
+                         [](const auto& a, const auto& b) { return a.first > b.first; });
 
         CaloClusters sorted_clusters;
         sorted_clusters.reserve(clusters.size());

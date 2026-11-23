@@ -62,7 +62,9 @@ namespace FlavorTagInference {
         for (const xAOD::FlowElement *p : m_associator(jet)) {
           particles.push_back({m_flowElementSortVar(p, jet), p});
         }
-        std::sort(particles.begin(), particles.end(), std::greater<>());
+        // keep the link order for equal pt, the pointer order is not reproducible
+        std::stable_sort(particles.begin(), particles.end(),
+                         [](const auto& a, const auto& b) { return a.first > b.first; });
         std::vector<const xAOD::FlowElement*> only_particles;
         for (const auto& particle: particles) {
           only_particles.push_back(particle.second);
