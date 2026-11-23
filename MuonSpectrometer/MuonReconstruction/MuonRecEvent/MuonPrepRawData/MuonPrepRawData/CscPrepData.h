@@ -25,7 +25,6 @@
 
 #include<vector>
 
-class CscPrepDataContainerCnv;
 
 namespace Muon
 {
@@ -43,7 +42,6 @@ class CscPrepData final:   public MuonCluster
   // /////////////////////////////////////////////////////////////////
  public:
 
-  friend class ::CscPrepDataContainerCnv;
   friend class Muon::CscPrepDataContainerCnv_p1;
 
   CscPrepData();
