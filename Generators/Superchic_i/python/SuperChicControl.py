@@ -14,6 +14,10 @@ class SuperChicControl:
         strictGridpack  : treat differences in input.DAT (other than iseed and nev)
                           between the gridpack and this job as errors
         """
+        self.gridpack = gridpack
+        self.makeGridpack = makeGridpack
+        self.strictGridpack = strictGridpack
+
         # Create the `SuperChicConfig` instance used to run SuperChic
         from Superchic_i.SuperChicUtils import SuperChicConfig
         self.scConfig = SuperChicConfig()
@@ -22,10 +26,10 @@ class SuperChicControl:
         self.scConfig.from_dict(Config)
         print(self.scConfig.toFortran())
 
+    def initialize(self):
         # Create SuperChic run card
         self.scConfig.writeInputDAT()
 
-    def initialize(self):
         # Run SuperChic internal initialization script
         self.scConfig.prepareGrids(gridpack=self.gridpack, makeGridpackFile=self.makeGridpack, strict=self.strictGridpack)
 
