@@ -69,6 +69,7 @@ namespace Rec{
       Gaudi::Property<float> m_sel2VrtProbCut{this, "Sel2VrtProbCut",  0.02, "Cut on probability of 2-track vertex for initial selection"  };
       Gaudi::Property<float> m_maxSVRadiusCut{this, "MaxSVRadiusCut",  140., "Cut on maximal radius of SV (def = Pixel detector size)"  };
       Gaudi::Property<float> m_cosSVPVCut{this,     "cosSVPVCut",        0., "Cut on cos of angle between SV-PV and full vertex momentum"  };
+      Gaudi::Property<float> m_twoTrkVtxFormingD0Cut{this, "TwoTrkVtxFormingD0Cut", 0.0,  "Minimum d0 for >=1 track forming 2-track vertices"  };
       //
       //-- Pixel geometry based 2-track vertex cleaning cuts
       Gaudi::Property<bool> m_do2TrkIBLChecks  {this, "do2TrkIBLChecks",   true, "IBL and B-layer hit requrirements based on the position of 2-track DV." };
