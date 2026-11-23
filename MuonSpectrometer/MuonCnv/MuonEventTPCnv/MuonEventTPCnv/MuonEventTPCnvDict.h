@@ -30,7 +30,6 @@
 #include "MuonEventTPCnv/TgcCoinDataContainer_tlp2.h"
 #include "MuonEventTPCnv/TgcCoinDataContainer_tlp3.h"
 #include "MuonEventTPCnv/MuonPrepRawData/MdtTwinPrepData_p1.h"
-#include "MuonEventTPCnv/MuonChamberT0s/ChamberT0s_p1.h"
 #include "MuonEventTPCnv/MuonDigitContainer/MuonSimDataCollection_p1.h"
 #include "MuonEventTPCnv/MuonDigitContainer/MuonSimDataCollection_p2.h"
 #include "MuonEventTPCnv/MuonDigitContainer/MuonSimDataCollection_p3.h"
