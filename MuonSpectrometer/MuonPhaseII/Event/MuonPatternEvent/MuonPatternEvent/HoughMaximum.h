@@ -1,13 +1,14 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONR4_MUONPATTERNRECOGNITION_HOUGHMAXIMUM__H
 #define MUONR4_MUONPATTERNRECOGNITION_HOUGHMAXIMUM__H
-#include <vector>
 
 #include "MuonSpacePoint/SpacePointContainer.h"
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
+#include <vector>
+#include <utility>
 
 namespace MuonR4 {
 /// @brief Data class to represent an eta maximum in hough space.
@@ -26,7 +27,7 @@ class HoughMaximum {
         m_tanBeta{tanBeta}, 
         m_interceptY{interceptY}, 
         m_counts{counts}, 
-        m_hitsInMax{hits},
+        m_hitsInMax{std::move(hits)},
         m_bucket{bucket} {}
     /// @brief default c-tor, creates empty maximum with zero counts in the
     /// origin
