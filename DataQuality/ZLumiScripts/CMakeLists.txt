@@ -4,7 +4,7 @@
 atlas_subdir( ZLumiScripts )
 
 # External dependencies:
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
 
 # Install files from the package:
 atlas_install_scripts( scripts/*.py scripts/Pandas_scripts/*py scripts/Pandas_scripts/plotting/dqt_csv_luminosity.sh )

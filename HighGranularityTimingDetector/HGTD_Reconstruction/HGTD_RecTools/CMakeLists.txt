@@ -3,7 +3,7 @@
 # Declare the package name:
 atlas_subdir( HGTD_RecTools )
 
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
 
 # Component(s) in the package:
 atlas_add_component( HGTD_RecTools

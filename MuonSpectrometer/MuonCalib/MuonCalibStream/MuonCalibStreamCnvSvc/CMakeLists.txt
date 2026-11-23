@@ -5,7 +5,7 @@ atlas_subdir( MuonCalibStreamCnvSvc )
 
 # External dependencies:
 find_package( CORAL COMPONENTS CoralBase CoralKernel RelationalAccess )
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
 find_package( tdaq-common COMPONENTS MuCalDecode EventStorage )
 
 # Component(s) in the package:

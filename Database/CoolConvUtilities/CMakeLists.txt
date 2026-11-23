@@ -6,7 +6,7 @@ atlas_subdir( CoolConvUtilities )
 # External dependencies:
 find_package( COOL COMPONENTS CoolKernel CoolApplication )
 find_package( CORAL COMPONENTS CoralBase CoralKernel RelationalAccess )
-find_package( ROOT COMPONENTS Hist Tree RIO Core MathCore pthread )
+find_package( ROOT COMPONENTS Hist Tree RIO Core MathCore )
 find_package( CURL )
 find_package( nlohmann_json )
 

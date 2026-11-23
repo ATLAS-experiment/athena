@@ -12,7 +12,7 @@ find_package( numpy )
 find_package( pandas )
 find_package( sqlalchemy )
 find_package( zipp )
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
 
 # Component(s) in the package:
 atlas_add_component( PerfMonComps

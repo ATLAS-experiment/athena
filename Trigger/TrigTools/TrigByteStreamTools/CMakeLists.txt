@@ -8,7 +8,7 @@ atlas_subdir( TrigByteStreamTools )
 # External dependencies:
 #Needed as dependency by TDAQ
 find_package( Boost )
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
 find_package( tdaq-common COMPONENTS CTPfragment eformat eformat_write DataReader DataWriter )
 
 # Component(s) in the package:

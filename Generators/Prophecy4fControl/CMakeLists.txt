@@ -6,7 +6,7 @@
 atlas_subdir( Prophecy4fControl )
 
 # External dependencies:
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread MathMore Minuit Minuit2 Matrix Physics HistPainter Rint )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO MathMore Minuit Minuit2 Matrix Physics HistPainter Rint )
 
 find_package( Prophecy4f )
 find_package( Pythia8 )

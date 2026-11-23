@@ -4,7 +4,7 @@
 atlas_subdir( DerivationFrameworkInDet )
 
 # External dependencies:
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
 
 # Component(s) in the package:
 atlas_add_component( DerivationFrameworkInDet

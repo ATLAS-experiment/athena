@@ -6,7 +6,7 @@
 atlas_subdir( Hto4lControl )
 
 # External dependencies:
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread MathMore Minuit Minuit2 Matrix Physics HistPainter Rint )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO MathMore Minuit Minuit2 Matrix Physics HistPainter Rint )
 find_package( Hto4l )
 # find_package( Powheg )
 find_package( Pythia8 )

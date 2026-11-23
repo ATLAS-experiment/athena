@@ -8,7 +8,7 @@ atlas_subdir( RingerSelectorTools )
 
 # External dependencies:
 
-find_package( ROOT COMPONENTS Core Gpad Tree MathCore Hist RIO pthread )
+find_package( ROOT COMPONENTS Core Gpad Tree MathCore Hist RIO )
 find_package( onnxruntime )
 
 

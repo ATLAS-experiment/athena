@@ -6,7 +6,7 @@
 atlas_subdir( D3PDMakerRoot )
 
 # External dependencies:
-find_package( ROOT COMPONENTS RIO Tree Core MathCore Hist pthread )
+find_package( ROOT COMPONENTS RIO Tree Core MathCore Hist )
 
 # Component(s) in the package:
 atlas_add_component( D3PDMakerRoot

@@ -4,7 +4,7 @@
 atlas_subdir( AFP_Calibration )
 find_package( Boost COMPONENTS program_options)
 
-find_package( ROOT COMPONENTS MathCore Core Tree Hist RIO pthread )
+find_package( ROOT COMPONENTS MathCore Core Tree Hist RIO )
 
 atlas_add_library( AFP_CalibrationLib
                    src/*.cxx

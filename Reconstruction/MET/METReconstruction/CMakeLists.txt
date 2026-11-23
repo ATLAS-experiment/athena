@@ -4,7 +4,7 @@
 atlas_subdir( METReconstruction )
 
 # External dependencies:
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
 
 include_directories(src)
 

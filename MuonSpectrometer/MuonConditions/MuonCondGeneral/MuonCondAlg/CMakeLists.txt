@@ -5,7 +5,7 @@ atlas_subdir( MuonCondAlg )
 
 # External dependencies:
 find_package( CORAL COMPONENTS CoralBase CoralKernel RelationalAccess )
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
 find_package( nlohmann_json )
                    
 atlas_add_component( MuonCondAlg

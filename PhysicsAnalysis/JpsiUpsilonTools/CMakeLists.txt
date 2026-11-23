@@ -7,7 +7,7 @@ atlas_subdir( JpsiUpsilonTools )
 
 # External dependencies:
 find_package( CLHEP )
-find_package( ROOT COMPONENTS Core MathCore pthread )
+find_package( ROOT COMPONENTS Core MathCore )
 
 # Component(s) in the package:
 atlas_add_library( JpsiUpsilonToolsLib

@@ -7,7 +7,7 @@ atlas_subdir( TileCalibBlobObjs )
 
 # External dependencies:
 find_package( CORAL COMPONENTS CoralBase CoralKernel RelationalAccess )
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
 
 # tag NEEDS_CORAL_BASE was not recognized in automatic conversion in cmt2cmake
 

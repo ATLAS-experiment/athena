@@ -5,7 +5,7 @@ atlas_subdir( LArCondTools )
 
 # External dependencies:
 find_package( CORAL COMPONENTS CoralBase )
-find_package( ROOT COMPONENTS Core Tree RIO pthread )
+find_package( ROOT COMPONENTS Core Tree RIO )
 
 # Component(s) in the package:
 atlas_add_component( LArCondTools

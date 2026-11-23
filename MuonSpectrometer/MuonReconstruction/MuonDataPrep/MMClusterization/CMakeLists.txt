@@ -6,7 +6,7 @@
 atlas_subdir( MMClusterization )
 
 # External dependencies:
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread Matrix Minuit Minuit2)
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO Matrix Minuit Minuit2)
 
 # Component(s) in the package:
 atlas_add_library( MMClusterizationLib

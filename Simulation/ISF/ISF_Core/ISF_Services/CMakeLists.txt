@@ -7,7 +7,7 @@ atlas_subdir( ISF_Services )
 find_package( CLHEP )
 find_package( GTest )
 find_package( GMock )
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
 
 # Component(s) in the package:
 atlas_add_library( ISF_Services

@@ -6,7 +6,7 @@ atlas_subdir( ISF_PunchThroughTools )
 # External dependencies:
 find_package( CLHEP )
 find_package( Eigen )
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
 find_package( lwtnn )
 
 

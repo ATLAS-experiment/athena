@@ -7,7 +7,7 @@ atlas_subdir( MuonLinearSegmentMakerUtilities )
 
 # External dependencies:
 find_package( GSL )
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
 
 # Component(s) in the package:
 atlas_add_library( MuonLinearSegmentMakerUtilities

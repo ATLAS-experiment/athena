@@ -4,7 +4,7 @@
 atlas_subdir( InDetPhysValMonitoring )
 
 # External dependencies:
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread EG )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO EG )
 find_package( Boost COMPONENTS unit_test_framework )
 find_package( XercesC )
 

@@ -4,7 +4,7 @@
 atlas_subdir( InDetTrackPerfMon )
 
 # External dependencies:
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread EG )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO EG )
 find_package( nlohmann_json )
 
 # Component(s) in the package:

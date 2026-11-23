@@ -7,7 +7,7 @@ atlas_subdir( TrackRecord )
 
 # External dependencies:
 find_package( CLHEP )
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
 
 atlas_add_library( TrackRecordLib
                    TrackRecord/*.h

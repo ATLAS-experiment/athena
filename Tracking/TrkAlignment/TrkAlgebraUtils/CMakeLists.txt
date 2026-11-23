@@ -7,7 +7,7 @@ atlas_subdir( TrkAlgebraUtils )
 find_package( BLAS )
 find_package( LAPACK )
 find_package( Eigen )
-find_package( ROOT COMPONENTS Core Matrix Tree MathCore Hist RIO pthread )
+find_package( ROOT COMPONENTS Core Matrix Tree MathCore Hist RIO )
 
 # Component(s) in the package:
 atlas_add_library( TrkAlgebraUtils

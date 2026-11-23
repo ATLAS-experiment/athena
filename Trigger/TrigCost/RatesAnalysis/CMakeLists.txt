@@ -4,7 +4,7 @@
 atlas_subdir( RatesAnalysis )
 
 # External dependencies:
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
 
 # Package library:
 atlas_add_library( RatesAnalysisLib
