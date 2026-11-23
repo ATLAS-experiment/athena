@@ -216,11 +216,12 @@ double BTaggingLargeRSelectionJsonTool::getTaggerDiscriminantInternal(const xAOD
 
     // Smallest positive normal float; below this, reciprocals may overflow.
     const float ep = std::numeric_limits<float>::min();
+    // Return the maximal positive or lowest negative finite float numbers for edge cases 
     //coverity[DIVIDE_BY_ZERO]
-    const float ratio = (std::abs(denominator) < ep ? std::numeric_limits<float>::infinity() : numerator / denominator);
-    const double tagger_discriminant = (std::abs(ratio) < ep ? -std::numeric_limits<double>::infinity() : std::log( ratio ));
+    const float ratio = (std::abs(denominator) < ep ? std::numeric_limits<float>::max() : numerator / denominator);
+    const double tagger_discriminant = (std::abs(ratio) < ep ? std::numeric_limits<double>::lowest() : std::log( ratio ));
 
-    return tagger_discriminant;    
+    return tagger_discriminant;
 }
 
 double BTaggingLargeRSelectionJsonTool::getTaggerDiscriminant(const xAOD::Jet& jet) const

@@ -12,7 +12,6 @@
 #include <functional>
 #include <limits>
 #include <map>
-#include <ostream>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -83,22 +82,53 @@ class BTaggingBoundsHandler {
         }
       }
     }
-    
-    protected:
-      // Pointer to the function used to retrieve the jet values to compare to the bounds
-      JetQuantityGetter *m_funcGetJetQuantity = nullptr;
 
-      // Structure for storing a min and max value for a given variable
-      // The varBounds structure also defines an ordering
-      // which allows to sort bins in increasing or decreasing order basically
-      // Finally an overlap function allows to check if two varBounds have some overlap
-      struct varBounds {
-        float lowerBound = std::numeric_limits<float>::lowest();
-        float upperBound = std::numeric_limits<float>::max();
-
+    // Class for storing a min and max value for a given variable
+    // The varBounds structure also defines an ordering
+    // which allows to sort bins in increasing or decreasing order basically
+    // Finally an overlap function allows to check if two varBounds have some overlap
+    class varBounds {
+      private: 
+        float m_lowerBound = std::numeric_limits<float>::lowest();
+        float m_upperBound = std::numeric_limits<float>::max();
         // Epsilon value to compare lowerBound and upperBound values
-        // This value can be changed if needed when initializing the structure
-        float varEps = 1.e-6f;
+        float m_varEps = 1.e-6f;
+
+      public:
+        // Default constructor
+        varBounds() = default;
+        // Real constructor
+        varBounds(const float lowerBound, const float upperBound, const float varEps = 1.e-6f){
+          m_lowerBound = lowerBound; 
+          m_upperBound = upperBound;
+          m_varEps = varEps;
+
+          // Make sure that lowerBound and upperBound are not NaNs or infinite float 
+          // In this way the minimal and maximal values that lowerBound and upperBound can take 
+          // are std::numeric_limits<float>::lowest() and std::numeric_limits<float>::max()
+          if (!std::isfinite(m_lowerBound)){
+            throw std::runtime_error("varBounds requires a finite lower bound but got lowerBound=" + std::to_string(m_lowerBound));
+          }
+          if (!std::isfinite(m_upperBound)){
+            throw std::runtime_error("varBounds requires a finite upper bound but got upperBound=" + std::to_string(m_upperBound));
+          }
+
+          // Make sure that lowerBound < upperBound 
+          // !(a < b) also catches NaN 
+          if (!(m_lowerBound < m_upperBound)) {
+            throw std::runtime_error( "varBounds requires lowerBound < upperBound but got lowerBound=" + std::to_string(m_lowerBound) + " and upperBound=" + std::to_string(m_upperBound));
+          }
+          // Make sure varEps is positive 
+          if (!(m_varEps >= 0.f) || !std::isfinite(m_varEps)) {
+            throw std::runtime_error("varBounds requires a finite varEps and varEps >=0 but got varEps=" + std::to_string(m_varEps));
+          }
+        }
+        // Copy construction
+        varBounds(const varBounds&) = default;
+
+        float getLowerBound() const { return m_lowerBound; }
+        float getUpperBound() const { return m_upperBound; }
+        float getVarEpsilon() const { return m_varEps; }
 
         // Two half-open intervals [low, high) overlap if each one starts before the other ends.
         // Touching edges (upper = other lower) are not considered overlapping.
@@ -106,12 +136,12 @@ class BTaggingBoundsHandler {
 
         // Define an ordering of varBounds compare first lowerBound then upperBound
         // within tolerance
-        bool operator<(const varBounds& o) const;
-        bool operator>(const varBounds& o) const { return o < *this; }
+        bool operator<(const varBounds& oBounds) const;
+        bool operator>(const varBounds& oBounds) const { return oBounds < *this; }
         // Define also equal and not equal operator within tolerance
-        bool operator==(const varBounds& o) const;
-        bool operator!=(const varBounds& o) const { return !(*this == o); }
-
+        bool operator==(const varBounds& oBounds) const;
+        bool operator!=(const varBounds& oBounds) const { return !(*this == oBounds); }
+        
         // Comparison with a value
         // varBounds < value if the interval ends at or below the value
         // value < varBounds if the value is below the start of the interval
@@ -119,26 +149,59 @@ class BTaggingBoundsHandler {
         // This allows to look up a value in a std::map<varBounds, ..., std::less<>> using find(value)
         // provided the varBounds stored in the map are disjoint
         // Exact comparisons are used to be consistent with isJetWithinBounds
-        bool operator<(float value) const { return upperBound <= value; }
-        friend bool operator<(float value, const varBounds& b) { return value < b.lowerBound; }
+        // Special case: if upperBound = std::numeric_limits<float>::max() the interval is closed
+        // on the upper side i.e. [lowerBound, max] so that value == max is considered within bounds
+        bool operator<(const float value) const {
+          // Any NaN is ordered after every interval 
+          // so that NaN values are never considered within bounds
+          if (std::isnan(value)) { return true; }
+
+          // If the upper bound is the maximal value a float can take 
+          // then value is still considered within the bounds if equal to that max value 
+          if (m_upperBound == std::numeric_limits<float>::max()){
+            return m_upperBound < value;
+          }
+          // For regular cases the value is greater than varBounds
+          // if it is at least equal or greater to the upper bound of varBounds
+          return m_upperBound <= value;
+        }
+        friend bool operator<(const float value, const varBounds& vBounds) {
+          // The value is lower than the varBounds if value is strictly lower than the lower bound of varBounds
+          // if value == lowerBound then value is NOT lower than the varBounds
+          return value < vBounds.m_lowerBound; 
+        }
         // Greater than operators defined from the operators above 
         // varBounds > value if the value is below the start of the interval
         // value > varBounds if the interval ends at or below the value
-        bool operator>(float value) const { return value < *this; }
-        friend bool operator>(float value, const varBounds& b) { return b < value; }
-      };
+        bool operator>(const float value) const { return value < *this; }
+        friend bool operator>(const float value, const varBounds& vBounds) { return vBounds < value; }
+
+        bool isWithinBounds(const float value) const { 
+          // Use the operators defined above to ensure that 
+          // lowerBound <= value < upperBound 
+          // or lowerBound <= value <= upperBound if upperBound = std::numeric_limits<float>::max())
+          // Neither value is lower or greater than the bounds hence it falls 
+          // in the range [lowerBound, upperBound)
+          // or [lowerBound, upperBound] if upperBound = std::numeric_limits<float>::max()
+          return (!(*this < value) && !(value < *this)); 
+        }
+    };
+
+    protected:
+      // Pointer to the function used to retrieve the jet values to compare to the bounds
+      JetQuantityGetter *m_funcGetJetQuantity = nullptr;
 
       // Map that will contain the variable type and the bounds 
       std::map<BTaggingToolUtil::varType, varBounds> m_varBinBounds;
 
       // Ordering of handlers loop over variables as stored in the map
       // and let the first variable whose bounds differ decide of the ordering
-      bool operator<(const BTaggingBoundsHandler& o) const;
-      bool operator>(const BTaggingBoundsHandler& o) const { return o < *this; }
+      bool operator<(const BTaggingBoundsHandler& oBounds) const;
+      bool operator>(const BTaggingBoundsHandler& oBounds) const { return oBounds < *this; }
       // Define also equal and not equal operator
       // if neither is less than the other then handlers are equal
-      bool operator==(const BTaggingBoundsHandler& o) const { return !(*this < o) && !(*this > o); }
-      bool operator!=(const BTaggingBoundsHandler& o) const { return !(*this == o); }
+      bool operator==(const BTaggingBoundsHandler& oBounds) const { return !(*this < oBounds) && !(*this > oBounds); }
+      bool operator!=(const BTaggingBoundsHandler& oBounds) const { return !(*this == oBounds); }
 };
 
 #endif // BTAGGINGBOUNDSHANDLER_H

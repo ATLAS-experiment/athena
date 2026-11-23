@@ -150,7 +150,7 @@ std::string makeRegularBinsGrid(const std::vector<int>& pT, const std::vector<in
   return out;
 }
 
-int test1 ATLAS_NOT_THREAD_SAFE (int /* argc */ , char* /* argv */ [] ) {
+int test1DGrid ATLAS_NOT_THREAD_SAFE (int /* argc */ , char* /* argv */ [] ) {
   // Change type returned by the ANA_CHECK function in case of error 
   // NB: this is needed here because the main() function should return an integer
   // In principle you should NOT call this line for your regular code 
@@ -165,6 +165,164 @@ int test1 ATLAS_NOT_THREAD_SAFE (int /* argc */ , char* /* argv */ [] ) {
   POOL::Init();
   #endif
 
+  std::cout << "\n\n\n\n" << std::endl;
+  ANA_MSG_INFO("Starting test1DGrid");
+
+  // The handlers only store a pointer to the jet quantity getter
+  // so it must outlive all the handlers: it is created here and kept alive until the end of the test
+  // (it also ensures that all the handlers share the same getter as required to compare them)
+  std::unique_ptr<BTaggingBoundsHandler::JetQuantityGetter> funcGetJetQuantity = std::make_unique<BTaggingBoundsHandler::JetQuantityGetter>(&getJetQuantity);
+  
+  json jsonGridContiguousRegularBinning = json::parse(R"###({
+    "listBins": [
+      { "binVariables": { "pT": [20   ,   30    ] } },
+      { "binVariables": { "pT": [30   ,   50    ] } },
+      { "binVariables": { "pT": [50   ,   75    ] } },
+      { "binVariables": { "pT": [75   ,   100   ] } },
+      { "binVariables": { "pT": [100  ,   250   ] } },
+      { "binVariables": { "pT": [250  ,   500   ] } },
+      { "binVariables": { "pT": [500  ,   1000  ] } },
+      { "binVariables": { "pT": [1000 , "+fmax" ] } }
+    ]})###"
+  );
+
+  // Define an alias 
+  using GridBoundsHandlerUniquePtr = std::unique_ptr<BTaggingGridBoundsHandler<BTaggingBoundsHandler>>;
+
+  // Normal retrieval no error expected 
+  GridBoundsHandlerUniquePtr gridHandlerContiguousRegularBinning = getGriBoundsHandler( jsonGridContiguousRegularBinning, funcGetJetQuantity.get() );
+
+  std::vector<float> pTVec = { 
+    10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 25, 27.5, 35, 40, 45, 55, 70, 80, 90, 110, 150, 200, 400, 600, 800, 
+    1500, 10000, 1.e6, 1.e10
+  };
+
+  std::vector<float> pTSpecialValuesVec = {
+    std::numeric_limits<float>::max(),     // Still a valid float (it's the largest finite float number possible 
+    std::numeric_limits<float>::infinity(), // A value larger than any finite number 
+    std::numeric_limits<float>::quiet_NaN() // NaN value
+  };
+
+  // Min and Max values where the grid should be defined 
+  // Outside of the range no handler should be found 
+  const double pTMinGridValid = 20.;
+  const double pTMaxGridValid = std::numeric_limits<float>::max();
+
+  // Fix eta and phi of the jet 
+  const double etaJet = 0.;
+  const double phiJet = 0.;
+  const double massJet = 5;
+
+  xAOD::Jet jet;
+  jet.makePrivateStore();
+  
+  // Test first the normal values 
+  for (const float &pTJet : pTVec){
+    // Change the jet 4-momentum
+    // Reminder units should be MeV hence multiplying by 1000. the mass and the pT
+    jet.setJetP4(xAOD::JetFourMom_t(pTJet*1000., etaJet, phiJet, massJet*1000.));
+
+    // Print jet inforamtion 
+    ANA_MSG_INFO("test1DGrid checking bounds handlers for jet=" << getJetInfo(jet));
+    
+    // Retrieve the corresponding handlers
+    const BTaggingBoundsHandler* handlerContiguousRegularBinning = gridHandlerContiguousRegularBinning->getHandlerPtr(jet);
+    // // For debugging 
+    // if (handlerContiguousRegularBinning){
+    //   std::cout << "  --> handlerContiguousRegularBinning=" << (*handlerContiguousRegularBinning) << std::endl;
+    // }
+    // else { 
+    //   std::cout << "  --> No handlerContiguousRegularBinning for current jet" << std::endl;
+    // }
+
+    // The jet is within the valid grid i.e. if that boolean is true the handlers should NOT be null pointers
+    // except for handlerHole is the jet falls in the hole of the gridHandlerdHole
+    bool jetIsWithinValidGrid = ((jet.pt()/1000. >= pTMinGridValid) && (jet.pt()/1000 < pTMaxGridValid)); 
+
+    if (!handlerContiguousRegularBinning && jetIsWithinValidGrid){
+      // The handler is a null pointer
+      // If the handler is a null pointer while the jet is within the valid grid 
+      // it means there is a logical issue in the implementation of the BTaggingGridBoundsHandler class
+      throw std::runtime_error("handlerContiguousRegularBinning should never be a null pointer for a jet within the valid grid: jet=" + getJetInfo(jet));
+    }
+    
+    if (handlerContiguousRegularBinning && !jetIsWithinValidGrid){
+      // The handler is a null pointer
+      // If the handler is a null pointer while the jet is within the valid grid 
+      // it means there is a logical issue in the implementation of the BTaggingGridBoundsHandler class
+      throw std::runtime_error("handlerContiguousRegularBinning should be a null pointer for a jet outside of the valid grid: jet=" + getJetInfo(jet) + " and handlerContiguousRegularBinning=" + handlerContiguousRegularBinning->to_string());
+    }
+  
+    // Check that the jet is indeed falling in the handler that was returned by the grid 
+    // If that's not the case there is a logical in the implementation of the BTaggingGridBoundsHandler class 
+    if (handlerContiguousRegularBinning && !handlerContiguousRegularBinning->isJetWithinBounds(jet)){
+      throw std::runtime_error( "jet and handlerContiguousRegularBinning are not matching: jet=" +  getJetInfo(jet) + " and handlerContiguousRegularBinning=" + handlerContiguousRegularBinning->to_string() );
+    }
+  }
+
+
+  // Now check the very peculiar values 
+  for (const float &pTJet : pTSpecialValuesVec ){
+    // Change the jet 4-momentum
+    // NB: here opposed to as the loop above do not multiply by 1000 as dealing with special values  
+    jet.setJetP4(xAOD::JetFourMom_t(pTJet, etaJet, phiJet, massJet));
+
+    // Print jet inforamtion 
+    ANA_MSG_INFO("test1DGrid checking bounds handlers for SPECIAL jet=" << getJetInfo(jet));
+
+    // Retrieve the corresponding handlers
+    const BTaggingBoundsHandler* handlerContiguousRegularBinning = gridHandlerContiguousRegularBinning->getHandlerPtr(jet);
+    // // For debugging 
+    // if (handlerContiguousRegularBinning){
+    //   std::cout << "  --> handlerContiguousRegularBinning=" << (*handlerContiguousRegularBinning) << std::endl;
+    // }
+    // else { 
+    //   std::cout << "  --> No handlerContiguousRegularBinning for current jet" << std::endl;
+    // }
+
+    // NB: again here opposed to as the loop above do not divide by 1000 the jet pT as dealing with special values  
+    bool jetIsWithinValidGrid = std::isfinite(jet.pt());
+
+    if (!handlerContiguousRegularBinning && jetIsWithinValidGrid){
+      // The handler is a null pointer
+      // If the handler is a null pointer while the jet is within the valid grid 
+      // it means there is a logical issue in the implementation of the BTaggingGridBoundsHandler class
+      throw std::runtime_error("handlerContiguousRegularBinning should never be a null pointer for a jet within the valid grid: jet=" + getJetInfo(jet));
+    }
+    
+    if (handlerContiguousRegularBinning && !jetIsWithinValidGrid){
+      // The handler is a null pointer
+      // If the handler is a null pointer while the jet is within the valid grid 
+      // it means there is a logical issue in the implementation of the BTaggingGridBoundsHandler class
+      throw std::runtime_error("handlerContiguousRegularBinning should be a null pointer for a jet outside of the valid grid: jet=" + getJetInfo(jet) + " and handlerContiguousRegularBinning=" + handlerContiguousRegularBinning->to_string());
+    }
+    // Check that the jet is indeed falling in the handler that was returned by the grid 
+    // If that's not the case there is a logical in the implementation of the BTaggingGridBoundsHandler class 
+    if (handlerContiguousRegularBinning && !handlerContiguousRegularBinning->isJetWithinBounds(jet)){
+      throw std::runtime_error( "jet and handlerContiguousRegularBinning are not matching: jet=" +  getJetInfo(jet) + " and handlerContiguousRegularBinning=" + handlerContiguousRegularBinning->to_string() );
+    }
+  }
+
+  return 0;
+}
+
+int test2DGrid ATLAS_NOT_THREAD_SAFE (int /* argc */ , char* /* argv */ [] ) {
+  // Change type returned by the ANA_CHECK function in case of error 
+  // NB: this is needed here because the main() function should return an integer
+  // In principle you should NOT call this line for your regular code 
+  ANA_CHECK_SET_TYPE (int);
+
+  #ifdef XAOD_STANDALONE
+  // Important to do this first!
+  // Those lines are only included if using AnalysisBase
+  ANA_CHECK (xAOD::Init()) ;
+  #else
+  // Those lines are only included if using AthAnalysis or Athena
+  POOL::Init();
+  #endif
+
+  std::cout << "\n\n\n\n" << std::endl;
+  ANA_MSG_INFO("Starting test2DGrid");
 
   // The handlers only store a pointer to the jet quantity getter
   // so it must outlive all the handlers: it is created here and kept alive until the end of the test
@@ -361,7 +519,7 @@ int test1 ATLAS_NOT_THREAD_SAFE (int /* argc */ , char* /* argv */ [] ) {
       jet.setJetP4(xAOD::JetFourMom_t(pTJet*1000., etaJet, phiJet, massJet*1000.));
       
       // Print jet inforamtion 
-      ANA_MSG_INFO("Checking bounds handlers for jet=" << getJetInfo(jet));
+      ANA_MSG_INFO("test2DGrid checking bounds handlers for jet=" << getJetInfo(jet));
 
       // Retrieve the corresponding handlers
       const BTaggingBoundsHandler* handlerContiguousRegularBinning = gridHandlerContiguousRegularBinning->getHandlerPtr(jet);
@@ -436,10 +594,29 @@ int test1 ATLAS_NOT_THREAD_SAFE (int /* argc */ , char* /* argv */ [] ) {
 
 int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[])
 {
+  int intTest1DGrid = 1;
+  int intTest2DGrid = 1;
+
   try {
-    return test1(argc, argv);
+    intTest1DGrid = test1DGrid(argc, argv);
   } catch (const std::exception& e) {
-    std::cerr << "exception: " << e.what() << "\n";
+    std::cerr << "Failed test1DGrid test, exception: " << e.what() << "\n";
     return 1;
   }
+
+  try {
+    intTest2DGrid = test2DGrid(argc, argv);
+  } catch (const std::exception& e) {
+    std::cerr << "Failed test2DGrid test, exception: " << e.what() << "\n";
+    return 1;
+  }
+
+  // If an integer for a test is not 0 it means there was an issue 
+  if ((intTest1DGrid != 0) || (intTest2DGrid != 0)) { 
+    std::cerr << "test1DGrid or test2DGrid failed, returned values are intTest1DGrid=" << intTest1DGrid << " and intTest2DGrid=" << intTest2DGrid << "\n";
+    return 1; 
+  }
+
+  // Otherwise all good return 0
+  return 0;
 }
