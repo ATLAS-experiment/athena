@@ -122,6 +122,28 @@ def TracccSeedConverterAlgCfg(flags,
         CompFactory.ActsTrk.TracccSeedConverterAlg(name, **kwargs))
     return acc   
 
+def TracccTrkParamConverterAlgCfg(flags,
+                                        name="TracccTrkParamConverterAlg",
+                                        **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    if "HostMR" not in kwargs:
+        kwargs["HostMR"] = acc.popToolsAndMerge(
+            HostMemoryResourceToolCfg(flags))
+    if "CopyProviderTool" not in kwargs:
+        kwargs["CopyProviderTool"] = acc.popToolsAndMerge(CopyToolCfg(flags))
+    kwargs.setdefault("InputPackedTrkParams", "TracccPixelSeedsPackedTrkParams")
+    kwargs.setdefault("InputPixelClusters", "ITkTracccPixelClusters")
+    kwargs.setdefault("InputStripClusters", "ITkTracccStripClusters")
+    kwargs.setdefault("InputMeasToPixelSP", "ITkTracccMeasToPixelSP")
+    kwargs.setdefault("InputMeasToStripCl", "ITkTracccMeasToStripCl")
+    kwargs.setdefault("OutputTrackParameters", "ITkTracccSeedParameters")
+    kwargs.setdefault("OutputSeedMeasurements", "ITkTracccSeedMeasurements")
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
+    kwargs.setdefault("TrackingGeometrySvc", acc.getPrimaryAndMerge(ActsTrackingGeometrySvcCfg(flags)))
+    acc.addEventAlgo(
+        CompFactory.ActsTrk.TracccTrkParamConverterAlg(name, **kwargs))
+    return acc
+
 def TracccTrackConverterAlgCfg(flags,
                                      name="TracccTrackConverterAlg",
                                      **kwargs) -> ComponentAccumulator:
@@ -208,6 +230,23 @@ def TracccSeedDeviceConverterAlgCfg(flags,
     kwargs.setdefault("InputMeasToPixelIndex", "")   # empty: map built in this alg
     acc.addEventAlgo(
         CompFactory.ActsTrk.TracccSeedDeviceConverterAlg(name, **kwargs))
+    return acc
+
+def TracccTrkParamDeviceConverterAlgCfg(flags,
+        name="TracccTrkParamDeviceConverterAlg",
+        **kwargs) -> ComponentAccumulator:
+    """Packs, on device, the track parameters and the measurement indices of
+    each traccc seed into one buffer for TracccTrkParamConverterAlg."""
+    acc = ComponentAccumulator()
+    kwargs.setdefault("InputTrackParameters", "TracccTrkParam")
+    kwargs.setdefault("InputSpacepoints", "TracccPixelSpacepointCollection")
+    kwargs.setdefault("InputSeeds", "TracccPixelSeeds")
+    kwargs.setdefault("OutputPackedTrkParams", f"{kwargs['InputSeeds']}PackedTrkParams")
+    kwargs.setdefault("CopiesProviderTool", acc.popToolsAndMerge(CopiesToolCfg(flags)))
+    kwargs.setdefault("MemoryResourcesTool", acc.popToolsAndMerge(MemoryResourcesToolCfg(flags)))
+    kwargs.setdefault("StreamTool", acc.popToolsAndMerge(StreamToolCfg(flags)))
+    acc.addEventAlgo(
+        CompFactory.ActsTrk.TracccTrkParamDeviceConverterAlg(name, **kwargs))
     return acc
 
 def ClusterValidationAlgCfg(flags,

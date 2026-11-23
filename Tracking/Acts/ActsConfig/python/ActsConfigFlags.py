@@ -15,6 +15,12 @@ class DeviceTritonMode(FlagEnum):
     Server = "Server"  # device algorithms only: cells in, traccc tracks out
     Client = "Client"  # RDO to cells, Triton request, host conversions
 
+# What the host CKF starts from when the seeding runs on the device but the
+# track finding does not
+class HostCKFInput(FlagEnum):
+    Seeds = "Seeds"                      # device seeds -> ACTS seeds, parameters estimated on the host
+    TrackParameters = "TrackParameters"  # device seeds -> device track parameters -> CKF initial parameters
+
 # Space point grid of the grid triplet seeding: (phi, z, r) or (phi, eta, r)
 class GridType(FlagEnum):
     Cylindrical = "Cylindrical"
@@ -315,6 +321,8 @@ def createActsConfigFlags():
     actscf.addFlag("Acts.Device.doSeeding", False)
     actscf.addFlag("Acts.Device.seedingStrategy", SeedingStrategy.GridTriplet, type=SeedingStrategy)
     actscf.addFlag("Acts.Device.doTrackReconstruction", False)
+    # Only used with doSeeding=True and doTrackReconstruction=False
+    actscf.addFlag("Acts.Device.hostCKFInput", HostCKFInput.Seeds, type=HostCKFInput)
     actscf.addFlag("Acts.Device.doLargeRadiusPass", False)
     actscf.addFlag("Acts.Device.tritonMode", DeviceTritonMode.Off, type=DeviceTritonMode)
 

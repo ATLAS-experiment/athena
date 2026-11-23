@@ -35,7 +35,32 @@ StatusCode DeviceTrkParamEstimationAlg::configureTrkParamEstimation()
 {
 
   ATH_MSG_INFO("Setting up configs");
-  // leaving this here in case we want to configure initial trk param errors
+
+  if (m_initialVarInflation.size() != m_trkparam_config.initial_inflation.size()) {
+    ATH_MSG_FATAL("initialVarInflation must have " << m_trkparam_config.initial_inflation.size()
+                  << " elements, but has " << m_initialVarInflation.size());
+    return StatusCode::FAILURE;
+  }
+
+  m_trkparam_config.initial_sigma = {
+    static_cast<traccc::scalar>(m_sigmaLoc0.value()),
+    static_cast<traccc::scalar>(m_sigmaLoc1.value()),
+    static_cast<traccc::scalar>(m_sigmaPhi.value()),
+    static_cast<traccc::scalar>(m_sigmaTheta.value()),
+    static_cast<traccc::scalar>(m_sigmaQOverP.value()),
+    static_cast<traccc::scalar>(m_sigmaT0.value())};
+  m_trkparam_config.initial_sigma_qopt = static_cast<traccc::scalar>(m_sigmaQOverPt.value());
+  m_trkparam_config.initial_sigma_pt_rel = static_cast<traccc::scalar>(m_initialSigmaPtRel.value());
+  for (std::size_t i = 0; i < m_trkparam_config.initial_inflation.size(); ++i) {
+    m_trkparam_config.initial_inflation[i] = static_cast<traccc::scalar>(m_initialVarInflation[i]);
+  }
+
+  ATH_MSG_DEBUG("Initial sigmas (loc0, loc1, phi, theta, q/p, t): "
+                << m_sigmaLoc0.value() << ", " << m_sigmaLoc1.value() << ", "
+                << m_sigmaPhi.value() << ", " << m_sigmaTheta.value() << ", "
+                << m_sigmaQOverP.value() << ", " << m_sigmaT0.value()
+                << "; sigmaQOverPt " << m_sigmaQOverPt.value()
+                << "; initialSigmaPtRel " << m_initialSigmaPtRel.value());
   return StatusCode::SUCCESS;
 
 }

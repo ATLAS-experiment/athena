@@ -272,6 +272,10 @@ def ActsTrackFindingCfg(flags,
         tpe_tool_kwargs["allowPropagatorFailure"] = True
     tpe_tool_kwargs["stripCalibrationIterations"] = flags.Acts.stripCalibrationIterations
 
+    # Only made when the caller does not give TrackParamsEstimationTool, but
+    # the setdefault below evaluates them either way
+    pixelTpe = None
+    stripTpe = None
     if pixelSeedLabels is None:
         pixelSeedKeys = None
         pixelDetElements = None

@@ -7,6 +7,7 @@
 #include "../TracccCellValidationAlg.h"
 #include "../TracccMeasurementConverterAlg.h"
 #include "../TracccSeedConverterAlg.h"
+#include "../TracccTrkParamConverterAlg.h"
 #include "../TracccTrackConverterAlg.h"
 #include "../xAODToTracccMeasurementConverterAlg.h"
 #include "../xAODToTracccSpacePointConverterAlg.h"
@@ -20,6 +21,7 @@ DECLARE_COMPONENT( ActsTrk::PhaseIIRDOtoTracccCellConverterAlg )
 DECLARE_COMPONENT( ActsTrk::TracccCellValidationAlg )
 DECLARE_COMPONENT( ActsTrk::TracccMeasurementConverterAlg )
 DECLARE_COMPONENT( ActsTrk::TracccSeedConverterAlg )
+DECLARE_COMPONENT( ActsTrk::TracccTrkParamConverterAlg )
 DECLARE_COMPONENT( ActsTrk::TracccTrackConverterAlg )
 DECLARE_COMPONENT( ActsTrk::xAODToTracccMeasurementConverterAlg )
 DECLARE_COMPONENT( ActsTrk::xAODToTracccSpacePointConverterAlg )
@@ -34,5 +36,8 @@ DECLARE_COMPONENT( ActsTrk::TracccCellsToPhaseIIRDOConverterAlg )
 DECLARE_COMPONENT( ActsTrk::TracccMeasurementDeviceConverterAlg )
 #include "../cuda/TracccSeedDeviceConverterAlg.h"
 DECLARE_COMPONENT( ActsTrk::TracccSeedDeviceConverterAlg )
+
+#include "src/cuda/TracccTrkParamDeviceConverterAlg.h"
+DECLARE_COMPONENT( ActsTrk::TracccTrkParamDeviceConverterAlg )
 
 #endif

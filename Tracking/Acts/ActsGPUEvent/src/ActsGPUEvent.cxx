@@ -13,6 +13,7 @@
 #include "ActsGPUEvent/TracccSpacepointCollection.h"
 #include "ActsGPUEvent/TracccSeedCollection.h"
 #include "ActsGPUEvent/TracccTrkParamCollection.h"
+#include "ActsGPUEvent/TracccTrkParam.h"
 #include "ActsGPUEvent/TracccTrackCollection.h"
 #include "ActsGPUEvent/TracccTrackStateCollection.h"
 #include "ActsGPUEvent/TracccTrackContainer.h"
