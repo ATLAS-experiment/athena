@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDET_INDETBEAMSPOTFINDER_H
@@ -14,8 +14,8 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ITHistSvc.h"
-#include "InDetBeamSpotFinder/IInDetBeamSpotTool.h" //for BeamSpot::Event
-#include "InDetBeamSpotFinder/BeamSpotStatusCode.h"
+#include "IInDetBeamSpotTool.h" //for BeamSpot::Event
+#include "BeamSpotStatusCode.h"
 #include "xAODEventInfo/EventInfo.h" //typedef, can't fwd declare
 #include "xAODTracking/VertexContainer.h" //typedef, can't fwd declare
 #include "xAODTracking/TrackingPrimitives.h" //for xAOD::VxType
@@ -36,7 +36,7 @@ namespace InDet {
 
   public:
     //Standard constructor and methods
-    InDetBeamSpotFinder  (const std::string& name, ISvcLocator* pSvcLocator);
+    using AthAlgorithm::AthAlgorithm;
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& ctx) override;
     virtual StatusCode finalize() override;
@@ -45,7 +45,7 @@ namespace InDet {
     //Reorganize and clean up this section
     ServiceHandle<IToolSvc> m_toolSvc{this, "ToolSvc", "ToolSvc"};
     ServiceHandle<ITHistSvc> m_thistSvc{this, "THistSvc", "THistSvc"};
-    ToolHandleArray<IInDetBeamSpotTool> m_beamSpotToolList;
+    PublicToolHandleArray<IInDetBeamSpotTool> m_beamSpotToolList{this, "BeamSpotToolList", {}};
 
     SG::ReadCondHandleKey<BunchCrossingCondData> m_bcDataKey
       {this, "BunchCrossingCondDataKey", "BunchCrossingData" ,"SG Key of BunchCrossing CDO"};
@@ -56,17 +56,17 @@ namespace InDet {
       {this, "VertexContainer", "PrimaryVertices", "Vertex container name"};
 
     //Beamspot sorting options
-    unsigned int m_maxRunsPerFit;
-    unsigned int m_maxEventsPerFit;
-    unsigned int m_maxLBsPerFit;
+    Gaudi::Property<unsigned int> m_maxRunsPerFit{this, "RunRange", 0};
+    Gaudi::Property<unsigned int> m_maxEventsPerFit{this, "EventRange", 0};
+    Gaudi::Property<unsigned int> m_maxLBsPerFit{this, "LumiRange", 0};
     //Event Selection
-    std::vector<unsigned int> m_BCIDsToAccept;
+    Gaudi::Property<std::vector<unsigned int>> m_BCIDsToAccept{this, "UseBCID", {}};
     //Job Options
-    bool m_writeVertexNtuple;
+    Gaudi::Property<bool> m_writeVertexNtuple{this, "VertexNtuple", true};
     std::string m_beamSpotNtupleName;
     //Initialize some pointers
-    TTree * m_root_bs=0;
-    TTree * m_root_vrt=0;
+    TTree * m_root_bs=nullptr;
+    TTree * m_root_vrt=nullptr;
 
     struct beamSpotNtuple_struct{
       int pileup{}, bcid{}, defectWord{}, fill{}, lbEnd{}, lbStart{};
@@ -88,7 +88,7 @@ namespace InDet {
     vertexNtuple_struct m_root_vtx;
     BeamSpotStatusCode m_BeamStatusCode;
     
-    std::string m_vertexTreeName; 
+    Gaudi::Property<std::string> m_vertexTreeName{this, "VertexTreeName", "Vertices"};
     std::vector<BeamSpot::Event> m_eventList;
     std::map< BeamSpot::ID, std::vector<BeamSpot::Event> > m_eventMap;
     std::vector<std::vector<BeamSpot::Event>> m_sortedEventList;
@@ -111,15 +111,15 @@ namespace InDet {
     void convertVtxTypeNames();
 
     // Parameters for vertex selection criteria
-    int m_minTrackNum{};         //min Tracks in a vertex to be added
-    int m_maxTrackNum{};         //max Tracks in a vertex to be added
-    double m_maxChi2Vertex{};    //maxChi2 of vertex
-    double m_maxTransverseError{}; // max transverse vertex resolution
-    double m_maxAbsCorrelXY{}; //max absolute XY correlation of a vertex to be added 
-    double m_minVtxProb{}; // probability cut on chi2/ndf
-    unsigned int m_minVertexNum{};        //min vertex count for solution
+    Gaudi::Property<int> m_minTrackNum{this, "MinTracksPerVtx", 5, "min Tracks in a vertex to be added"};
+    Gaudi::Property<int> m_maxTrackNum{this, "MaxTracksPerVtx", 1000000, "max Tracks in a vertex to be added"};
+    Gaudi::Property<double> m_maxChi2Vertex{this, "MaxVtxChi2", 10, "maxChi2 of vertex"};
+    Gaudi::Property<double> m_maxTransverseError{this, "MaxTransverseErr", 1000000, "max transverse vertex resolution"};
+    Gaudi::Property<double> m_maxAbsCorrelXY{this, "MaxAbsCorrelXY", 0.8, "max absolute XY correlation of a vertex to be added"};
+    Gaudi::Property<double> m_minVtxProb{this, "MinVtxProb", 0.001, "probability cut on chi2/ndf"};
+    Gaudi::Property<unsigned int> m_minVertexNum{this, "MinVtxNum", 100, "min vertex count for solution"};
 
-    std::vector<std::string> m_vertexTypeNames{}; //names of vertexTypes
+    Gaudi::Property<std::vector<std::string>> m_vertexTypeNames{this, "VertexTypes", {}, "names of vertexTypes"};
     std::vector<xAOD::VxType::VertexType> m_vertexTypes{};
 
     IInDetBeamSpotTool * cloneTool( int );
@@ -127,14 +127,14 @@ namespace InDet {
     //For forcing a specific run number
 
     //    bool m_groupFitsByBCID; // each bcid is fitted separately
-    bool m_useFilledBCIDsOnly{}; // Only use filled BCIDs not empty ones (data)
-    std::string m_fitSortingKey{};
+    Gaudi::Property<bool> m_useFilledBCIDsOnly{this, "UseFilledBCIDsOnly", true, "Only use filled BCIDs not empty ones (data)"};
+    Gaudi::Property<std::string> m_fitSortingKey{this, "GroupFitsBy", "none"};
 
-    bool m_writeAllVertices{};
+    Gaudi::Property<bool> m_writeAllVertices{this, "WriteAllVertices", false};
     //std::map<unsigned int,long> m_nEvents;
     //std::map<BeamSpot::ID, long> m_nEvents;
    
-    unsigned long m_secondsPerFit{}; 
+    Gaudi::Property<unsigned long> m_secondsPerFit{this, "SecondsPerFit", 1};
    };
 }//end namespace 
 

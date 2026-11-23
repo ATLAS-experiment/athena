@@ -37,174 +37,66 @@ public:
 };
 
 
-InDetBeamSpotVertex::InDetBeamSpotVertex( const std::string& type, 
-              const std::string& name, 
-              const IInterface* parent):
-  AthAlgTool(type,name,parent),
-  m_x(4),m_cov(4,0),m_z(0.),m_zErr(0.),
-  m_p(4), m_V(4,0),
-  m_zSolved(0.), m_zErrSolved(0.),
-  m_NPARS(10), m_pLL(m_NPARS,0),m_VLL(m_NPARS,0),
-  m_vertexCount(0),m_getLLres(false),
-  m_fitStatus(unsolved),m_minVtxProb{},m_nUsed(0)
-
-{
-  declareInterface<IInDetBeamSpotTool>(this);
-  declareProperty("UseLikelihood",m_useLL = true);
-
-  //Fit initial parameter setup
-  declareProperty("InitParX",      m_init_x =0.0);
-  declareProperty("InitParY",      m_init_y =0.0);
-  declareProperty("InitParZ",      m_init_z =0.0);
-  declareProperty("InitParAx",     m_init_ax=0.0);
-  declareProperty("InitParAy",     m_init_ay=0.0);
-  declareProperty("InitParSigmaX", m_init_sx=0.01);
-  declareProperty("InitParSigmaY", m_init_sy=0.01);
-  declareProperty("InitParSigmaZ", m_init_sz=56.0);
-  declareProperty("InitParK",      m_init_k =1.0);
-  declareProperty("InitParRhoXY",  m_init_rhoxy=0.0);
-  declareProperty("MinuitMaxIterations",  m_minuit_maxIter=2000);
-  declareProperty("InitParMinX",      m_init_min_x =0.0);
-  declareProperty("InitParMinY",      m_init_min_y =0.0);
-  declareProperty("InitParMinZ",      m_init_min_z =0.0);
-  declareProperty("InitParMinAx",     m_init_min_ax=0.0);
-  declareProperty("InitParMinAy",     m_init_min_ay=0.0);
-  declareProperty("InitParMinSigmaX", m_init_min_sx=0.0001);
-  declareProperty("InitParMinSigmaY", m_init_min_sy=0.0001);
-
-  declareProperty("InitParMinSigmaZ", m_init_min_sz=0.0);
-  declareProperty("InitParMinK",      m_init_min_k =0);
-  declareProperty("InitParMinRhoXY",  m_init_min_rhoxy=-1.0);
- 
-  declareProperty("InitParMaxX",      m_init_max_x =0.0);
-  declareProperty("InitParMaxY",      m_init_max_y =0.0);
-  declareProperty("InitParMaxZ",      m_init_max_z =0.0);
-  declareProperty("InitParMaxAx",     m_init_max_ax=0.0);
-  declareProperty("InitParMaxAy",     m_init_max_ay=0.0);
-  declareProperty("InitParMaxSigmaX", m_init_max_sx=2.0);
-  declareProperty("InitParMaxSigmaY", m_init_max_sy=2.0);
-  declareProperty("InitParMaxSigmaZ", m_init_max_sz=3000.);
-  declareProperty("InitParMaxK",      m_init_max_k =10.);
-  declareProperty("InitParMaxRhoXY",  m_init_max_rhoxy=1.0);
-
-  declareProperty("DefaultX0",  m_def_x0=0.0);
-  declareProperty("DefaultY0",  m_def_y0=0.0);
-  declareProperty("DefaultZ",   m_def_z=0.0);
-  declareProperty("DefaultTiltX",  m_def_ax=0.0);
-  declareProperty("DefaultTiltY",  m_def_ay=0.0);
-  //these are used when returning a chi2 value
-  declareProperty("DefaultSigmaX",  m_def_sx=0.0);
-  declareProperty("DefaultSigmaY",  m_def_sy=0.0);
-  declareProperty("DefaultSigmaZ",  m_def_sz=0.0);
-
- 
-  // selections
-  declareProperty("MaxSigmaTr", m_sigTr=20.); 
-  declareProperty("MaxVtxErrTr", m_maxVtxErTr=100.); // in mm
-  declareProperty("OutlierChi2Tr", m_outlierChi2Tr=20.);
-  declareProperty("MaxOutlierLoops",m_maxOutlierLoops = 30);
-  declareProperty("OutlierMaxRejection",m_singleIterationMax=30);
-  declareProperty("OutlierWidthFail", m_widthFail=5.1e-3); // in mm
-  declareProperty("OutlierRhoFail", m_rhoFail=0.8); 
-
-  declareProperty("OutlierKFailMin", m_kMinFail = 0);
-  declareProperty("OutlierKFailMax", m_kMaxFail = 9.9);
-  
-  declareProperty("DoFitSanityCheck", m_doFitSanityCheck=true); 
-  declareProperty("DoChi2OnlyOutlierRemoval",m_doChi2OutlierRemoval=false);
-  //  declareProperty( "MinVertexProb", m_minVtxProb=0.001); // min prob(chi2,ndf)
-  
-  declareProperty( "FixParK" ,   m_fixInputK = false);
-  declareProperty( "UseLLNorm" , m_useLLNorm = false);
-  declareProperty( "FixWidth",   m_fixWidth  = false); 
-
-  declareProperty("TruncatedRMS", m_truncatedRMS = true); 
-  declareProperty("RMSFraction", m_fractionRMS = 0.95); 
-  declareProperty("SetInitialRMS", m_setInitialRMS = false);
-
-}
-
 InDetBeamSpotVertex::InDetBeamSpotVertex( const InDetBeamSpotVertex& rhs) : 
-  IInDetBeamSpotTool(rhs), 
-  AthAlgTool(rhs.type(), rhs.name(), rhs.parent()),
-  m_x(4),m_cov(4,0),m_z(0.),m_zErr(0.),
-  m_p(4), m_V(4,0),
-  m_zSolved(0.), m_zErrSolved(0.),
-  m_NPARS(10), m_pLL(m_NPARS,0),m_VLL(m_NPARS,0),
-  m_vertexCount(0),m_getLLres(false),
-  m_fitStatus(unsolved),m_nUsed(0)
+  base_class(rhs.type(), rhs.name(), rhs.parent())
 {
-  m_useLL = rhs.m_useLL;
-  m_init_x = rhs.m_init_x;
-  m_init_y = rhs.m_init_y;
-  m_useLL = rhs.m_useLL;
-
-  m_init_x = rhs.m_init_x; 
-  m_init_y = rhs.m_init_y;
-  m_init_z = rhs.m_init_z;
-  m_init_sx = rhs.m_init_sx; 
-  m_init_sy = rhs.m_init_sy;
-  m_init_sz = rhs.m_init_sz;
-  m_init_ax = rhs.m_init_ax;
-  m_init_ay = rhs.m_init_ay;
-  m_init_k = rhs.m_init_k;
-  m_init_rhoxy = rhs.m_init_rhoxy;
-  
-  m_init_min_x = rhs.m_init_min_x;
-  m_init_min_y = rhs.m_init_min_y;
-  m_init_min_z = rhs.m_init_min_z;
-  m_init_min_sx = rhs.m_init_min_sx;
-  m_init_min_sy = rhs.m_init_min_sy;
-  m_init_min_sz = rhs.m_init_min_sz;
-  m_init_min_ax = rhs.m_init_min_ax;
-  m_init_min_ay = rhs.m_init_min_ay;
-  m_init_min_k = rhs.m_init_min_k;
-  m_init_min_rhoxy = rhs.m_init_min_rhoxy;
-  
-  m_init_max_x = rhs.m_init_max_x;
-  m_init_max_y = rhs.m_init_max_y;
-  m_init_max_z = rhs.m_init_max_z;
-  m_init_max_sx = rhs.m_init_max_sx;
-  m_init_max_sy = rhs.m_init_max_sy;
-  m_init_max_sz = rhs.m_init_max_sz;
-  m_init_max_ax = rhs.m_init_max_ax;
-  m_init_max_ay = rhs.m_init_max_ay;
-  m_init_max_k = rhs.m_init_max_k;
-  m_init_max_rhoxy = rhs.m_init_max_rhoxy;
-  
-  m_def_x0 = rhs.m_def_x0;
-  m_def_y0 = rhs.m_def_y0;
-  m_def_z = rhs.m_def_z;
-  m_def_ax = rhs.m_def_ax;
-  m_def_ay = rhs.m_def_ay;
-  m_def_sx = rhs.m_def_sx;
-  m_def_sy = rhs.m_def_sy;
-  m_def_sz = rhs.m_def_sz;
-
-  m_sigTr = rhs.m_sigTr;
-  m_maxVtxErTr = rhs.m_maxVtxErTr;
-
-
-  m_minuit_maxIter = rhs.m_minuit_maxIter;
-  
-  m_outlierChi2Tr       = rhs.m_outlierChi2Tr;
-  m_maxOutlierLoops     = rhs.m_maxOutlierLoops;
-  m_singleIterationMax  = rhs.m_singleIterationMax;
-  m_widthFail           = rhs.m_widthFail;
-  m_rhoFail             = rhs.m_rhoFail;
-  m_kMinFail            = rhs.m_kMinFail;
-  m_kMaxFail            = rhs.m_kMaxFail;
-
-  m_doFitSanityCheck      = rhs.m_doFitSanityCheck;
-  m_doChi2OutlierRemoval  = rhs.m_doChi2OutlierRemoval;
-
-  m_fixInputK   = rhs.m_fixInputK;
-  m_useLLNorm   = rhs.m_useLLNorm;
-  m_fixWidth    = rhs.m_fixWidth;
-
-  m_truncatedRMS = rhs.m_truncatedRMS;
-  m_fractionRMS = rhs.m_fractionRMS;
-  m_setInitialRMS = rhs.m_setInitialRMS;
+  m_useLL.setValue(rhs.m_useLL.value());
+  m_init_x.setValue(rhs.m_init_x.value());
+  m_init_y.setValue(rhs.m_init_y.value());
+  m_init_z.setValue(rhs.m_init_z.value());
+  m_init_sx.setValue(rhs.m_init_sx.value());
+  m_init_sy.setValue(rhs.m_init_sy.value());
+  m_init_sz.setValue(rhs.m_init_sz.value());
+  m_init_ax.setValue(rhs.m_init_ax.value());
+  m_init_ay.setValue(rhs.m_init_ay.value());
+  m_init_k.setValue(rhs.m_init_k.value());
+  m_init_rhoxy.setValue(rhs.m_init_rhoxy.value());
+  m_init_min_x.setValue(rhs.m_init_min_x.value());
+  m_init_min_y.setValue(rhs.m_init_min_y.value());
+  m_init_min_z.setValue(rhs.m_init_min_z.value());
+  m_init_min_sx.setValue(rhs.m_init_min_sx.value());
+  m_init_min_sy.setValue(rhs.m_init_min_sy.value());
+  m_init_min_sz.setValue(rhs.m_init_min_sz.value());
+  m_init_min_ax.setValue(rhs.m_init_min_ax.value());
+  m_init_min_ay.setValue(rhs.m_init_min_ay.value());
+  m_init_min_k.setValue(rhs.m_init_min_k.value());
+  m_init_min_rhoxy.setValue(rhs.m_init_min_rhoxy.value());
+  m_init_max_x.setValue(rhs.m_init_max_x.value());
+  m_init_max_y.setValue(rhs.m_init_max_y.value());
+  m_init_max_z.setValue(rhs.m_init_max_z.value());
+  m_init_max_sx.setValue(rhs.m_init_max_sx.value());
+  m_init_max_sy.setValue(rhs.m_init_max_sy.value());
+  m_init_max_sz.setValue(rhs.m_init_max_sz.value());
+  m_init_max_ax.setValue(rhs.m_init_max_ax.value());
+  m_init_max_ay.setValue(rhs.m_init_max_ay.value());
+  m_init_max_k.setValue(rhs.m_init_max_k.value());
+  m_init_max_rhoxy.setValue(rhs.m_init_max_rhoxy.value());
+  m_def_x0.setValue(rhs.m_def_x0.value());
+  m_def_y0.setValue(rhs.m_def_y0.value());
+  m_def_z.setValue(rhs.m_def_z.value());
+  m_def_ax.setValue(rhs.m_def_ax.value());
+  m_def_ay.setValue(rhs.m_def_ay.value());
+  m_def_sx.setValue(rhs.m_def_sx.value());
+  m_def_sy.setValue(rhs.m_def_sy.value());
+  m_def_sz.setValue(rhs.m_def_sz.value());
+  m_sigTr.setValue(rhs.m_sigTr.value());
+  m_maxVtxErTr.setValue(rhs.m_maxVtxErTr.value());
+  m_minuit_maxIter.setValue(rhs.m_minuit_maxIter.value());
+  m_outlierChi2Tr.setValue(rhs.m_outlierChi2Tr.value());
+  m_maxOutlierLoops.setValue(rhs.m_maxOutlierLoops.value());
+  m_singleIterationMax.setValue(rhs.m_singleIterationMax.value());
+  m_widthFail.setValue(rhs.m_widthFail.value());
+  m_rhoFail.setValue(rhs.m_rhoFail.value());
+  m_kMinFail.setValue(rhs.m_kMinFail.value());
+  m_kMaxFail.setValue(rhs.m_kMaxFail.value());
+  m_doFitSanityCheck.setValue(rhs.m_doFitSanityCheck.value());
+  m_doChi2OutlierRemoval.setValue(rhs.m_doChi2OutlierRemoval.value());
+  m_fixInputK.setValue(rhs.m_fixInputK.value());
+  m_useLLNorm.setValue(rhs.m_useLLNorm.value());
+  m_fixWidth.setValue(rhs.m_fixWidth.value());
+  m_truncatedRMS.setValue(rhs.m_truncatedRMS.value());
+  m_fractionRMS.setValue(rhs.m_fractionRMS.value());
+  m_setInitialRMS.setValue(rhs.m_setInitialRMS.value());
   m_minVtxProb = rhs.m_minVtxProb;
 }
 
@@ -1038,7 +930,8 @@ void BeamSpot::myFCN_LLsolver( Int_t &, Double_t *, Double_t &f, Double_t *par, 
   f = 0;
   
   using Vertices = std::vector<BeamSpot::VrtHolder>;
-  std::lock_guard<std::mutex> lock(BeamSpot::mutex);
+  // BeamSpot::mutex is already held by InDetBeamSpotVertex::solveLL(), from which
+  // Minuit calls this function. Locking it here again would deadlock.
   Vertices::const_iterator vit = BeamSpot::vertexData->begin();
   
   double temp =0;
@@ -1249,9 +1142,9 @@ std::map<std::string,double> InDetBeamSpotVertex::getParamMap() const {
   paramMap["posX"]   = (m_getLLres ? m_pLL(1) + m_pLL(3)*z  : m_p(1) + m_p(2)*z);
   paramMap["posY"]   = (m_getLLres ? m_pLL(2) + m_pLL(4)*z  : m_p(3) + m_p(4)*z);
   paramMap["posZ"]   = (m_getLLres ? m_pLL(9) : m_zSolved);
-  paramMap["sigmaX"] = (m_getLLres ? m_pLL(5) : m_def_sx);
-  paramMap["sigmaY"] = (m_getLLres ? m_pLL(6) : m_def_sy);
-  paramMap["sigmaZ"] = (m_getLLres ? m_pLL(10) : m_def_sz);
+  paramMap["sigmaX"] = (m_getLLres ? m_pLL(5) : m_def_sx.value());
+  paramMap["sigmaY"] = (m_getLLres ? m_pLL(6) : m_def_sy.value());
+  paramMap["sigmaZ"] = (m_getLLres ? m_pLL(10) : m_def_sz.value());
   paramMap["rhoXY"]  = (m_getLLres ? m_pLL(7) : 0.);
   paramMap["nUsed"] = m_nUsed;
 

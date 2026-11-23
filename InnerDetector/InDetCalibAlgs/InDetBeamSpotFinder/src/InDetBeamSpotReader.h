@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDET_INDETBEAMSPOTREADER_H
@@ -24,7 +24,7 @@ namespace InDet {
 
   public:
     //Standard constructor and methods
-    InDetBeamSpotReader  (const std::string& name, ISvcLocator* pSvcLocator);
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
     StatusCode initialize() override;
     StatusCode execute(const EventContext& ctx) const override;
 

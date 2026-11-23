@@ -1,14 +1,9 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetBeamSpotReader.h"
 #include "VxVertex/VxCandidate.h"
-
-InDet::InDetBeamSpotReader::InDetBeamSpotReader(const std::string& name, ISvcLocator* pSvcLocator):
-  AthReentrantAlgorithm(name, pSvcLocator)
-{
-}
 
 StatusCode InDet::InDetBeamSpotReader::initialize() {
   ATH_MSG_DEBUG( "in initialize()" );

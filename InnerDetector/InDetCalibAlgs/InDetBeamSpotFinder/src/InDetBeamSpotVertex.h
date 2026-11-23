@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDET_INDETBEAMSPOTVERTEX_H
@@ -12,7 +12,7 @@
 ////////////////////////////////////////////////////////////
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "InDetBeamSpotFinder/IInDetBeamSpotTool.h"
+#include "IInDetBeamSpotTool.h"
 #include "TrkEventPrimitives/VertexType.h"
 #include "CLHEP/Matrix/Vector.h"
 #include "CLHEP/Matrix/SymMatrix.h"
@@ -29,25 +29,20 @@ namespace InDet {
       determine the position of the beamspot using a chi2 and/or log-likelihood method.
       @copydoc InDet::IInDetBeamSpotTool
   */
-  class InDetBeamSpotVertex : public AthAlgTool, 
-    virtual public IInDetBeamSpotTool {
+  class InDetBeamSpotVertex : public extends<AthAlgTool, IInDetBeamSpotTool> {
     public:
     // Constructor
-    InDetBeamSpotVertex( const std::string& type, 
-			 const std::string& name, 
-			 const IInterface* parent);
-    // Standard Destructor
-    virtual ~InDetBeamSpotVertex() {}
+    using base_class::base_class;
 
     //Copy Constructor
     InDetBeamSpotVertex( const InDetBeamSpotVertex& rhs );
     
 
-    virtual StatusCode initialize();
-    virtual StatusCode finalize();
-    virtual FitStatus fit(std::vector< BeamSpot::VrtHolder >&);
-    virtual FitID getFitID() const { return (m_getLLres ? vertexLL : vertexChi2  );}
-    IInDetBeamSpotTool *Clone() {return new InDetBeamSpotVertex(*this);}
+    virtual StatusCode initialize() override;
+    virtual StatusCode finalize() override;
+    virtual FitStatus fit(std::vector< BeamSpot::VrtHolder >&) override;
+    virtual FitID getFitID() const override { return (m_getLLres ? vertexLL : vertexChi2  );}
+    virtual IInDetBeamSpotTool *Clone() override {return new InDetBeamSpotVertex(*this);}
 
     double  getX( double  z) const {
       return (m_getLLres ? m_pLL(1) + m_pLL(3)*z  : m_p(1) + m_p(2)*z);}
@@ -67,11 +62,11 @@ namespace InDet {
       return (m_getLLres ?  (m_fixInputK ? sqrt(m_VLL(8,8)) : sqrt(m_VLL(9,9))):m_zErrSolved);} // defined as centroid of beam
     
     double  getSigmaX(double) const { 
-      return (m_getLLres ? m_pLL(5) : m_def_sx);}
+      return (m_getLLres ? m_pLL(5) : m_def_sx.value());}
     double  getSigmaY(double) const  { 
-      return (m_getLLres ? m_pLL(6) : m_def_sy);}
+      return (m_getLLres ? m_pLL(6) : m_def_sy.value());}
     double  getSigmaZ() const { 
-      return (m_getLLres ? m_pLL(10) : m_def_sz);}
+      return (m_getLLres ? m_pLL(10) : m_def_sz.value());}
     double  getErrSigmaX(double) const {
       return (m_getLLres ? sqrt(m_VLL(5,5)) :0.);}
     double  getErrSigmaY(double) const {
@@ -116,32 +111,32 @@ namespace InDet {
 
     const CLHEP::HepVector & getLLpos() const { return m_pLL;}
     const CLHEP::HepSymMatrix & getLLcov() const { return m_VLL;}
-    virtual std::map<std::string,double> getCovMap() const;
-    virtual std::map<std::string,double> getParamMap() const;
+    virtual std::map<std::string,double> getCovMap() const override;
+    virtual std::map<std::string,double> getParamMap() const override;
     void clear();
     private:
 
     //updated per vertex
-    CLHEP::HepVector m_x;
-    CLHEP::HepSymMatrix m_cov;
-    double m_z, m_zErr;
+    CLHEP::HepVector m_x{4};
+    CLHEP::HepSymMatrix m_cov{4,0};
+    double m_z{0.}, m_zErr{0.};
 
     //solved matrices
-    CLHEP::HepVector m_p;
-    CLHEP::HepSymMatrix m_V;
-    double m_zSolved, m_zErrSolved;
+    CLHEP::HepVector m_p{4};
+    CLHEP::HepSymMatrix m_V{4,0};
+    double m_zSolved{0.}, m_zErrSolved{0.};
 
     //for LL output
-    const int m_NPARS;
-    CLHEP::HepVector m_pLL;
-    CLHEP::HepSymMatrix m_VLL;
+    const int m_NPARS{10};
+    CLHEP::HepVector m_pLL{m_NPARS,0};
+    CLHEP::HepSymMatrix m_VLL{m_NPARS,0};
 
-    long m_vertexCount;
+    long m_vertexCount{0};
 
     //    std::string m_containerName;
 
-    bool m_useLL; // true if using the full log-likelihood method    
-    bool m_getLLres; //use LL results, or fallback on Chi2
+    Gaudi::Property<bool> m_useLL{this, "UseLikelihood", true, "true if using the full log-likelihood method"};
+    bool m_getLLres{false}; //use LL results, or fallback on Chi2
     std::vector< BeamSpot::VrtHolder > m_vertexData;
 
     
@@ -150,35 +145,68 @@ namespace InDet {
     // Note, it using Chi2, these may be overriding by the
     // results of the Chi2 fit.
     
-    double m_init_x, m_init_y, m_init_z, m_init_sx,m_init_sy,m_init_sz;
-    double m_init_ax, m_init_ay, m_init_k, m_init_rhoxy;
-    
-    double m_init_min_x, m_init_min_y, m_init_min_z, m_init_min_sx,m_init_min_sy,m_init_min_sz;
-    double m_init_min_ax, m_init_min_ay, m_init_min_k, m_init_min_rhoxy;
-    
-    double m_init_max_x, m_init_max_y, m_init_max_z, m_init_max_sx,m_init_max_sy,m_init_max_sz;
-    double m_init_max_ax, m_init_max_ay, m_init_max_k, m_init_max_rhoxy;
+    Gaudi::Property<double> m_init_x{this, "InitParX", 0.0};
+    Gaudi::Property<double> m_init_y{this, "InitParY", 0.0};
+    Gaudi::Property<double> m_init_z{this, "InitParZ", 0.0};
+    Gaudi::Property<double> m_init_sx{this, "InitParSigmaX", 0.01};
+    Gaudi::Property<double> m_init_sy{this, "InitParSigmaY", 0.01};
+    Gaudi::Property<double> m_init_sz{this, "InitParSigmaZ", 56.0};
+    Gaudi::Property<double> m_init_ax{this, "InitParAx", 0.0};
+    Gaudi::Property<double> m_init_ay{this, "InitParAy", 0.0};
+    Gaudi::Property<double> m_init_k{this, "InitParK", 1.0};
+    Gaudi::Property<double> m_init_rhoxy{this, "InitParRhoXY", 0.0};
 
-    int m_minuit_maxIter; // max iterations for Minuit to perform
+    Gaudi::Property<double> m_init_min_x{this, "InitParMinX", 0.0};
+    Gaudi::Property<double> m_init_min_y{this, "InitParMinY", 0.0};
+    Gaudi::Property<double> m_init_min_z{this, "InitParMinZ", 0.0};
+    Gaudi::Property<double> m_init_min_sx{this, "InitParMinSigmaX", 0.0001};
+    Gaudi::Property<double> m_init_min_sy{this, "InitParMinSigmaY", 0.0001};
+    Gaudi::Property<double> m_init_min_sz{this, "InitParMinSigmaZ", 0.0};
+    Gaudi::Property<double> m_init_min_ax{this, "InitParMinAx", 0.0};
+    Gaudi::Property<double> m_init_min_ay{this, "InitParMinAy", 0.0};
+    Gaudi::Property<double> m_init_min_k{this, "InitParMinK", 0};
+    Gaudi::Property<double> m_init_min_rhoxy{this, "InitParMinRhoXY", -1.0};
 
-    double m_def_x0,m_def_y0,m_def_z,m_def_ax,m_def_ay,m_def_sx,m_def_sy,m_def_sz; //default values: controled by jobOptions
+    Gaudi::Property<double> m_init_max_x{this, "InitParMaxX", 0.0};
+    Gaudi::Property<double> m_init_max_y{this, "InitParMaxY", 0.0};
+    Gaudi::Property<double> m_init_max_z{this, "InitParMaxZ", 0.0};
+    Gaudi::Property<double> m_init_max_sx{this, "InitParMaxSigmaX", 2.0};
+    Gaudi::Property<double> m_init_max_sy{this, "InitParMaxSigmaY", 2.0};
+    Gaudi::Property<double> m_init_max_sz{this, "InitParMaxSigmaZ", 3000.};
+    Gaudi::Property<double> m_init_max_ax{this, "InitParMaxAx", 0.0};
+    Gaudi::Property<double> m_init_max_ay{this, "InitParMaxAy", 0.0};
+    Gaudi::Property<double> m_init_max_k{this, "InitParMaxK", 10.};
+    Gaudi::Property<double> m_init_max_rhoxy{this, "InitParMaxRhoXY", 1.0};
+
+    Gaudi::Property<int> m_minuit_maxIter{this, "MinuitMaxIterations", 2000, "max iterations for Minuit to perform"};
+
+    //default values: controled by jobOptions
+    Gaudi::Property<double> m_def_x0{this, "DefaultX0", 0.0};
+    Gaudi::Property<double> m_def_y0{this, "DefaultY0", 0.0};
+    Gaudi::Property<double> m_def_z{this, "DefaultZ", 0.0};
+    Gaudi::Property<double> m_def_ax{this, "DefaultTiltX", 0.0};
+    Gaudi::Property<double> m_def_ay{this, "DefaultTiltY", 0.0};
+    //these are used when returning a chi2 value
+    Gaudi::Property<double> m_def_sx{this, "DefaultSigmaX", 0.0};
+    Gaudi::Property<double> m_def_sy{this, "DefaultSigmaY", 0.0};
+    Gaudi::Property<double> m_def_sz{this, "DefaultSigmaZ", 0.0};
 
     // selections based on chi2-estimated position of beamspot
-    double m_sigTr; // number of sigmas from total beam-spread width
-    double m_maxVtxErTr; // max uncertainty in vertex error in transverse direction
-    double m_widthFail; // sigma value to 'not trust LL fit'.
-    double m_rhoFail;   // rho value to 'not trust LL fit'.
-    int m_singleIterationMax; // max allowed vertices to reject in a single iteration (-1 => all)
-    bool m_truncatedRMS;
-    float m_fractionRMS;
-    bool m_setInitialRMS;
+    Gaudi::Property<double> m_sigTr{this, "MaxSigmaTr", 20., "number of sigmas from total beam-spread width"};
+    Gaudi::Property<double> m_maxVtxErTr{this, "MaxVtxErrTr", 100., "max uncertainty in vertex error in transverse direction (in mm)"};
+    Gaudi::Property<double> m_widthFail{this, "OutlierWidthFail", 5.1e-3, "sigma value to 'not trust LL fit' (in mm)"};
+    Gaudi::Property<double> m_rhoFail{this, "OutlierRhoFail", 0.8, "rho value to 'not trust LL fit'"};
+    Gaudi::Property<int> m_singleIterationMax{this, "OutlierMaxRejection", 30, "max allowed vertices to reject in a single iteration (-1 => all)"};
+    Gaudi::Property<bool> m_truncatedRMS{this, "TruncatedRMS", true};
+    Gaudi::Property<float> m_fractionRMS{this, "RMSFraction", 0.95};
+    Gaudi::Property<bool> m_setInitialRMS{this, "SetInitialRMS", false};
 
-    FitStatus m_fitStatus;
+    FitStatus m_fitStatus{unsolved};
     bool solveChi2();
     bool solveLL(bool printOut = false);
     bool applyOutlierRemoval();
-    double m_outlierChi2Tr;
-    int m_maxOutlierLoops; // maximum number of resursive loops in outlier removal to perform
+    Gaudi::Property<double> m_outlierChi2Tr{this, "OutlierChi2Tr", 20.};
+    Gaudi::Property<int> m_maxOutlierLoops{this, "MaxOutlierLoops", 30, "maximum number of resursive loops in outlier removal to perform"};
     //LL setup
     int setInitialPars( TMinuit * minuit);
     int setParsFromChi2( TMinuit * minuit);
@@ -189,16 +217,17 @@ namespace InDet {
 			std::pair<int, std::string> & );
     void doFit2(TMinuit * , bool printOut = false); 
 
-    bool m_doFitSanityCheck; //<! determine that fit is really converged
-    bool m_doChi2OutlierRemoval; //<! for chi2 only fit, run outlier removal as well.
-    double m_kMaxFail, m_kMinFail; // max and min sanity values for k
-    double m_minVtxProb; // probability cut on chi2/ndf
+    Gaudi::Property<bool> m_doFitSanityCheck{this, "DoFitSanityCheck", true, "determine that fit is really converged"};
+    Gaudi::Property<bool> m_doChi2OutlierRemoval{this, "DoChi2OnlyOutlierRemoval", false, "for chi2 only fit, run outlier removal as well"};
+    Gaudi::Property<double> m_kMaxFail{this, "OutlierKFailMax", 9.9, "max sanity value for k"};
+    Gaudi::Property<double> m_kMinFail{this, "OutlierKFailMin", 0, "min sanity value for k"};
+    double m_minVtxProb{}; // probability cut on chi2/ndf
     
-    bool m_fixInputK; // fix in LL fit the K factor to it's initial value
-    bool m_useLLNorm; // use the normalisation mode of the pdf...
-    bool m_fixWidth;
+    Gaudi::Property<bool> m_fixInputK{this, "FixParK", false, "fix in LL fit the K factor to it's initial value"};
+    Gaudi::Property<bool> m_useLLNorm{this, "UseLLNorm", false, "use the normalisation mode of the pdf"};
+    Gaudi::Property<bool> m_fixWidth{this, "FixWidth", false};
     
-    int m_nUsed;
+    int m_nUsed{0};
 
     mutable std::atomic<int> m_rCount{0}; // counter used for recussive mode
   };

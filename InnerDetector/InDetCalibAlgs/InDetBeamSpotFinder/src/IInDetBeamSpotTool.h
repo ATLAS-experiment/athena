@@ -53,8 +53,6 @@ namespace InDet {
     static const InterfaceID& interfaceID() { return IID_IInDetBeamSpotTool; }
     
     //General methods for all beamspot determination methods
-    virtual StatusCode initialize() = 0; //!< Standard initialize
-    virtual StatusCode finalize()   = 0; //!< Standard finalize. Will attempt a solution if not already done
     virtual FitStatus fit(std::vector< BeamSpot::VrtHolder >& ) = 0; //!< Attempt a to find a solution of the beamspot.
     virtual FitID getFitID() const = 0; //!< A unique ID for the specific fit type.
 

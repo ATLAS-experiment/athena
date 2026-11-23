@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // @file RefitTracksAndVertex.cxx
@@ -17,12 +17,12 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "TrkFitterUtils/FitterTypes.h"
 #include "TrkParameters/TrackParameters.h"
+#include "TrkFitterInterfaces/ITrackFitter.h"
+#include "TrkVertexFitterInterfaces/IVertexFitter.h"
 
 class AtlasDetectorID ;
 
 namespace Trk {
-  class ITrackFitter ;
-  class IVertexFitter ;
   class Track ;
   class TrackStateOnSurface ;
   class PseudoMeasurementOnTrack ;
@@ -36,8 +36,7 @@ class RefitTracksAndVertex: public AthAlgorithm {
       taken into account while refitting the Si-only part of the track or read in by the alignment algorithms
       directly, can serve to eliminate the alignment weak modes from the Si tracker of ATLAS.
       More details can be found at: https://twiki.cern.ch/twiki/bin/view/Atlas/TRTMomConstraint */
-  RefitTracksAndVertex(const std::string& name, ISvcLocator* pSvcLocator) ;
-  ~RefitTracksAndVertex() ;
+  using AthAlgorithm::AthAlgorithm;
   StatusCode initialize() ; //!< initialize method of this algorithm.   
   StatusCode execute(const EventContext& ctx)    ; //!< execute method of this algorithm that is called for each event  
   StatusCode finalize()   ; //!< finalize method of this algorithm. Prints out a summary of all events
@@ -57,32 +56,29 @@ class RefitTracksAndVertex: public AthAlgorithm {
   Trk::Track* fitSCTOnlyTrack( const Trk::Track* track ) ;
 
   // infrastructure  
-  const AtlasDetectorID*  m_idHelper  ; //!< Detector ID helper
-  std::string m_vertexListInput  ; //!< Name of the TrackCollection (input)
-  
-  
-  
-  std::string m_trackListOutput ; //!< Name of the TrackCollection (Output)
-  std::string m_outputVertexContainerName ; //!< Name of vertex container
-  ToolHandle<Trk::ITrackFitter> m_trackFitter ; //!< The TrackFitter to refit the tracks (segment, momentum constraint)
-  ToolHandle<Trk::IVertexFitter> m_vertexFitter ; //!< The TrackFitter to refit the tracks (segment, momentum constraint)
+  const AtlasDetectorID*  m_idHelper{nullptr}; //!< Detector ID helper
+  Gaudi::Property<std::string> m_vertexListInput{this, "VertexListInput", "PrimaryVertices", "Name of the TrackCollection (input)"};
+  Gaudi::Property<std::string> m_trackListOutput{this, "TrackListOutput", "SiTracksWithRefitTracksAndVertex", "Name of the TrackCollection (Output)"};
+  Gaudi::Property<std::string> m_outputVertexContainerName{this, "OutputVertexContainer", "RefittedPrimaryVertex", "Name of vertex container"};
+  PublicToolHandle<Trk::ITrackFitter> m_trackFitter{this, "TrackFitter", "Trk::GlobalChi2Fitter/InDetTrackFitter", "The TrackFitter to refit the tracks (segment, momentum constraint)"};
+  PublicToolHandle<Trk::IVertexFitter> m_vertexFitter{this, "VertexFitterTool", "Trk::FullVertexFitter", "The VertexFitter to refit the vertices"};
 
   // algorithm-internal members
-  bool   m_applyTrkSel        ; //!< apply a selection on tracks or not
-  bool   m_refitTracks        ; //!< refitTracks
-  bool   m_addPM              ; //!< apply a pseudo measurement based on the original track (theta,z0)
-  double m_selPtMin           ; //!< minimal pT cut value for the TrackSelection
-  double m_selEtaMin          ; //!< minimal eta cut value for the TrackSelection
-  double m_selEtaMax          ; //!< maximal eta cut value for the TrackSelection
-  int    m_selNHitPIXMin      ; //!< minimal number of PIX hits cut value for the TrackSelection
-  int    m_selNHitSCTMin      ; //!< minimal number of SCT hits cut value for the TrackSelection
-  size_t m_nTracksProcessed   ; //!< Counter for number of tracks processed
-  size_t m_nTracksPresel      ; //!< Counter for number of tracks passing the preselection
-  size_t m_nTracksAccepted    ; //!< Counter for number of tracks passing the preselection and with PM
-  size_t m_nRejectPIX         ; //!< Counter for number of tracks failing the min number of PIX hits req.
-  size_t m_nRejectSCT         ; //!< Counter for number of tracks failing the min number of SCT hits req.
-  size_t m_nRejectTRT         ; //!< Counter for number of tracks failing the min number of TRT hits req.
-  size_t m_nRejectPM          ; //!< Counter for number of tracks failing the addition of a pseudo-measurement (PM)
+  Gaudi::Property<bool> m_applyTrkSel{this, "ApplyTrkSel", false, "apply a selection on tracks or not"};
+  Gaudi::Property<bool> m_refitTracks{this, "RefitTracks", true, "refitTracks"};
+  Gaudi::Property<bool> m_addPM{this, "AddPseudoMeasurement", false, "apply a pseudo measurement based on the original track (theta,z0)"};
+  Gaudi::Property<double> m_selPtMin{this, "SelPtMin", 0, "minimal pT cut value for the TrackSelection"};
+  Gaudi::Property<double> m_selEtaMin{this, "SelEtaMin", -2.5, "minimal eta cut value for the TrackSelection"};
+  Gaudi::Property<double> m_selEtaMax{this, "SelEtaMax", 2.5, "maximal eta cut value for the TrackSelection"};
+  Gaudi::Property<int> m_selNHitPIXMin{this, "SelNHitPIXMin", 0, "minimal number of PIX hits cut value for the TrackSelection"};
+  Gaudi::Property<int> m_selNHitSCTMin{this, "SelNHitSCTMin", 6, "minimal number of SCT hits cut value for the TrackSelection"};
+  size_t m_nTracksProcessed{0}; //!< Counter for number of tracks processed
+  size_t m_nTracksPresel{0}; //!< Counter for number of tracks passing the preselection
+  size_t m_nTracksAccepted{0}; //!< Counter for number of tracks passing the preselection and with PM
+  size_t m_nRejectPIX{0}; //!< Counter for number of tracks failing the min number of PIX hits req.
+  size_t m_nRejectSCT{0}; //!< Counter for number of tracks failing the min number of SCT hits req.
+  size_t m_nRejectTRT{0}; //!< Counter for number of tracks failing the min number of TRT hits req.
+  size_t m_nRejectPM{0}; //!< Counter for number of tracks failing the addition of a pseudo-measurement (PM)
 } ;
 
 MsgStream& operator<<( MsgStream& outst, const RefitTracksAndVertex& alg ) ;

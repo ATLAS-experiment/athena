@@ -3,7 +3,7 @@
 */
 
 #include "InDetBeamSpotFinder.h"
-#include "InDetBeamSpotFinder/IInDetBeamSpotTool.h"
+#include "IInDetBeamSpotTool.h"
 #include "InDetBeamSpotVertex.h"
 #include "InDetBeamSpotRooFit.h"
 #include "VxVertex/VxCandidate.h"
@@ -27,30 +27,6 @@ namespace{
 
 }
 
-InDet::InDetBeamSpotFinder::InDetBeamSpotFinder(const std::string& name, ISvcLocator* pSvcLocator):
-  AthAlgorithm(name, pSvcLocator)
-{
-  declareProperty( "BeamSpotToolList"  , m_beamSpotToolList );
-  declareProperty( "RunRange"     , m_maxRunsPerFit  = 0 );
-  declareProperty( "LumiRange"      , m_maxLBsPerFit = 0 );
-  declareProperty( "EventRange"   , m_maxEventsPerFit = 0);
-  declareProperty( "UseBCID"     , m_BCIDsToAccept );
-  declareProperty( "UseFilledBCIDsOnly", m_useFilledBCIDsOnly = true );
-  declareProperty( "MinTracksPerVtx", m_minTrackNum = 5);
-  declareProperty( "MaxTracksPerVtx", m_maxTrackNum = 1000000);
-  declareProperty( "MinVtxNum"      , m_minVertexNum = 100);
-  declareProperty( "MaxVtxChi2"     , m_maxChi2Vertex = 10);
-  declareProperty( "MaxTransverseErr", m_maxTransverseError=1000000);
-  declareProperty( "MaxAbsCorrelXY", m_maxAbsCorrelXY=0.8);
-  declareProperty( "VertexTypes"       , m_vertexTypeNames);
-  declareProperty( "MinVtxProb"     , m_minVtxProb=0.001);
-  declareProperty( "GroupFitsBy"       , m_fitSortingKey = "none");
-  declareProperty( "VertexNtuple" , m_writeVertexNtuple = true);
-  declareProperty( "WriteAllVertices"  , m_writeAllVertices=false);
-  declareProperty( "VertexTreeName"    , m_vertexTreeName = "Vertices");
-  declareProperty( "SecondsPerFit",  m_secondsPerFit = 1);
-}
-  
 StatusCode InDet::InDetBeamSpotFinder::initialize() {
   ATH_MSG_DEBUG( "in initialize()");
   if ( m_beamSpotToolList.empty() ){
