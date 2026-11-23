@@ -16,7 +16,6 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "EventPrimitives/EventPrimitives.h"
 
-class RpcCoinDataContainerCnv;
 
 namespace Muon
 {
@@ -28,9 +27,6 @@ class RpcCoinData : public RpcPrepData
     // Public methods:
     ///////////////////////////////////////////////////////////////////
   public:
-
-    friend class ::RpcCoinDataContainerCnv;
-    
     /** Public, Copy, operator=, constructor*/
     RpcCoinData() = default;
     RpcCoinData(const RpcCoinData &) noexcept = default;
