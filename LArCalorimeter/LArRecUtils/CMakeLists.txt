@@ -42,3 +42,9 @@ atlas_add_test( LArADC2MeVCondAlgConfig_test
 atlas_add_test( LArADC2MeVSCCondAlgConfig_test
                 SCRIPT python -m LArRecUtils.LArADC2MeVSCCondAlgConfig
                 POST_EXEC_SCRIPT noerror.sh )
+
+atlas_add_test( LArFCalDegCond
+                SCRIPT python -m LArRecUtils.LArFCalDegCond_test
+                POST_EXEC_SCRIPT noerror.sh
+                PROPERTIES TIMEOUT 600 )
+

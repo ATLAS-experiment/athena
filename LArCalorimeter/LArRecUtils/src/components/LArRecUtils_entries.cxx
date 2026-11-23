@@ -22,6 +22,8 @@
 #include "../LArRoIMapCondAlg.h"
 #include "../LArXTalkWeightCondAlg.h"
 #include "../LArXTalkWeightGlobalCondAlg.h"
+#include "../LArFcalDegCondAlg.h"
+#include "../LArFCalDegTestAlg.h"
 
 
 DECLARE_COMPONENT( LArOFPeakRecoTool )
@@ -94,3 +96,5 @@ DECLARE_COMPONENT( LArXTalkWeightCondAlg_middle1 )
 DECLARE_COMPONENT( LArXTalkWeightCondAlg_middle2 )
 DECLARE_COMPONENT( LArXTalkWeightCondAlg_middle1_ec )
 DECLARE_COMPONENT( LArXTalkWeightCondAlg_middle2_ec )
+DECLARE_COMPONENT( LArFcalDegCondAlg )
+DECLARE_COMPONENT( LArFCalDegTestAlg )
