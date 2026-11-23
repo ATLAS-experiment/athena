@@ -223,7 +223,8 @@ def MultifoldGNNCfg(
     remapping = dict(remapping)
     if dependencies:
         electrons = electrons or ('Electrons' if 'E' in dependencies else '')
-        muons = muons or ('Muons' if 'M' in dependencies else '')
+        muons = muons or (
+            'Muons' if 'M' in dependencies or 'MC' in dependencies else '')
         if 'MC' in dependencies:
             remapping.setdefault('FTagMuons', 'FTagMuonsConeMatched')
 
