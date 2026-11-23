@@ -82,12 +82,10 @@ private:
 
   // Properties
   Gaudi::Property<std::string> m_workingPoint {this, "WorkingPoint", "", "Name of the Photon ID BDT Working point"};
+  Gaudi::Property<std::string> m_configFile {this, "ConfigFile", "", "Path to the configuration file (TEnv format) containing the working point definition (if set, overrides the one associated to WorkingPoint)"};
   Gaudi::Property<bool> m_excludeTRT {this, "ExcludeTRT", true, "Conversion definition for Run 3"};
   Gaudi::Property<bool> m_reapplyWPIfNoShowerShapes {this, "ReapplyWPIfNoShowerShapes", true, "Reapply the WP calculation, based on the BDT score and isEM word (works only if these are available!) "};
   Gaudi::Property<std::string> m_isEMDecoration {this, "IsEMDecoration", "BDTIsEM", "Name of the int decoration containing the isEM word (used if ReapplyWPIfNoShowerShapes is true)"};
-
-  // Config file with binning and cuts
-  std::string m_configFile = "";
 
   // Binning and cuts
   std::vector<float> m_etaBins;
