@@ -2,12 +2,19 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import LHCPeriod
 
 def SeedJetBuilderCfg(flags, name="DiTauRec_SeedJetBuilder", jetCollection=""):
     """Configure the seed jet builder"""
     acc = ComponentAccumulator()
+
+    if jetCollection == "":
+        jet_coll = flags.DiTau.SeedJetCollection[2] if flags.GeoModel.Run > LHCPeriod.Run3 else flags.DiTau.SeedJetCollection[0]
+    else:
+        jet_coll = jetCollection 
+ 
     acc.setPrivateTools(CompFactory.SeedJetBuilder(name, 
-                                                   JetCollection = jetCollection if jetCollection != "" else flags.DiTau.SeedJetCollection[0]))
+                                                   JetCollection = jet_coll))
     return acc
 
 
