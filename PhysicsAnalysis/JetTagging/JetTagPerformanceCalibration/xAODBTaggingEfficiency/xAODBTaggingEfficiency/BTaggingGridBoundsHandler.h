@@ -112,7 +112,7 @@ BTaggingGridBoundsHandler<handlerClass>::BTaggingGridBoundsHandler(const std::st
 
     // Get epsilon value for float comparison from the first handler for the current variable
     // The epsilon value should in any case be the same for all handlers
-    float varEps = m_handlers.at(0).m_varBinBounds.at(vType).varEps;
+    float varEps = m_handlers.at(0).m_varBinBounds.at(vType).getVarEpsilon();
 
     // Loop over each handler
     for (const handlerClass& handler : m_handlers){
@@ -121,8 +121,8 @@ BTaggingGridBoundsHandler<handlerClass>::BTaggingGridBoundsHandler(const std::st
 
       // Retrieve the lower and upper bounds associated to the current variable and current handler 
       const BTaggingBoundsHandler::varBounds & hdlrBounds = handler.m_varBinBounds.at(vType);
-      float lowerBound = hdlrBounds.lowerBound;
-      float upperBound = hdlrBounds.upperBound;
+      float lowerBound = hdlrBounds.getLowerBound();
+      float upperBound = hdlrBounds.getUpperBound();
 
       // // For debugging print information 
       // std::cout << "varName=" << BTaggingToolUtil::getVariableName(vType) << ", lowerBound=" << lowerBound << ", upperBound=" << upperBound << std::endl;
@@ -168,16 +168,8 @@ BTaggingGridBoundsHandler<handlerClass>::BTaggingGridBoundsHandler(const std::st
     // Now loop over the sorted vector 
     for (unsigned int i = 0; i < varBounds.size() - 1; i++){
       // Build the corresponding varBounds 
-      BTaggingBoundsHandler::varBounds bounds;
-      bounds.lowerBound = varBounds[i];
-      bounds.upperBound = varBounds[i+1];
-      bounds.varEps = varEps;
-
-      // For sanity check make sure that lowerBound is strictly smaller than upperBound 
-      if (bounds.lowerBound >= bounds.upperBound){ 
-        throw std::runtime_error("bounds.lowerBound >= bounds.upperBound for context=" + context);
-      }
-
+      BTaggingBoundsHandler::varBounds vBounds(varBounds[i], varBounds[i+1], varEps);
+      
       std::set<const handlerClass*> handlerSet;
       // Loop again over handlers
       for (const handlerClass& handler : m_handlers){
@@ -188,7 +180,7 @@ BTaggingGridBoundsHandler<handlerClass>::BTaggingGridBoundsHandler(const std::st
         // it means the handler covers the current bounds range 
         // hence add the pointer to the handler to the set as the handler should be considered for that current bound
         // Otherwise the handler does not corresponds to the current bounds 
-        if (hdlrBounds.overlaps(bounds)){
+        if (hdlrBounds.overlaps(vBounds)){
           handlerSet.insert( &handler );
         }
       }
@@ -196,12 +188,12 @@ BTaggingGridBoundsHandler<handlerClass>::BTaggingGridBoundsHandler(const std::st
       // If the set of handler overlapping with the current bound 
       // is not empty then add that set to the map 
       if (handlerSet.size()){
-        m_varBoundsSetHandlers[vType][bounds] = std::move(handlerSet);
+        m_varBoundsSetHandlers[vType][vBounds] = std::move(handlerSet);
         // // For debugging 
-        // std::cout << "varName=" << BTaggingToolUtil::getVariableName(vType) << ", bounds(lowerBounds, upperBound)=("<< bounds.lowerBound << ", " << bounds.upperBound  << "): " ;
+        // std::cout << "varName=" << BTaggingToolUtil::getVariableName(vType) << ", vBounds(lowerBounds, upperBound)=("<< vBounds.getLowerBound() << ", " << vBounds.getUpperBound() << "): " ;
         // // Iterate over the set 
         // bool firstHandler = true;
-        // for (const handlerClass *handler : m_varBoundsSetHandlers[vType][bounds]){
+        // for (const handlerClass *handler : m_varBoundsSetHandlers[vType][vBounds]){
         //   if (!firstHandler){
         //     std::cout << ", ";
         //   }
@@ -216,9 +208,7 @@ BTaggingGridBoundsHandler<handlerClass>::BTaggingGridBoundsHandler(const std::st
 }
 
 template<class handlerClass>
-const handlerClass* BTaggingGridBoundsHandler<handlerClass>::getHandlerPtr(const xAOD::Jet& jet) const
-{ 
-
+const handlerClass* BTaggingGridBoundsHandler<handlerClass>::getHandlerPtr(const xAOD::Jet& jet) const {
   // Perform the matching between the jet and the corresponding handler 
   // See MR https://gitlab.cern.ch/atlas/athena/-/merge_requests/92635 
   // for more explanation 
@@ -291,10 +281,10 @@ const handlerClass* BTaggingGridBoundsHandler<handlerClass>::getHandlerPtr(const
   }
 
   // If arriving here all good we have only one handler in the set 
-  // retrieve it and return the pointer to that handler
+  // retrieve the pointer to the handler and return the pointer to that handler
   // that is matching the jet
-  const handlerClass* handler = *handlersSetMatchingJetValues.begin();
-  return handler;
+  const handlerClass* handlerPtr = *handlersSetMatchingJetValues.begin();
+  return handlerPtr;
 }
 
 #endif // BTAGGINGGRIDBOUNDSHANDLER_H

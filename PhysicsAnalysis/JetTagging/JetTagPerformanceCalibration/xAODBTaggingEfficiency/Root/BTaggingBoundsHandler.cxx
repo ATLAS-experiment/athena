@@ -7,21 +7,21 @@
 
 // Two half-open intervals [low, high) overlap if each one starts before the other ends.
 // Touching edges (upper = other lower) are not considered overlapping.
-bool BTaggingBoundsHandler::varBounds::overlaps(const varBounds& o) const {
-  const bool endsBeforeOther = upperBound < o.lowerBound || BTaggingToolUtil::approxEqual(upperBound, o.lowerBound, varEps);
-  const bool otherEndsBefore = o.upperBound < lowerBound || BTaggingToolUtil::approxEqual(o.upperBound, lowerBound, varEps);
+bool BTaggingBoundsHandler::varBounds::overlaps(const varBounds& oBounds) const {
+  const bool endsBeforeOther = m_upperBound < oBounds.m_lowerBound || BTaggingToolUtil::approxEqual(m_upperBound, oBounds.m_lowerBound, m_varEps);
+  const bool otherEndsBefore = oBounds.m_upperBound < m_lowerBound || BTaggingToolUtil::approxEqual(oBounds.m_upperBound, m_lowerBound, m_varEps);
   return !endsBeforeOther && !otherEndsBefore;
 }
-bool BTaggingBoundsHandler::varBounds::operator<(const varBounds& o) const {
-  if (!BTaggingToolUtil::approxEqual(lowerBound, o.lowerBound, varEps)) return lowerBound < o.lowerBound;
-  if (!BTaggingToolUtil::approxEqual(upperBound, o.upperBound, varEps)) return upperBound < o.upperBound;
+bool BTaggingBoundsHandler::varBounds::operator<(const varBounds& oBounds) const {
+  if (!BTaggingToolUtil::approxEqual(m_lowerBound, oBounds.m_lowerBound, m_varEps)) return m_lowerBound < oBounds.m_lowerBound;
+  if (!BTaggingToolUtil::approxEqual(m_upperBound, oBounds.m_upperBound, m_varEps)) return m_upperBound < oBounds.m_upperBound;
   // Both upper and lower bounds are equal within tolerance
   return false;
 }
 // Define an ordering of varBounds compare first lowerBound then upperBound
 // within tolerance
-bool BTaggingBoundsHandler::varBounds::operator==(const varBounds& o) const {
-  return BTaggingToolUtil::approxEqual(lowerBound, o.lowerBound, varEps) && BTaggingToolUtil::approxEqual(upperBound, o.upperBound, varEps);
+bool BTaggingBoundsHandler::varBounds::operator==(const varBounds& oBounds) const {
+  return BTaggingToolUtil::approxEqual(m_lowerBound, oBounds.m_lowerBound, m_varEps) && BTaggingToolUtil::approxEqual(m_upperBound, oBounds.m_upperBound, m_varEps);
 }
 
 BTaggingBoundsHandler::BTaggingBoundsHandler(
@@ -78,34 +78,22 @@ BTaggingBoundsHandler::BTaggingBoundsHandler(
     }
     catch (const std::exception& e) {
       // throw error 
-      throw std::runtime_error("Could not retrieve variable type for varName='" + varName + "': " + e.what());
+      throw std::runtime_error("Could not retrieve variable type for varName='" + varName + "' for jsonConfig=" + jsonConfig.dump() + " --> Error=" + e.what());
     }
 
-    // Retrieve the corresponding bounds 
-    varBounds vBounds;
-    vBounds.lowerBound = BTaggingToolUtil::getExtendedFloat(varBinRange[0]);
-    vBounds.upperBound = BTaggingToolUtil::getExtendedFloat(varBinRange[1]);
+    try {
+      // Retrieve the corresponding bounds 
+      varBounds vBounds(
+        BTaggingToolUtil::getExtendedFloat(varBinRange[0]),
+        BTaggingToolUtil::getExtendedFloat(varBinRange[1])
+      );
 
-    // Make sure that lowerBounds and upperBounds are not NaNs
-    if (!std::isfinite(vBounds.lowerBound)){
-      throw std::runtime_error(
-        "Bin issue lower bound is not a finite number for varName='" + varName + 
-        "' while varBinRange="+ varBinRange.dump() + " for jsonConfig=" + jsonConfig.dump());
+      // Finally add the varBounds to the map of variable bounds
+      m_varBinBounds[vType] = vBounds;
     }
-    if (!std::isfinite(vBounds.upperBound)){
-      throw std::runtime_error(
-        "Bin issue upper bound is not a finite number for varName='" + varName + 
-        "' while varBinRange="+ varBinRange.dump() + " for jsonConfig=" + jsonConfig.dump());
+    catch (const std::exception& e) {
+      throw std::runtime_error("Bin issue varName='" + varName + "' and varBinRange="+ varBinRange.dump() + " for jsonConfig=" + jsonConfig.dump() + " --> Error=" + e.what());
     }
-
-    // Let's make sure that lowerBound < upperBound
-    if (vBounds.lowerBound >= vBounds.upperBound){
-      throw std::runtime_error(
-        "Bin issue, the min value >= max value for varName='" + varName +"': min=" + std::to_string(vBounds.lowerBound)+ ", max=" + std::to_string(vBounds.upperBound) + " for jsonConfig=" + jsonConfig.dump());
-    }
-
-    // Finally add the varBounds to the map of variable bounds
-    m_varBinBounds[vType] = vBounds;
   }
 }
 
@@ -120,7 +108,7 @@ std::vector<BTaggingToolUtil::varType> BTaggingBoundsHandler::getListVariables()
 
 bool BTaggingBoundsHandler::isJetWithinBounds(const xAOD::Jet& jet) const {
   // Loop over all variables e.g. pT, eta etc
-  for (const auto& [vType, bounds] : m_varBinBounds) {
+  for (const auto& [vType, vBounds] : m_varBinBounds) {
     // For each variable get the corresponding jet value
     // e.g. get the jet pT if the variable is pT
     const float value = (*m_funcGetJetQuantity)(jet, vType);
@@ -128,7 +116,7 @@ bool BTaggingBoundsHandler::isJetWithinBounds(const xAOD::Jet& jet) const {
     // e.g. check if jet pT is within pTmin and pTmax
     // If not within those bounds then the jet is not falling in the bin
     // thus return false
-    if (value < bounds.lowerBound || value >= bounds.upperBound) {
+    if ( !(vBounds.isWithinBounds(value)) ) {
       return false;
     }
   }
@@ -143,10 +131,10 @@ std::string BTaggingBoundsHandler::onlyBounds_to_string() const {
   // e.g. "pT: [250, 500], mass: [50, 100]"
   // The separator ", " is only added between entries, not after the last one
   bool first = true;
-  for (const auto& [vType, bounds] : m_varBinBounds) {
+  for (const auto& [vType, vBounds] : m_varBinBounds) {
     if (!first) os << ", ";
     first = false;
-    os << BTaggingToolUtil::getVariableName(vType) << ": [" << bounds.lowerBound << ", " << bounds.upperBound << "]";
+    os << BTaggingToolUtil::getVariableName(vType) << ": [" << vBounds.getLowerBound() << ", " << vBounds.getUpperBound() << "]";
   }
   return os.str();
 }
@@ -157,13 +145,13 @@ std::string BTaggingBoundsHandler::to_string() const {
   return os.str();
 }
 
-bool BTaggingBoundsHandler::operator<(const BTaggingBoundsHandler& o) const {
+bool BTaggingBoundsHandler::operator<(const BTaggingBoundsHandler& oBounds) const {
   // Ordering of handlers loop over variables as stored in the map
   // and let the first variable whose bounds differ decide of the ordering
 
   // Make sure maps have the same size
-  if (m_varBinBounds.size() != o.m_varBinBounds.size()) {
-    throw std::logic_error("Cannot compare handlers with a different number of variables: " + this->to_string() + " versus " + o.to_string() );
+  if (m_varBinBounds.size() != oBounds.m_varBinBounds.size()) {
+    throw std::logic_error("Cannot compare handlers with a different number of variables: " + this->to_string() + " versus " + oBounds.to_string() );
   }
 
   // Make sure that the function used to retrieve the jet quantities is also the same 
@@ -171,15 +159,15 @@ bool BTaggingBoundsHandler::operator<(const BTaggingBoundsHandler& o) const {
   // as they may then return different jet quantities e.g. imagine one handler 
   // is returning the regular jet pT while the other one returns the regressed jet pT
   // that would imply migration and so we cannot ensure orthogonality in that case 
-  if (m_funcGetJetQuantity != o.m_funcGetJetQuantity){
-    throw std::logic_error("Cannot compare handlers with a different jet quantity getter function: " + this->to_string() + " versus " + o.to_string() );
+  if (m_funcGetJetQuantity != oBounds.m_funcGetJetQuantity){
+    throw std::logic_error("Cannot compare handlers with a different jet quantity getter function: " + this->to_string() + " versus " + oBounds.to_string() );
   }
 
   // Loop over the different variables bounds and compare
   for (const auto& [vType, vBounds1] : m_varBinBounds) {
     // Make sure the other handler has the same variable
-    const auto it = o.m_varBinBounds.find(vType);
-    if (it == o.m_varBinBounds.end()) {
+    const auto it = oBounds.m_varBinBounds.find(vType);
+    if (it == oBounds.m_varBinBounds.end()) {
       throw std::logic_error("Cannot compare handlers: variable '" + BTaggingToolUtil::getVariableName(vType) +
                              "' missing in the other handler");
     }
@@ -190,14 +178,14 @@ bool BTaggingBoundsHandler::operator<(const BTaggingBoundsHandler& o) const {
   return false;  // all bounds equal
 }
 
-bool BTaggingBoundsHandler::overlaps(const BTaggingBoundsHandler& o) const {
+bool BTaggingBoundsHandler::overlaps(const BTaggingBoundsHandler& oBounds) const {
   // Two handlers that are N-dimensional bins overlap if
   // for every variable their bounds overlap
   // If for one variable there is no overlapping bounds then the bins are not overlapping
 
   // Make sure maps have the same size
-  if (m_varBinBounds.size() != o.m_varBinBounds.size()) {
-    throw std::logic_error("Cannot check overlap of handlers with a different number of variables: " + this->to_string() + " versus " + o.to_string() );
+  if (m_varBinBounds.size() != oBounds.m_varBinBounds.size()) {
+    throw std::logic_error("Cannot check overlap of handlers with a different number of variables: " + this->to_string() + " versus " + oBounds.to_string() );
   }
 
   // Make sure that the function used to retrieve the jet quantities is also the same 
@@ -205,15 +193,15 @@ bool BTaggingBoundsHandler::overlaps(const BTaggingBoundsHandler& o) const {
   // as they may then return different jet quantities e.g. imagine one handler 
   // is returning the regular jet pT while the other one returns the regressed jet pT
   // that would imply migration and so we cannot ensure orthogonality in that case 
-  if (m_funcGetJetQuantity != o.m_funcGetJetQuantity){
-    throw std::logic_error("Cannot compare handlers with a different jet quantity getter function: " + this->to_string() + " versus " + o.to_string() );
+  if (m_funcGetJetQuantity != oBounds.m_funcGetJetQuantity){
+    throw std::logic_error("Cannot compare handlers with a different jet quantity getter function: " + this->to_string() + " versus " + oBounds.to_string() );
   }
 
   // Loop over the different variables bounds and check the overlap
   for (const auto& [vType, vBounds1] : m_varBinBounds) {
     // Make sure the other handler has the same variable
-    const auto it = o.m_varBinBounds.find(vType);
-    if (it == o.m_varBinBounds.end()) {
+    const auto it = oBounds.m_varBinBounds.find(vType);
+    if (it == oBounds.m_varBinBounds.end()) {
       throw std::logic_error("Cannot check overlap of handlers: variable '" + BTaggingToolUtil::getVariableName(vType) +
                              "' missing in the other handler");
     }
