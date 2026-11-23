@@ -7332,6 +7332,12 @@ EF_j460C_a10sd_cssk_pf_jes_ftf_preselj225_L1jJ160:
   stepFeatures:
     0: 6
   eventCount: 0
+EF_j460C_a10sd_cssk_ufo_nojcalib_ftf_preselj225_L1jJ160:
+  stepCounts:
+    0: 6
+  stepFeatures:
+    0: 6
+  eventCount: 0
 EF_j460_a10sd_cssk_pf_jes_ftf_preselj225_L1SC175-SCjJ10:
   stepCounts:
     0: 6

@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 ##########################################################################################
@@ -136,13 +136,27 @@ def jetDefToString(jetDef):
         constitstr = "ion" if _jetDef.context == "hi" else "ionp"
     else:
         clusterCalib = 'lcw' if 'LC' in constitdef.label else 'em'
-        constittype = 'pf' if 'PFlow' in constitdef.label else 'tc'
+        if 'UFO' in constitdef.label:
+            constittype = 'ufo'
+        elif 'PFlow' in constitdef.label:
+            constittype = 'pf'
+        else:
+            constittype = 'tc'
+
         constitmods = ''
         if isinstance(constitdef,JetInputConstitSeq):
             ignore = ['EM','LC','CHS','CorrectPFO']
             for mod in constitdef.modifiers:
                 if mod not in ignore:
                     constitmods += str.lower(mod)
+        # special case for UFO because they are JetInputConstit which do not include modifiers
+        if constittype == 'ufo':
+            ignore = ['EM','LC','CHS','CorrectPFO']
+            constitmods = constitdef.label
+            for	drop in ignore:
+                if drop in constitmods:
+                    constitmods = constitmods.replace(drop, '')
+            constitmods = constitmods.lower().replace(constittype,'')
         constitstr = f'{constitmods}{constittype}_{clusterCalib}'
     jetdefstr = f'{algstr}_{constitstr}{jetDef.suffix}'
 
@@ -186,6 +200,12 @@ def isPFlow(jetRecoDict):
     if isPFlow and not doFSTracking(jetRecoDict):
         raise ValueError("This is a PFlow chain but an incompatible tracking option is given!")
     return isPFlow
+
+def isUFO(jetRecoDict):
+    isUFO = jetRecoDict["constitType"] == "ufo"
+    if isUFO and not doFSTracking(jetRecoDict):
+        raise ValueError("This is a PFlow chain but an incompatible tracking option is given!")
+    return isUFO
 
 # return the min jet pT in MeV for the configured recoAlg
 def getFilterCut(recoAlg):
@@ -405,10 +425,12 @@ def defineJetConstit(jetRecoDict,clustersKey=None,pfoPrefix=None):
     constitMods = []
     # Get the details of the constituent definition:
     # type, mods and the input container name
+
+    from JetRecConfig.StandardJetConstits import stdConstitDic
     
-    if jetRecoDict["constitType"] == "pf":
+    if jetRecoDict["constitType"] == "pf" or jetRecoDict["constitType"] == "ufo":
         if pfoPrefix is None:
-            raise RuntimeError("JetRecoCommon: Cannot define PF jets without pfo prefix!")
+            raise RuntimeError("JetRecoCommon: Cannot define PF or UFO jets without pfo prefix!")
 
         constitMods = ["CorrectPFO"] 
         # apply constituent pileup suppression
@@ -431,6 +453,13 @@ def defineJetConstit(jetRecoDict,clustersKey=None,pfoPrefix=None):
         else:
             jetConstit = JetInputConstitSeq( "HLT_EMPFlow"+modstring, inputxAODType, constitMods, inputname=inputPFO, outputname=pfoPrefix+modstring+"ParticleFlowObjects",label='EMPFlow'+(modstring if modstring!='CHS' else ''), jetinputtype="EMPFlow" )
 
+        if jetRecoDict["constitType"] == "ufo":
+
+            # Add the PFlow constituents needed as input for UFO reconstruction
+            stdConstitDic.setdefault(jetConstit.name, jetConstit)
+
+            # Define UFO constituents
+            jetConstit = JetInputConstit("HLT_"+jetRecoDict["trkopt"]+"UFO"+modstring, inputxAODType, "HLT_"+jetRecoDict["trkopt"]+"UFO"+(modstring if modstring!="CHS" else ""), label="UFO"+(modstring if modstring!="CHS" else ""))
             
     if jetRecoDict["constitType"] == "tc":
         # apply constituent pileup suppression
@@ -459,7 +488,6 @@ def defineJetConstit(jetRecoDict,clustersKey=None,pfoPrefix=None):
             jetConstit = JetInputConstitSeq( "HLT_"+constitMods[0]+"Topo",xAODType.CaloCluster, constitMods, inputname=clustersKey, outputname=clustersKey+modstring,label=constitMods[0]+'Topo'+modstring)
 
     # declare our new JetInputConstitSeq in the standard dictionary
-    from JetRecConfig.StandardJetConstits import stdConstitDic
     stdConstitDic.setdefault(jetConstit.name, jetConstit)
 
     return jetConstit

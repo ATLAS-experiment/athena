@@ -49,6 +49,7 @@ nPFOVarsToKeep = ['AVG_LAR_Q', 'AVG_TILE_Q', 'BADLARQ_FRAC',
                   'TIMING',
         ]
 
+UFOVarsToKeep = ['pt','eta','phi','m','signalType']
 
 # ============
 # === JETS ===
@@ -808,6 +809,13 @@ TriggerHLTListProtoRun4 = [
 
     ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_nojcalib_ftf',                'BS ESD AODFULL AODSLIM', 'Jet'),
     ('xAOD::JetAuxContainer#HLT_AntiKt4EMPFlowJets_nojcalib_ftfAux.'+JetVars, 'BS ESD AODFULL AODSLIM', 'Jet'),
+
+    # UFO jets and objects
+    ('xAOD::JetContainer#HLT_AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets_nojcalib_ftf',                      'BS ESD AODFULL', 'Jet'),
+    ('xAOD::JetAuxContainer#HLT_AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets_nojcalib_ftfAux.'+LargeRJetVars, 'BS ESD AODFULL', 'Jet'),
+
+    ('xAOD::FlowElementContainer#HLT_ftfUFOCSSK', 'BS ESD', 'Jet'),
+    ('xAOD::FlowElementAuxContainer#HLT_ftfUFOCSSKAux.'+'.'.join(UFOVarsToKeep), 'BS ESD', 'Jet'),
 
     ## event info
     ('xAOD::TrigCompositeContainer#HLT_TCEventInfo_jet',                                 'BS ESD AODFULL', 'Jet' ),

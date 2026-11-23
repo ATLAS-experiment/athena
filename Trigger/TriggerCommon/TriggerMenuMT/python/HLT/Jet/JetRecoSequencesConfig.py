@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 """ ComponentAccumulator equivalents for the functions in JetRecoSequences """
@@ -16,6 +16,7 @@ from .JetRecoCommon import (
     getHLTPrefix,
     getClustersKey,
     isPFlow,
+    isUFO,
     doTracking,
     doFSTracking,
     getJetCalibDefaultString,
@@ -93,7 +94,8 @@ def StandardJetBuildDataDeps(flags, **jetRecoDict):
     clustersKey = getClustersKey(jetRecoDict)
 
     is_pflow = isPFlow(jetRecoDict)
-    if is_pflow:
+    is_ufo = isUFO(jetRecoDict)
+    if is_pflow or is_ufo:
         jetDef = defineJets(
             flags,
             jetRecoDict,
@@ -137,6 +139,7 @@ def StandardJetBuildDataDeps(flags, **jetRecoDict):
 
 def StandardJetRecoDataDeps(flags, **jetRecoDict):
     """Jet clustering + calibration (via shallow copy)"""
+
     if jetRecoDict["jetCalib"] == "nojcalib":
         # If we don't calibrate, we need to return the clustered jets with filter
         jetDefDict = StandardJetBuildDataDeps(
@@ -311,7 +314,7 @@ def StandardJetBuildCfg(flags, jetDef):
     acc.addSequence(parOR(seqname),primary=True)
 
     # Add PFlow reconstruction if necessary
-    if 'PFlow' in jetDef.inputdef.label:
+    if 'PFlow' in jetDef.inputdef.label or 'UFO' in jetDef.inputdef.label:
         from eflowRec.PFHLTConfig import PFCfg
 
         clustersKey = jetDef.inputdef.prereqs[0].split(':')[1]
@@ -327,6 +330,23 @@ def StandardJetBuildCfg(flags, jetDef):
             ),
             seqname
         )
+
+    if 'UFO' in jetDef.inputdef.label:
+        import TrackCaloClusterRecTools.HLT_TrackCaloClusterConfig as tcccfg
+
+        from JetRecConfig.StandardJetConstits import stdConstitDic
+
+        inputs_EMPFlow = ''
+        if "CSSK" in jetDef.inputdef.label:
+            inputs_EMPFlow = 'HLT_EMPFlowCSSK'
+        else:
+            inputs_EMPFlow = 'HLT_EMPFlowCHS'
+
+        alg = JetRecConfig.getConstitModAlg_nojetdef(stdConstitDic[inputs_EMPFlow],flags,context=jetDef.context)
+        acc.addEventAlgo(alg,seqname)
+
+        acc.merge(
+            tcccfg.runUFOReconstruction(flags,stdConstitDic[inputs_EMPFlow],trackColls["Tracks"],trackColls["Vertices"],caloClusterName=clustersKey,trackingType=jetDef.context),seqname)
 
     alg = JetRecConfig.getConstitModAlg(
         jetDef, jetDef.inputdef,
