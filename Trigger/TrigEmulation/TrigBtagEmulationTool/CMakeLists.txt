@@ -11,6 +11,12 @@ atlas_add_library(TrigBtagEmulationToolLib
 		  LINK_LIBRARIES AsgTools AsgMessagingLib
 		  )
 
+# the StoreGate key of the per-RoI jet collections of Run 2 data
+set( extra_libs )
+if( NOT XAOD_STANDALONE )
+  set( extra_libs SGTools )
+endif()
+
 atlas_add_component(TrigBtagEmulationTool
 		      src/*.cxx 
 		      src/*.h 
@@ -20,12 +26,14 @@ atlas_add_component(TrigBtagEmulationTool
 		    LINK_LIBRARIES 
 		      ${ROOT_LIBRARIES}
 		      TrigBtagEmulationToolLib
+		      CxxUtils
 		      xAODJet
 		      xAODBTagging
 		      xAODTrigger
 		      TrigDecisionToolLib
 		      FlavorTagDiscriminants
               TrigCompositeUtilsLib
+		      ${extra_libs}
 		    )
 
 # Install files from the package:

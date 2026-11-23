@@ -4,6 +4,27 @@ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #include "src/JetManagerTool.h"
 #include "AsgDataHandles/ReadHandle.h"
+#ifdef XAOD_STANDALONE
+#include "CxxUtils/crc64.h"
+#else
+#include "SGTools/StringPool.h"
+#endif
+
+#include <format>
+
+namespace {
+  // StoreGate's key of a name. AnalysisBase has no function for it (xAOD::Event::stringToKey
+  // hashes names it does not know with std::hash), so there it is a copy of SG::StringPool::stringToKey.
+  SG::sgkey_t storeGateKey(const std::string& name, CLID clid) {
+#ifdef XAOD_STANDALONE
+    constexpr SG::sgkey_t keyMask = (SG::sgkey_t{1} << 30) - 1;
+    return CxxUtils::crc64addint(CxxUtils::crc64(name), clid) & keyMask;
+#else
+    SG::StringPool pool;
+    return pool.stringToKey(name, clid);
+#endif
+  }
+}
 
 namespace Trig {
 
@@ -25,6 +46,12 @@ StatusCode JetManagerTool::initialize() {
 
   ATH_CHECK(m_btagInputKey.initialize(m_LHCPeriod == 2));
 
+  const bool isRun2GSC = m_LHCPeriod == 2 and m_jetInputKey.key().find("GSC") != std::string::npos;
+  ATH_CHECK(m_splitJetInputKey.initialize(isRun2GSC));
+  if (m_LHCPeriod == 2) {
+    m_onlineJetIndex = onlineJetIndex(m_jetInputKey.key());
+    if (isRun2GSC) m_onlineSplitJetIndex = onlineJetIndex(m_splitJetInputKey.key());
+  }
 
   return StatusCode::SUCCESS;
 }
@@ -131,13 +158,32 @@ StatusCode JetManagerTool::retrieveByContainer(const EventContext& ctx,
 
       bool isGSCchain = jetContainerName().find("GSC")!=std::string::npos;
 
+      // for GSC chains the b-tagged jet can be a split jet
+      const xAOD::JetContainer *theSplitJetContainer = nullptr;
+      if (isGSCchain) {
+        SG::ReadHandle< xAOD::JetContainer > splitJetContainerHandle = SG::makeHandle( m_splitJetInputKey, ctx );
+        if (splitJetContainerHandle.isValid()) theSplitJetContainer = splitJetContainerHandle.cptr();
+      }
+
       for ( const xAOD::BTagging *btag : *theBTagContainer ) {
         //coverity[UNNECESSARY_STRING_COPY:FALSE]
         static const SG::ConstAccessor<std::vector<ElementLink<xAOD::IParticleContainer>>> btagToJetAccessor("BTagBtagToJetAssociator");
         if (btagToJetAccessor.isAvailable(*btag)) {
           const auto &jetLink = btagToJetAccessor(*btag);
-          if (jetLink.size() > 0 && jetLink.at(0).isValid()) {
-            const xAOD::Jet *btaggedJet = static_cast<const xAOD::Jet *>(*jetLink.at(0));
+          if (jetLink.size() > 0) {
+            const xAOD::Jet *btaggedJet = nullptr;
+            if (jetLink.at(0).isValid()) {
+              btaggedJet = static_cast<const xAOD::Jet *>(*jetLink.at(0));
+            } else {
+              // data: the link still points to the per-RoI jet collection of the HLT
+              btaggedJet = onlineJet(m_onlineJetIndex, jetLink.at(0).persKey(), theJetContainer);
+              if (btaggedJet == nullptr)
+                btaggedJet = onlineJet(m_onlineSplitJetIndex, jetLink.at(0).persKey(), theSplitJetContainer);
+            }
+            if (btaggedJet == nullptr) {
+              ATH_MSG_DEBUG("BTagging object without a jet in " << jetContainerName());
+              continue;
+            }
             double mv2c20_score, mv2c10_score;
             btag->MVx_discriminant("MV2c20", mv2c20_score);
             btag->MVx_discriminant("MV2c10", mv2c10_score);
@@ -200,6 +246,33 @@ const std::vector<TrigBtagEmulationJet>& JetManagerTool::getJets(const EmulConte
 const std::vector<TrigBtagEmulationJet>& JetManagerTool::getSortedPreselJets(const EmulContext& emulCtx) const 
 { 
   return *emulCtx.get<std::vector<TrigBtagEmulationJet>>(m_jetcontainer.value() + "_presel");
+}
+
+// In Run 2 data the b-tagging objects still link to the per-RoI jet collections of the HLT,
+// "HLTAutoKey_<label>_<CLID>_<sub-type>_to_<n>" (HLT::IHolder::generateAliasKey), which are
+// not in the file. A link keeps only the StoreGate key of that name, and jet n of it is jet n
+// of the merged HLT_xAOD__JetContainer_<label>, so we hash all such names once and look it up.
+JetManagerTool::OnlineJetIndex JetManagerTool::onlineJetIndex(const std::string& jetContainerName) {
+  const CLID clid = ClassID_traits<xAOD::JetContainer>::ID();
+  static const std::string containerPrefix = "HLT_xAOD__JetContainer_";
+  OnlineJetIndex index;
+  if (jetContainerName.rfind(containerPrefix, 0) != 0) return index;
+  const std::string label = jetContainerName.substr(containerPrefix.size());
+  // the sub-type differs between events
+  for (unsigned int subType = 0; subType < 64; subType++) {
+    for (std::size_t n = 0; n < 64; n++) {
+      index.emplace(storeGateKey(std::format("HLTAutoKey_{}_{}_{}_to_{}", label, clid, subType, n), clid), n);
+    }
+  }
+  return index;
+}
+
+const xAOD::Jet* JetManagerTool::onlineJet(const OnlineJetIndex& index, SG::sgkey_t linkKey,
+                                           const xAOD::JetContainer* jets) {
+  if (jets == nullptr) return nullptr;
+  const auto found = index.find(linkKey);
+  if (found == index.end() or found->second >= jets->size()) return nullptr;
+  return jets->at(found->second);
 }
 
 bool JetManagerTool::matchedSPLITjet(const xAOD::Jet *splitJet,
