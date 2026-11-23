@@ -93,7 +93,7 @@ testEDMList(edm_list, check_edmdetails_for_version=-1)
 - Valid EDM targets
 - Duplicates
 - `AllowTruncation` entries appear at end of list.
-- Relevance of each EDMDetails entry if `check_edmdetails_for_version` set.
+- EDM version specific checks if `do_extra_checks_for_version` set.
 
 Used in EDM unit testing and when adding new EDM via
 `Trigger.ExtraEDMList` flag on the fly.

@@ -16,6 +16,10 @@ atlas_add_test( testEDMRun3
    SCRIPT testEDMRun3.py
    POST_EXEC_SCRIPT noerror.sh )
 
+atlas_add_test( testEDMProtoRun4
+   SCRIPT testEDMProtoRun4.py
+   POST_EXEC_SCRIPT noerror.sh )
+
 atlas_add_test( testEDMRun4
    SCRIPT testEDMRun4.py
    POST_EXEC_SCRIPT noerror.sh )

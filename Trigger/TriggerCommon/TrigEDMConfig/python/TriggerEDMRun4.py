@@ -14,7 +14,9 @@ __log = logging.getLogger('TriggerEDMRun4Config')
 # ------------------------------------------------------------
 # Additional properties for EDM collections
 # ------------------------------------------------------------
-from TrigEDMConfig.TriggerEDMDefs import InViews, Alias # Import when needed, allowTruncation
+# from TrigEDMConfig.TriggerEDMDefs import InViews, Alias # Import when needed, allowTruncation
+allowedRun4EDMPrefixes = ['EF_', 'L1_']
+run4EDMNamingExceptionsList = ['SeedLessFS']
 
 # ------------------------------------------------------------
 # Lists of variables to be kept in the collections 
@@ -68,17 +70,17 @@ TriggerHLTListRun4 = [
     #('xAOD::TrigDecision#xTrigDecision' ,                    'ESD AODFULL AODSLIM', 'Steer'), 
 
     # Collections for Run 4 calorimeter studies
-    ('xAOD::TrigRingerRingsContainer#Ringer2sigGlobal',  'BS ESD AODFULL', 'Calo'),
-    ('xAOD::TrigRingerRingsAuxContainer#Ringer2sigGlobalAux.',  'BS ESD AODFULL', 'Calo'), 
+    ('xAOD::TrigRingerRingsContainer#L1_Ringer2sigGlobal',  'BS ESD AODFULL', 'Calo'),
+    ('xAOD::TrigRingerRingsAuxContainer#L1_Ringer2sigGlobalAux.',  'BS ESD AODFULL', 'Calo'),
 
-    ('xAOD::TrigEMClusterContainer#CaloClusters2sigGlobal',  'BS ESD AODFULL', 'Calo'), 
-    ('xAOD::TrigEMClusterAuxContainer#CaloClusters2sigGlobalAux.',  'BS ESD AODFULL', 'Calo'),
+    ('xAOD::TrigEMClusterContainer#L1_CaloClusters2sigGlobal',  'BS ESD AODFULL', 'Calo'),
+    ('xAOD::TrigEMClusterAuxContainer#L1_CaloClusters2sigGlobalAux.',  'BS ESD AODFULL', 'Calo'),
 
-    ('xAOD::TrigRingerRingsContainer#RingerGlobal',  'BS ESD AODFULL', 'Calo'), 
-    ('xAOD::TrigRingerRingsAuxContainer#RingerGlobalAux.',  'BS ESD AODFULL', 'Calo'), 
+    ('xAOD::TrigRingerRingsContainer#L1_RingerGlobal',  'BS ESD AODFULL', 'Calo'),
+    ('xAOD::TrigRingerRingsAuxContainer#L1_RingerGlobalAux.',  'BS ESD AODFULL', 'Calo'),
 
-    ('xAOD::TrigEMClusterContainer#CaloClustersGlobal',  'BS ESD AODFULL', 'Calo'), 
-    ('xAOD::TrigEMClusterAuxContainer#CaloClustersGlobalAux.',  'BS ESD AODFULL', 'Calo'),
+    ('xAOD::TrigEMClusterContainer#L1_CaloClustersGlobal',  'BS ESD AODFULL', 'Calo'),
+    ('xAOD::TrigEMClusterAuxContainer#L1_CaloClustersGlobalAux.',  'BS ESD AODFULL', 'Calo'),
 
     ('CaloCellContainer#SeedLessFS',  'ESD AODFULL', 'Calo'), 
     
@@ -88,88 +90,6 @@ TriggerHLTListRun4 = [
     ('std::vector<float>#L1_FailedeFEXeta', 'ESD AODFULL', 'L1'),
     ('std::vector<float>#L1_FailedeFEXphi', 'ESD AODFULL', 'L1'),
     ('std::vector<float>#L1_eGamma1BDT', 'ESD AODFULL', 'L1'),
-
-    # HitZ preselection, in its own super-RoI step ahead of the tracking
-    ('TrigRoiDescriptorCollection#HLT_Roi_JetSuperHitZ',                'BS ESD AODFULL', 'Jet'),
-    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesIS_hitz',           'BS ESD AODFULL', 'Jet', [Alias('JetContainerShallowCopy')]),
-    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subjesIS_hitzAux.pt.eta.phi.m.HitZ_z0.HitZ_z0_sigma', 'BS ESD AODFULL', 'Jet'),
-
-    # Particle Flow Objects, for assessing performance with ITk (and perhaps HGTD)
-    ('xAOD::FlowElementContainer#HLT_ftfChargedParticleFlowObjects', 'BS ESD', 'Jet'),
-    ('xAOD::FlowElementAuxContainer#HLT_ftfChargedParticleFlowObjectsAux.'+'.'.join(cPFOVarsToKeep), 'BS ESD', 'Jet'),
-    ('xAOD::FlowElementContainer#HLT_ftfNeutralParticleFlowObjects', 'BS ESD', 'Jet'),
-    ('xAOD::FlowElementAuxContainer#HLT_ftfNeutralParticleFlowObjectsAux.'+'.'.join(nPFOVarsToKeep), 'BS ESD', 'Jet'),
-
-    # New EDM for Run 4 muons
-    # EF Fast Reco muons (SA)
-    ('xAOD::MuonContainer#HLT_FastMuons_RoI',                          'BS ESD AODFULL AODSLIM', 'Muon', [InViews('L2MuFastReco_RoIViews')]),
-    ('xAOD::MuonAuxContainer#HLT_FastMuons_RoIAux.',                   'BS ESD AODFULL AODSLIM', 'Muon'),
-
-    # EF Precise Reco muons (SA) in RoI views
-    ('xAOD::MuonContainer#HLT_Muons_RoI',                                       'BS ESD AODFULL AODSLIM', 'Muon', [InViews('EFMuMSReco_RoIViews'),InViews('EFMuMSReco_RoIPhIIViews')]),
-    ('xAOD::MuonAuxContainer#HLT_Muons_RoIAux.',                                'BS ESD AODFULL AODSLIM', 'Muon'),
-    ('xAOD::MuonContainer#HLT_Muons_RoIPhII_newFast',                  'BS ESD AODFULL AODSLIM', 'Muon', [InViews("EFMuMSReco_RoIPhII_newFastViews")]),
-    ('xAOD::MuonAuxContainer#HLT_Muons_RoIPhII_newFastAux.',           'BS ESD AODFULL AODSLIM', 'Muon'),
-
-    ('xAOD::MuonContainer#HLT_Muons_RoIPhII_mlbkt',                    'BS ESD AODFULL AODSLIM', 'Muon', [InViews("EFMuMSReco_RoIPhII_mlbktViews")]),
-    ('xAOD::MuonAuxContainer#HLT_Muons_RoIPhII_mlbktAux.',             'BS ESD AODFULL AODSLIM', 'Muon'),
-
-    # EF Precise Reco muons (SA) in FS views
-    ('xAOD::MuonContainer#HLT_Muons_FS',                                        'BS ESD AODFULL AODSLIM', 'Muon', [InViews('EFMuMSReco_FSViews'),InViews('EFMuMSReco_FSPhIIViews')]),
-    ('xAOD::MuonAuxContainer#HLT_Muons_FSAux.',                                 'BS ESD AODFULL AODSLIM', 'Muon'),
-    ('xAOD::MuonContainer#HLT_Muons_FSPhII_newFast',                   'BS ESD AODFULL AODSLIM', 'Muon', [InViews("EFMuMSReco_FSPhII_newFastViews")]),
-    ('xAOD::MuonAuxContainer#HLT_Muons_FSPhII_newFastAux.',            'BS ESD AODFULL AODSLIM', 'Muon'),
-
-    ('xAOD::MuonContainer#HLT_Muons_FSPhII_mlbkt',                     'BS ESD AODFULL AODSLIM', 'Muon', [InViews("EFMuMSReco_FSPhII_mlbktViews")]),
-    ('xAOD::MuonAuxContainer#HLT_Muons_FSPhII_mlbktAux.',              'BS ESD AODFULL AODSLIM', 'Muon'),
-
-    # EF Precise Reco muon tracks (SA) in RoI views
-    ('xAOD::TrackParticleContainer#HLT_MuonMSTrackParticles_RoIPhII',               'BS ESD AODFULL', 'Muon', [InViews('EFMuMSReco_RoIPhIIViews')]),
-    ('xAOD::TrackParticleAuxContainer#HLT_MuonMSTrackParticles_RoIPhIIAux.',        'BS ESD AODFULL', 'Muon'),
-
-    ('xAOD::TrackParticleContainer#HLT_MuonMSTrackParticles_RoIPhII_newFast',       'BS ESD AODFULL', 'Muon', [InViews('EFMuMSReco_RoIPhII_newFastViews')]),
-    ('xAOD::TrackParticleAuxContainer#HLT_MuonMSTrackParticles_RoIPhII_newFastAux.','BS ESD AODFULL', 'Muon'),
-
-    ('xAOD::TrackParticleContainer#HLT_MuonMSTrackParticles_RoIPhII_mlbkt',         'BS ESD AODFULL', 'Muon', [InViews('EFMuMSReco_RoIPhII_mlbktViews')]),
-    ('xAOD::TrackParticleAuxContainer#HLT_MuonMSTrackParticles_RoIPhII_mlbktAux.',  'BS ESD AODFULL', 'Muon'),
-
-    # EF Precise Reco muon tracks (SA) in FS views
-    ('xAOD::TrackParticleContainer#HLT_MuonMSTrackParticles_FSPhII',                'BS ESD AODFULL', 'Muon', [InViews('EFMuMSReco_FSPhIIViews')]),
-    ('xAOD::TrackParticleAuxContainer#HLT_MuonMSTrackParticles_FSPhIIAux.',         'BS ESD AODFULL', 'Muon'),
-
-    ('xAOD::TrackParticleContainer#HLT_MuonMSTrackParticles_FSPhII_newFast',        'BS ESD AODFULL', 'Muon', [InViews('EFMuMSReco_FSPhII_newFastViews')]),
-    ('xAOD::TrackParticleAuxContainer#HLT_MuonMSTrackParticles_FSPhII_newFastAux.', 'BS ESD AODFULL', 'Muon'),
-
-    ('xAOD::TrackParticleContainer#HLT_MuonMSTrackParticles_FSPhII_mlbkt',          'BS ESD AODFULL', 'Muon', [InViews('EFMuMSReco_FSPhII_mlbktViews')]),
-    ('xAOD::TrackParticleAuxContainer#HLT_MuonMSTrackParticles_FSPhII_mlbktAux.',   'BS ESD AODFULL', 'Muon'),
-
-    # EF Displaced Vertex inference outputs
-    ('xAOD::TrigCompositeContainer#EF_MuonDVInferenceOutput',                       'BS ESD AODFULL', 'Muon'),
-    ('xAOD::TrigCompositeAuxContainer#EF_MuonDVInferenceOutputAux.Score',           'BS ESD AODFULL', 'Muon'),
-
-    # Tau
-    ('xAOD::CaloClusterContainer#HLT_TopoCaloClustersEM',                       'BS ESD AODFULL', 'Tau', [InViews('tauCaloEMMVAViews')]),   
-    ('xAOD::CaloClusterTrigAuxContainer#HLT_TopoCaloClustersEMAux.nCells',      'BS ESD AODFULL', 'Tau'),
-
-    ('xAOD::TrackParticleContainer#HLT_IDTrack_TauCoreEM_FTF',                  'BS ESD AODFULL', 'Tau', [InViews('tauFastTrackCoreEMViews')]),
-    ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_TauCoreEM_FTFAux.',           'BS ESD AODFULL', 'Tau'),
-
-    ('xAOD::TrackParticleContainer#HLT_IDTrack_TauIsoEM_FTF',                   'BS ESD AODFULL', 'Tau', [InViews('tauFastTrackIsoEMViews')]),
-    ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_TauIsoEM_FTFAux.',            'BS ESD AODFULL', 'Tau'),
-
-    ('TrigRoiDescriptorCollection#HLT_Roi_TauCoreEM',                           'BS ESD AODFULL', 'Tau'),
-    ('TrigRoiDescriptorCollection#HLT_Roi_TauIsoEM',                            'BS ESD AODFULL', 'Tau'),
-
-    ('xAOD::TauJetContainer#HLT_TrigTauRecMerged_CaloEMOnly',                   'BS ESD AODFULL', 'Tau', [InViews('tauCaloEMMVAViews')]),
-    ('xAOD::TauJetAuxContainer#HLT_TrigTauRecMerged_CaloEMOnlyAux.',            'BS ESD AODFULL', 'Tau'),
-
-    ('xAOD::TauJetContainer#HLT_TrigTauRecMerged_EM',                           'BS ESD AODFULL', 'Tau', [InViews('precEMTauViews'), InViews('tauPrecisionReco_EMViews')]),
-    ('xAOD::TauJetAuxContainer#HLT_TrigTauRecMerged_EMAux.' + TauJet_vars_str,  'BS ESD AODFULL', 'Tau'),
-
-    # tau tracks
-    ('xAOD::TauTrackContainer#HLT_tautrack_EM',                                 'BS ESD AODFULL', 'Tau', [InViews('precEMTauViews'), InViews('tauPrecisionReco_EMViews')]),
-    ('xAOD::TauTrackAuxContainer#HLT_tautrack_EMAux.' + TauTrack_vars_str,      'BS ESD AODFULL', 'Tau'),
-
 
 ]
 
