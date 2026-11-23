@@ -119,15 +119,40 @@ def FTAG3SlimmingCfg(flags, name_tag="FTAG3", TriggerListsHelper=None):
     # Add truth
     if flags.Input.isMC:
         slimming_helper.AllVariables += [
-            "TruthBoson",
-            "TruthBosonsWithDecayParticles",
             "TruthBosonsWithDecayVertices",
-            "TruthBottom",
-            "TruthBSMWithDecayParticles",
             "TruthEvents",
-            "TruthMuons",
             "TruthParticles",
             "TruthVertices",
+        ]
+
+        # Copies of TruthParticles, written with the TRUTH3 lists
+        slimming_helper.ExtraVariables += [
+            (
+                "TruthBoson.m.px.py.pz.e.pdgId.status."
+                "classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.Classification."
+                "prodVtxLink.decayVtxLink.parentLinks.childLinks.polarizationPhi.polarizationTheta.uid"
+            ),
+            (
+                "TruthBosonsWithDecayParticles.m.px.py.pz.e.pdgId.status."
+                "classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.Classification."
+                "id.x.y.z.t.prodVtxLink.decayVtxLink.incomingParticleLinks.outgoingParticleLinks.uid"
+            ),
+            (
+                "TruthBottom.m.px.py.pz.e.pdgId.status."
+                "classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.Classification."
+                "prodVtxLink.decayVtxLink.parentLinks.childLinks.polarizationPhi.polarizationTheta.uid"
+            ),
+            (
+                "TruthBSMWithDecayParticles.Classification."
+                "classifierParticleOrigin.classifierParticleOutCome.classifierParticleType."
+                "decayVtxLink.e.m.pdgId.prodVtxLink.px.py.pz.status.uid"
+            ),
+            (
+                "TruthMuons.m.px.py.pz.e.pdgId.status."
+                "classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.Classification."
+                "e_dressed.pt_dressed.eta_dressed.phi_dressed.nPhotons_dressed.ptcone30.etcone20."
+                "decayVtxLink.prodVtxLink.parentLinks.childLinks.polarizationPhi.polarizationTheta.uid"
+            ),
         ]
 
         # Add truth jet collections to smart collection

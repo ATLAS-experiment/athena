@@ -124,11 +124,14 @@ def add_truth_to_slimming_helper(slimming_helper: SlimmingHelper) -> None:
     # Get TRUTH3 content
     addTruth3ContentToSlimmerTool(slimming_helper)
 
+    slimming_helper.ExtraVariables += [
+        "TruthCharm.prodVtxLink.decayVtxLink.parentLinks.childLinks.m.px.py.pz.e.pdgId.Classification.uid.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.status.polarizationPhi.polarizationTheta",
+    ]
+
     # Add all variabes for certain truth containers
     slimming_helper.AllVariables += [
         "TruthHFWithDecayParticles",
         "TruthHFWithDecayVertices",
-        "TruthCharm",
         "TruthPileupParticles",
         "InTimeAntiKt4TruthJets",
         "OutOfTimeAntiKt4TruthJets",
@@ -206,10 +209,6 @@ def add_baseline_slimming_allvariables(slimming_helper: SlimmingHelper) -> None:
         "EventInfo",
         "PrimaryVertices",
         "InDetTrackParticles",
-        "TruthBottom",
-        "TruthElectrons",
-        "TruthMuons",
-        "TruthTaus",
     ]
 
 
