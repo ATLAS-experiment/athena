@@ -19,7 +19,9 @@
 #include "xAODEgamma/EgammaxAODHelpers.h"
 #include "CxxUtils/checker_macros.h"
 
+#include <algorithm>
 #include <cmath>
+#include <vector>
 
 namespace CP {
     using namespace xAOD::Iso;
@@ -172,7 +174,10 @@ namespace CP {
         static const CharAccessor isLRT("isLRT");
 
         cache.prim_vtx = retrieveIDBestPrimaryVertex(ctx);
-        for (const xAOD::IParticle* prim : cache.prim_parts) {
+        // egamma first, so that their topo clusters take priority over the muon ones in getAssociatedClusters
+        std::vector<const xAOD::IParticle*> ordered{cache.prim_parts.begin(), cache.prim_parts.end()};
+        std::stable_partition(ordered.begin(), ordered.end(), [](const xAOD::IParticle* p) { return isEgamma(p); });
+        for (const xAOD::IParticle* prim : ordered) {
             // skip LRT leptons
             if (!isLRT.isAvailable(*prim) || !isLRT(*prim) ) {
                 const TrackSet tracks = getAssociatedTracks(prim, cache.prim_vtx);
