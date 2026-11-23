@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RATESANALYSIS_FULLMENU_H
@@ -13,7 +13,7 @@ class FullMenu: public ::RatesAnalysisAlg {
   virtual ~FullMenu(); 
 
   virtual StatusCode  ratesInitialize() override;
-  virtual StatusCode  ratesExecute() override;
+  virtual StatusCode  ratesExecute(const EventContext& ctx) override;
   virtual StatusCode  ratesFinalize() override;
 
  private:

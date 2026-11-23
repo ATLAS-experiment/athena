@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FullMenu.h"
@@ -30,7 +30,7 @@ StatusCode  FullMenu::ratesInitialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode  FullMenu::ratesExecute() {
+StatusCode  FullMenu::ratesExecute(const EventContext&) {
   // Triggers added are of type kEXISTING so here we rely on the Trigger Decision Tool for pass/fail. 
   // This is automatic so there is nothing to do here.
   return StatusCode::SUCCESS;

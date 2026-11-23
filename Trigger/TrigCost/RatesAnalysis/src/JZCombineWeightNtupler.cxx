@@ -39,7 +39,7 @@ StatusCode JZCombineWeightNtupler::ratesInitialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode JZCombineWeightNtupler::ratesExecute() {
+StatusCode JZCombineWeightNtupler::ratesExecute(const EventContext&) {
   ATH_CHECK(resetValues());
   
   // Event level variables

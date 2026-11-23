@@ -22,7 +22,7 @@ class JZCombineWeightNtupler : public RatesAnalysisAlg {
   virtual ~JZCombineWeightNtupler(); 
 
   virtual StatusCode ratesInitialize() override;
-  virtual StatusCode ratesExecute() override;
+  virtual StatusCode ratesExecute(const EventContext& ctx) override;
   virtual StatusCode ratesFinalize() override;
   
  private:

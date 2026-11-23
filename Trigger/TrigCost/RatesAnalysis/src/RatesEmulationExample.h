@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RATESANALYSIS_RATESEMULATIONEXAMPLE_H
@@ -13,7 +13,7 @@ class RatesEmulationExample: public ::RatesAnalysisAlg {
   virtual ~RatesEmulationExample(); 
 
   virtual StatusCode  ratesInitialize() override;
-  virtual StatusCode  ratesExecute() override;
+  virtual StatusCode  ratesExecute(const EventContext& ctx) override;
   virtual StatusCode  ratesFinalize() override;
 
  private:

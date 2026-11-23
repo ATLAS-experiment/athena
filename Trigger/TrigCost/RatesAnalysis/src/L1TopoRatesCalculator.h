@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RATESANALYSIS_L1TOPORATESCALCULATOR_H
@@ -14,6 +14,8 @@
 #include "xAODTrigger/TrigDecision.h"
 #include "xAODTrigger/L1TopoSimResultsContainer.h"
 #include "xAODTrigger/L1TopoSimResults.h"
+#include "TrigT1Interfaces/TrigT1StoreGateKeys.h"
+#include "TrigT1Interfaces/MuCTPICTP.h"
 
 //for hw data access 
 #include "xAODTrigL1Calo/L1TopoRawDataContainer.h"
@@ -23,6 +25,7 @@
 #include "TrigConfData/L1Connector.h"
 #include "TrigConfData/L1Menu.h"
 #include "RatesAnalysis/RatesTrigger.h"
+#include <RatesAnalysis/L1Emu.h>
 #include "AthenaBaseComps/AthCommonDataStore.h"
 #include <vector>
 #include <cstdint>
@@ -34,10 +37,11 @@ class L1TopoRatesCalculator: public ::RatesAnalysisAlg {
   
   SG::ReadHandleKey<xAOD::TrigDecision> m_trigDecisionKey{this, "TrigDecisionKey", "xTrigDecision"};
   SG::ReadHandleKey<xAOD::L1TopoSimResultsContainer> m_l1topoKey {this, "L1_TopoKey", "L1_TopoSimResults", "l1topo EDM"};
+  SG::ReadHandleKey<LVL1::MuCTPICTP> m_muctpiKey{this, "MuCTPIKey", LVL1MUCTPI::DEFAULT_MuonCTPLocation};
   
   virtual StatusCode initialize() override;
   virtual StatusCode  ratesInitialize() override;
-  virtual StatusCode  ratesExecute() override;
+  virtual StatusCode  ratesExecute(const EventContext& ctx) override;
   virtual StatusCode  ratesFinalize() override;
  protected:
   std::vector<double> m_EB_weight; 
@@ -80,7 +84,10 @@ class L1TopoRatesCalculator: public ::RatesAnalysisAlg {
     	std::vector<std::string> operations;
   };
  
-  std::map<std::string, TriggerInfo> m_triggerMap; 
+  std::map<std::string, TriggerInfo> m_triggerMap;
+  // Start/end bits of muon thresholds to retrieve results from MuCTPI
+  std::unordered_map<std::string, std::pair<uint32_t, uint32_t> > m_muonTriggerLines;
+  std::unordered_map<std::string, L1Emu> m_l1EmuMap;
   uint32_t extractResult(const std::vector<uint32_t>& connectorContents, const L1TopoRatesCalculator::ResultDefinition& definition, unsigned int startOffset);
   uint32_t getHWvalue(const L1TopoRatesCalculator::ResultDefinition& definition); 
   bool getTOBblockFromProcessor(const std::vector<uint32_t>& allDataBlock, std::vector<uint32_t>& tobBlock, uint32_t fpgaPattern);

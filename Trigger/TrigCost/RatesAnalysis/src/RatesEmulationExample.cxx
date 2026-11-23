@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RatesEmulationExample.h"
@@ -48,30 +48,30 @@ StatusCode RatesEmulationExample::ratesInitialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode RatesEmulationExample::ratesExecute() {
+StatusCode RatesEmulationExample::ratesExecute(const EventContext& ctx) {
 
-  SG::ReadHandle<xAOD::ElectronContainer> electrons(m_electron_RHKey);
+  SG::ReadHandle<xAOD::ElectronContainer> electrons(m_electron_RHKey, ctx);
   ATH_CHECK( electrons.isValid() );
   std::set<double> electronpTs;
   for (const auto e : *electrons) electronpTs.insert(e->pt()/1000.);
-  if (electronpTs.size() >= 1 && *electronpTs.rbegin() >= 10.) ATH_CHECK(setTriggerDesicison("OFF_e10", true));
-  if (electronpTs.size() >= 1) ATH_CHECK(setTriggerDesicison("OFF_eX", *electronpTs.rbegin() ));
+  if (electronpTs.size() >= 1 && *electronpTs.rbegin() >= 10.) ATH_CHECK(setTriggerDecision("OFF_e10", true));
+  if (electronpTs.size() >= 1) ATH_CHECK(setTriggerDecision("OFF_eX", *electronpTs.rbegin() ));
 
 
-  SG::ReadHandle<xAOD::JetContainer> Jets(m_jet_RHKey);
+  SG::ReadHandle<xAOD::JetContainer> Jets(m_jet_RHKey, ctx);
   ATH_CHECK( Jets.isValid() );
 
   std::set<double> jetpTs;
   for (const auto j : *Jets) jetpTs.insert(j->pt()/1000.);
-  if (jetpTs.size() >= 1) ATH_CHECK(setTriggerDesicison("OFF_jXa_AntiKt4EMTopo", *jetpTs.rbegin() ));
+  if (jetpTs.size() >= 1) ATH_CHECK(setTriggerDecision("OFF_jXa_AntiKt4EMTopo", *jetpTs.rbegin() ));
 
   std::set<double> jetcpTs;
   for (const auto jc : *Jets) {
     if (std::abs(jc->eta()) < 2.4) jetcpTs.insert(jc->pt()/1000.);
   }
-  if (jetcpTs.size() >= 1 && *jetcpTs.rbegin() >= 40.) ATH_CHECK(setTriggerDesicison("OFF_j40c_AntiKt4EMTopo", true));
-  if (jetcpTs.size() >= 1) ATH_CHECK(setTriggerDesicison("OFF_jXc_AntiKt4EMTopo", *jetcpTs.rbegin() ));
-  if (jetcpTs.size() >= 3) ATH_CHECK(setTriggerDesicison("OFF_3jXc_AntiKt4EMTopo", *jetcpTs.rbegin()+2 ));
+  if (jetcpTs.size() >= 1 && *jetcpTs.rbegin() >= 40.) ATH_CHECK(setTriggerDecision("OFF_j40c_AntiKt4EMTopo", true));
+  if (jetcpTs.size() >= 1) ATH_CHECK(setTriggerDecision("OFF_jXc_AntiKt4EMTopo", *jetcpTs.rbegin() ));
+  if (jetcpTs.size() >= 3) ATH_CHECK(setTriggerDecision("OFF_3jXc_AntiKt4EMTopo", *jetcpTs.rbegin()+2 ));
 
   return StatusCode::SUCCESS;
 }

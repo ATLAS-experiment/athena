@@ -4,7 +4,6 @@
 """
 CA module to configure the (standalone) HLT for athena.
 """
-from AthenaCommon.Constants import DEBUG
 
 # This entry point is only used when running in athena
 
@@ -33,9 +32,6 @@ if __name__ == "__main__":
    #
    parser.add_argument('--doRatesVsPositionInTrain', action='store_true', help='Study rates vs BCID position in bunch train')
    parser.add_argument('--vetoStartOfTrain', default=0, type=int, help='Number of BCIDs at the start of the train to veto, implies doRatesVsPositionInTrain')
-   #
-   parser.add_argument('--maxEvents', type=int, help='Maximum number of events to process')
-   parser.add_argument('flags', nargs='*', help='Config flag overrides')
 
    parser.add_argument('--ratesJson', type=str, help='Input JSON of triggers for rates')
    args, _ = parser.parse_known_args()
@@ -64,7 +60,6 @@ if __name__ == "__main__":
    flags.Trigger.doLVL1=True
    flags.Concurrency.NumConcurrentEvents = 1
    flags.Concurrency.NumThreads = 1
-   flags.Exec.MaxEvents = 1000
 
    useBunchCrossingData = (args.doRatesVsPositionInTrain or args.vetoStartOfTrain > 0)
    
@@ -138,7 +133,6 @@ if __name__ == "__main__":
         rates.m_userDefinedNames = userDefinedNames  
         rates.m_userDefinedDefinitions = userDefinedDefinitions
 
-   rates.OutputLevel =  DEBUG
    rates.DoTriggerGroups = True
    rates.DoGlobalGroups = True
    rates.DoExpressRates = True
