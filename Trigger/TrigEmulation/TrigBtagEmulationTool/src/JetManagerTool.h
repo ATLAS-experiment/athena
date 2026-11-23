@@ -25,6 +25,7 @@ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #include "TLorentzVector.h"
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace Trig {
@@ -52,12 +53,20 @@ namespace Trig {
     SG::ReadHandleKey< xAOD::JetContainer > m_jetInputKey {this, "InputJets", "", "Input Jet Collection Key, retrieved from reconstructed jets"};
     SG::ReadHandleKey< xAOD::JetContainer > m_bjetInputKey {this, "InputBJets", "", "Input b-Jet Collection Key, retrieved from reconstructed jets"};
     SG::ReadHandleKey< xAOD::BTaggingContainer > m_btagInputKey {this, "InputBTag", "HLT_xAOD__BTaggingContainer_HLTBjetFex", "Run2 input b-tag Collection Key"};
+    SG::ReadHandleKey< xAOD::JetContainer > m_splitJetInputKey {this, "InputSplitJets", "HLT_xAOD__JetContainer_SplitJet", "Run2 split-jet Collection Key, the b-tagged jets of GSC chains in data"};
 
     Gaudi::Property<std::string> m_btagging_link {this, "BTaggingLink", "btaggingLink"};    
     Gaudi::Property<std::string> m_jetcontainer {this, "JetContainerName", "", "Jet Container"};
     Gaudi::Property<int> m_LHCPeriod {this, "LHCPeriod", 3, "LHC Period Run2 or Run3"};
 
     bool matchedSPLITjet(const xAOD::Jet*, const xAOD::Jet*) const;
+
+    // Run 2 data: key of a link to a per-RoI jet collection of the HLT -> index of that jet in the merged collection
+    using OnlineJetIndex = std::unordered_map<SG::sgkey_t, std::size_t>;
+    static OnlineJetIndex onlineJetIndex(const std::string& jetContainerName);
+    static const xAOD::Jet* onlineJet(const OnlineJetIndex& index, SG::sgkey_t linkKey, const xAOD::JetContainer* jets);
+    OnlineJetIndex m_onlineJetIndex;
+    OnlineJetIndex m_onlineSplitJetIndex;
   };
 
   inline const std::string& JetManagerTool::jetContainerName() const { return m_jetInputKey.key(); }
