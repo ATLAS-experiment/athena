@@ -101,6 +101,8 @@ namespace FlavorTagInference {
 
       // set the filter
       std::tie (m_muonFilter, m_deps.muonInputs) = muonFilter(cfg.selection);
+      m_deps.muonInputs.insert(m_seqGetter.getDependencies().begin(),
+                               m_seqGetter.getDependencies().end());
       
 
       SG::ConstAccessor<PartLinks> acc(options.muon_link_name);
