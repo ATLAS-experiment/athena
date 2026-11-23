@@ -38,7 +38,8 @@ python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
     Trigger.FPGATrackSim.writeOfflPRDInfo=True \
     Trigger.FPGATrackSim.writeAdditionalOutputData="$WRITE_UPSTREAM_OUTPUT_DATA" \
     Trigger.FPGATrackSim.writeClustersToAOD="$WRITE_XAOD_CLUSTERS" \
-    Trigger.FPGATrackSim.outputMonitorFile="monitoring_${TEST_LABEL}.root"
+    Trigger.FPGATrackSim.outputMonitorFile="monitoring_${TEST_LABEL}.root" \
+    Acts.TrackingGeometry.UseBlueprint=False
 
 
 if [ -z $ArtJobType ];then # skip file check for ART (this has already been done in CI)

@@ -85,7 +85,8 @@ Reco_tf.py --CA \
                 flags.Acts.EDM.PersistifyClusters=${storeClusters};\
                 flags.Acts.EDM.PersistifySpacePoints=${storeClusters};\
                 flags.Tracking.doPixelDigitalClustering=True;flags.Concurrency.NumThreads=${threads};\
-                flags.Concurrency.NumConcurrentEvents=${threads};"\
+                flags.Concurrency.NumConcurrentEvents=${threads};\
+                flags.Acts.TrackingGeometry.UseBlueprint=False;"\
     --postInclude "ActsConfig.ActsPostIncludes.ACTSClusterPostInclude" \
     --steering 'doRAWtoALL' \
     --inputRDOFile "${inputRDO_arg}" \

@@ -258,17 +258,6 @@ ForwardElectronClustersAuxDyn.phimax_sampl
 ForwardElectronClusters_links
 ForwardElectrons
 ForwardElectronsAux.
-ForwardElectronsAuxDyn.DNNLoose
-ForwardElectronsAuxDyn.DNNMedium
-ForwardElectronsAuxDyn.DNNTight
-ForwardElectronsAuxDyn.DNN_Score
-ForwardElectronsAuxDyn.Loose
-ForwardElectronsAuxDyn.Medium
-ForwardElectronsAuxDyn.Tight
-ForwardElectronsAuxDyn.truthClassification
-ForwardElectronsAuxDyn.truthOrigin
-ForwardElectronsAuxDyn.truthParticleLink
-ForwardElectronsAuxDyn.truthType
 GSFConversionVertices
 GSFConversionVerticesAux.
 GSFConversionVerticesAuxDyn.DR1R2

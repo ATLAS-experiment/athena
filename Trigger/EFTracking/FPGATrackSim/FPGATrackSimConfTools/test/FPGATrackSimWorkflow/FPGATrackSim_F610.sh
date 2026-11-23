@@ -44,7 +44,8 @@ run_F610(){
         Trigger.FPGATrackSim.outputMonitorFile="monitoring_${TEST_LABEL}.root" \
         Trigger.FPGATrackSim.writeOfflPRDInfo=True \
         Output.AODFileName=$xAODOutput \
-        PerfMon.doFullMonMT=True
+        PerfMon.doFullMonMT=True \
+        Acts.TrackingGeometry.UseBlueprint=False
 }
 
 echo "... Running ${TEST_LABEL} analysis"

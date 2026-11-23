@@ -103,7 +103,8 @@ preExecFlags="flags.Tracking.doPixelDigitalClustering=True;\
                flags.Acts.EDM.PersistifyClusters=${storeClusters};\
                flags.Trigger.FPGATrackSim.mapsDir=\"${MAPS_5L}\";\
                flags.Trigger.FPGATrackSim.regionList=${regionList};\
-               flags.Trigger.FPGATrackSim.bankDir=\"${BANKS_5L}\";"
+               flags.Trigger.FPGATrackSim.bankDir=\"${BANKS_5L}\";\
+               flags.Acts.TrackingGeometry.UseBlueprint=False;"
 postExecFlags=""
 
 if [ "$writeAdditionalOutputData" == "0" ]; then

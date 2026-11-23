@@ -3,6 +3,8 @@
 
 # This test schedules both Acts workflows for ScoreBasedAmbiguity
 # For Acts we schedule both primary and secondary passes without the caching mechanism
+# The detector volume ids in ActsConfig/ActsAmbiguityConfig.json are those of the
+# Gen1 tracking geometry, so the Blueprint-based (Gen3) geometry is switched off
 
 # ttbar mu=200 input
 input_rdo=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.RDO_RUN4[0])")
@@ -11,6 +13,7 @@ n_events=1
 
 Reco_tf.py \
   --preExec "flags.Exec.FPE=-1; \
+  	     flags.Acts.TrackingGeometry.UseBlueprint = False; \
   	     flags.Acts.doAmbiguityResolution = True; \
   	     from ActsConfig.ActsConfigFlags import AmbiguitySolverStrategy; \
 	     flags.Acts.AmbiguitySolverStrategy = AmbiguitySolverStrategy.ScoreBased;" \
