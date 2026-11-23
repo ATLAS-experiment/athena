@@ -2,6 +2,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import LHCPeriod
 
 # Low pT di-taus
 def AddDiTauLowPtCfg(flags, **kwargs):
@@ -10,8 +11,11 @@ def AddDiTauLowPtCfg(flags, **kwargs):
     acc = ComponentAccumulator()
     acc.flagPerfmonDomain('Tau')
     from JetRecConfig.JetRecConfig import JetRecCfg
-    from JetRecConfig.StandardLargeRJets import AntiKt10LCTopo_tau
-    acc.merge(JetRecCfg(flags,AntiKt10LCTopo_tau))
+    from JetRecConfig.StandardLargeRJets import AntiKt10LCTopo_tau, AntiKt10UFOCSSKSoftDrop 
+    if flags.GeoModel.Run > LHCPeriod.Run3:
+        acc.merge(JetRecCfg(flags,AntiKt10UFOCSSKSoftDrop))
+    else:    
+        acc.merge(JetRecCfg(flags,AntiKt10LCTopo_tau))
 
     from DiTauRec.DiTauBuilderConfig import DiTauBuilderCfg
     acc.merge(DiTauBuilderCfg(flags, name="DiTauLowPtBuilder", doLowPt=True))
