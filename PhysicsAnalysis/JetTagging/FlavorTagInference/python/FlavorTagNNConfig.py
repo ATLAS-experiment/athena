@@ -714,6 +714,7 @@ def PassThroughModelCfg(flags, JetCollection,
                         variableRemapping=None,
                         electrons='Electrons',
                         muons='',
+                        caloClusters='CaloCalTopoClusters',
                         jsonPath=None,
                         nameSuffix=''):
     """Configure a pass-through model for jet and constituent variables.
@@ -769,6 +770,7 @@ def PassThroughModelCfg(flags, JetCollection,
             constituentContainer=TrackCollection,
             electronContainer=electrons,
             muonContainer=muons,
+            caloClusterContainer=caloClusters,
             decorator=tool,
         )
     )

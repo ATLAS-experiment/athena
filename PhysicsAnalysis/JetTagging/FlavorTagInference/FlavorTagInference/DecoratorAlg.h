@@ -9,6 +9,7 @@
 
 #include "xAODEgamma/ElectronContainer.h"
 #include "xAODMuon/MuonContainer.h"
+#include "xAODBase/IParticleContainer.h"
 
 #include "StoreGate/WriteDecorHandleKey.h"
 #include "StoreGate/ReadDecorHandleKey.h"
@@ -38,6 +39,11 @@ namespace FlavorTagInference {
       this, "muonContainer",
       "", "key for input muon container"
     };
+    // same type as CaloChargedFlowDecoratorAlg writes
+    SG::ReadHandleKey<xAOD::IParticleContainer> m_caloClusterKey{
+      this, "caloClusterContainer",
+      "", "key for input calo cluster container"
+    };
     Gaudi::Property<std::vector<std::string>> m_undeclaredReadDecorKeys {
       this, "undeclaredReadDecorKeys", {},
       "List of read handles that we don't read, e.g. static variables" };
@@ -50,6 +56,7 @@ namespace FlavorTagInference {
     std::vector<SG::ReadDecorHandleKey<CONSTITUENTS>> m_constituentAux;
     std::vector<SG::ReadDecorHandleKey<xAOD::ElectronContainer>> m_electronAux;
     std::vector<SG::ReadDecorHandleKey<xAOD::MuonContainer>> m_muonAux;
+    std::vector<SG::ReadDecorHandleKey<xAOD::IParticleContainer>> m_caloClusterAux;
     std::vector<SG::WriteDecorHandleKey<CONTAINER>> m_decor;
 
     // aux ids (to lock)

@@ -17,6 +17,7 @@ namespace FlavorTagInference {
     trackInputs.merge(d.trackInputs);
     electronInputs.merge(d.electronInputs);
     muonInputs.merge(d.muonInputs);
+    caloClusterInputs.merge(d.caloClusterInputs);
     bTagInputs.merge(d.bTagInputs);
     bTagOutputs.merge(d.bTagOutputs);
     return *this;

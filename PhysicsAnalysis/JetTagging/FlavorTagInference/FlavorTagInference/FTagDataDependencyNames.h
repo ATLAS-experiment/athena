@@ -13,6 +13,7 @@ namespace FlavorTagInference {
     std::set<std::string> trackInputs;
     std::set<std::string> electronInputs;
     std::set<std::string> muonInputs;
+    std::set<std::string> caloClusterInputs;
     std::set<std::string> bTagInputs;
     std::set<std::string> bTagOutputs;
     //coverity[PASS_BY_VALUE]
