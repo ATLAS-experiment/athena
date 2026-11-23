@@ -9,7 +9,7 @@
 
 from TrigEDMConfig.TriggerEDMRun2 import TriggerResultsList,TriggerLvl1List,TriggerHLTList,EDMDetails,EDMLibraries
 from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3,varToRemoveFromAODSLIM,EDMDetailsRun3,getRun3LowMuEDM
-from TrigEDMConfig.TriggerEDMRun4 import TriggerHLTListRun4,EDMDetailsRun4
+from TrigEDMConfig.TriggerEDMRun4 import TriggerHLTListRun4,EDMDetailsRun4,allowedRun4EDMPrefixes,run4EDMNamingExceptionsList
 from TrigEDMConfig.TriggerEDMProtoRun4 import TriggerHLTListProtoRun4
 from TrigEDMConfig.TriggerEDMDefs import allowTruncation
 from CLIDComps.clidGenerator import clidGenerator
@@ -154,6 +154,10 @@ def getRawTriggerEDMList(flags, runVersion=-1):
         lenPostMerge = len(edm4ListCopy)
         edmListCopy = edm4ListCopy
         log.info(f"Added TriggerHLTListProtoRun4 to TriggerHLTListRun4. EDM entries {lenPreMerge} -> {lenPostMerge}")
+    elif runVersion == 5:
+        # Note: There is no TriggerHLTListRun5. This option intentionally provides a config that creates an EDM from
+        # TriggerHLTListRun4 only for whilst we're still adding TriggerHLTListProtoRun4 for runVersion == 4.
+        edmListCopy = TriggerHLTListRun4.copy()
     else:
         errMsg="ERROR the getRawTriggerEDMList function supports runs 3 and 4."
         log.error(errMsg)
@@ -717,7 +721,7 @@ def tpMap():
     return l
 
 
-def testEDMList(edm_list, check_edmdetails_for_version=-1):
+def testEDMList(edm_list, do_extra_checks_for_version=-1):
     """
     Checks EDM list entries for serialization and configuration compliance.
     """
@@ -816,6 +820,14 @@ def testEDMList(edm_list, check_edmdetails_for_version=-1):
                   log.error("Target list for %s containing '%s' must also contain lower level target '%s'.",serializable_name,file_type,required_lower_level)
                   return_code = 1
 
+        # check EDM entry starts with a valid prefix (properly enforced for Run 4)
+        if do_extra_checks_for_version >= 4:
+            serializable_name_label_only = serializable_name_no_properties.split('#')[1]
+            if serializable_name_label_only not in run4EDMNamingExceptionsList:
+                if not any([serializable_name_label_only.startswith(p) for p in allowedRun4EDMPrefixes]):
+                    log.error("The collection name %s does not start with any of the allowed prefixes: %s. If the naming must exceptionally differ, add it to run4EDMNamingExceptionsList.",serializable_name_label_only,allowedRun4EDMPrefixes)
+                    return_code = 1
+
         # Check allowTuncation is only at the end
         tags = edm[3] if len(edm) > 3 else None
         allow_truncation_flag = False
@@ -841,13 +853,13 @@ def testEDMList(edm_list, check_edmdetails_for_version=-1):
         return_code = 1
 
     #check EDMDetails
-    if check_edmdetails_for_version > 0:
+    if do_extra_checks_for_version > 0:
         EDMDetailList = []
-        if check_edmdetails_for_version == 3:
+        if do_extra_checks_for_version == 3:
             EDMDetailList = EDMDetailsRun3
-        elif check_edmdetails_for_version >= 4:
+        elif do_extra_checks_for_version == 4:
             EDMDetailList = EDMDetailsRun4
-        else: log.warning("No EDMDetails for EDM version %d. Skipping EDMDetails check.", check_edmdetails_for_version)
+        else: log.warning("No EDMDetails for EDM version %d. Skipping EDMDetails check.", do_extra_checks_for_version)
 
         for EDMDetail in EDMDetailList:
             if EDMDetail not in serializable_names_no_label:

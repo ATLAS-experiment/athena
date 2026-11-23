@@ -165,13 +165,13 @@ def L0CaloGlobalRoIBuilderCfg(flags,DoNoiseThrRings=True):
     from TrigT2CaloEgamma.TrigT2CaloEgammaConfig import RingerReFexConfig
     nameTool='RingerGlobalFex'
     nameAlgo='L0CaloGlobalRoIBuilder'
-    nameContCalo='CaloClustersGlobal'
-    nameContRinger='RingerGlobal'
+    nameContCalo='L1_CaloClustersGlobal'
+    nameContRinger='L1_RingerGlobal'
     if ( DoNoiseThrRings ):
         nameTool='RingerGlobal2sigFex'
         nameAlgo='L0CaloGlobalRoI2sigBuilder'
-        nameContCalo='CaloClusters2sigGlobal'
-        nameContRinger='Ringer2sigGlobal'
+        nameContCalo='L1_CaloClusters2sigGlobal'
+        nameContRinger='L1_Ringer2sigGlobal'
     ringer = RingerReFexConfig(flags,name=nameTool,RingerKey='NOTNEEDED',
           ClustersName=nameContCalo,DoNoiseThrRings=DoNoiseThrRings)
     from AthenaCommon.CFElements import parOR
@@ -194,9 +194,9 @@ def CaloL0RingerPreCfg(flags,DoNoiseThrRings=True):
 def CaloL0RingerPrepareList(DoNoiseThrRings=True):
     extraEDMList=[]
     if DoNoiseThrRings : 
-       extraEDMList+=[('xAOD::TrigRingerRingsContainer#Ringer2sigGlobal',  'BS ESD AODFULL', 'Calo'), ('xAOD::TrigRingerRingsAuxContainer#Ringer2sigGlobalAux.',  'BS ESD AODFULL', 'Calo'), ('xAOD::TrigEMClusterContainer#CaloClusters2sigGlobal',  'BS ESD AODFULL', 'Calo'), ('xAOD::TrigEMClusterAuxContainer#CaloClusters2sigGlobalAux.',  'BS ESD AODFULL', 'Calo')]
+       extraEDMList+=[('xAOD::TrigRingerRingsContainer#L1_Ringer2sigGlobal',  'BS ESD AODFULL', 'Calo'), ('xAOD::TrigRingerRingsAuxContainer#L1_Ringer2sigGlobalAux.',  'BS ESD AODFULL', 'Calo'), ('xAOD::TrigEMClusterContainer#L1_CaloClusters2sigGlobal',  'BS ESD AODFULL', 'Calo'), ('xAOD::TrigEMClusterAuxContainer#L1_CaloClusters2sigGlobalAux.',  'BS ESD AODFULL', 'Calo')]
     else : 
-       extraEDMList+=[('xAOD::TrigRingerRingsContainer#RingerGlobal',  'BS ESD AODFULL', 'Calo'), ('xAOD::TrigRingerRingsAuxContainer#RingerGlobalAux.',  'BS ESD AODFULL', 'Calo'), ('xAOD::TrigEMClusterContainer#CaloClustersGlobal',  'BS ESD AODFULL', 'Calo'), ('xAOD::TrigEMClusterAuxContainer#CaloClustersGlobalAux.',  'BS ESD AODFULL', 'Calo')]
+       extraEDMList+=[('xAOD::TrigRingerRingsContainer#L1_RingerGlobal',  'BS ESD AODFULL', 'Calo'), ('xAOD::TrigRingerRingsAuxContainer#L1_RingerGlobalAux.',  'BS ESD AODFULL', 'Calo'), ('xAOD::TrigEMClusterContainer#L1_CaloClustersGlobal',  'BS ESD AODFULL', 'Calo'), ('xAOD::TrigEMClusterAuxContainer#L1_CaloClustersGlobalAux.',  'BS ESD AODFULL', 'Calo')]
     return extraEDMList
 
 def CaloL0RingerCfg(flags,DoNoiseThrRings=True):
