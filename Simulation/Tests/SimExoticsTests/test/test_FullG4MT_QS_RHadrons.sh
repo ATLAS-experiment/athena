@@ -21,7 +21,7 @@ Sim_tf.py \
     --postInclude 'PyJobTransforms.UseFrontier' \
     --preInclude 'EVNTtoHITS:Campaigns.MC23cSimulationMultipleIoV' \
     --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
-    --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/Rhadrons.EVNT.34227998._000001.pool.root.1" \
+    --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/user.lbezio.52920452.EXT0._000001.EVNT.pool.root.1" \
     --outputHITSFile "test.CA.HITS.pool.root" \
     --maxEvents '50' \
     --jobNumber 1 \
