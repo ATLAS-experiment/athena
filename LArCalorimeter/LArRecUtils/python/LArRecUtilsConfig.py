@@ -1,6 +1,6 @@
 """ComponentAccumulator configuration utilities for LArRecUtils
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -174,6 +174,23 @@ def LArRoIMapCondAlgCfg (flags, name = 'LArRoIMapCondAlg', **kwargs):
     LArRoIMapCondAlg = CompFactory.LArRoIMapCondAlg
     acc.addCondAlgo (LArRoIMapCondAlg (name, **kwargs))
     return acc
+
+def LArFcalDegCondAlgCfg(flags, name="LArFcalDegCondAlg", **kwargs):
+    """Return ComponentAccumulator with configured LArFcalDegCondAlg"""
+    fld='/LAR/CellCorrOfl/fcalDegradation'    
+    fldkey='FcalDegData'
+    acc = ComponentAccumulator()
+    kwargs.setdefault("keyFactors", fldkey)
+    kwargs.setdefault("OutputKey", "LArFcalDegMap")
+    from IOVDbSvc.IOVDbSvcConfig import addFolders
+    # in case test from local crest_fs is needed:
+    #dbString='crest_fs:/afs/cern.ch/user/p/pavol/w0/public/git1/run/fcal_crest_fs'
+    #acc.merge(addFolders(flags,fld, modifiers='<key>'+fldkey+'</key>',tag='LARCellCorrOflfcalDegradation-RUN4-00', className="CondAttrListCollection", detDb=dbString))
+    #otherwise:
+    acc.merge(addFolders(flags,fld, modifiers='<key>'+fldkey+'</key>',tag='LARCellCorrOflfcalDegradation-RUN4-00', className="CondAttrListCollection"))
+    acc.addCondAlgo(CompFactory.LArFcalDegCondAlg(name, **kwargs))
+    return acc
+
 
 
 if __name__ == "__main__":
