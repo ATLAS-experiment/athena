@@ -310,19 +310,21 @@ StatusCode GeoModelSvc::compareTags() {
   for (const auto &pair : pairs) {
     std::string tagPairName = pair.first;
     if (tagPairName == "GeoAtlas") {
-      // ** Two possible cases need to be taken into account
-      // **
-      // ** 1. The retrieved ATLAS tag is following naming schema
-      // ATLAS-...-XX-YY-ZZ
-      // ** where '...' can be anything, it may also containg one or more '-'.
-      // ** If this is the case, then we need to check whether the job option
-      // tag
-      // ** is also following the same schema and they have the same
-      // 'ATLAS-...-XX' part
-      // **
-      // ** 2. The retrieved ATLAS tag is not following the schema mentioned
-      // above
-      // ** If this is the case, we just need to check the exact match
+      // Two possible cases need to be taken into account
+      //
+      // 1. The retrieved ATLAS tag is following naming schema ATLAS-...-XX-YY-ZZ
+      //    where '...' can be anything, it may also contain one or more '-'.
+      //    If this is the case, then we need to check whether the job option tag
+      //    is also following the same schema and they have the same 'ATLAS-...-XX' part
+      //
+      //    NOTE: Compatibility between DD2 and the legacy geometry tags.
+      //    It has been agreed that we should consider DD2-based geometry tags compatible
+      //    with their counterparts made in the legacy system.
+      //    This means, for example, the compatibility of
+      //    ATLAS-DD2-P2-RUN4-05-01-00 and ATLAS-P2-RUN4-05-01-00
+      //
+      // 2. The retrieved ATLAS tag is not following the schema mentioned above
+      //    If this is the case, we just need to check the exact match
       std::vector<std::string> tokensTagInfo, tokensJobOpt;
 
       // Parse Tag Info tag
@@ -330,8 +332,9 @@ StatusCode GeoModelSvc::compareTags() {
       std::string currStr = pair.second;
       for (std::string::size_type endpos = currStr.find('-');
            endpos != std::string::npos; endpos = currStr.find('-', startpos)) {
-        tokensTagInfo.push_back(currStr.substr(startpos, endpos - startpos));
-        startpos = endpos + 1;
+	std::string token = currStr.substr(startpos, endpos - startpos);
+	startpos = endpos + 1;
+	if(token!="DD2") tokensTagInfo.push_back(token);
       }
       tokensTagInfo.push_back(currStr.substr(startpos));
 
@@ -349,8 +352,9 @@ StatusCode GeoModelSvc::compareTags() {
         for (std::string::size_type endpos = currStr.find('-');
              endpos != std::string::npos;
              endpos = currStr.find('-', startpos)) {
-          tokensJobOpt.push_back(currStr.substr(startpos, endpos - startpos));
-          startpos = endpos + 1;
+	  std::string token = currStr.substr(startpos, endpos - startpos);
+	  startpos = endpos + 1;
+          if(token!="DD2") tokensJobOpt.push_back(token);
         }
         tokensJobOpt.push_back(currStr.substr(startpos));
 
@@ -360,10 +364,21 @@ StatusCode GeoModelSvc::compareTags() {
              tokensJobOpt[tokensJobOptSize - 1].size() == 2 &&
              tokensJobOpt[tokensJobOptSize - 2].size() == 2 &&
              tokensJobOpt[tokensJobOptSize - 3].size() == 2);
+
+	// Debug
+	ATH_MSG_DEBUG("Tag Info tokens:");
+	for(auto& element : tokensTagInfo) ATH_MSG_DEBUG("** {}",element);
+	ATH_MSG_DEBUG("Config tokens:");
+	for(auto& element : tokensJobOpt) ATH_MSG_DEBUG("** {}",element);
+
         if (jobOptFollowsTheScheme) {
-          const std::string &atlasVersion = m_atlasVersion;
-          tagsMatch = (pair.second.substr(0, currStr.size() - 6) ==
-                       atlasVersion.substr(0, atlasVersion.size() - 6));
+	  bool tagsMatch = tokensTagInfo.size()==tokensJobOpt.size();
+	  if(tagsMatch) {
+	    for(size_t ind=0; ind<tokensTagInfo.size()-2; ind++) {
+	      tagsMatch = tokensTagInfo[ind]==tokensJobOpt[ind];
+	      if(!tagsMatch) break;
+	    }
+	  }
         } else {
           tagsMatch = false;
         }
