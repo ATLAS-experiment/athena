@@ -142,11 +142,11 @@ To execute the L1TopoRatesCalculator, the user must provide a triggers.json file
 
 #### Running the Tool
 
-The L1TopoRatesCalculator is executed through a Python script, /athena/Trigger/TrigCost/RatesAnalysis/python/runL1TopoRates.py, which is configured to run in the Athena framework. This script is the entry point for configuring and running the HLT (High-Level Trigger) with custom trigger definitions provided in a JSON format.
+The L1TopoRatesCalculator is executed through a Python script, `/athena/Trigger/TrigCost/RatesAnalysis/share/runL1TopoRates.py`, which is configured to run in the Athena framework. This script is the entry point for configuring and running the HLT (High-Level Trigger) with custom trigger definitions provided in a JSON format.
 
 Command to execute:
 ```bash
-python /athena/Trigger/TrigCost/RatesAnalysis/python/runL1TopoRates.py 
+runL1TopoRates.py 
   --ratesJson=triggers.json \
   --filesInput=/RDO inputFile
 ```

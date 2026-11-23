@@ -195,12 +195,15 @@ const std::unordered_map<std::string, std::unique_ptr<RatesTrigger>>& RatesAnaly
     return m_triggers;
 }
 
-StatusCode RatesAnalysisAlg::addExisting(const std::string& pattern) {
+StatusCode RatesAnalysisAlg::addExisting(const std::string& pattern, bool checkPSJson) {
   // Check we have the TDT
   ATH_CHECK(checkGotTDT());
 
   const auto& triggers = m_tdt->getListOfTriggers(pattern);
   ATH_MSG_INFO("Read " << triggers.size() << " triggers from AOD.");
+  if(triggers.size()==0) {
+    ATH_MSG_WARNING("No triggers found for pattern '" << pattern << "'");
+  }
 
   // Check if chain was disabled in athena job
   const bool runWithPrescaleJSON = !m_prescalesJSON.value().empty();
@@ -302,9 +305,11 @@ StatusCode RatesAnalysisAlg::addExisting(const std::string& pattern) {
     ATH_CHECK( newTrigger(trigger, prescale, expressPrescale, lowerName, lowerPrescale, groups, kEXISTING) );
   }
 
-  for (const auto& trigger : m_prescalesJSON) {
-    if (trigger.second.at("prescale") > 0 &&  std::find(triggers.begin(), triggers.end(), trigger.first) == triggers.end()) {
-       ATH_MSG_WARNING( "Trigger " << trigger.first << " in supplied JSON is NOT AVAILABLE in the supplied AOD file.");
+  if (checkPSJson) {
+    for (const auto& trigger : m_prescalesJSON) {
+      if (trigger.second.at("prescale") > 0 &&  std::find(triggers.begin(), triggers.end(), trigger.first) == triggers.end()) {
+        ATH_MSG_WARNING( "Trigger " << trigger.first << " in supplied JSON is NOT AVAILABLE in the supplied AOD file.");
+      }
     }
   }
 
@@ -343,7 +348,7 @@ StatusCode RatesAnalysisAlg::checkExistingTrigger(const std::string& name, const
   return StatusCode::SUCCESS;
 }
 
-StatusCode RatesAnalysisAlg::setTriggerDesicison(const std::string& name, const bool triggerIsPassed, const bool triggerIsActive) {
+StatusCode RatesAnalysisAlg::setTriggerDecision(const std::string& name, const bool triggerIsPassed, const bool triggerIsActive) {
   // Currently - we call execute on setPassed, so the user would be unable to overwrite a decision set e.g. by the TDT.
   // so for now we only accept positive decisions here.
   if (triggerIsPassed || triggerIsActive) {
@@ -359,7 +364,7 @@ StatusCode RatesAnalysisAlg::setTriggerDesicison(const std::string& name, const 
 }
 
 
-StatusCode RatesAnalysisAlg::setTriggerDesicison(const std::string& name, const double threshold) {
+StatusCode RatesAnalysisAlg::setTriggerDecision(const std::string& name, const double threshold) {
   const auto iterator = m_scanTriggers.find(name);
   if (iterator == m_scanTriggers.end()) {
     ATH_MSG_ERROR("Cannot find scan-trigger " << name << " did you call newScanTrigger for this in initialize?");
@@ -715,7 +720,7 @@ StatusCode RatesAnalysisAlg::execute(const EventContext& ctx) {
   ATH_CHECK( executeTrigDecisionToolTriggers() );
 
   // Run user's code. Do manual triggers
-  ATH_CHECK( ratesExecute() );
+  ATH_CHECK( ratesExecute(ctx) );
 
   // Execute groups
   for (const auto& group : m_globalGroups) group.second->execute(m_weightingValues); // Physics, L1, express: Must execute before m_uniqueGroups (which are in active groups). Map.
@@ -742,7 +747,7 @@ StatusCode RatesAnalysisAlg::executeTrigDecisionToolTriggers() {
     // Expect this find operation to fail for L1 chains (lower = "")
     const std::unordered_map<std::string, const Trig::ChainGroup*>::const_iterator it = m_existingTriggers.find(lower);
     const bool active = (it == m_existingTriggers.end() ? true : it->second->isPassed());
-    ATH_CHECK( setTriggerDesicison(trigger.first, passed, active) );
+    ATH_CHECK( setTriggerDecision(trigger.first, passed, active) );
   }
   return StatusCode::SUCCESS;
 }

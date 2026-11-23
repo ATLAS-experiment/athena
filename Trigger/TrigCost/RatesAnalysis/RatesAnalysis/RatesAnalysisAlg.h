@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RATESANALYSIS_RATESANALYSISALG_H
@@ -33,7 +33,7 @@ namespace TrigConf {
  * This class should be inherited and the user should implement ratesInitialize, ratesExecute
  * and ratesFinalize. Triggers to emulate should be added in ratesInitialize with newTrigger
  * or other members such as addExisting. Manually emulated triggers should have their decision 
- * supplied during ratesExecute using setTriggerDesicison. Rates will be reported at the end.
+ * supplied during ratesExecute using setTriggerDecision. Rates will be reported at the end.
  */
 class RatesAnalysisAlg: public ::AthAnalysisAlgorithm { 
  public: 
@@ -42,7 +42,7 @@ class RatesAnalysisAlg: public ::AthAnalysisAlgorithm {
    * using the Trigger Decision Tool for a pre-existing item.
    */
   enum Method_t{
-    kMANUAL, //!< The pass/fail decision is evaluated by the user and supplied per event using setTriggerDesicison
+    kMANUAL, //!< The pass/fail decision is evaluated by the user and supplied per event using setTriggerDecision
     kAUTO, //!< The pass/fail decision is automatically emulated per event based on decoding the trigger name
     kEXISTING //!< The pass/fail decision is taken from the Trigger Decision Tool for an existing trigger.
   };
@@ -50,7 +50,7 @@ class RatesAnalysisAlg: public ::AthAnalysisAlgorithm {
   RatesAnalysisAlg( const std::string& name, ISvcLocator* pSvcLocator );
   virtual ~RatesAnalysisAlg(); 
   virtual StatusCode ratesInitialize() = 0; //!< To be implemented by the user. Register "triggers" to calculate the rate for 
-  virtual StatusCode ratesExecute() = 0; //!<  To be implemented by the user. Supply pass/fail for all "triggers"
+  virtual StatusCode ratesExecute(const EventContext& ctx) = 0; //!<  To be implemented by the user. Supply pass/fail for all "triggers"
   virtual StatusCode ratesFinalize() = 0; //!< To be implemented by the user.
 
   /**
@@ -129,21 +129,21 @@ class RatesAnalysisAlg: public ::AthAnalysisAlgorithm {
    * @brief Register some existing triggers based on wild-card match, e.g. "L1_.*" for all L1.
    * @param pattern Wild-card string to match in trigger name 
    */
-  StatusCode addExisting(const std::string& pattern);
+  StatusCode addExisting(const std::string& pattern, bool checkPSJson=true);
 
   /**
    * Set the pass/fail decision for an item.
    * @param name Name of the registered trigger
    * @param triggerIsPassed Trigger decision.
    */
-  StatusCode setTriggerDesicison(const std::string& name, const bool triggerIsPassed = true, const bool triggerIsActive = true);
+  StatusCode setTriggerDecision(const std::string& name, const bool triggerIsPassed = true, const bool triggerIsActive = true);
 
   /**
    * Set the pass threshold for a Scan Trigger item.
    * @param name Name of the registered scan-trigger
    * @param threshold The passed threshold in the event
    */
-  StatusCode setTriggerDesicison(const std::string& name, const double threshold);
+  StatusCode setTriggerDecision(const std::string& name, const double threshold);
 
   /**
    * Set the target instantaneous luminosity and mu. Number of bunches in the ring is derived.
