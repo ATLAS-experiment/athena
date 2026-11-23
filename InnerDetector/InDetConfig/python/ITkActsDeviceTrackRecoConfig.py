@@ -3,7 +3,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import FlagEnum
 
 from ActsGPUGeometry.ActsGPUGeometryConfig import DeviceDetectorDescriptionCondAlgCfg
-from ActsConfig.ActsConfigFlags import DeviceTritonMode
+from ActsConfig.ActsConfigFlags import DeviceTritonMode, HostCKFInput
 from ActsGPUDataPreparation.ActsGPUDataPreparationConfig import DeviceClusterizationAlgCfg
 
 class DataLocation(FlagEnum):
@@ -288,9 +288,28 @@ def ITkActsDeviceTrackRecoCfg(flags, *, previousExtension=None):
                 StripOverlapSpacePoints="ITkStripOverlapSpacePoints"))
             clustersLocation = DataLocation.HOST
 
-        if seedsLocation is DataLocation.DEVICE:
+        ckfKwargs = {}
+        if (seedsLocation is DataLocation.DEVICE and
+                flags.Acts.Device.hostCKFInput is HostCKFInput.TrackParameters):
+            # The seed track parameters are estimated on the device, and handed
+            # to the CKF with the measurements of each seed instead of seeds&SPs.
+            # Pixel seeds only for now.
+            if flags.Tracking.ActiveConfig.useITkStripSeeding:
+                print("Acts.Device.hostCKFInput=TrackParameters: the host CKF "
+                      "starts from the device pixel seeds only, strip seeding is not run")
+
+            acc.merge(ITkActsDeviceSeedParametersCfg(flags))
+            ckfKwargs = dict(
+                SeedLabels=["PPP"],
+                SeedContainerKeys=[],
+                TrackParamsEstimationTool=[],
+                InitialParametersKeys=["ITkTracccSeedParameters"],
+                SeedMeasurementsKeys=["ITkTracccSeedMeasurements"])
+            seedsLocation = DataLocation.HOST
+
+        elif seedsLocation is DataLocation.DEVICE:
             from ActsGPUEventCnv.ActsGPUEventCnvConfig import TracccSeedConverterAlgCfg
-            
+
             acc.merge(TracccSeedConverterAlgCfg(flags,
                 name="TracccSeedConverterAlg",
                 InputSpacepointsDevice="TracccPixelSpacepointCollection",
@@ -309,7 +328,7 @@ def ITkActsDeviceTrackRecoCfg(flags, *, previousExtension=None):
             raise ValueError("Strip seeding is enabled in the configuration, but it is not supported on the device path. Turn it off using Tracking.ITkActsPass.useITkStripSeeding flag.")
 
         from ActsConfig.ActsTrackFindingConfig import ActsTrackFindingCfg
-        acc.merge(ActsTrackFindingCfg(flags))
+        acc.merge(ActsTrackFindingCfg(flags, **ckfKwargs))
 
         # Ambiguity Resolution
         if flags.Acts.doAmbiguityResolution:
@@ -317,6 +336,77 @@ def ITkActsDeviceTrackRecoCfg(flags, *, previousExtension=None):
             acc.merge(ActsAmbiguityResolutionCfg(flags))
 
     acc.merge(ITkActsDeviceTrackRecoPostProcessingCfg(flags, previousExtension=previousExtension))
+    return acc
+
+
+def ITkActsDeviceSeedParametersCfg(flags,
+                                   *,
+                                   spacepoints="TracccPixelSpacepointCollection",
+                                   measurements="TracccMeasurementCollection",
+                                   seeds="TracccPixelSeedCollection",
+                                   trackParameters="TracccTrackParameterCollection",
+                                   outputParameters="ITkTracccSeedParameters",
+                                   outputSeedMeasurements="ITkTracccSeedMeasurements"):
+    """Device seeds -> track parameters estimated on the device -> initial
+    parameters and seed measurements for the host CKF (InitialParametersKeys
+    and SeedMeasurementsKeys of ActsTrackFindingCfg).
+
+    Needs the host xAOD clusters and the measurement index maps of
+    TracccMeasurementConverterAlg (ITkPixelClusters, ITkStripClusters,
+    ITkTracccMeasToPixelSP, ITkTracccMeasToStripCl)."""
+    acc = ComponentAccumulator()
+
+    from ActsGPUMagField.ActsGPUMagFieldConfig import JSONDeviceMagFieldProviderSvcCfg
+    acc.merge(JSONDeviceMagFieldProviderSvcCfg(flags,
+        DeviceMagFieldObjectName="TracccMagneticField",
+        HostMagFieldObjectName="TracccHostMagField",
+    ))
+
+    # The host CKF gets the same initial covariance as from the CPU parameter
+    # estimation: the defaults of the CPU TrackParamsEstimationTool, and the
+    # same variance inflation flag (the traccc defaults differ, e.g. 1 degree
+    # instead of 0.1 degree for phi and theta)
+    from AthenaConfiguration.ComponentFactory import CompFactory
+    cpuTpe = CompFactory.ActsTrk.TrackParamsEstimationTool
+    cpuCovariance = {name: cpuTpe.getDefaultProperty(name)
+                     for name in ("sigmaLoc0", "sigmaLoc1", "sigmaPhi", "sigmaTheta",
+                                  "sigmaQOverP", "sigmaT0", "initialSigmaPtRel")}
+
+    from ActsGPUPatternRecognition.ActsGPUPatternRecognitionConfig import DeviceTrkParamEstimationAlgCfg
+    acc.merge(DeviceTrkParamEstimationAlgCfg(flags,
+        InputTracccSpacepoints=spacepoints,
+        InputTracccMeasurements=measurements,
+        InputTracccSeeds=seeds,
+        InputTracccMagField="TracccMagneticField",
+        OutputTracccTrackParameters=trackParameters,
+        sigmaQOverPt=0.,  # the CPU tool has no q/pt term
+        initialVarInflation=flags.Acts.initialVarInflation,
+        **cpuCovariance,
+    ))
+
+    # The track parameters (reduced covariance) and the measurement indices of
+    # each seed, packed on the device into one buffer: the host needs a single
+    # copy, and neither the device space points nor the seeds are copied to the host. 
+    from ActsGPUEventCnv.ActsGPUEventCnvConfig import (
+        TracccTrkParamDeviceConverterAlgCfg, TracccTrkParamConverterAlgCfg)
+    packedTrkParams = f"{seeds}PackedTrkParams"
+    acc.merge(TracccTrkParamDeviceConverterAlgCfg(flags,
+        InputTrackParameters=trackParameters,
+        InputSpacepoints=spacepoints,
+        InputSeeds=seeds,
+        OutputPackedTrkParams=packedTrkParams,
+    ))
+
+    acc.merge(TracccTrkParamConverterAlgCfg(flags,
+        InputPackedTrkParams=packedTrkParams,
+        InputPixelClusters="ITkPixelClusters",
+        InputStripClusters="ITkStripClusters",
+        InputMeasToPixelSP="ITkTracccMeasToPixelSP",
+        InputMeasToStripCl="ITkTracccMeasToStripCl",
+        OutputTrackParameters=outputParameters,
+        OutputSeedMeasurements=outputSeedMeasurements,
+    ))
+
     return acc
 
 

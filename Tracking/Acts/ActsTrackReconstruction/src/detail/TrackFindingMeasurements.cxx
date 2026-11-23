@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/detail/TrackFindingMeasurements.h"
@@ -118,32 +118,43 @@ namespace ActsTrk::detail {
   std::unique_ptr<MeasurementRangeListFlat>
   TrackFindingMeasurements::createMeasurementRangesForced(const ActsTrk::Seed &seed,
                                                           const MeasurementIndex &measurementIndex) const {
-    std::unique_ptr<MeasurementRangeListFlat> measurementRangesForced=std::make_unique<ActsTrk::detail::MeasurementRangeListFlat>();
-    measurementRangesForced->reserve(seed.sp().size());  // wrong for strip seeds, but just means an extra allocation in this rare case
+    std::vector<const xAOD::UncalibratedMeasurement*> seedMeasurements;
+    seedMeasurements.reserve(seed.sp().size());  // wrong for strip seeds, but just means an extra allocation in this rare case
     for (const xAOD::SpacePoint *sp : seed.sp()) {
-      for (const xAOD::UncalibratedMeasurement *measurement : sp->measurements()) {
-        std::size_t idx = measurementIndex.index(*measurement);
-        if (!(idx < m_surfaceIndices.size())) {
-          // The measurement was not found in the measurementIndex.
-          // This could happen if no measurements in the same owning container were provided to addMeasurements().
-          continue;
-        }
-        auto [measurementSurfaceId, typeIndex, sl_idx] = m_surfaceIndices.at(idx);
-        if (measurementSurfaceId.value() == 0ul) {
-          // This measurement was not provided to addMeasurements(), so we can't force the track onto it.
-          // This happens in secondary passes, which are given a reduced set of measurements.
-          // Note that the test uses measurementSurfaceId=0, since 0 is valid for the other members.
-          continue;
-        }
-        assert(container(typeIndex)->at(sl_idx) == measurement);
-        measurementRangesForced->setContainer(typeIndex, container(typeIndex));
-        addMeasurementToRange(*measurementRangesForced,
-                              typeIndex,
-                              sl_idx,
-                              sl_idx + 1,
-                              measurement,
-                              measurementSurfaceId);
+      seedMeasurements.insert(seedMeasurements.end(), sp->measurements().begin(), sp->measurements().end());
+    }
+    return createMeasurementRangesForced(seedMeasurements, measurementIndex);
+  }
+
+  std::unique_ptr<MeasurementRangeListFlat>
+  TrackFindingMeasurements::createMeasurementRangesForced(std::span<const xAOD::UncalibratedMeasurement* const> seedMeasurements,
+                                                          const MeasurementIndex &measurementIndex) const {
+    std::unique_ptr<MeasurementRangeListFlat> measurementRangesForced=std::make_unique<ActsTrk::detail::MeasurementRangeListFlat>();
+    measurementRangesForced->reserve(seedMeasurements.size());
+    for (const xAOD::UncalibratedMeasurement *measurement : seedMeasurements) {
+      std::size_t idx = measurementIndex.index(*measurement);
+      if (!(idx < m_surfaceIndices.size())) {
+        // The measurement was not found in the measurementIndex.
+        // This could happen if no measurements in the same owning container were provided to addMeasurements().
+        continue;
       }
+      auto [measurementSurfaceId, typeIndex, sl_idx] = m_surfaceIndices.at(idx);
+      if (measurementSurfaceId.value() == 0ul) {
+        // This measurement was not provided to addMeasurements(), so we can't force the track onto it.
+        // This happens in secondary passes, which are given a reduced set of measurements.
+        // Note that the test uses measurementSurfaceId=0, since 0 is valid for the other members.
+        continue;
+      }
+      
+      assert(container(typeIndex)->at(sl_idx) == measurement);
+      measurementRangesForced->setContainer(typeIndex, container(typeIndex));
+      addMeasurementToRange(*measurementRangesForced,
+                            typeIndex,
+                            sl_idx,
+                            sl_idx + 1,
+                            measurement,
+                            measurementSurfaceId);
+
     }
     return measurementRangesForced;
   }

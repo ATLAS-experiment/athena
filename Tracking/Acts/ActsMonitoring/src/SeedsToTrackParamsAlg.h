@@ -15,6 +15,7 @@
 #include "ActsToolInterfaces/ITrackParamsEstimationTool.h"
 
 #include "ActsEvent/SeedContainer.h"
+#include "ActsEvent/SeedMeasurementsContainer.h"
 #include "ActsEvent/TrackParameters.h"
 #include "ActsEvent/TrackParametersContainer.h"
 #include "ActsEvent/ContextUtility.h"
@@ -39,6 +40,7 @@ namespace ActsTrk {
 
     SG::ReadHandleKey<ActsTrk::SeedContainer> m_inputSeedContainerKey{this, "InputSeedContainerKey", "", "Name of the input seed container"};
     SG::WriteHandleKey<ActsTrk::BoundTrackParametersContainer> m_outputTrackParamsCollectionKey{this, "OutputTrackParamsCollectionKey","", "Name of the output track parameters collection"};
+    SG::WriteHandleKey<ActsTrk::SeedMeasurementsContainer> m_outputSeedMeasurementsKey{this, "OutputSeedMeasurementsKey", "", "Optional output with the measurements of each seed, to provide the seeds to the track finding together with the track parameters"};
 
     Gaudi::Property<bool> m_autoReverseSearch{this, "autoReverseSearch", false, "Estimate seeds beyond useTopSpRZboundary at the top SP, as the track finding"};
     Gaudi::Property<std::vector<double>> m_useTopSpRZboundary {this, "useTopSpRZboundary", {350. * Acts::UnitConstants::mm, 1060. * Acts::UnitConstants::mm}, "R/|z| of the bottom SP beyond which autoReverseSearch estimates at the top SP"};

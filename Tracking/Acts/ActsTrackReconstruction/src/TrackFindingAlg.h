@@ -18,6 +18,8 @@
 
 // ActsTrk
 #include "ActsEvent/SeedContainer.h"
+#include "ActsEvent/SeedMeasurementsContainer.h"
+#include "ActsEvent/TrackParametersContainer.h"
 #include "ActsEvent/TrackContainer.h"
 #include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"
 #include "src/detail/AtlasUncalibSourceLinkAccessor.h"
@@ -38,6 +40,7 @@
 #include "StoreGate/CondHandleKeyArray.h"
 #include "src/detail/Definitions.h"
 #include "src/detail/MeasurementIndex.h"
+#include "src/detail/CkfSeedSource.h"
 
 namespace ActsTrk
 {
@@ -59,12 +62,9 @@ namespace ActsTrk
     using ExpectedLayerPattern = std::array<unsigned int, 4>;
 
   private:
-    std::size_t getSeedCategory(std::size_t typeIndex,
-                                const ActsTrk::Seed& seed) const;
-
     void printSeed(unsigned int iseed,
                    const DetectorContextHolder& detContext,
-                   const ActsTrk::SeedContainer& seeds,
+                   const detail::ICkfSeedSource& seeds,
                    const Acts::BoundTrackParameters &seedParameters,
                    const detail::MeasurementIndex &measurementIndex,
                    std::size_t& nPrinted,
@@ -118,8 +118,14 @@ namespace ActsTrk
     ToolHandleArray<ActsTrk::ITrackParamsEstimationTool> m_paramEstimationTool{this, "TrackParamsEstimationTool", {}, "Track Param Estimation from Seeds (one tool per seed type)"};
 
     // Handle Keys
+    // The seeds are given either as space point seeds (SeedContainerKeys), with the initial parameters
+    // estimated by the TrackParamsEstimationTool, or as precomputed initial parameters together with
+    // the seed measurements (InitialParametersKeys and SeedMeasurementsKeys).
     // Seed collections. These 2 vectors must match element for element.
     SG::ReadHandleKeyArray<ActsTrk::SeedContainer> m_seedContainerKeys{this, "SeedContainerKeys", {}, "Seed containers"};
+    // Seeds given by their initial parameters. These 2 vectors must match element for element.
+    SG::ReadHandleKeyArray<ActsTrk::BoundTrackParametersContainer> m_initialParametersKeys{this, "InitialParametersKeys", {}, "Initial track parameters of the seeds, used instead of SeedContainerKeys"};
+    SG::ReadHandleKeyArray<ActsTrk::SeedMeasurementsContainer> m_seedMeasurementsKeys{this, "SeedMeasurementsKeys", {}, "Measurements of the seeds given by InitialParametersKeys"};
 
     // Measurement collections. These 2 vectors must match element for element.
     SG::ReadHandleKeyArray<xAOD::UncalibratedMeasurementContainer> m_uncalibratedMeasurementContainerKeys{this, "UncalibratedMeasurementContainerKeys", {}, "input cluster collections"};
@@ -162,6 +168,10 @@ namespace ActsTrk
     std::optional<Acts::GreedyAmbiguityResolution> m_ambi;
     std::optional<Acts::TrackletJoiner> m_trackletJoiner;
 
+    bool useInitialParameters() const { return !m_initialParametersKeys.empty(); }
+    std::size_t nSeedInputs() const { return useInitialParameters() ? m_initialParametersKeys.size() : m_seedContainerKeys.size(); }
+    const std::string &seedInputKey(std::size_t i) const { return useInitialParameters() ? m_initialParametersKeys[i].key() : m_seedContainerKeys[i].key(); }
+
 
     Acts::Result<void> extrapolateTrackToReferenceSurface(
       const DetectorContextHolder& detContext,
@@ -179,7 +189,7 @@ namespace ActsTrk
      * @param measurements - measurements container used in MeasurementSelector
      * @param sharedHits - measurements container used for shared hit counting
      * @param seedDeduplicator - duplicate seed detector
-     * @param seeds - spacepoint triplet seeds
+     * @param seeds - seeds, providing initial trk param and seed measurements
      * @param detElements - Trk detector elements
      * @param actsTracksContainer - output tracks
      * @param seedCollectionIndex - index of this collection of seeds
@@ -195,7 +205,7 @@ namespace ActsTrk
                const ActsTrk::ActsVolumeIdToDetectorElementCollectionMap &volumeIdMap,
                detail::SharedHitCounter &sharedHits,
                Acts::SeedDeduplicator &seedDeduplicator,
-               const ActsTrk::SeedContainer &seeds,
+               const detail::ICkfSeedSource &seeds,
                detail::RecoTrackContainer &actsTracksContainer,
                std::size_t seedCollectionIndex,
                const char *seedType,

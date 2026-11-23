@@ -10,6 +10,7 @@
 #include "ActsEvent/SeedContainer.h"
 #include "src/detail/AtlasUncalibSourceLinkAccessor.h"
 #include "src/detail/MeasurementIndex.h"
+#include <span>
 #include <vector>
 
 namespace ActsTrk {
@@ -35,6 +36,9 @@ namespace ActsTrk::detail {
     std::unique_ptr<MeasurementRangeListFlat> createMeasurementRangesForced(const ActsTrk::Seed &seed,
                                                                             const MeasurementIndex &measurementIndex) const;
     MeasurementRange markSurfaceInsensitive(const Acts::GeometryIdentifier &identifier);
+    std::unique_ptr<MeasurementRangeListFlat> createMeasurementRangesForced(std::span<const xAOD::UncalibratedMeasurement* const> seedMeasurements,
+                                                                            const MeasurementIndex &measurementIndex) const;
+
 
     inline const MeasurementRangeList &measurementRanges() const;
     inline std::size_t nMeasurements() const;
