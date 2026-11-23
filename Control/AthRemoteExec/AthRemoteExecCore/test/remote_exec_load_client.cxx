@@ -38,6 +38,7 @@ std::string resolveTarget(const std::string& argument, double timeoutSeconds) {
     std::ifstream in(argument);
     int port = 0;
     if (in >> port && port > 0) {
+      //coverity[TAINTED_SCALAR]
       return "localhost:" + std::to_string(port);
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
