@@ -5,8 +5,6 @@
 // generate the T/P converter entries
 #include "AthenaKernel/TPCnvFactory.h"
 
-#include "MuonEventTPCnv/MuonChamberT0s/ChamberT0sCnv_p1.h"
-
 #include "MuonEventTPCnv/CscPrepDataContainerCnv_tlp1.h"
 #include "MuonEventTPCnv/CscStripPrepDataContainerCnv_tlp1.h"
 #include "MuonEventTPCnv/MdtPrepDataContainerCnv_tlp1.h"
@@ -17,10 +15,7 @@
 #include "MuonEventTPCnv/TgcCoinDataContainerCnv_tlp3.h"
 #include "MuonEventTPCnv/TgcPrepDataContainerCnv_tlp1.h"
 
-DECLARE_TPCNV_FACTORY(ChamberT0sCnv_p1,
-                      Muon::ChamberT0s,
-                      Muon::ChamberT0s_p1,
-                      Athena::TPCnvVers::Current)
+
 
 DECLARE_TPCNV_FACTORY(CscPrepDataContainerCnv_tlp1,
                       Muon::CscPrepDataContainer,

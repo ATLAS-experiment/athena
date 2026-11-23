@@ -19,12 +19,11 @@ atlas_add_library( MuonEventTPCnv
    MuonEventTPCnv/MuonPrepRawData/*.h src/MuonPrepRawData/*.cxx
    MuonEventTPCnv/MuonTrigCoinData/*.h src/MuonTrigCoinData/*.cxx
    MuonEventTPCnv/MuonSegment/*.h src/MuonSegment/*.cxx
-   MuonEventTPCnv/MuonChamberT0s/*.h src/MuonChamberT0s/*.cxx
    MuonEventTPCnv/MuonDigitContainer/*.h src/MuonDigitContainer/*.cxx src/MuonRDO/*.cxx
    PUBLIC_HEADERS MuonEventTPCnv
    LINK_LIBRARIES AthAllocators AthLinks DataModelAthenaPoolLib AthenaPoolCnvSvcLib
    AthenaPoolUtilities Identifier GaudiKernel GeneratorObjectsTPCnv
-   MuonDigitContainer MuonChamberT0s MuonCompetingRIOsOnTrack MuonPrepRawData
+   MuonDigitContainer MuonCompetingRIOsOnTrack MuonPrepRawData
    MuonRIO_OnTrack MuonSegment MuonTrigCoinData MuonSimData MuonRDO TrkSurfaces
    TrkRIO_OnTrack TrkEventTPCnv
    PRIVATE_LINK_LIBRARIES AthenaKernel StoreGateLib GeoPrimitives
