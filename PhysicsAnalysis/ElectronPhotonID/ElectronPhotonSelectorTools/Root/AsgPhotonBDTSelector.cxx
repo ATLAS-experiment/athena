@@ -76,26 +76,34 @@ StatusCode AsgPhotonBDTSelector::initialize() {
 // Load and parse the configuration file
 //=============================================================================
 StatusCode AsgPhotonBDTSelector::loadConfig() {
-  // If we specified the WP, look for the corresponding config file in the mapping
-  if (!m_workingPoint.empty()) {
-    m_configFile = AsgConfigHelper::findConfigFile(
+  // ConfigFile (if set) has priority
+  std::string confFile = m_configFile.value();
+  if (!confFile.empty()) {
+    if (!m_workingPoint.empty()) {
+      ATH_MSG_INFO("ConfigFile is set: it overrides the config file of WorkingPoint " << m_workingPoint.value());
+    }
+  } else if (!m_workingPoint.empty()) {
+    // If we specified the WP, look for the corresponding config file in the mapping
+    confFile = AsgConfigHelper::findConfigFile(
       m_workingPoint, EgammaSelectors::PhotonBDTPointToConfFile
     );
-    ATH_MSG_INFO("Photon ID BDT working point: " << getOperatingPointName());
   }
 
-  if (m_configFile.empty()) {
-    ATH_MSG_ERROR("Empty configFile. WorkingPoint: " << m_workingPoint);
+  if (confFile.empty()) {
+    ATH_MSG_ERROR("Empty configFile. WorkingPoint: '" << m_workingPoint.value()
+                  << "', ConfigFile: '" << m_configFile.value() << "'");
     return StatusCode::FAILURE;
   }
 
-  const std::string configFile = PathResolverFindCalibFile(m_configFile);
+  ATH_MSG_INFO("Photon ID BDT operating point: " << getOperatingPointName() << " (config file: " << confFile << ")");
+
+  const std::string configFile = PathResolverFindCalibFile(confFile);
   if (configFile.empty()) {
-    ATH_MSG_ERROR("Could not locate config via PathResolver: " << m_configFile);
+    ATH_MSG_ERROR("Could not locate config via PathResolver: " << confFile);
     return StatusCode::FAILURE;
   }
 
-  ATH_MSG_DEBUG("Using config file: " << m_configFile << " (resolved: " << configFile << ")");
+  ATH_MSG_DEBUG("Using config file: " << confFile << " (resolved: " << configFile << ")");
 
   // Parse config file
   TEnv env;
@@ -139,7 +147,8 @@ StatusCode AsgPhotonBDTSelector::loadConfig() {
 //=============================================================================
 std::string AsgPhotonBDTSelector::getOperatingPointName() const
 {
-  return m_workingPoint;
+  // ConfigFile (if set) has priority over WorkingPoint, as in loadConfig()
+  return m_configFile.empty() ? m_workingPoint.value() : m_configFile.value();
 }
 
 //=============================================================================
