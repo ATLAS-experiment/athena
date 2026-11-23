@@ -289,6 +289,10 @@ def DVFinderToolCfg(flags, name="DVFinderTool", **myargs):
     acc = ComponentAccumulator()
     acc.merge(BeamSpotCondAlgCfg(flags))
 
+    # Allow overrides (with defaults)
+    twoTrkD0Cut = myargs.pop("TwoTrkVtxFormingD0Cut", 0.0)
+    do2TrkIBLChecks  = myargs.pop("do2TrkIBLChecks", True)
+
     #-- 2-track vertex initial selector
     iniV2Targs = {}
     iniV2Targs.setdefault("Vrt2TrPtMin" , 2000.)
@@ -297,6 +301,8 @@ def DVFinderToolCfg(flags, name="DVFinderTool", **myargs):
     iniV2Targs.setdefault("MaxSVRadiusCut", 350.)
     iniV2Targs.setdefault("Vrt2TrMassLimit", 1000000.)
     iniV2Targs.setdefault("useVertexCleaning"  , False)
+    iniV2Targs.setdefault("do2TrkIBLChecks"  , do2TrkIBLChecks)
+    iniV2Targs.setdefault("TwoTrkVtxFormingD0Cut", twoTrkD0Cut)
     iniV2TSelector = CompFactory.Rec.TwoTrackVrtBDTSelector("IniV2TSelector",**iniV2Targs)
     #-- 2-track vertex final selector
     finV2Targs = {}
@@ -306,6 +312,8 @@ def DVFinderToolCfg(flags, name="DVFinderTool", **myargs):
     finV2Targs.setdefault("MaxSVRadiusCut", 350.)
     finV2Targs.setdefault("Vrt2TrMassLimit", 1000000.)
     finV2Targs.setdefault("useVertexCleaning"  , False)
+    finV2Targs.setdefault("do2TrkIBLChecks"  , do2TrkIBLChecks)
+    finV2Targs.setdefault("TwoTrkVtxFormingD0Cut", twoTrkD0Cut)
     finV2TSelector = CompFactory.Rec.TwoTrackVrtBDTSelector("FinV2TSelector",**finV2Targs)
 
     #-- NVSI track selection cuts

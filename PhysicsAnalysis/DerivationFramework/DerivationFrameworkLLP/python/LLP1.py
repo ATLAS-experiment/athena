@@ -552,7 +552,8 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
     from NewVrtSecInclusiveTool.NewVrtSecInclusiveConfig import DVFinderToolCfg
     IDAndGSFSuffix = "_IDAndGSF_LepTrack"
 
-    NVSILepTrack_Tool = acc.popToolsAndMerge(DVFinderToolCfg(flags,FillHist=False,AugmentingVersionString=IDAndGSFSuffix,MaxZVrt=1000.,AntiPileupSigRCut=2.))                                
+    NVSILepTrack_Tool = acc.popToolsAndMerge(DVFinderToolCfg(flags,FillHist=False,AugmentingVersionString=IDAndGSFSuffix,MaxZVrt=1000.,AntiPileupSigRCut=2.,
+                                                             do2TrkIBLChecks=False, TwoTrkVtxFormingD0Cut=1.0))                                
     acc.merge(NewVrtSecInclusiveAlgLLPCfg(flags, 
                                        algname = "NVSI"+IDAndGSFSuffix,
                                        AugmentingVersionString = IDAndGSFSuffix,

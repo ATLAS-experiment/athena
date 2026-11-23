@@ -108,6 +108,8 @@ TwoTrackVrtBDTSelector::TwoTrackVrtBDTSelector(const std::string& type,
 
       double vrtRErr=vrtRadiusError(candV.position(),candV.covariance() );
 //
+//-------------------Minimum pairwise track d0 (for DV applications) 
+      if ((std::abs(iTrks.first->d0())<m_twoTrkVtxFormingD0Cut) && (std::abs(iTrks.second->d0())<m_twoTrkVtxFormingD0Cut)) return false;
 // Check pixel hits vs vertex positions.
       int ihitIBL  = getIBLHit(iTrks.first);
       int jhitIBL  = getIBLHit(iTrks.second);
