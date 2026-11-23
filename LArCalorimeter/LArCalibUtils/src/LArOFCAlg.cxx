@@ -703,20 +703,20 @@ void  LArOFCAlg::optFiltPed(const std::vector<float> &gWave, const std::vector<f
   const int optNpt = gWave.size();
   
   Eigen::VectorXd gResp(optNpt), gDerivResp(optNpt);
+  Eigen::VectorXd Kunit = Eigen::VectorXd::Ones(optNpt);
   for (int i=0;i<optNpt;i++) {
     gResp[i] = gWave[i];
     gDerivResp[i] = gDerivWave[i];
   }
 
   Eigen::Matrix3d isol;
-  Eigen::Vector3d Kunit(1.,1.,1.);
   auto s3=(gDerivResp.transpose()*acInverse*gResp)[0];
-  auto s4=(gResp.transpose()*acInverse*Kunit)[0];
-  auto s5=(gDerivResp.transpose()*acInverse*Kunit)[0];
+  auto s4=(acInverse*gResp).sum();      // 1^T R^-1 g  (R^-1 symmetric)
+  auto s5=(acInverse*gDerivResp).sum(); // 1^T R^-1 g'
   isol << 
     (gResp.transpose()*acInverse*gResp)[0], s3, s4,
-    s3, (gDerivResp.transpose()*acInverse*gResp)[0], s5,
-    s4, s5, (Kunit.transpose()*acInverse*Kunit)[0];
+    s3, (gDerivResp.transpose()*acInverse*gDerivResp)[0], s5,
+    s4, s5, acInverse.sum();
 
   Eigen::Vector3d Amp; 
   Eigen::Vector3d Atau;
