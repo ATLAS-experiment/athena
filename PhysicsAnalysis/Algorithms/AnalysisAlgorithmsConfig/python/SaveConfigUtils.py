@@ -10,7 +10,7 @@ import re
 
 # A tool declaration value has the shape 'Type/Name', with a (possibly namespace-qualified
 # or templated) C++ type name and a tool name made of identifier components separated by dots
-_toolDeclarationExpr = re.compile(r'[A-Za-z_][A-Za-z0-9_:<>,]*/[A-Za-z_][A-Za-z0-9_.]*')
+_toolDeclarationExpr = re.compile(r'\d*[A-Za-z_][A-Za-z0-9_:<>,]*/[A-Za-z_][A-Za-z0-9_.]*')
 
 def combine_tools_and_algorithms_ELjob(combine_dictionaries = True, text_file = 'tool_config.txt',
                                        alg_file = 'alg_sequence.json', output_file = 'my_analysis_config.json'):
