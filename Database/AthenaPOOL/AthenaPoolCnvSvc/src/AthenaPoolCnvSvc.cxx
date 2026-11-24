@@ -386,6 +386,7 @@ StatusCode AthenaPoolCnvSvc::convertAddress(const IOpaqueAddress* pAddress,
 }
 //______________________________________________________________________________
 StatusCode AthenaPoolCnvSvc::registerCleanUp(IAthenaPoolCleanUp* cnv) {
+   std::unique_lock<std::mutex> lock(m_mutex);
    m_cnvs.push_back(cnv);
    return(StatusCode::SUCCESS);
 }
