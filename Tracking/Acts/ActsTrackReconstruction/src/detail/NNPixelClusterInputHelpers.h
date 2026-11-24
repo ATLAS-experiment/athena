@@ -126,8 +126,12 @@ inline void fillClusterData(const PixelID& pixelID, NNinput& nn,
     const int x = NNinput::toModuleIndex(i, xCenter);
     const int y = NNinput::toModuleIndex(i, yCenter);
     const InDetDD::SiCellId cell(x, y);
-    if (cell.isValid())
-      nn.setPixelXPitch(i, design->parameters(cell).width().xPhi());
+    if (cell.isValid()) {
+      const auto& width =
+          design->diodeProxyFromIdx({cell.phiIndex(), cell.etaIndex()}).width();
+      nn.setPixelXPitch(i, width[0]);
+      nn.setPixelYPitch(i, width[1]);
+    }
   }
 }
 
