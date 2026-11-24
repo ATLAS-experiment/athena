@@ -63,8 +63,9 @@ namespace MuonValR4{
                     const auto* seg = static_cast<const xAOD::MuonSegment*>(aux);
                     const xAOD::TruthParticle* truthP = MuonR4::getTruthMatchedParticle(*seg);
                     m_truthTrks->push_back(truthP);
-                    unsigned short linkIdx = m_truthTrks->find(truthP);                    
-                    return linkIdx;
+                    const auto rawIdx = m_truthTrks->find(truthP);
+                    assert(std::in_range<unsigned short>(rawIdx));
+                    return static_cast<unsigned short>(rawIdx);           
                 }));
 
         m_segmentBranches->addVariable(std::make_unique<MuonVal::GenericAuxDecorationBranch<

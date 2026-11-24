@@ -605,12 +605,12 @@ StatusCode SegmentDumperAlg::execute(const EventContext& ctx) {
     ATH_CHECK(SG::get(spContainer, spKey, ctx));
 
     SegmentsPerBucket_t segPerBucket{};
-    if (segContainer) {
-      for (const xAOD::MuonSegment* seg : *segContainer) {
-        const auto* detSeg = MuonR4::detailedSegment(*seg);
-        segPerBucket[detSeg->parent()->parentBucket()].insert(seg);
-      }
+    //segContainer cannot be nullptr at this point.
+    for (const xAOD::MuonSegment* seg : *segContainer) {
+      const auto* detSeg = MuonR4::detailedSegment(*seg);
+      segPerBucket[detSeg->parent()->parentBucket()].insert(seg);
     }
+    
 
     for (const SpacePointBucket* bucket : *spContainer) {
       m_bucket_spacePoints = static_cast<uint16_t>(bucket->size());

@@ -279,7 +279,7 @@ StatusCode ReadoutGeomCnvAlg::cloneReadoutVolume(const ActsTrk::GeometryContext&
     station = cacheObj.detMgr->getMuonStation(stName, 
                                               m_idHelperSvc->stationEta(reId), 
                                               m_idHelperSvc->stationPhi(reId));
-  
+    assert(station != nullptr);
     PVLink copiedStationVol{station->getPhysVol()};
     const MuonGMR4::MuonReadoutElement* copyMe = m_detMgr->getReadoutElement(reId);
     GeoIntrusivePtr<const GeoVFullPhysVol> readOutVol{copyMe->getMaterialGeom()};
@@ -386,6 +386,8 @@ StatusCode ReadoutGeomCnvAlg::buildRpc(const ActsTrk::GeometryContext& gctx, Con
         for (const Identifier& gapId : gapIds) {
             const int surfaceHash = newElement->surfaceHash(gapId);
             const int layerHash = newElement->layerHash(gapId);
+            assert(surfaceHash >= 0);
+            assert(layerHash >= 0);
             const Acts::Transform3 refTrf{copyMe->localToGlobalTransform(gctx, gapId)* 
                                           (m_idHelperSvc->measuresPhi(gapId) ? 
                                                 Amg::getRotateZ3D(90_degree) :
