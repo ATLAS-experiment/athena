@@ -2,7 +2,7 @@
 """Examples of how to declare new Codecs"""
 
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthRemoteExecCore.RemoteExecCodecs import Codec, Direction, Encoding
+from AthRemoteExecCore.RemoteExecCodecs import Codec, Direction
 
 #: Message schema, matching whatever name we use in C++
 INTS = "athexremoteexec.demo.v1.Ints"
@@ -16,7 +16,7 @@ class DemoInts(Codec):
     .add(..., boundaries={"addends": DemoInts(["a", "b"])})
     """
 
-    encoding = Encoding.protobuf
+    encoding = "protobuf"
     tool_type = CompFactory.AthRemoteExec.Example.DemoIntsCodec
 
     def __init__(self, values: list[str]):
@@ -40,7 +40,7 @@ class DemoInts(Codec):
 class DemoDoubles(Codec):
     """One named vector of doubles."""
 
-    encoding = Encoding.protobuf
+    encoding = "protobuf"
     tool_type = CompFactory.AthRemoteExec.Example.DemoDoublesCodec
 
     def __init__(self, values: str):
@@ -64,7 +64,7 @@ class DemoDoubles(Codec):
 class DemoWords(Codec):
     """Vector of unsigned 32-bit integers"""
 
-    encoding = Encoding.protobuf
+    encoding = "protobuf"
     tool_type = CompFactory.AthRemoteExec.Example.DemoWordsCodec
 
     def __init__(self, values: str):

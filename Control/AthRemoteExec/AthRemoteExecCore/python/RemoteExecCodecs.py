@@ -5,9 +5,6 @@ from enum import StrEnum
 
 from AthenaCommon.Configurable import Configurable
 
-__all__ = ["Codec"]
-
-Encoding = StrEnum("Encoding", ["protobuf"])
 Source = StrEnum("Source", ["explicit", "derived", "none"])
 
 
@@ -20,7 +17,7 @@ class Codec:
     """Configuration helper for Codec tools. Each codec configuration should derive from this class."""
 
     # Codec encoding protocol, see BoundaryInfo in AthRemoteExecWire/Protocol.h
-    encoding: Encoding | None = None
+    encoding: str | None = None
     # C++ Codec tool, e.g. CompFactory.AthRemoteExec.MyCodecTool
     tool_type = None
     # Where Codec's schema comes from:

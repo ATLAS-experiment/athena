@@ -4,7 +4,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-from AthRemoteExecCore.RemoteExecCodecs import Codec, Direction, Encoding
+from AthRemoteExecCore.RemoteExecCodecs import Codec, Direction
 from AthRemoteExecCore.RemoteExecFragments import (
     REMOTE_EXEC_REQUEST_KEY,
     RemoteExecTop,
@@ -18,7 +18,7 @@ INTS = "test_ints"
 class test_IntsCodec(Codec):
     """Python helper for test_IntsCodec"""
 
-    encoding = Encoding.protobuf
+    encoding = "protobuf"
     tool_type = CompFactory.AthRemoteExec.test_IntsCodec
 
     def __init__(self, values: list[str]):
