@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -271,6 +271,8 @@ StatusCode TrigFastTrackFinder::initialize() {
       while(!ifs.eof()) {
         ifs >> row >> col0 >> col1;
         if(ifs.eof()) break;
+        //should sanitise inputs
+        //coverity[TAINTED_SCALAR]
         for(int c=col0;c<=col1;c++) L.setBin(row, c);
       }
       ifs.close();
@@ -394,7 +396,8 @@ StatusCode TrigFastTrackFinder::execute(const EventContext& ctx) const {
       inputTracks = inputTrackHandle.ptr();
     }
   }
-  InDet::ExtendedSiTrackMakerEventData_xk trackEventData(m_prdToTrackMap, ctx);
+  //trackEventData uses 814592 bytes of space
+  auto pTrackEventData = std::make_unique<InDet::ExtendedSiTrackMakerEventData_xk>(m_prdToTrackMap, ctx);
 
   //RoI preparation/update
 
@@ -402,7 +405,7 @@ StatusCode TrigFastTrackFinder::execute(const EventContext& ctx) const {
     //the default fullscan TrigRoiDescriptor settings for beamspot width (z-range) are incorrect
     const TrigRoiDescriptor internalRoI = TrigRoiDescriptor(0, -4.5, 4.5, 0, -M_PI, M_PI, 0, -150.0, 150.0);
 
-    ATH_CHECK(findTracks(trackEventData, internalRoI, inputTracks, *outputTracks, ctx));
+    ATH_CHECK(findTracks(*pTrackEventData, internalRoI, inputTracks, *outputTracks, ctx));
 
   } else {
     SG::ReadHandle<TrigRoiDescriptorCollection> roiCollection(m_roiCollectionKey, ctx);
@@ -418,7 +421,7 @@ StatusCode TrigFastTrackFinder::execute(const EventContext& ctx) const {
 
     TrigRoiDescriptor internalRoI = **roiCollection->begin();
 
-    ATH_CHECK(findTracks(trackEventData, internalRoI, inputTracks, *outputTracks, ctx));
+    ATH_CHECK(findTracks(*pTrackEventData, internalRoI, inputTracks, *outputTracks, ctx));
   }
 
   /// internalRoI.manageConstituents(false);//Don't try to delete RoIs at the end
@@ -690,10 +693,10 @@ StatusCode TrigFastTrackFinder::findTracks(InDet::SiTrackMakerEventData_xk &trac
     std::list<Trk::Track*> tracksAll = m_trackMaker->getTracks(ctx, trackEventData, spVec);
     auto resultCode = trackEventData.combinatorialData().resultCode();
     if( ! m_doDisappearingTrk || (m_doDisappearingTrk && resultCode==InDet::SiCombinatorialTrackFinderData_xk::ResultCode::Success) ) {
-       tracks = tracksAll;
+       tracks = std::move(tracksAll);
     }
     else {
-       tracksFail = tracksAll;
+       tracksFail = std::move(tracksAll);
     }
 
     if( m_doDisappearingTrk ) {
@@ -808,8 +811,8 @@ StatusCode TrigFastTrackFinder::findTracks(InDet::SiTrackMakerEventData_xk &trac
     idx++;
   }
   qualityTracks.clear();
-
-  ATH_MSG_DEBUG("After clone removal "<<initialTracks.size()<<" tracks left");
+  const std::size_t nInitialTracks = initialTracks.size();
+  ATH_MSG_DEBUG("After clone removal "<<nInitialTracks<<" tracks left");
 
 
   mnt_timer_CombTracking.stop();
@@ -848,7 +851,7 @@ StatusCode TrigFastTrackFinder::findTracks(InDet::SiTrackMakerEventData_xk &trac
   
 
   bool do_recoverDisCombTrk = true;
-  if( m_doDisappearingTrk && (initialTracks.size()!=outputTracks.size()) ) {
+  if( m_doDisappearingTrk && (nInitialTracks!=outputTracks.size()) ) {
      ATH_MSG_DEBUG("part of initialTracks fails in fitting. do not try to recover DisCombTracks");
      do_recoverDisCombTrk = false;
   }
@@ -1243,12 +1246,13 @@ void TrigFastTrackFinder::fillMon(const TrackCollection& tracks, const TrigVerte
       }
     }
     mnt_trk_nPIXHits.push_back(nPix);
-    mnt_trk_nSCTHits.push_back(nSct/2);
-    mnt_trk_nSiHits.push_back(nPix + nSct/2);
+    const int halfSct = static_cast<int>(nSct/2);//integer division
+    mnt_trk_nSCTHits.push_back(halfSct);
+    mnt_trk_nSiHits.push_back(nPix + halfSct);
 
     ATH_MSG_DEBUG("REGTEST / track npix/nsct/phi0/pt/eta/d0/z0/chi2: " <<
         nPix   << " / "  <<
-        nSct/2 << " / "  <<
+        halfSct << " / "  <<
         phi0   << " / "  <<
         pT     << " / " <<
         eta    << " / " <<
@@ -1256,7 +1260,7 @@ void TrigFastTrackFinder::fillMon(const TrackCollection& tracks, const TrigVerte
         z0     << " / " <<
         chi2);
     // tighter selection for unbiased residuals
-    bool goodTrack = std::fabs(pT)>1000. && (nPix + nSct/2) > 3 && nSct > 0;
+    bool goodTrack = std::fabs(pT)>1000. && (nPix + halfSct) > 3 && nSct > 0;
     if (goodTrack && m_doResMonitoring) {
       runResidualMonitoring(*track, ctx);
     }
@@ -1495,7 +1499,7 @@ void TrigFastTrackFinder::makeSeedsOnGPU(const TrigCombinatorialSettings& tcs, c
 
   std::shared_ptr<TrigAccel::OffloadBuffer> pBuff = std::make_shared<TrigAccel::OffloadBuffer>(dataBuffer);
 
-  TrigAccel::Work* pJob = m_accelSvc->createWork(TrigAccel::InDetJobControlCode::MAKE_SEEDS, pBuff);
+  TrigAccel::Work* pJob = m_accelSvc->createWork(TrigAccel::InDetJobControlCode::MAKE_SEEDS, std::move(pBuff));
 
   if(pJob) {
     ATH_MSG_DEBUG("Work item created for task "<<TrigAccel::InDetJobControlCode::MAKE_SEEDS);
@@ -1504,7 +1508,7 @@ void TrigFastTrackFinder::makeSeedsOnGPU(const TrigCombinatorialSettings& tcs, c
 
     std::shared_ptr<TrigAccel::OffloadBuffer> pOB = pJob->getOutput();
 
-    int nTriplets = m_accelTool->extractTripletsFromOutput(pOB,vsp, output);
+    int nTriplets = m_accelTool->extractTripletsFromOutput(std::move(pOB),vsp, output);
 
     ATH_MSG_DEBUG("Found "<<nTriplets<<" triplets on GPU");
   }
@@ -1676,7 +1680,29 @@ StatusCode TrigFastTrackFinder::finddEdxTrk(const EventContext& ctx, const Track
    static constexpr float TRKCUT_PTGEV_TIGHT  = 10.0;
    static constexpr float TRKCUT_DEDX_LOOSE   =  1.25;
    static constexpr float TRKCUT_DEDX_TIGHT   =  1.55;
-
+   static const std::array<std::string, 11> dEdxTrkNames{
+      "dEdxTrk_id",    
+      "dEdxTrk_pt",    
+      "dEdxTrk_eta",   
+      "dEdxTrk_phi",   
+      "dEdxTrk_a0beam",
+      "dEdxTrk_dedx",  
+      "dEdxTrk_dedx_n_usedhits", 
+      "dEdxTrk_n_hits_innermost", 
+      "dEdxTrk_n_hits_inner",     
+      "dEdxTrk_n_hits_pix",       
+      "dEdxTrk_n_hits_sct",       
+   };
+   static const std::array<std::string, 8> dEdxHitNames{
+      "dEdxHit_trkid", 
+      "dEdxHit_dedx",    
+      "dEdxHit_tot",    
+      "dEdxHit_trkchi2",
+      "dEdxHit_trkndof",
+      "dEdxHit_iblovfl",
+      "dEdxHit_loc",    
+      "dEdxHit_layer",  
+   };
    for (const auto track: outputTracks) {
 
       float shift_x = 0; float shift_y = 0;
@@ -1709,29 +1735,29 @@ StatusCode TrigFastTrackFinder::finddEdxTrk(const EventContext& ctx, const Track
 
       xAOD::TrigComposite *dEdxTrk = new xAOD::TrigComposite();
       dEdxTrkContainer->push_back(dEdxTrk);
-      dEdxTrk->setDetail<int>  ("dEdxTrk_id",     i_track);
-      dEdxTrk->setDetail<float>("dEdxTrk_pt",     theTrackInfo.ptGeV*Gaudi::Units::GeV);
-      dEdxTrk->setDetail<float>("dEdxTrk_eta",    theTrackInfo.eta);
-      dEdxTrk->setDetail<float>("dEdxTrk_phi",    theTrackInfo.phi0);
-      dEdxTrk->setDetail<float>("dEdxTrk_a0beam", theTrackInfo.a0beam);
-      dEdxTrk->setDetail<float>("dEdxTrk_dedx",   dedx);
-      dEdxTrk->setDetail<int>  ("dEdxTrk_dedx_n_usedhits",  n_usedhits);
-      dEdxTrk->setDetail<int>  ("dEdxTrk_n_hits_innermost", theTrackInfo.n_hits_innermost);
-      dEdxTrk->setDetail<int>  ("dEdxTrk_n_hits_inner",     theTrackInfo.n_hits_inner);
-      dEdxTrk->setDetail<int>  ("dEdxTrk_n_hits_pix",       theTrackInfo.n_hits_pix);
-      dEdxTrk->setDetail<int>  ("dEdxTrk_n_hits_sct",       theTrackInfo.n_hits_sct);
+      dEdxTrk->setDetail<int>  (dEdxTrkNames[0],     i_track);
+      dEdxTrk->setDetail<float>(dEdxTrkNames[1],     theTrackInfo.ptGeV*Gaudi::Units::GeV);
+      dEdxTrk->setDetail<float>(dEdxTrkNames[2],    theTrackInfo.eta);
+      dEdxTrk->setDetail<float>(dEdxTrkNames[3],    theTrackInfo.phi0);
+      dEdxTrk->setDetail<float>(dEdxTrkNames[4], theTrackInfo.a0beam);
+      dEdxTrk->setDetail<float>(dEdxTrkNames[5],   dedx);
+      dEdxTrk->setDetail<int>  (dEdxTrkNames[6],  n_usedhits);
+      dEdxTrk->setDetail<int>  (dEdxTrkNames[7], theTrackInfo.n_hits_innermost);
+      dEdxTrk->setDetail<int>  (dEdxTrkNames[8],     theTrackInfo.n_hits_inner);
+      dEdxTrk->setDetail<int>  (dEdxTrkNames[9],       theTrackInfo.n_hits_pix);
+      dEdxTrk->setDetail<int>  (dEdxTrkNames[10],       theTrackInfo.n_hits_sct);
 
       for(unsigned int i=0; i<v_pixhit_dedx.size(); i++) {
-	 xAOD::TrigComposite *dEdxHit = new xAOD::TrigComposite();
-	 dEdxHitContainer->push_back(dEdxHit);
-	 dEdxHit->setDetail<int>  ("dEdxHit_trkid",   i_track);
-	 dEdxHit->setDetail<float>("dEdxHit_dedx",    v_pixhit_dedx[i]);
-	 dEdxHit->setDetail<float>("dEdxHit_tot",     v_pixhit_tot[i]);
-	 dEdxHit->setDetail<float>("dEdxHit_trkchi2", v_pixhit_trkchi2[i]);
-	 dEdxHit->setDetail<float>("dEdxHit_trkndof", v_pixhit_trkndof[i]);
-	 dEdxHit->setDetail<int>  ("dEdxHit_iblovfl", v_pixhit_iblovfl[i]);
-	 dEdxHit->setDetail<int>  ("dEdxHit_loc",     v_pixhit_loc[i]);
-	 dEdxHit->setDetail<int>  ("dEdxHit_layer",   v_pixhit_layer[i]);
+         xAOD::TrigComposite *dEdxHit = new xAOD::TrigComposite();
+         dEdxHitContainer->push_back(dEdxHit);
+         dEdxHit->setDetail<int>  (dEdxHitNames[0],   i_track);
+         dEdxHit->setDetail<float>(dEdxHitNames[1],    v_pixhit_dedx[i]);
+         dEdxHit->setDetail<float>(dEdxHitNames[2],     v_pixhit_tot[i]);
+         dEdxHit->setDetail<float>(dEdxHitNames[3], v_pixhit_trkchi2[i]);
+         dEdxHit->setDetail<float>(dEdxHitNames[4], v_pixhit_trkndof[i]);
+         dEdxHit->setDetail<int>  (dEdxHitNames[5], v_pixhit_iblovfl[i]);
+         dEdxHit->setDetail<int>  (dEdxHitNames[6],     v_pixhit_loc[i]);
+         dEdxHit->setDetail<int>  (dEdxHitNames[7],   v_pixhit_layer[i]);
       }
    }
    return StatusCode::SUCCESS;
