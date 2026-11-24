@@ -41,10 +41,10 @@ namespace ActsTrk {
     /// this assumes pixel seeds, whose space points are made from a single
     /// measurement. Strip space points have two measurements, so strip seeds
     /// would need the second index (measurement_index_2) as well.
-    std::array<unsigned int, 3> measurementIndices;
+    std::array<unsigned int, 3> measurementIndices {};
     /// False if the estimate failed: all-zero parameters (traccc's degenerate
     /// states), non-finite parameters, or a non-finite or non-positive variance
-    bool hasParameters;
+    bool hasParameters = false;
   };
 
   /// One record per seed, index-aligned with the traccc seed collection
