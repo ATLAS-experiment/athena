@@ -129,6 +129,8 @@ namespace {
             break;
          } default:
                ATH_MSG_WARNING("Dude you can't have CSCs in R4 "<<spacePoint);
+               //don't continue with invalid value for primaryCh
+               return 0;
       };
 
       rawRep |= ((static_cast<std::uint32_t>(gasGap - 1u) & fourBit) << 17);

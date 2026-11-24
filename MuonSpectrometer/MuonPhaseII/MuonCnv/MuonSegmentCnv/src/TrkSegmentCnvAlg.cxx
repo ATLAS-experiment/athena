@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "TrkSegmentCnvAlg.h"
 #include "MuonSegment/MuonSegment.h"
@@ -170,6 +170,9 @@ namespace MuonR4{
         
         std::vector<std::unique_ptr<Trk::RIO_OnTrack>> rots{};
         unsigned int nPrec{0};
+        const std::string mdtStr{"mdtTrkPrdLink"};
+        const std::string rpcStr{"rpcTrkPrdLink"};
+        const std::string tgcStr{"tgcTrkPrdLink"};
         for (const Segment::MeasType& spacePoint : segment.measurements()){
             if (spacePoint->fitState() != CalibratedSpacePoint::State::Valid) {
                 ATH_MSG_VERBOSE("'Reject invalid measurement'");
@@ -177,16 +180,16 @@ namespace MuonR4{
             }
             switch (spacePoint->type()) {
                 case xAOD::UncalibMeasType::MdtDriftCircleType: {
-                    ATH_CHECK(convertMeasurement(segment, *spacePoint, mdtPrds, rots, "mdtTrkPrdLink"));
+                    ATH_CHECK(convertMeasurement(segment, *spacePoint, mdtPrds, rots, mdtStr));
                     ++nPrec;
                     break;
                 }
                 case xAOD::UncalibMeasType::RpcStripType: {
-                    ATH_CHECK(convertMeasurement(segment,*spacePoint, rpcPrds, rots, "rpcTrkPrdLink"));
+                    ATH_CHECK(convertMeasurement(segment,*spacePoint, rpcPrds, rots, rpcStr));
                     break;
                 }
                 case xAOD::UncalibMeasType::TgcStripType: {
-                    ATH_CHECK(convertMeasurement(segment,*spacePoint, tgcPrds, rots, "tgcTrkPrdLink"));
+                    ATH_CHECK(convertMeasurement(segment,*spacePoint, tgcPrds, rots, tgcStr));
                     break;
                 }
                 case xAOD::UncalibMeasType::MMClusterType:{

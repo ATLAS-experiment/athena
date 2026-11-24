@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BucketDumperAlg.h"
@@ -204,6 +204,7 @@ namespace MuonR4{
                     if (const xAOD::MuonSegment* truthSeg = getMatchedTruthSegment(*segment)) {
                         truthSegments.insert(truthSeg);
                     }
+                    assert(truthLink >= 0);
                     m_segmentTruthIdx+=truthLink;
                     m_segmentPos.push_back(segment->position());
                     m_segmentDir.push_back(segment->direction());
@@ -305,7 +306,7 @@ namespace MuonR4{
                 } else {
                     // Empty buckets are skipped during inference, so missing scores is expected
                     // Only warn if a non-empty bucket is missing scores (indicates a real problem)
-                    if (bucket && !bucket->empty()) {
+                    if (!bucket->empty()) {
                         ATH_MSG_WARNING("Non-empty bucket from scored container not found in ML scores map");
                     }
                     m_bucket_ml_score_class0.push_back(0.f);
@@ -408,7 +409,7 @@ namespace MuonR4{
             scores[1] = logitsPtr[3 * predIdx + 1];
             scores[2] = logitsPtr[3 * predIdx + 2];
             
-            bucketScoreMap[bucket] = scores;
+            bucketScoreMap[bucket] = std::move(scores);
             ++predIdx;
         }
         

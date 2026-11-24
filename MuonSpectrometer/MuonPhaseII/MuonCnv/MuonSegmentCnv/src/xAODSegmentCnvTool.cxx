@@ -304,9 +304,7 @@ namespace MuonR4{
                 continue;
             }   
             const Acts::Surface& surface = xAOD::muonSurface(meas);
-            if (!muonMeas){
-                continue;
-            }
+            
             crossedSurfaces.insert( muonMeas->type() != xAOD::UncalibMeasType::MdtDriftCircleType ? 
                                     m_idHelperSvc->gasGapId(muonMeas->identify()) :
                                     muonMeas->identify());
@@ -322,6 +320,7 @@ namespace MuonR4{
         if (m_estimateHoles) {
             const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
             std::shared_ptr<const Acts::Surface> startSurfPtr = startSurface->getSharedPtr();
+            assert(startSurface != nullptr);
             auto atSurface = startSurface->intersect(tgContext, segment.position(), segment.direction(),
                                                       Acts::BoundaryTolerance::Infinite()).closest();
 
@@ -349,7 +348,7 @@ namespace MuonR4{
                     startSurfPtr = Acts::Surface::makeShared<Acts::PlaneSurface>(startSurfPtr->localToGlobalTransform(tgContext));
                 }
             }
-            auto startPars = Acts::BoundTrackParameters::create(tgContext, startSurfPtr,
+            auto startPars = Acts::BoundTrackParameters::create(tgContext, std::move(startSurfPtr),
                                                                 ActsTrk::convertPosToActs(atSurface.position()),
                                                                 segment.direction(), 1./ 5._TeV, std::nullopt,
                                                                 Acts::ParticleHypothesis::muon());
