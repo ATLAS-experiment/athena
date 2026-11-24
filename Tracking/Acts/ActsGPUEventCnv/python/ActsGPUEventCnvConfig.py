@@ -10,6 +10,7 @@ from AthDeviceComps.AthDeviceCompsConfig import (
     CopiesToolCfg,
 )
 from AthenaConfiguration.Enums import BeamType
+from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
 from AthCUDAServices.AthCUDAServicesConfig import StreamToolCfg
 from ActsGPUGeometry.ActsGPUGeometryConfig import DeviceDetectorDescriptionSvcCfg
 
@@ -279,4 +280,25 @@ def TracccCellsToPhaseIIRDOConverterAlgCfg(flags,
     acc.addEventAlgo(
         CompFactory.ActsTrk.TracccCellsToPhaseIIRDOConverterAlg(name, **kwargs))
 
+    return acc
+
+
+def TracccStripSpacepointConverterAlgCfg(
+        flags, name="TracccStripSpacepointConverterAlg", **kwargs):
+    """Convert standard/overlap GPU SPs to separate transient xAOD containers."""
+    acc = ComponentAccumulator()
+    acc.merge(ITkStripReadoutGeometryCfg(flags))
+    kwargs.setdefault("HostMR", acc.popToolsAndMerge(HostMemoryResourceToolCfg(flags)))
+    kwargs.setdefault("CopyProviderTool", acc.popToolsAndMerge(CopyToolCfg(flags)))
+    acc.addEventAlgo(CompFactory.ActsTrk.TracccStripSpacepointConverterAlg(name, **kwargs))
+    return acc
+
+
+def TracccPixelSpacepointConverterAlgCfg(
+        flags, name="TracccPixelSpacepointConverterAlg", **kwargs):
+    """Convert GPU Pixel SPs to xAOD and associate their input clusters."""
+    acc = ComponentAccumulator()
+    kwargs.setdefault("HostMR", acc.popToolsAndMerge(HostMemoryResourceToolCfg(flags)))
+    kwargs.setdefault("CopyProviderTool", acc.popToolsAndMerge(CopyToolCfg(flags)))
+    acc.addEventAlgo(CompFactory.ActsTrk.TracccPixelSpacepointConverterAlg(name, **kwargs))
     return acc

@@ -11,6 +11,8 @@
 #include "../TracccTrackConverterAlg.h"
 #include "../xAODToTracccMeasurementConverterAlg.h"
 #include "../xAODToTracccSpacePointConverterAlg.h"
+#include "../TracccStripSpacepointConverterAlg.h"
+#include "../TracccPixelSpacepointConverterAlg.h"
 #include "../ClusterValidationAlg.h"
 #include "../SeedValidationAlg.h"
 #include "../TracccCellsToPhaseIIRDOConverterAlg.h"
@@ -25,6 +27,8 @@ DECLARE_COMPONENT( ActsTrk::TracccTrkParamConverterAlg )
 DECLARE_COMPONENT( ActsTrk::TracccTrackConverterAlg )
 DECLARE_COMPONENT( ActsTrk::xAODToTracccMeasurementConverterAlg )
 DECLARE_COMPONENT( ActsTrk::xAODToTracccSpacePointConverterAlg )
+DECLARE_COMPONENT( ActsTrk::TracccStripSpacepointConverterAlg )
+DECLARE_COMPONENT( ActsTrk::TracccPixelSpacepointConverterAlg )
 DECLARE_COMPONENT( ActsTrk::ClusterValidationAlg )
 DECLARE_COMPONENT( ActsTrk::SeedValidationAlg )
 DECLARE_COMPONENT( ActsTrk::TracccCellsToPhaseIIRDOConverterAlg )
