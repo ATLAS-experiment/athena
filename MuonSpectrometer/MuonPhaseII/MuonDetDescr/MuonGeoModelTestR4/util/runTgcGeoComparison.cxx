@@ -15,11 +15,7 @@
 #include <GeoPrimitives/GeoPrimitivesHelpers.h>
 #include <GeoPrimitives/GeoPrimitivesToStringConverter.h>
 #include <GaudiKernel/SystemOfUnits.h>
-#include <string>
-#include <set>
-#include <vector>
-#include <map>
-#include <iostream>
+
 
 #include <PathResolver/PathResolver.h>
 #include <TFile.h>
@@ -29,6 +25,12 @@
 #include "Acts/Definitions/Units.hpp"
 
 #include "GeoModelHelpers/TransformToStringConverter.h"
+#include <string>
+#include <set>
+#include <vector>
+#include <map>
+#include <iostream>
+#include <format>
 
 Amg::Vector3D makeDir(const double theta, const double phi) {
     using namespace Acts::UnitLiterals;
@@ -125,12 +127,13 @@ struct TgcChamber{
 };
 
 std::ostream& operator<<(std::ostream& ostr, const TgcChamber::WireGang& gang) {
-    ostr<<"wire gang (gap/number/n-Wires/length): "<<gang.gasGap<<"/"<<std::setfill('0')<<std::setw(2)<<gang.number<<"/"<<std::setfill('0')<<std::setw(3)<<gang.numWires<<std::setw(-1)<<"/"<<gang.length;
+    ostr << std::format("wire gang (gap/number/n-Wires/length): {}/{:02}/{:03}/{}",
+                    gang.gasGap, gang.number, gang.numWires, gang.length);
     // ostr<<" position: "<<Amg::toString(gang.position,2 );
     return ostr;
 }
 std::ostream& operator<<(std::ostream& ostr, const TgcChamber::RadialStrip& strip) {
-    ostr<<"strip (gap/number): "<<strip.gasGap<<"/"<<std::setfill('0')<<std::setw(2)<<strip.number<<std::setw(-1);
+    ostr << std::format("strip (gap/number): {}/{:02}", strip.gasGap, strip.number);
     return ostr;
 }
 std::ostream& operator<<(std::ostream& ostr, const TgcChamber::LayerTrans& lTrans) {
@@ -419,7 +422,7 @@ int main1( int argc, char** argv ) {
         if (!Amg::doesNotDeform(alignableDistort) || alignableDistort.translation().mag() > tolerance) {
             std::cerr<<"runTgcComparison() "<<__LINE__<<": The alignable nodes are at differnt places for  "
                      <<ref<<". " <<GeoTrf::toString(alignableDistort, true)<<std::endl;
-            chambOk = false; 
+             
         }
  
         chambOk = true;     
