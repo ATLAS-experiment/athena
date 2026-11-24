@@ -209,7 +209,6 @@ def MuonCombinedReconstructionConfigR4(flags):
     from MuonCombinedAlgsR4.MuonCombinedAlgsConfigR4 import MuonInDetTrackSelectionAlgCfg, \
                                                         MuonSegmentTaggingAlgCfg, \
                                                         BeamSpotPreparatorAlgCfg, \
-                                                        MuonLegacyCaloTagAlgCfg, \
                                                         MuonCombinedStacoAlgCfg, \
                                                         MuonCombinedFitAlgCfg, \
                                                         MuidSaTagMakerAlgCfg, \
@@ -223,9 +222,6 @@ def MuonCombinedReconstructionConfigR4(flags):
         MuonTags+=["MuonTagsSTACO"]
         result.merge(MuonCombinedFitAlgCfg(flags))
         MuonTags+=["MuonTagsMuidCo"]
-        if flags.MuonCombined.doCaloTrkMuId:
-            result.merge(MuonLegacyCaloTagAlgCfg(flags))
-            MuonTags+=["LegacyCaloTags"]
     
     result.merge(MuidSaTagMakerAlgCfg(flags,
                                       CombinedTags="MuonTagsSTACO" if flags.Reco.EnableTracking else ""))
@@ -251,7 +247,6 @@ def LRT_MuonCombinedReconstructionConfigR4(flags):
     MuonTags = []
     from MuonCombinedAlgsR4.MuonCombinedAlgsConfigR4 import LRT_MuonInDetTrackSelectionAlgCfg, \
                                                         LRT_MuonCombinedStacoAlgCfg, \
-                                                        LRT_MuonLegacyCaloTagAlgCfg, \
                                                         LRT_MuonSegmentTaggingAlgCfg, \
                                                         LRT_MuonCombinedFitAlgCfg, \
                                                         MuonCreatorAlgCfg
@@ -268,11 +263,6 @@ def LRT_MuonCombinedReconstructionConfigR4(flags):
     
     result.merge(LRT_MuonCombinedFitAlgCfg(flags))
     MuonTags+=["MuonTagsMuidCoLRT"]
-
-
-    if flags.MuonCombined.doCaloTrkMuId:
-        result.merge(LRT_MuonLegacyCaloTagAlgCfg(flags))
-        MuonTags+=["LegacyCaloTagsLRT"]
     
     result.merge(MuonCreatorAlgCfg(flags, name = "MuonActsCreatorAlg_LRT",
                                       TagKeys=MuonTags, MuonKey="MuonsLRT", ClusterContainerName=""))
