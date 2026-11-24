@@ -146,7 +146,8 @@ __global__ void decodeRD53CHits(
     uint32_t* decoding_error = nullptr;
 
     GPUCallback callback{decoding_error, &write_index, &output_cells,
-        si.moduleIndex(), si.transformType(), si.chipId()};
+        si.moduleIndex(), ITkPixelCabling::TransformType(si.transformType()),
+        si.chipId()};
     itksw_cuda::endec::DebugEventVoid debug_cb;
     itksw_cuda::endec::decode_stream(opt, callback, provider, debug_cb, state);
     itksw_cuda::endec::decode_stream_end(opt, callback, provider, debug_cb, state);

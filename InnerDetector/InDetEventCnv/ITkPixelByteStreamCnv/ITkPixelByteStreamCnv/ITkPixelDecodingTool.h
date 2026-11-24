@@ -35,12 +35,16 @@ struct ITkPixelDecodingTool: public AthAlgTool
    *   uint8_t: transform type to use to transform the coordinates of this chip
    *   uint8_t: chip ID of this stream, required to transform coordinates
    *   })
+   *
+   * The module ID of the stream is not stored directly; instead is stored:
+   * module_id_transform(module_id).
    */
   template <typename TStreamInfo>
   StatusCode aggregateData(
     const EventContext& ctx,
     std::vector<uint64_t> & bytestream_data,
-    TStreamInfo & streams_info
+    TStreamInfo & streams_info,
+    std::function<StatusCode (uint32_t, uint32_t&)> module_id_transform = {}
     ) const;
 
   /* Aggregated data decoding

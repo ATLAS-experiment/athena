@@ -3,13 +3,13 @@
  */
 #include "ITkPixelByteStreamCnv/ITkPixelDecodingTool.h"
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
-#include "ITkPixelDecodingAlg.h"
-#include "ITkPixelPhaseIIRDOCallback.h"
 #include <GaudiKernel/EventContext.h>
 #include <GaudiKernel/StatusCode.h>
+#include <cuda/RD53CDecodingCUDA.h>
 #include <itksw/pix/endec/DecCore.hpp>
 #include <itksw/pix/endec/intf/Options.hpp>
 #include <cstdint>
+#include <functional>
 
 StatusCode ITkPixelDecodingTool::initialize()
 {
@@ -30,7 +30,8 @@ template <typename TStreamInfo>
 StatusCode ITkPixelDecodingTool::aggregateData(
   const EventContext& ctx,
   std::vector<uint64_t> & bytestream_data,
-  TStreamInfo & streams_info
+  TStreamInfo & streams_info,
+  std::function<StatusCode (uint32_t, uint32_t&)> module_id_transform
   ) const
 {
   // Cabling data
@@ -132,8 +133,13 @@ StatusCode ITkPixelDecodingTool::aggregateData(
 
       const uint16_t stream_size_64bits = (length - 2) / 2;
       const uint32_t module_id = ITkPixelCabling::dridToModuleID(detector_resource_id);
+      uint32_t transformed_id = module_id;
+      if (module_id_transform) {
+        ATH_CHECK(module_id_transform(module_id, transformed_id));
+      }
+
       streams_info.push_back({payload64_start, stream_size_64bits,
-        module_id, static_cast<uint8_t>(cabling->transformType(module_id)),
+        transformed_id, static_cast<uint8_t>(cabling->transformType(module_id)),
         ITkPixelCabling::dridToChipID(detector_resource_id)});
 
         // This will be the start index of the next stream
@@ -192,12 +198,32 @@ StatusCode ITkPixelDecodingTool::aggregateData(
  * Instantiate the required templates
  */
 
+#include "ITkPixelDecodingAlg.h"
+#include "ITkPixelPhaseIIRDOCallback.h"
+
 // Legacy RDO and Phase-II RDO decoders use the same type for stream info
 template StatusCode ITkPixelDecodingTool::aggregateData<> (
   const EventContext& ctx,
   std::vector<uint64_t> & bytestream_data,
-  std::vector<ITkPixelDecodingStreamInfo> & streams_info
+  std::vector<ITkPixelDecodingStreamInfo> & streams_info,
+  std::function<StatusCode (uint32_t, uint32_t&)> module_id_transform
   ) const;
+
+#ifdef ITKPIXEL_WITH_CUDA
+
+#include <cuda/RD53CDecodingCUDA.h>
+#include <cuda/ITkPixelDecodingTracccCellsCUDAAlg.h>
+
+// The module ID transform may depend on algorithm state (e.g. geometry ID
+// mapping data), so it is passed as an already-bound callable.
+template StatusCode ITkPixelDecodingTool::aggregateData<> (
+  const EventContext& ctx,
+  std::vector<uint64_t> & bytestream_data,
+  ITkPixelDecodingCUDA::StreamInfoContainer::host & streams_info,
+  std::function<StatusCode (uint32_t, uint32_t&)> module_id_transform
+  ) const;
+
+#endif // ITKPIXEL_WITH_CUDA
 
 // Legacy RDO decoder
 template StatusCode ITkPixelDecodingTool::decodeData<>(
