@@ -282,12 +282,8 @@ def PHYSVALEntries(fileName, integral=False):
 #  @details Use TFile.Open to retrieve a ROOT filehandle, which will
 #  deal with all non-posix filesystems. Return the GetSize() value.
 #  The option filetype=raw is added to ensure this works for non-ROOT files too (e.g. BS)
-#  @note Use the PyUtils forking decorator to ensure that ROOT is run completely within 
-#  a child process and will not 'pollute' the parent python process with unthread-safe
-#  bits of code (otherwise strange hangs are observed on subsequent uses of ROOT)
 #  @param filename Filename to get size of
 #  @return fileSize or None if there was a problem
-@_decos.forking
 def ROOTGetSize(filename):
     root = import_root()
     
