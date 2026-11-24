@@ -1,21 +1,10 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "NeutronFastSimTool.h"
 
-#include "TrackWriteFastSim/NeutronFastSim.h"
-
-NeutronFastSimTool::NeutronFastSimTool(const std::string& type, const std::string& name, const IInterface *parent)
-  : FastSimulationBase(type,name,parent),
-    m_trackFastSimSDName("TrackFastSimSDTool"),
-    m_etaCut(6.0),
-    m_timeCut(150.)
-{
-  declareProperty("TrackFastSimSDName", m_trackFastSimSDName);
-  declareProperty("PrimaryEtaCut",m_etaCut);
-  declareProperty("NeutronTimeCut",m_timeCut);
-}
+#include "NeutronFastSim.h"
 
 G4VFastSimulationModel* NeutronFastSimTool::makeFastSimModel()
 {

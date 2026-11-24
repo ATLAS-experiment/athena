@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4USERACTIONS_G4UA__SCORINGPLANETOOL_H
@@ -26,9 +26,7 @@ namespace G4UA
 
     public:
 
-      /// Standard tool ctor
-      ScoringPlaneTool(const std::string& type, const std::string& name,
-                       const IInterface* parent);
+      using UserActionToolBase<ScoringPlane>::UserActionToolBase;
 
     protected:
 
@@ -39,7 +37,9 @@ namespace G4UA
     private:
 
       /// holds the python configuration
-      ScoringPlane::Config m_config;
+      Gaudi::Property<double> m_plane{this, "Plane", 22600};
+      Gaudi::Property<int> m_pkill{this, "PKill", 0};
+      Gaudi::Property<std::string> m_fname{this, "FName", "ufo.root"};
 
   }; // class ScoringPlaneTool
 

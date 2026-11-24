@@ -1,27 +1,19 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "StepHistogramTool.h"
 
 namespace G4UA{ 
 
-  StepHistogramTool::StepHistogramTool(const std::string& type,
-                                       const std::string& name,
-                                       const IInterface* parent):
-    UserActionToolBase<StepHistogram>(type, name, parent),
-    m_config(),
-    m_histSvc("THistSvc", name){
-
-    declareProperty("do2DHistograms", m_config.do2DHistograms);
-    declareProperty("doGeneralHistograms", m_config.doGeneralHistograms);
-  }
-
   std::unique_ptr<StepHistogram>
   StepHistogramTool::makeAndFillAction(G4AtlasUserActions& actionList)
   {
     ATH_MSG_DEBUG("Constructing a TestActionTimer");
-    auto action = std::make_unique<StepHistogram>(m_config);
+    StepHistogram::Config config;
+    config.do2DHistograms = m_do2DHistograms;
+    config.doGeneralHistograms = m_doGeneralHistograms;
+    auto action = std::make_unique<StepHistogram>(config);
     actionList.runActions.push_back( action.get() );
     actionList.eventActions.push_back( action.get() );
     actionList.steppingActions.push_back( action.get() );
@@ -95,7 +87,7 @@ namespace G4UA{
       BookHistograms(report.histoMapMap_prc_numberOfSteps, "numberOfSteps/", "processes/");
       BookHistograms(report.histoMapMap_prc_numberOfStepsPerInitialE, "numberOfStepsPerInitialE/", "processes/");
 
-      if (m_config.doGeneralHistograms) {
+      if (m_doGeneralHistograms) {
         BookHistograms(report.histoMapMap_numberOfSteps, "numberOfSteps/", "nSteps/");
         BookHistograms(report.histoMapMap_numberOfStepsPerInitialE, "numberOfStepsPerInitialE/", "nSteps/");
         BookHistograms(report.histoMapMap_trackLengthPerInitialE, "trackLengthPerInitialE/", "nSteps/");
@@ -104,7 +96,7 @@ namespace G4UA{
         BookHistograms(report.histoMapMap_postStepKinetic, "postStepKineticEnergy/", "nSteps/");
       }
 
-      if (m_config.do2DHistograms) {
+      if (m_do2DHistograms) {
         BookHistograms(report.histoMapMap2D_vol_RZ, "2DMaps/", "volumes/");
         BookHistograms(report.histoMapMap2D_mat_RZ, "2DMaps/", "materials/");
         BookHistograms(report.histoMapMap2D_prc_RZ, "2DMaps/", "processes/");

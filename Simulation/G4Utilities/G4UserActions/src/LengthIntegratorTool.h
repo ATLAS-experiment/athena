@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4USERACTIONS_G4UA_LENGTHINTEGRATOR_H
@@ -28,9 +28,7 @@ namespace G4UA
 
     public:
 
-      /// Standard constructor
-      LengthIntegratorTool(const std::string& type, const std::string& name,
-                           const IInterface* parent);
+      using UserActionToolBase<LengthIntegrator>::UserActionToolBase;
 
       /// Initialize the tool
       virtual StatusCode initialize() override;
@@ -44,11 +42,11 @@ namespace G4UA
     private:
 
       /// Handle to the histogram service
-      ServiceHandle<ITHistSvc> m_hSvc;
+      ServiceHandle<ITHistSvc> m_hSvc{this, "HistoSvc", "THistSvc"};
 
       //do we fill histograms as well as TTree?
       //(very large filesize...)
-      bool m_doHistos;
+      Gaudi::Property<bool> m_doHistos{this, "CreateHistograms", true};
 
   }; // class LengthIntegratorTool
 

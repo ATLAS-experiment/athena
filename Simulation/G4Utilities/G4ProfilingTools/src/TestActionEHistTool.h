@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4PROFILINGTOOLS_G4UA__TESTACTIONEHISTTOOL_H
@@ -25,9 +25,7 @@ namespace G4UA
 
   public:
 
-    /// Standard constructor
-    TestActionEHistTool(const std::string& type, const std::string& name,
-                        const IInterface* parent);
+    using UserActionToolBase<TestActionEHist>::UserActionToolBase;
 
   protected:
 
@@ -38,7 +36,13 @@ namespace G4UA
   private:
 
     /// holds the configuration details received from python
-    TestActionEHist::Config m_config;
+    Gaudi::Property<std::string> m_name{this, "ROOTFileName", "default.root", "Name of root output file"};
+    Gaudi::Property<int> m_dCALO{this, "CaloDepth", 2};
+    Gaudi::Property<int> m_dBeam{this, "BeamPipeDepth", 2};
+    Gaudi::Property<int> m_dIDET{this, "InDetDepth", 2};
+    Gaudi::Property<int> m_dMUON{this, "MuonDepth", 2};
+    Gaudi::Property<int> m_maxhists{this, "MaxHists", 1000};
+    Gaudi::Property<std::string> m_dDetail{this, "DetailDepth", "", "Path used to set detailed depth cuts"};
 
   }; // class TestActionEHistTool
 

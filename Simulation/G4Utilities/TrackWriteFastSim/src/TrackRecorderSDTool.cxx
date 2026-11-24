@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Track Recorder Sensitive Detector Tool.
@@ -14,15 +14,6 @@
 // Athena includes
 #include "HitManagement/HitCollectionMap.h"
 #include "TrackRecord/TrackRecordCollection.h"
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-TrackRecorderSDTool::TrackRecorderSDTool(const std::string& type, const std::string& name, const IInterface* parent)
-  : SensitiveDetectorBase( type , name , parent )
-  , m_SD_type(1)
-{
-  declareProperty("SD_type", m_SD_type);
-}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 

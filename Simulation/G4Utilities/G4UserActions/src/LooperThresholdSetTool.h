@@ -1,12 +1,9 @@
 /*
-   Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef G4USERACTIONS_G4UA_LooperThresholdSetTOOL_H
 #define G4USERACTIONS_G4UA_LooperThresholdSetTOOL_H
-
-// System includes
-#include <string>
 
 // Infrastructure includes
 #include "G4AtlasTools/UserActionToolBase.h"
@@ -29,9 +26,7 @@ class LooperThresholdSetTool : public UserActionToolBase<LooperThresholdSet>
 
 public:
 
-/// Standard constructor
-LooperThresholdSetTool(const std::string& type, const std::string& name,
-                       const IInterface* parent);
+using UserActionToolBase<LooperThresholdSet>::UserActionToolBase;
 
 virtual StatusCode initialize() override;
 virtual StatusCode finalize() override;
@@ -45,7 +40,9 @@ makeAndFillAction(G4AtlasUserActions&) override final;
 private:
 
 /// Configuration parameters
-LooperThresholdSet::Config m_config;
+Gaudi::Property<double> m_warningEnergy{this, "WarningEnergy", 100.0 * CLHEP::MeV};
+Gaudi::Property<double> m_importantEnergy{this, "ImportantEnergy", 250.0 * CLHEP::MeV};
+Gaudi::Property<int> m_numberOfTrials{this, "NumberOfTrials", 10};
 
 };   // class LooperThresholdSetTool
 

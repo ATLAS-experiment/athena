@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /****************************************************************
@@ -12,9 +12,6 @@
 // Base class
 #include "G4AtlasTools/SensitiveDetectorBase.h"
 
-// STL headers
-#include <string>
-
 class G4VSensitiveDetector;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo.....
@@ -22,11 +19,7 @@ class G4VSensitiveDetector;
 class TrackRecorderSDTool : public SensitiveDetectorBase
 {
  public:
-  // Constructor
-  TrackRecorderSDTool(const std::string& type, const std::string& name, const IInterface *parent);
-
-  // Destructor
-  ~TrackRecorderSDTool() { /* If all goes well we do not own myHitColl here */ }
+  using SensitiveDetectorBase::SensitiveDetectorBase;
 
 protected:
   StatusCode SetupEvent(HitCollectionMap&) override final;
@@ -35,7 +28,7 @@ protected:
   // Make me an SD!
   G4VSensitiveDetector* makeSD() const override final;
 
-  int m_SD_type; //TrackRecorderSD=1, CosmicTRSD=2
+  Gaudi::Property<int> m_SD_type{this, "SD_type", 1, "TrackRecorderSD=1, CosmicTRSD=2"};
 };
 
 #endif //TRACKWRITEFASTSIM_TRACKRECORDERSDTOOL_H

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACKWRITEFASTSIM_NeutronFastSimTool_h
@@ -7,25 +7,22 @@
 
 #include "G4AtlasTools/FastSimulationBase.h"
 
-#include <string>
-
 class G4VFastSimulationModel;
 
 class NeutronFastSimTool: public FastSimulationBase
 {
 public:
 
-  NeutronFastSimTool(const std::string& type, const std::string& name, const IInterface *parent);
-  ~NeutronFastSimTool() {}
+  using FastSimulationBase::FastSimulationBase;
 protected:
   /** Method to make the actual fast simulation model itself, which
    will be owned by the tool.  Must be implemented in all concrete
    base classes. */
   virtual G4VFastSimulationModel* makeFastSimModel() override final;
 private:
-  std::string m_trackFastSimSDName;
-  double m_etaCut; ///!< Eta cut for primaries
-  double m_timeCut; ///!< Time cut for neutrons
+  Gaudi::Property<std::string> m_trackFastSimSDName{this, "TrackFastSimSDName", "TrackFastSimSDTool"};
+  Gaudi::Property<double> m_etaCut{this, "PrimaryEtaCut", 6.0, "Eta cut for primaries"};
+  Gaudi::Property<double> m_timeCut{this, "NeutronTimeCut", 150., "Time cut for neutrons"};
 };
 
 #endif // TRACKWRITEFASTSIM_NeutronFastSimTool_h

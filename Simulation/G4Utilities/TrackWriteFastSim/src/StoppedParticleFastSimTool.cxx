@@ -1,15 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "StoppedParticleFastSimTool.h"
-#include "TrackWriteFastSim/StoppedParticleFastSim.h"
-
-StoppedParticleFastSimTool::StoppedParticleFastSimTool(const std::string& type, const std::string& name, const IInterface *parent)
-  : FastSimulationBase(type,name,parent),
-    m_trackFastSimSDTool("TrackFastSimSDTool")
-{
-}
+#include "StoppedParticleFastSim.h"
 
 StatusCode StoppedParticleFastSimTool::initialize()
 {

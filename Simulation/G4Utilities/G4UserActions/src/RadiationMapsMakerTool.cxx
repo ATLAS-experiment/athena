@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "TH2D.h"
 #include "TH3D.h"
@@ -8,74 +8,45 @@
 
 namespace G4UA{ 
 
-  RadiationMapsMakerTool::RadiationMapsMakerTool(const std::string& type, 
-						 const std::string& name,
-						 const IInterface* parent)
-    : UserActionToolBase<RadiationMapsMaker>(type, name, parent),
-      m_radMapsFileName("RadMaps.root")  
-  {
-    /// Output Filename for the Radiation Maps
-    declareProperty("RadMapsFileName"   , m_radMapsFileName);
-    /// Name of the materials to make radiation maps for (take all if empty) 
-    declareProperty("Materials"         , m_config.materials);
-    /// Name of the file to store activated unstable isotopes (don't save if empty)
-    declareProperty("ActivationFileName", m_config.activationFileName);
-    /// If true consider hits with y>0 only -- useful for shafts
-    declareProperty("PositiveYOnly"     , m_config.posYOnly);
-    /// map granularities 
-    /// number of bins in r and z for all 2D maps
-    declareProperty("NBinsR"            , m_config.nBinsr);
-    declareProperty("NBinsZ"            , m_config.nBinsz);
-    /// number of bins in logE for energy spectra of neutrons in 2D grids
-    declareProperty("NBinsLogEn"        , m_config.nBinslogEn);
-    /// number of bins in logE for energy spectra of other particles in 2D grids
-    declareProperty("NBinsLogEo"        , m_config.nBinslogEo);
-    /// number of bins in dphi for dphi x theta dependent energy spectra
-    declareProperty("NBinsDPhi"         , m_config.nBinsdphi);
-    /// number of bins in theta for dphi x theta dependent energy spectra
-    declareProperty("NBinsTheta"        , m_config.nBinstheta);
-    /// number of bins in r, z and phi for all 3D maps
-    declareProperty("NBinsR3D"          , m_config.nBinsr3d);
-    declareProperty("NBinsZ3D"          , m_config.nBinsz3d);
-    declareProperty("NBinsPhi3D"        , m_config.nBinsphi3d);
-    /// number of bins in logTimeCut for time dependent TID and H_T 2D maps
-    declareProperty("NBinsLogTimeCut"   , m_config.nBinslogT);
-    /// map ranges
-    /// for Zoomed area in 2D and 3D
-    declareProperty("RMinZoom"          , m_config.rMinZoom);
-    declareProperty("RMaxZoom"          , m_config.rMaxZoom);
-    declareProperty("ZMinZoom"          , m_config.zMinZoom);
-    declareProperty("ZMaxZoom"          , m_config.zMaxZoom);
-    /// for Full detector in 2D
-    declareProperty("RMinFull"          , m_config.rMinFull);
-    declareProperty("RMaxFull"          , m_config.rMaxFull);
-    declareProperty("ZMinFull"          , m_config.zMinFull);
-    declareProperty("ZMaxFull"          , m_config.zMaxFull);
-    /// for Zoomed area in 3D 
-    declareProperty("PhiMinZoom"        , m_config.phiMinZoom);
-    declareProperty("PhiMaxZoom"        , m_config.phiMaxZoom);
-    /// for logE of neutrons in 2D spectra
-    declareProperty("LogEMinn"          , m_config.logEMinn);
-    declareProperty("LogEMaxn"          , m_config.logEMaxn);
-    /// for logE of other particles in 2D spectra
-    declareProperty("LogEMino"          , m_config.logEMino);
-    declareProperty("LogEMaxo"          , m_config.logEMaxo);
-    /// for Theta in 2D spectra
-    declareProperty("ThetaMin"          , m_config.thetaMin);
-    declareProperty("ThetaMax"          , m_config.thetaMax);
-    /// for logT in time-dependent TID and H_T 2D maps
-    declareProperty("LogTMin"           , m_config.logTMin);
-    declareProperty("LogTMax"           , m_config.logTMax);
-    /// for elements mass fracion 2D maps
-    declareProperty("ElemZMin"          , m_config.elemZMin);
-    declareProperty("ElemZMax"          , m_config.elemZMax);
-  }
-
   //---------------------------------------------------------------------------
   // Initialize Configurable Properties
   //---------------------------------------------------------------------------
   StatusCode RadiationMapsMakerTool::initialize()
   {
+    m_config.materials = m_materials;
+    m_config.activationFileName = m_activationFileName;
+    m_config.posYOnly = m_posYOnly;
+    m_config.nBinsr = m_nBinsr;
+    m_config.nBinsz = m_nBinsz;
+    m_config.nBinslogEn = m_nBinslogEn;
+    m_config.nBinslogEo = m_nBinslogEo;
+    m_config.nBinsdphi = m_nBinsdphi;
+    m_config.nBinstheta = m_nBinstheta;
+    m_config.nBinsr3d = m_nBinsr3d;
+    m_config.nBinsz3d = m_nBinsz3d;
+    m_config.nBinsphi3d = m_nBinsphi3d;
+    m_config.nBinslogT = m_nBinslogT;
+    m_config.rMinZoom = m_rMinZoom;
+    m_config.rMaxZoom = m_rMaxZoom;
+    m_config.zMinZoom = m_zMinZoom;
+    m_config.zMaxZoom = m_zMaxZoom;
+    m_config.rMinFull = m_rMinFull;
+    m_config.rMaxFull = m_rMaxFull;
+    m_config.zMinFull = m_zMinFull;
+    m_config.zMaxFull = m_zMaxFull;
+    m_config.phiMinZoom = m_phiMinZoom;
+    m_config.phiMaxZoom = m_phiMaxZoom;
+    m_config.logEMinn = m_logEMinn;
+    m_config.logEMaxn = m_logEMaxn;
+    m_config.logEMino = m_logEMino;
+    m_config.logEMaxo = m_logEMaxo;
+    m_config.thetaMin = m_thetaMin;
+    m_config.thetaMax = m_thetaMax;
+    m_config.logTMin = m_logTMin;
+    m_config.logTMax = m_logTMax;
+    m_config.elemZMin = m_elemZMin;
+    m_config.elemZMax = m_elemZMax;
+
     msg(MSG::INFO) 
       << "Initializing     " << name()              << "\n"
       << "OutputFile:      " << m_radMapsFileName   << "\n"
@@ -252,7 +223,7 @@ namespace G4UA{
     m_actions.accumulate(maps, &RadiationMapsMaker::getReport,
                          &RadiationMapsMaker::Report::merge);
 
-    TFile * f = new TFile(m_radMapsFileName.c_str(),"RECREATE");
+    TFile * f = new TFile(m_radMapsFileName.value().c_str(),"RECREATE");
 
     // histograms can be booked, filled, written and deleted in a loop
     // in order to save memory. Need vectors to loop over them ...

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4DEBUGGINGTOOLS_G4UA__G4ATLANTISDUMPERTOOL_H
@@ -16,7 +16,7 @@ namespace G4UA
 
   public:
 
-    G4AtlantisDumperTool(const std::string& type, const std::string& name, const IInterface* parent);
+    using UserActionToolBase<G4AtlantisDumper>::UserActionToolBase;
 
   protected:
 
@@ -25,7 +25,10 @@ namespace G4UA
 
   private:
 
-    G4AtlantisDumper::Config m_config;
+    Gaudi::Property<double> m_tedep_cut{this, "Edep", 0.1};
+    Gaudi::Property<double> m_length_cut{this, "Length", 1.0};
+    Gaudi::Property<double> m_p_cut{this, "P", 10.0};
+    Gaudi::Property<double> m_ke_cut{this, "KE", 10.0};
 
   }; // class G4AtlantisDumperTool
 

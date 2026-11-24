@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FastIDKillerTool.h"
@@ -8,23 +8,16 @@ namespace G4UA
 {
 
   //---------------------------------------------------------------------------
-  FastIDKillerTool::FastIDKillerTool(const std::string& type,
-                                     const std::string& name,
-                                     const IInterface* parent)
-    : UserActionToolBase<FastIDKiller>(type, name, parent)
-  {
-    declareProperty("R", m_config.R);
-    declareProperty("Z", m_config.Z);
-    declareProperty("energyCut", m_config.energyCut);
-    declareProperty("isDalek", m_config.isDalek);
-  }
-
-  //---------------------------------------------------------------------------
   std::unique_ptr<FastIDKiller>
   FastIDKillerTool::makeAndFillAction(G4AtlasUserActions& actionList)
   {
     ATH_MSG_DEBUG("Constructing a FastIDKiller action");
-    auto action = std::make_unique<FastIDKiller>(m_config);
+    FastIDKiller::Config config;
+    config.R = m_R;
+    config.Z = m_Z;
+    config.energyCut = m_energyCut;
+    config.isDalek = m_isDalek;
+    auto action = std::make_unique<FastIDKiller>(config);
     actionList.runActions.push_back( action.get() );
     actionList.steppingActions.push_back( action.get() );
     return action;

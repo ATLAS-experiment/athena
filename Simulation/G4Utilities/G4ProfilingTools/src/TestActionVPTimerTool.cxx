@@ -37,24 +37,17 @@ namespace G4UA
   typedef VolMap::const_iterator VolIt;
 
   //----------------------------------------------------------------------------
-  TestActionVPTimerTool::TestActionVPTimerTool(const std::string& type,
-                                               const std::string& name,
-                                               const IInterface* parent)
-    : UserActionToolBase<TestActionVPTimer>(type, name, parent)
-  {
-    declareProperty("CaloDepth",m_config.dCALO);
-    declareProperty("BeamPipeDepth",m_config.dBeam);
-    declareProperty("InDetDepth",m_config.dIDET);
-    declareProperty("MuonDepth",m_config.dMUON);
-    declareProperty("DetailDepth",m_config.dDetail);
-  }
-
-  //----------------------------------------------------------------------------
   std::unique_ptr<TestActionVPTimer>
   TestActionVPTimerTool::makeAndFillAction(G4AtlasUserActions& actionList)
   {
     ATH_MSG_DEBUG("Constructing a TestActionVPTimer");
-    auto action = std::make_unique<TestActionVPTimer>(m_config);
+    TestActionVPTimer::Config config;
+    config.dCALO = m_dCALO;
+    config.dBeam = m_dBeam;
+    config.dIDET = m_dIDET;
+    config.dMUON = m_dMUON;
+    config.dDetail = m_dDetail;
+    auto action = std::make_unique<TestActionVPTimer>(config);
     actionList.runActions.push_back( action.get() );
     actionList.eventActions.push_back( action.get() );
     actionList.steppingActions.push_back( action.get() );

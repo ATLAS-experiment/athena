@@ -1,12 +1,9 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4USERACTIONS_G4UA_COSMICPERIGEEACTIONTOOL_H
 #define G4USERACTIONS_G4UA_COSMICPERIGEEACTIONTOOL_H
-
-// System includes
-#include <string>
 
 // Infrastructure includes
 #include "G4AtlasTools/UserActionToolBase.h"
@@ -29,9 +26,7 @@ namespace G4UA
 
     public:
 
-      /// Standard constructor
-      CosmicPerigeeActionTool(const std::string& type, const std::string& name,
-		              const IInterface* parent);
+      using UserActionToolBase<CosmicPerigeeAction>::UserActionToolBase;
 
     protected:
 
@@ -42,7 +37,7 @@ namespace G4UA
     private:
 
       /// Configuration parameters
-      CosmicPerigeeAction::Config m_config;
+      Gaudi::Property<float> m_pMinPrimary{this, "pMinPrimary", 100*CLHEP::MeV};
 
   }; // class CosmicPerigeeActionTool
 

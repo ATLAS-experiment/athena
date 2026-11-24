@@ -1,25 +1,11 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LengthIntegratorTool.h"
 
 namespace G4UA
 {
-
-  //---------------------------------------------------------------------------
-  // Constructor
-  //---------------------------------------------------------------------------
-  LengthIntegratorTool::LengthIntegratorTool(const std::string& type,
-                                             const std::string& name,
-                                             const IInterface* parent)
-    : UserActionToolBase<LengthIntegrator>(type, name, parent),
-      m_hSvc("THistSvc", name)
-  {
-    declareProperty("HistoSvc", m_hSvc);
-    declareProperty("CreateHistograms", m_doHistos=true);
-    
-  }
 
   //---------------------------------------------------------------------------
   // Initialize - temporarily here for debugging

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4FASTSIMULATION_DEADMATERIALSHOWERTOOL_H
@@ -7,13 +7,14 @@
 
 #include "G4AtlasTools/FastSimulationBase.h"
 
+#include "CLHEP/Units/SystemOfUnits.h"
+
 class G4VFastSimulationModel;
 class DeadMaterialShowerTool: public FastSimulationBase
 {
  public:
 
-  DeadMaterialShowerTool(const std::string& type, const std::string& name, const IInterface *parent);   //!< Default constructor
-  ~DeadMaterialShowerTool() {}
+  using FastSimulationBase::FastSimulationBase;
 
 protected:
   /** Method to make the actual fast simulation model itself, which
@@ -22,9 +23,9 @@ protected:
   virtual G4VFastSimulationModel* makeFastSimModel() override final;
 
  private:
-  double m_highEnergy; ///!< Kill everything but muons up to this energy
-  double m_lowEnergy; ///!< Kill only electrons and positrons up to this energy
-  double m_zcutoff; ///!< Z-position to start killing everything but muons
+  Gaudi::Property<double> m_highEnergy{this, "HighEnergy", 1000.0*CLHEP::GeV, "Kill everything but muons up to this energy"};
+  Gaudi::Property<double> m_lowEnergy{this, "LowEnergy", 0.0*CLHEP::GeV, "Kill only electrons and positrons up to this energy"};
+  Gaudi::Property<double> m_zcutoff{this, "ZCutoff", 5698.*CLHEP::mm, "Z-position to start killing everything but muons"};
 
 };
 
