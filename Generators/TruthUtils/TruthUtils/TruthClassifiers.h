@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRUTHUTILS_TRUTHCLASSIFIERS_H
 #define TRUTHUTILS_TRUTHCLASSIFIERS_H
@@ -10,6 +10,7 @@
 #include <vector>
 #include <string>
 #include "TruthUtils/TruthClasses.h"
+
 namespace MCTruthPartClassifier {
 /// @brief Convert a hadron ParticleType to a ParticleOrigin (JPsi if a c-cbar meson has a J/psi mother).
 inline ParticleOrigin convHadronTypeToOrig(ParticleType pType, int motherPDG)
@@ -190,7 +191,7 @@ template <class T> std::tuple<unsigned int, T> defOrigOfParticle(T thePart) {
 
   auto prodVtx = thePart->production_vertex();
   if (isPhysical && prodVtx && !isGeant) {
-    fromHad = MC::isFromHadron(thePart, parent_hadron_ptr, fromTau, fromBSM);
+    fromHad = MC::isFromHadron(std::move(thePart), parent_hadron_ptr, fromTau, fromBSM);
   }
   else  uncat = 1;
 

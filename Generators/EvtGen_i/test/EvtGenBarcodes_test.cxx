@@ -109,7 +109,7 @@ namespace {
     McEventCollection collection;
     collection.push_back(HepMC::newGenEvent(1, 1));
     HepMC::GenEvent& event = *collection.back();
-    event.set_run_info(runInfo);
+    event.set_run_info(std::move(runInfo));
     event.weights() = {1.};
 
     auto beam1 = makeParticle(2212, 6800., 4);
@@ -126,23 +126,23 @@ namespace {
     hard->add_particle_out(dPlus);
     hard->add_particle_out(makeParticle(21, 10., 1));
     hard->add_particle_out(dZero);
-    event.add_vertex(hard);
+    event.add_vertex(std::move(hard));
     auto bDecay = HepMC::newGenVertexPtr();
     bDecay->add_particle_in(bPlus);
     bDecay->add_particle_out(makeParticle(-421, 25., 2));
     bDecay->add_particle_out(makeParticle(211, 25., 1));
-    event.add_vertex(bDecay);
+    event.add_vertex(std::move(bDecay));
     auto dPlusDecay = HepMC::newGenVertexPtr();
-    dPlusDecay->add_particle_in(dPlus);
+    dPlusDecay->add_particle_in(std::move(dPlus));
     dPlusDecay->add_particle_out(makeParticle(-321, 20., 1));
     dPlusDecay->add_particle_out(makeParticle(211, 20., 1));
-    event.add_vertex(dPlusDecay);
+    event.add_vertex(std::move(dPlusDecay));
     auto dZeroDecay = HepMC::newGenVertexPtr();
     dZeroDecay->add_particle_in(dZero);
     dZeroDecay->add_particle_out(makeParticle(-321, 17., 1));
     dZeroDecay->add_particle_out(makeParticle(211, 17., 1));
-    event.add_vertex(dZeroDecay);
-    event.set_beam_particles(beam1, beam2);
+    event.add_vertex(std::move(dZeroDecay));
+    event.set_beam_particles(std::move(beam1), std::move(beam2));
 
     // The barcodes as the EVNT reader sets them.
     for (const auto& p : event.particles()) {

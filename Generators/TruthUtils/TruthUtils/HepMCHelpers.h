@@ -134,7 +134,7 @@ namespace MC
 
   /// @brief Function to find in the container the particle that p descends from in the simulation (see HepMC::is_sim_descendant).
   /** This can be used for HepMC3::GenParticlePtr, HepMC3::ConstGenParticlePtr or xAOD::TruthParticle* */
-  template <class C, class T> T findMatching(C TruthContainer, T p) {
+  template <class C, class T> T findMatching(const C & TruthContainer, T p) {
     T ptrPart = nullptr;
     if (!p) return ptrPart;
     if constexpr (std::is_pointer_v<C> || HepMC::is_smart_ptr_v<C>){ //C is ptr
