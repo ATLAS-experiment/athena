@@ -389,10 +389,15 @@ int main1( int argc, char** argv ) {
             continue;
         }
 
+        /**
+          The following code is not run but kept commented for possible
+          later re-instatement (Nov. 2026)
 
+        
         using RpcLayer = RpcChamber::RpcLayer;
         for (const RpcLayer& refLayer : reference.layers) {
             break;
+            
             std::set<RpcLayer>::const_iterator lay_itr = test.layers.find(refLayer);
             if (lay_itr == test.layers.end()) {
                 std::cerr<<"runRpcGeoComparison() "<<__LINE__<<": "<<test<<" "
@@ -422,9 +427,10 @@ int main1( int argc, char** argv ) {
                          <<GeoTrf::toString(layAlignment, true)<<std::endl;
                 chamberOkay = false;
             }
+            
         }
+        **/
         using RpcStrip = RpcChamber::RpcStrip;
-        if (!chamberOkay) continue;
         unsigned int failedEta{0}, failedPhi{0};
         for (const RpcStrip& refStrip : reference.strips) {
             std::set<RpcStrip>::const_iterator strip_itr = test.strips.find(refStrip);
