@@ -120,9 +120,9 @@ NNClusterCalibrator<calib_data_t, traj_t>::calibrate(
       subClusterPosition(chosen).template cast<float>();
 
   // the NN precision is converted to the RMS (in mm), the covariance is its square
-  const float rmsX = nnInput.precisionToRealCoord(positions.xprec(maxProbNumberIndex),
+  const float rmsX = nnInput.precisionToRealCoord(positions.xprec(chosen),
                                                   NNinput::Index::pitchXOffset);
-  const float rmsY = nnInput.precisionToRealCoord(positions.yprec(maxProbNumberIndex),
+  const float rmsY = nnInput.precisionToRealCoord(positions.yprec(chosen),
                                                   NNinput::Index::pitchYOffset);
   typename NNClusterCalibrator<calib_data_t, traj_t>::BASE::Cov cov;
   cov(1, 0) = cov(0, 1) = 0.0f;
