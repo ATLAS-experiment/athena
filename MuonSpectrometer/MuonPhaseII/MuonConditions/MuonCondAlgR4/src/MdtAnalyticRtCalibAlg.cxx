@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "MdtAnalyticRtCalibAlg.h"
 
@@ -19,6 +19,7 @@
 #include "TROOT.h"
 
 #include <format>
+#include <cassert>
 
 using namespace MuonCalib;
 using namespace Acts;
@@ -63,14 +64,14 @@ namespace MuonCalibR4{
               continue;
           }
           const MdtFullCalibData* copyMe = readHandle->getCalibData(detId, msgStream());
-          
+          assert(copyMe != nullptr);
           if (copyMe->corrections && !writeCdo->storeData(detId, copyMe->corrections, msgStream())) {
             return StatusCode::FAILURE;
           }
           /// Check whether all tubes are complete 
           const std::vector<Identifier> tubes = tubeIds(detId);
-          if (std::ranges::none_of(tubes, [copyMe](const Identifier& tubeId){
-                return !copyMe->tubeCalib->getCalib(tubeId);
+          if (const auto pCalib = copyMe->tubeCalib; pCalib && std::ranges::none_of(tubes, [pCalib](const Identifier& tubeId){
+                return !pCalib->getCalib(tubeId);
           })) {
            /// Copy the calibration constants for T0 & the corrections
             if (!writeCdo->storeData(detId, copyMe->tubeCalib, msgStream())) {
@@ -80,10 +81,11 @@ namespace MuonCalibR4{
             ATH_MSG_VERBOSE("Tube calibration constants invalid for: "<<m_idHelperSvc->toStringDetEl(detId));
             missedElements.insert(detId);
           }
-
-          RtRelationPtr& translated = translatedRts[copyMe->rtRelation];
+          const auto pRtRelation = copyMe->rtRelation;
+          assert(pRtRelation != nullptr);
+          RtRelationPtr& translated = translatedRts[pRtRelation];
           if (!translated) {
-              translated = translateRt(ctx, detId, *copyMe->rtRelation);
+              translated = translateRt(ctx, detId, *pRtRelation);
           }
           if (!dummyFillerRt) {
             dummyFillerRt = translated;
@@ -168,6 +170,10 @@ namespace MuonCalibR4{
                 default:
                     break;
             }
+            if (!rt){
+              ATH_MSG_ERROR("rt was left as nullptr, possibly an unsupported PolyType was chosen.");
+              continue;
+            }
             const unsigned rtNdoF = rtPoints.size() - rt->nDoF();
             const double rtChi2 = calculateChi2(rtPoints, *rt) / rtNdoF;
             ATH_MSG_VERBOSE("Fit has a chi2 of "<<rtChi2<<". Cut off at "<<m_chiCutOff);
@@ -197,7 +203,11 @@ namespace MuonCalibR4{
                 default:
                     break;
             }
-            const unsigned trNdoF = rtPoints.size() - tr->nDoF();
+            if (!tr){
+              ATH_MSG_ERROR("tr was left as nullptr, possibly an unsupported PolyType was chosen.");
+              continue;
+            }
+            const unsigned trNdoF = trPoints.size() - tr->nDoF();
             const double trChi2 = calculateChi2(trPoints, *tr) / trNdoF; 
             /// Reject bad fits
             ATH_MSG_VERBOSE("T-R fit resulted in a chi2/nDoF for tr: "<<trChi2<<" ("<<trNdoF<<")");
@@ -307,7 +317,8 @@ namespace MuonCalibR4{
                                              const Identifier& detId,
                                              const std::vector<SamplePoint>& resoPoints,
                                              const IRtResolution& inReso) const{
-
+        //m_visualSvc is only retrieved if m_saveDiagnostic is true
+        if (!m_saveDiagnostic) return;
         const std::string chName = std::format("{:}{:d}{:}{:d}M{:1d}",
                                                m_idHelperSvc->stationNameString(detId),
                                                std::abs(m_idHelperSvc->stationEta(detId)),
