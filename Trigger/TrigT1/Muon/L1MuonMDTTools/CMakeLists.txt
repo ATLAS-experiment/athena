@@ -12,7 +12,7 @@ atlas_add_library( L1MuonMDTToolsLib
                    src/*.cxx
                    PUBLIC_HEADERS L1MuonMDTTools
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps xAODMuonPrepData AthenaKernel GaudiKernel Identifier MuonDigitContainer MuonIdHelpersLib MuonRDO MuonReadoutGeometryR4  MuonSimData MuonSimEvent MuonPrepRawData MagFieldConditions MagFieldElements StoreGateLib CxxUtils
+                   LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps xAODMuonPrepData AthenaKernel GaudiKernel Identifier MuonDigitContainer MuonIdHelpersLib MuonRDO MuonReadoutGeometryR4  MuonSimData MuonSimEvent MuonPrepRawData MagFieldConditions MagFieldElements  MuonStationIndexLib StoreGateLib CxxUtils
                  )
 
 # Component(s) in the package:

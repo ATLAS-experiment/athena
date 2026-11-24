@@ -2,10 +2,13 @@
 
 atlas_subdir ( L1MuonMDT )
 
+find_package( Acts COMPONENTS Core )
+
 atlas_add_component (L1MuonMDT
         src/*.cxx src/components/*.cxx
         LINK_LIBRARIES AthenaKernel xAODMuonRDO MuonRDO MuonDigitContainer xAODTrigger AthenaMonitoringKernelLib IRegionSelector
-        MuonReadoutGeometryR4 L1MuonMDTToolsLib TrigSteeringEvent xAODMuonViews xAODMuonPrepData xAODTrigL1Muon MuonCalibEventBase MuonCalibITools xAODMuonSimHit)
+  MuonReadoutGeometryR4 L1MuonMDTToolsLib TrigSteeringEvent xAODMuonViews xAODMuonPrepData xAODTrigL1Muon MuonCalibEventBase MuonCalibITools xAODMuonSimHit MuonDetDescrUtils
+  MuonStationIndexLib MdtCalibInterfacesLib GaudiKernel Acts::Core)
 
 
 
