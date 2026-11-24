@@ -6,6 +6,7 @@
 #include <regex>
 #include <ranges> //std::views::split
 #include <cstdint>
+#include <iostream>
 
 TrigTauInfo::TrigTauInfo(const std::string& trigger)
     : m_trigger{trigger}
@@ -39,6 +40,9 @@ void TrigTauInfo::parseTriggerString(bool remove_L1_phase1_thresholds)
     if(clean_trigger.size() > 3 && clean_trigger.rfind("L1_", 0) == 0) {
         clean_trigger = "L1" + clean_trigger.substr(3);
     }
+
+    bool is_em = false;
+    if( m_trigger.find("_em") != std::string::npos) is_em = true; 
 
     std::vector<std::string> sections;
     for (auto&& subrange : std::views::split(m_trigger, '_')) sections.emplace_back(subrange.begin(), subrange.end());
@@ -152,7 +156,10 @@ void TrigTauInfo::parseTriggerString(bool remove_L1_phase1_thresholds)
                 std::string tau_jet_container_sfx = type;
                 // Remove the tracktwo prefixes if they are present
                 if(type == "ptonly") tau_jet_container_sfx = "CaloMVAOnly";
-                else if(tau_jet_container_sfx.starts_with("tracktwo")) tau_jet_container_sfx = tau_jet_container_sfx.substr(8);
+                else if(tau_jet_container_sfx.starts_with("tracktwo")) {
+		    if(is_em){ tau_jet_container_sfx = "EM"; } 
+		    else {tau_jet_container_sfx = tau_jet_container_sfx.substr(8);}
+		}
                 else if(tau_jet_container_sfx.starts_with("track")) tau_jet_container_sfx = tau_jet_container_sfx.substr(5);
 
                 // Check if the leg is a probe leg (to support bootstrapped tau triggers)
