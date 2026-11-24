@@ -19,7 +19,7 @@ file(GLOB ALL_SRC_COMPONENT_FILES src/components/*.cxx)
 # define extra_incl, extra_lib for Athena builds (and not AthSimulation)
 if( NOT SIMULATIONBASE )
   find_package( Acts COMPONENTS PluginJson Fatras ) # for ActsFatrasG4
-  find_package( ROOT COMPONENTS Core MathCore Hist RIO pthread )
+  find_package( ROOT COMPONENTS Core MathCore Hist RIO )
   find_package( lwtnn )
 
   # set extra_lib

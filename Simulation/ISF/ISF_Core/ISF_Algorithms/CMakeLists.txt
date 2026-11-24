@@ -4,7 +4,7 @@
 atlas_subdir( ISF_Algorithms )
 
 # External dependencies:
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
 find_package( GTest )
 find_package( GMock )
 set( extra_libs )

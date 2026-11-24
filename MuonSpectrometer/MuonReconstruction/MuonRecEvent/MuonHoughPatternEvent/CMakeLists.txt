@@ -6,7 +6,7 @@
 atlas_subdir( MuonHoughPatternEvent )
 
 # External dependencies:
-find_package( ROOT COMPONENTS Hist Core Tree MathCore RIO pthread )
+find_package( ROOT COMPONENTS Hist Core Tree MathCore RIO )
 
 # tag ROOTBasicLibs was not recognized in automatic conversion in cmt2cmake
 

@@ -4,7 +4,7 @@
 atlas_subdir( MuonCondDump )
 
 # External dependencies:
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread Graf Gpad)
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO Graf Gpad)
 find_package( CORAL )
 
 # Component(s) in the package:

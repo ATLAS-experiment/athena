@@ -10,7 +10,7 @@ find_package( AdePT QUIET )
 find_package( CLHEP )
 find_package( Celeritas QUIET )
 find_package( Geant4 )
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
 
 # If Celeritas is found, add its code
 if( Celeritas_FOUND )

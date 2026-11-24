@@ -10,7 +10,7 @@ if( NOT XAOD_STANDALONE )
 endif()
 
 # External dependencies:
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
 find_package( GTest )
 
 # FIX ME: These settings should come from the Project configuration

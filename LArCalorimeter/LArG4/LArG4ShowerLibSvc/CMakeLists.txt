@@ -5,7 +5,7 @@ atlas_subdir( LArG4ShowerLibSvc )
 
 # External dependencies:
 find_package( Geant4 )
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
 
 atlas_add_library( LArG4ShowerLibSvcLib
                    LArG4ShowerLibSvc/*.h

@@ -4,7 +4,7 @@
 atlas_subdir( JetMonitoring )
 
 # External dependencies:
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
 
 atlas_add_library( JetMonitoringLib
                    JetMonitoring/*.h

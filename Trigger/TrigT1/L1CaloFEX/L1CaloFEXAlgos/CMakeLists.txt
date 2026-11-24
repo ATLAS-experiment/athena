@@ -6,7 +6,7 @@ atlas_subdir( L1CaloFEXAlgos )
 # External dependencies:
 find_package( tdaq-common COMPONENTS eformat eformat_write )
 
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread Gpad Graf )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO Gpad Graf )
 
 # Component(s) in the package:
 atlas_add_component( L1CaloFEXAlgos

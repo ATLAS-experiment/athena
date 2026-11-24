@@ -8,7 +8,7 @@ atlas_subdir( MuonCalibDbOperations )
 # External dependencies:
 find_package( COOL COMPONENTS CoolKernel CoolApplication )
 find_package( CORAL COMPONENTS CoralBase CoralKernel RelationalAccess )
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
 find_package( cx_Oracle )
 
 # Component(s) in the package:

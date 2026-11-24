@@ -5,7 +5,7 @@ atlas_subdir( LArG4Validation )
 
 # External dependencies:
 find_package( CLHEP )
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
 
 # Component(s) in the package:
 atlas_add_component( LArG4Validation

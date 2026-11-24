@@ -5,7 +5,7 @@ atlas_subdir( MDT_Response )
 
 # External dependencies:
 find_package( CLHEP )
-find_package( ROOT COMPONENTS RIO Core Tree MathCore Hist pthread )
+find_package( ROOT COMPONENTS RIO Core Tree MathCore Hist )
 
 # Component(s) in the package:
 atlas_add_library( MDT_Response

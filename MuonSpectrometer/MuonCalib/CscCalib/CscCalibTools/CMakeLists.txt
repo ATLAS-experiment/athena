@@ -6,7 +6,7 @@
 atlas_subdir( CscCalibTools )
 
 # External dependencies:
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
 
 atlas_add_library( CscCalibToolsLib
                    CscCalibTools/*.h

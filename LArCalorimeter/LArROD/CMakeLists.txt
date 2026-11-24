@@ -5,7 +5,7 @@ atlas_subdir( LArROD )
 
 # External dependencies:
 find_package( CLHEP )
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
 find_package( onnxruntime )
 
 # Component(s) in the package:

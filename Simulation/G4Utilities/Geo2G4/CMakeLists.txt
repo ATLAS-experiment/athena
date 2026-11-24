@@ -6,7 +6,7 @@ atlas_subdir( Geo2G4 )
 # External dependencies:
 find_package( CLHEP )
 find_package( Geant4 )
-find_package( ROOT COMPONENTS MathCore RIO Core Tree Hist pthread )
+find_package( ROOT COMPONENTS MathCore RIO Core Tree Hist )
 find_package( GeoModel COMPONENTS GeoModelKernel )
 
 # Component(s) in the package:

@@ -5,7 +5,7 @@ atlas_subdir( SCT_CalibAlgs )
 
 # External dependencies:
 find_package( CORAL COMPONENTS CoralBase CoralKernel RelationalAccess )
-find_package( ROOT COMPONENTS MathCore Core Tree Hist RIO pthread )
+find_package( ROOT COMPONENTS MathCore Core Tree Hist RIO )
 find_package( Boost COMPONENTS unit_test_framework)
 
 # Component(s) in the package:

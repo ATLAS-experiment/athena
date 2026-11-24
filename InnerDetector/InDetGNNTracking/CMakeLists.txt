@@ -4,7 +4,7 @@
 atlas_subdir( InDetGNNTracking )
 
 # External dependencies:
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
 find_package(Boost REQUIRED COMPONENTS graph)
 find_package( Acts COMPONENTS Core OPTIONAL_COMPONENTS PluginGnn )
 

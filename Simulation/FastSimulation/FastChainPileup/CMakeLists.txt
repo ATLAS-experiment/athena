@@ -9,7 +9,7 @@ atlas_subdir( FastChainPileup )
 find_package( CLHEP )
 find_package( Lhapdf )
 find_package( Pythia8 )
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
 
 # Component(s) in the package:
 atlas_add_component( FastChainPileup

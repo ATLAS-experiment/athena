@@ -5,7 +5,7 @@ atlas_subdir( NewVrtSecInclusiveTool )
 
 # External dependencies:
 find_package( Boost )
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
 
 atlas_add_library(   NewVrtSecInclusiveToolLib
                      src/*.cxx

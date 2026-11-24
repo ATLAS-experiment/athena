@@ -6,7 +6,7 @@ atlas_subdir( ISF_Geant4Tools )
 # External dependencies:
 find_package( CLHEP )
 find_package( Geant4 )
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
 find_package( TBB )
 
 atlas_add_library( ISF_Geant4ToolsLib

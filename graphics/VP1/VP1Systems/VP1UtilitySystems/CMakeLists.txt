@@ -5,7 +5,7 @@ atlas_subdir( VP1UtilitySystems )
 
 # External dependencies:
 find_package( Coin3D )
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
 find_package( Qt5 COMPONENTS Core Gui  Widgets PrintSupport)
 
 # Generate UI files automatically:

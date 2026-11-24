@@ -6,7 +6,7 @@
 atlas_subdir( MuonCalibMath )
 
 # External dependencies:
-find_package( ROOT COMPONENTS MathCore MathMore Core Tree Hist RIO pthread )
+find_package( ROOT COMPONENTS MathCore MathMore Core Tree Hist RIO )
 find_package( CLHEP )
 find_package( GeoModel COMPONENTS GeoModelHelpers)
 find_package( Acts COMPONENTS Core)

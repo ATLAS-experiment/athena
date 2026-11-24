@@ -4,7 +4,7 @@
 atlas_subdir( MuonPRDTest )
 
 # External dependencies:
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
 find_package( CLHEP )
 
 atlas_add_library (MuonPRDTestLib

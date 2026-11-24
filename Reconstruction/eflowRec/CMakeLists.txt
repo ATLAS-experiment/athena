@@ -4,7 +4,7 @@
 atlas_subdir( eflowRec )
 
 # External dependencies:
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
 find_package( onnxruntime )
 
 # Component(s) in the package:

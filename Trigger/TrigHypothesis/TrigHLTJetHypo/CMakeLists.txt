@@ -4,7 +4,7 @@
 atlas_subdir( TrigHLTJetHypo )
 
 # External dependencies:
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
 find_package( CLHEP )
 
 # Component(s) in the package:
