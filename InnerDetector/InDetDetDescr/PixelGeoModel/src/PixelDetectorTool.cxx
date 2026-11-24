@@ -33,20 +33,6 @@
 using InDetDD::PixelDetectorManager;
 using InDetDD::SiDetectorManager;
 
-PixelDetectorTool::PixelDetectorTool( const std::string& type, const std::string& name, const IInterface* parent )
-  : GeoModelTool( type, name, parent )
-{
-  declareProperty("Services",m_services);
-  declareProperty("ServicesOnLadder",m_servicesOnLadder); ///JBdV
-  declareProperty("Alignable", m_alignable);
-  declareProperty("TweakIBLDist", m_tweakIBLDist);
-  declareProperty("DC1Geometry",m_dc1Geometry);
-  declareProperty("InitialLayout",m_initialLayout);
-  declareProperty("DevVersion", m_devVersion);
-  declareProperty("OverrideVersionName", m_overrideVersionName);
-  declareProperty("useDynamicAlignFolders", m_useDynamicAlignFolders);
-}
-
 PixelDetectorTool::~PixelDetectorTool()
 {
   delete m_athenaComps;
@@ -239,7 +225,7 @@ StatusCode PixelDetectorTool::create()
       ATH_MSG_WARNING( "Could not retrieve IBLParameterSvc");
     }
     else {
-      m_IBLParameterSvc->setBoolParameters(m_alignable,"alignable");
+      m_IBLParameterSvc->setBoolParameters(m_alignable.value(),"alignable");
     }
 
     if (versionName == "IBL") switches.setIBL();

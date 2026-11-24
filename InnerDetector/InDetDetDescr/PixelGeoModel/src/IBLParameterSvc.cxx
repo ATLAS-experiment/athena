@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "IBLParameterSvc.h"
@@ -12,37 +12,6 @@
 #include "RDBAccessSvc/IRDBRecordset.h"
 #include "GeoModelInterfaces/IGeoDbTagSvc.h"
 #include "GeoModelUtilities/DecodeVersionKey.h"
-
- 
-/**
- ** Constructor(s)
- **/
-IBLParameterSvc::IBLParameterSvc(const std::string& name,ISvcLocator* svc)
-  : base_class(name,svc),
-    m_IBLpresent{},
-    m_DBMpresent{},
-    m_LayerColumnsPerFE{},
-    m_LayerRowsPerFE{},
-    m_LayerFEsPerHalfModule_planar{},
-    m_LayerFEsPerHalfModule_3d{},
-    m_layout{},
-    m_geoDbTagSvc("GeoDbTagSvc",name),
-    m_disablePixMapCondDB(false),
-    m_disableSpecialPixels(false),
-    m_disableAlignable(false),
-    m_disableAllClusterSplitting(false),
-    m_disableDCS(true) {
-	declareProperty("GeoDbTagSvc",m_geoDbTagSvc);
- 	declareProperty("DisablePixMapCondDB",m_disablePixMapCondDB);
- 	declareProperty("DisableSpecialPixels",m_disableSpecialPixels);
- 	declareProperty("DisableAlignable",m_disableAlignable);
- 	declareProperty("DisableAllClusterSplitting",m_disableAllClusterSplitting);
- 	declareProperty("DisableDCS",m_disableDCS);
-}
- 
-IBLParameterSvc::~IBLParameterSvc()
-{
-}
 
 /**
  ** Initialize Service

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -8,8 +8,8 @@
 #ifndef BCMGEOMODEL_BCMMODULE_H
 #define BCMGEOMODEL_BCMMODULE_H
 
-#include "BCM_GeoModel/BCM_Wall.h"
-#include "BCM_GeoModel/BCM_ModuleParameters.h"
+#include "BCM_Wall.h"
+#include "BCM_ModuleParameters.h"
 #include "GaudiKernel/MsgStream.h"
 #include <iostream>
 

@@ -25,7 +25,7 @@ class PixelDetectorTool final : public GeoModelTool {
 
  public:
   // Standard Constructor
-  PixelDetectorTool( const std::string& type, const std::string& name, const IInterface* parent );
+  using GeoModelTool::GeoModelTool;
   // Standard Destructor
   virtual ~PixelDetectorTool() override final;
 
@@ -39,22 +39,22 @@ class PixelDetectorTool final : public GeoModelTool {
 
 private:
   //
-  bool m_services{true};
-  bool m_servicesOnLadder{true}; //JBdV
+  Gaudi::Property<bool> m_services{this, "Services", true};
+  Gaudi::Property<bool> m_servicesOnLadder{this, "ServicesOnLadder", true}; //JBdV
   std::string m_detectorName{"PixelDetector"};
   ServiceHandle<IIBLParameterSvc> m_IBLParameterSvc{this,"IBLParameterSvc","IBLParameterSvc",""};
-  bool m_dc1Geometry{false};
-  bool m_alignable{true};
-  bool m_tweakIBLDist{true}; // whether to tweak L3 transforms with IBLDist
-  bool m_initialLayout{false};
-  bool m_devVersion{false};
+  Gaudi::Property<bool> m_dc1Geometry{this, "DC1Geometry", false};
+  Gaudi::Property<bool> m_alignable{this, "Alignable", true};
+  Gaudi::Property<bool> m_tweakIBLDist{this, "TweakIBLDist", true, "whether to tweak L3 transforms with IBLDist"};
+  Gaudi::Property<bool> m_initialLayout{this, "InitialLayout", false};
+  Gaudi::Property<bool> m_devVersion{this, "DevVersion", false};
   bool m_buildDBM{false};
-  bool m_useDynamicAlignFolders{false};
+  Gaudi::Property<bool> m_useDynamicAlignFolders{this, "useDynamicAlignFolders", false};
   ToolHandle< IGeoSubDetTool > m_bcmTool{this,"BCM_Tool","",""};
   ToolHandle< IGeoSubDetTool > m_blmTool{this,"BLM_Tool","",""};
   PublicToolHandle< IInDetServMatBuilderTool > m_serviceBuilderTool{this,"ServiceBuilderTool","",""};
   const InDetDD::PixelDetectorManager * m_manager{nullptr};
-  std::string m_overrideVersionName;
+  Gaudi::Property<std::string> m_overrideVersionName{this, "OverrideVersionName", ""};
 
   PixelGeoModelAthenaComps * m_athenaComps{};
 

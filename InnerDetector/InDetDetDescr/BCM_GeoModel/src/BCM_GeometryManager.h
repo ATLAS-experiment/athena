@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -8,7 +8,7 @@
 #ifndef BCMGEOMETRYMANAGER_H
 #define BCMGEOMETRYMANAGER_H
 
-#include "BCM_GeoModel/BCM_ModuleParameters.h"
+#include "BCM_ModuleParameters.h"
 
   /** @class BCM_GeometryManager 
 

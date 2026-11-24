@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "BLM_GeoModel/BLM_Module.h"
+#include "BLM_Module.h"
 
 #include "GeoModelInterfaces/StoredMaterialManager.h"
 
@@ -15,8 +15,8 @@
 #include "GeoModelKernel/Units.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "GaudiKernel/MsgStream.h"
-#include "BLM_GeoModel/BLM_Wall.h"
-#include "BLM_GeoModel/BLM_ModuleParameters.h"
+#include "BLM_Wall.h"
+#include "BLM_ModuleParameters.h"
 
 
 GeoPhysVol* BLM_Module::Build(StoredMaterialManager* mat_mgr, const BLM_ModuleParameters* parameters, MsgStream* msg)
