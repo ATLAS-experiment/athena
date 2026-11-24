@@ -27,54 +27,54 @@ namespace {
 constexpr unsigned int max_strip_rows = 4u;
 struct athena_strip_surface_info {
   /// Surface link identifying this record. Records are sorted by this value.
-  std::uint64_t surface_link;
+  std::uint64_t surface_link = 0;
   /// Whether this entry corresponds to an endcap strip surface.
-  unsigned int is_endcap;
+  unsigned int is_endcap = 0;
   /// Spacepoint covariance terms used by the seed doublet/triplet tests.
   traccc::scalar spacepoint_variance_r;
   traccc::scalar spacepoint_variance_z;
   /// Minimum radius from the endcap annulus boundary.
-  double min_r;
+  double min_r = 0;
   /// Maximum radius from the endcap annulus boundary.
-  double max_r;
+  double max_r = 0;
   /// Whether the Athena detector element uses an annulus design.
-  unsigned int is_annulus;
+  unsigned int is_annulus = 0;
   /// Surface frame used for endpoint reconstruction.
-  std::array<double, 3> origin;
-  std::array<double, 3> eta_axis;
-  std::array<double, 3> phi_axis;
+  std::array<double, 3> origin {};
+  std::array<double, 3> eta_axis {};
+  std::array<double, 3> phi_axis {};
   /// Transform data used for the strip-gap correction.
-  std::array<double, 3> transform_local_x;
-  std::array<double, 3> transform_normal;
-  std::array<double, 3> transform_translation;
-  std::array<double, 3> element_center;
+  std::array<double, 3> transform_local_x {};
+  std::array<double, 3> transform_normal {};
+  std::array<double, 3> transform_translation {};
+  std::array<double, 3> element_center {};
   /// StripBoxDesign parameters used by cellIdOfPosition()/endsOfStrip().
-  unsigned int barrel_n_rows;
-  unsigned int barrel_n_strips;
-  double barrel_pitch;
-  double barrel_row_length;
+  unsigned int barrel_n_rows = 0;
+  unsigned int barrel_n_strips = 0;
+  double barrel_pitch = 0;
+  double barrel_row_length = 0;
   /// Row-0 parameters used by the radial endpoint and strip-index mappings.
-  unsigned int endcap_n_strips;
-  double endcap_phi_pitch;
-  double endcap_stereo_angle;
-  double endcap_wafer_center_r;
+  unsigned int endcap_n_strips = 0;
+  double endcap_phi_pitch = 0;
+  double endcap_stereo_angle = 0;
+  double endcap_wafer_center_r = 0;
   /// Cached constants used verbatim by StripStereoAnnulusDesign.
-  double endcap_phi_width;
-  double endcap_length_bf;
-  double endcap_sin_stereo;
-  double endcap_cos_stereo;
+  double endcap_phi_width = 0;
+  double endcap_length_bf = 0;
+  double endcap_sin_stereo = 0;
+  double endcap_cos_stereo = 0;
   /// Whether the endcap surface uses polar local coordinates.
-  unsigned int endcap_uses_polar_coordinates;
+  unsigned int endcap_uses_polar_coordinates = 0;
   /// Signed barrel/endcap identifier (-2, 0, or +2).
-  int barrel_ec;
+  int barrel_ec = 0;
   /// Whether this surface is the non-stereo reference side.
-  unsigned int is_reference_surface;
+  unsigned int is_reference_surface = 0;
   /// Detray surface links of the offline module relationships.
-  std::uint64_t opposite_surface_link;
-  std::uint64_t eta_minus_surface_link;
-  std::uint64_t eta_plus_surface_link;
-  std::uint64_t phi_minus_surface_link;
-  std::uint64_t phi_plus_surface_link;
+  std::uint64_t opposite_surface_link = 0;
+  std::uint64_t eta_minus_surface_link = 0;
+  std::uint64_t eta_plus_surface_link = 0;
+  std::uint64_t phi_minus_surface_link = 0;
+  std::uint64_t phi_plus_surface_link = 0;
   /// Final offline compatibility ranges for opposite and eta neighbours.
   traccc::scalar opposite_min;
   traccc::scalar opposite_max;
