@@ -56,6 +56,11 @@ def defaultTrigTrackingFlags(flags : AthConfigFlags):
   flags.addFlag("doHitDV",              False)
   flags.addFlag("doDisappearingTrk",    False)
   flags.addFlag("useDynamicRoiZWidth",  False)
+
+  #NB. This option is added to support existing combined muon chains signature code whcih continues to depend on an ElementLink to Trk::Track
+  #This option is NOT to be used without agreement from the EF Tracking group (even if only temporarily)
+  #The conversion WILL BE REMOVED as soon as trigger muons is ready (and Trigger more widely wrt geometry etc is ready), no new development should use Trk::Track objects and existing code (to be retained for Run 4) must be ported to ActsTrk
+  flags.addFlag("createTrkTracks", False)
   
   
   #precision tracking configuration values
@@ -81,7 +86,9 @@ def defaultTrigTrackingFlags(flags : AthConfigFlags):
   flags.addFlag("trkTracks_FTF",   "")
   flags.addFlag("trkTracks_IDTrig","")
   flags.addFlag("tracks_FTF",      "")        
-  flags.addFlag("tracks_IDTrig",   "")  
+  flags.addFlag("tracks_IDTrig",   "")
+  flags.addFlag("actsTracks_FTF",   "")
+  flags.addFlag("actsTracks_IDTrig",   "")
   flags.addFlag("useGBTSeedingTool",  False)
 
 def defaultInDetTrigTrackingFlags() -> AthConfigFlags:
@@ -335,6 +342,7 @@ def muon(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFl
   flags.doResMon            = True
   flags.DoPhiFiltering      = False
   flags.doSeedRedundancyCheck = True
+  flags.createTrkTracks = True #See nb. above, this is a temporary configuration flag (will be dropped as soon as possible)
   return flags
   
 @signatureActions
@@ -347,6 +355,7 @@ def muonIso(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   flags.etaHalfWidth        = 0.35
   flags.phiHalfWidth        = 0.35
   flags.zedHalfWidth        = 10.0
+  flags.createTrkTracks = True #See nb. above, this is a temporary configuration flag (will be dropped as soon as possible)
   return flags
 
 @signatureActions
@@ -887,8 +896,8 @@ def derivedFromSignatureFlags(flags: AthConfigFlags, recoMode : str):
     collToRecordable(flags, f"HLT_IDTrack_{flags.suffix if flags.input_name not in ['tauIso', 'tauIsoHitZ'] else "Tau"}_IDTrig")
 
   if recoMode == "Acts":
-    flags.trkTracks_FTF     = f'HLT_Acts_{flags.suffix}_Tracks'
-    flags.trkTracks_IDTrig  = f'HLT_Acts_{flags.suffix}_Ambi_Tracks'
+    flags.actsTracks_FTF     = f'HLT_Acts_{flags.suffix}_Tracks'
+    flags.actsTracks_IDTrig  = f'HLT_Acts_{flags.suffix}_Ambi_Tracks'
 
   if flags.isLRT:             # to be moved to a separate function once LRTs differ
     flags.minClusters         = tsetter(flags.minClusters         , 8)
