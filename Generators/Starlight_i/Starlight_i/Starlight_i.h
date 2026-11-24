@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // --------------------------------------------------
@@ -63,8 +63,8 @@ protected:
   >                m_event{};
 
   // beam energy dropped to LHE file (GeV)
-  DoubleProperty m_beam1_energy{this,"beam1Energy", 2.51e+03};
-  DoubleProperty m_beam2_energy{this,"beam2Energy", 2.51e+03};
+  DoubleProperty m_beam1_energy{this, "beam1Energy", 2.51e+03};
+  DoubleProperty m_beam2_energy{this, "beam2Energy", 2.51e+03};
 
   unsigned int m_beam1Z{0};
   unsigned int m_beam1A{0};
