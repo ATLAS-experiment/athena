@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigPartialEventBuilding_PEBInfoWriterAlg_h
@@ -30,6 +30,9 @@ private:
   ToolHandleArray<PEBInfoWriterToolBase> m_hypoTools {this, "HypoTools", {}, "Tools to create the PEB Info"};
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey {this,"EventInfo","EventInfo","input data key"};
   Gaudi::Property<std::vector<uint8_t> > m_matchTriggerType {this, "MatchTriggerType", {}, "L1 trigger type to match"};
+  SG::WriteHandleKey< TrigRoiDescriptorCollection > m_superRoisWriteHandleKey {this,"SuperRoisWriteHandleKey","",
+    "Name of the Super ROI collection produced by this tool."};
+
 };
 
 #endif // TrigPartialEventBuilding_PEBInfoWriterAlg_h
