@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtCalibDbAlg.h"
@@ -205,7 +205,7 @@ StatusCode MdtCalibDbAlg::execute(const EventContext& ctx) const {
         TTree* tree{nullptr};
         inFile->GetObject(m_t0TreeName.value().c_str(), tree);
         if (!tree) {
-            ATH_MSG_FATAL("The object "<<m_rtRootFile<<" does not contain "<<m_t0TreeName);
+            ATH_MSG_FATAL("The object "<<m_t0RootFile<<" does not contain "<<m_t0TreeName);
             return StatusCode::FAILURE;
         }
         ATH_CHECK(parseT0Payload(*tree, *writeCdo));
@@ -435,7 +435,7 @@ StatusCode MdtCalibDbAlg::parseT0Payload(TTree& t0Tree,
                 return StatusCode::FAILURE;
             }
         }
-        if (!outContainer.storeData(detId, calibChannels, msgStream())){
+        if (!outContainer.storeData(detId, std::move(calibChannels), msgStream())){
             return StatusCode::FAILURE;
         }
     }
