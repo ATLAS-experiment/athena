@@ -115,7 +115,7 @@ namespace Rivet {
       cat.errorCode = err;
       const auto errIndex = static_cast<std::size_t>(err);
       if (errIndex < std::size(m_errorCount)) {
-        ++m_errorCount[errIndex];
+        ++m_errorCount.at(errIndex);
       } else {
         MSG_WARNING("Invalid HTXS error code: " << errIndex);
       }

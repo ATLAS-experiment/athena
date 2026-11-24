@@ -247,8 +247,8 @@ Starlight_i::fillEvt(HepMC::GenEvent* evt)
     HepMC::GenParticlePtr b1 = std::make_shared<HepMC::GenParticle>(HepMC::FourVector(0, 0,  m_beam1_energy.value(), m_beam1_energy.value()), beam1pid, 4);
     HepMC::GenParticlePtr b2 = std::make_shared<HepMC::GenParticle>(HepMC::FourVector(0, 0, -m_beam2_energy.value(), m_beam2_energy.value()), beam2pid, 4);
 
-    v1->add_particle_in(b1);
-    v1->add_particle_in(b2);
+    v1->add_particle_in(std::move(b1));
+    v1->add_particle_in(std::move(b2));
 
     // Conversion GeV -> MeV to ensure correct units
     evt->set_units(HepMC3::Units::MEV, HepMC3::Units::MM);
