@@ -440,9 +440,6 @@ namespace InDetPVNNSelection
         dec_jetLinks(*vertex) = jetsInVertex[vertex];
         dec_nJets(*vertex) = countValid(jetsInVertex[vertex]);
       }
-      else{
-        dec_nJets(*vertex) = 0;
-      }
 
       std::vector<ElementLink<xAOD::MuonContainer>> muonLinks;
       for(const xAOD::Muon* muon : *muonsIn){
