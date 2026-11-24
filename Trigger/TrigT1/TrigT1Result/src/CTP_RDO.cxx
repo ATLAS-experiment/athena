@@ -42,7 +42,6 @@ CTP_RDO::CTP_RDO(unsigned int ctpVersionNumber, std::vector<uint32_t>&& data, ui
    }
 }
 
-CTP_RDO::~CTP_RDO(){}
 
 const CTPdataformatVersion &
 CTP_RDO::getCTPVersion() const { 

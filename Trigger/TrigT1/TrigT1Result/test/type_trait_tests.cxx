@@ -48,13 +48,12 @@ int main(){
     static_assert(std::is_trivially_copy_constructible<CTPRoI>::value);
     static_assert(std::is_trivially_destructible<CTPRoI>::value);
 
-    //Dunno why this isn't movable but it isn't used much
-    //static_assert(std::is_nothrow_move_constructible<MuCTPI_RIO>::value);
-    //static_assert(std::is_nothrow_move_constructible<MuCTPI_RDO>::value);
+    static_assert(std::is_nothrow_move_constructible<MuCTPI_RIO>::value);
+    static_assert(std::is_nothrow_move_constructible<MuCTPI_RDO>::value);
     
     //Dunno what CTPdataformatVersion is so this will have to wait
 //    static_assert(std::is_trivially_copy_constructible<CTPResult>::value);
-//    static_assert(std::is_trivially_copy_constructible<CTP_RIO>::value);
+    static_assert(std::is_nothrow_move_constructible<CTP_RIO>::value);
 //    static_assert(std::is_trivially_copy_constructible<CTP_RDO>::value);  
 	return 0;
 }

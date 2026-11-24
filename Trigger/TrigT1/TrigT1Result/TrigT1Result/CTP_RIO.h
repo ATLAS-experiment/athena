@@ -23,7 +23,6 @@ class CTP_RIO {
 
 public:
   CTP_RIO();
-  ~CTP_RIO();
 
   uint32_t getSourceId() const{return m_sourceId;}
   uint32_t getRunNumber() const{return m_runNumber;}

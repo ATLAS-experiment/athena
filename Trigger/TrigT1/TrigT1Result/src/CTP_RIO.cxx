@@ -13,9 +13,6 @@ CTP_RIO::CTP_RIO() :
   m_detEventType(0),m_nDataWords(0),m_nStatusWords(0) {
 }
 
-CTP_RIO::~CTP_RIO() {
-}
-
 void CTP_RIO::dumpData() const
 {
   SmartIF<IMessageSvc> msgSvc{Gaudi::svcLocator()->service("MessageSvc")};
