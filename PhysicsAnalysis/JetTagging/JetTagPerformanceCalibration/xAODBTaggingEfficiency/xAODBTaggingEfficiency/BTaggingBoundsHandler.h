@@ -125,6 +125,7 @@ class BTaggingBoundsHandler {
         }
         // Copy construction
         varBounds(const varBounds&) = default;
+        varBounds& operator=(const varBounds&) = default;
 
         float getLowerBound() const { return m_lowerBound; }
         float getUpperBound() const { return m_upperBound; }

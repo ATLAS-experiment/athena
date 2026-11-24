@@ -16,6 +16,7 @@
 
 class LogicalElement {
     public:
+    virtual ~LogicalElement() = default;
     // Receive map of threshold to multiplicity input to CTP
     virtual bool evaluate(const std::unordered_map<std::string, size_t>& resultMap, bool debug=false) const = 0;
     virtual bool isGroup() const {return false;};
