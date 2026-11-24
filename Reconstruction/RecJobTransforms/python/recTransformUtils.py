@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 ## @brief Module with standard reconstruction transform options and substeps
 
@@ -119,13 +119,13 @@ def addRecoSubsteps(executorSet):
                                    substep = 'r2tla', inData = ['BS'], outData = ['DAOD_TLA'], ))
     executorSet.add(athenaExecutor(name = 'RAWtoDAODTLAFTAGPEB',
                                    skeletonCA = 'RecJobTransforms.RAWtoDAOD_TLA_Skeleton',
-                                   substep = 'r2TLAFTAGPEB', inData = ['BS'], outData = ['DAOD_TLAFTAGPEB'], ))
+                                   substep = 'r2TLAFTAGPEB', inData = ['BS','RDO'], outData = ['DAOD_TLAFTAGPEB'], ))
     executorSet.add(athenaExecutor(name = 'RAWtoDAODTLADJETPEB',
                                    skeletonCA = 'RecJobTransforms.RAWtoDAOD_TLA_Skeleton',
-                                   substep = 'r2TLADJETPEB', inData = ['BS'], outData = ['DAOD_TLADJETPEB'], ))
+                                   substep = 'r2TLADJETPEB', inData = ['BS', 'RDO'], outData = ['DAOD_TLADJETPEB'], ))
     executorSet.add(athenaExecutor(name = 'RAWtoDAODTLAEGAMPEB',
                                    skeletonCA = 'RecJobTransforms.RAWtoDAOD_TLA_Skeleton',
-                                   substep = 'r2TLAEGAMPEB', inData = ['BS'], outData = ['DAOD_TLAEGAMPEB'], ))
+                                   substep = 'r2TLAEGAMPEB', inData = ['BS', 'RDO'], outData = ['DAOD_TLAEGAMPEB'], ))
     executorSet.add(DQMergeExecutor(name = 'DQHistogramMerge', inData = [('HIST_ESD_INT', 'HIST_AOD_INT'), 'HIST_R2A', 'HIST_AOD'], outData = ['HIST']))
     executorSet.add(athenaExecutor(name = 'AODtoHIST',
                                    skeletonCA = 'RecJobTransforms.AODtoHIST_Skeleton',

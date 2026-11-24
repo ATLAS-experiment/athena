@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 import functools
 from TrigEDMConfig import DataScoutingInfo
@@ -328,7 +328,16 @@ def pebMenuSequenceGenCfg(flags, chain, eventBuildType, chainDict):
     recoAcc = InEventRecoCA("pebSequence_"+eventBuildType, inputMaker=inputMaker)
     selAcc = SelectionCA("pebMainSeq_"+eventBuildType+suffix)
     selAcc.mergeReco(recoAcc)
-    selAcc.addHypoAlgo(CompFactory.PEBInfoWriterAlg('PEBInfoWriterAlg_' + eventBuildType+suffix))
+
+    isRoIBasedPEB = EventBuildingInfo.isRoIBasedPEB(eventBuildType)
+    #exclude detector PEB chains
+    from TriggerMenuMT.HLT.CommonSequences import EventBuildingSequences
+    pebBuildSuffix = EventBuildingSequences.getPEBBuildSuffix(chain,eventBuildType)
+    if isRoIBasedPEB and pebBuildSuffix=='':
+        superRoIKey = 'HLT_Roi_Selected_'+eventBuildType
+    else:
+        superRoIKey=""
+    selAcc.addHypoAlgo(CompFactory.PEBInfoWriterAlg('PEBInfoWriterAlg_' + eventBuildType+suffix, SuperRoisWriteHandleKey = superRoIKey))
 
     return MenuSequence(flags,
                           selAcc,
