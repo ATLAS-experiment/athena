@@ -48,8 +48,6 @@ public:
 
   /// Default constructor
   MuCTPI_RIO();
-  /// Destructor
-  ~MuCTPI_RIO() = default;
 
   /// Function setting the BCID of the object
   void setBCID( const uint16_t bcId ) { m_bcId = bcId; }

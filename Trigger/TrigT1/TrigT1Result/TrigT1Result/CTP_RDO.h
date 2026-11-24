@@ -32,12 +32,7 @@ class CTP_RDO {
 
   /// Normal constructor taking the data words of one or several BCs as argument
   CTP_RDO(unsigned int ctpVersionNumber, std::vector<uint32_t>&& data, uint32_t nExtraWords=0);
-
-  /// empty default destructor
-  ~CTP_RDO();
   
-  CTP_RDO& operator=(CTP_RDO&&) noexcept = default;
-
   const std::vector<uint32_t> & getDataWords () const {
     return m_dataWords;
   }

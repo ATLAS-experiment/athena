@@ -79,12 +79,6 @@ public:
    */
   MuCTPI_RDO () = default;
 
-  /// Destructor
-  /**
-   * The destructor doesn't really have to do anything.
-   */
-  ~MuCTPI_RDO () = default;
-
   /// Function <strong>adding</strong> a multiplicity word to the object
   /**
    * Be careful, that contrary to its name, this function doesn't reset the multiplicity
