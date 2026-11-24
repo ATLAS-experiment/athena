@@ -430,8 +430,8 @@ StatusCode SingleTrackValidation::execute(const EventContext& ctx) {
       } else if (i==3) {
         lArKey="LArHitFCAL";
       }
-
-      SG::ReadHandle<LArHitContainer> larHitContainer(lArKey, "StoreGateSvc");
+      static const std::string sgStr{"StoreGateSvc"};
+      SG::ReadHandle<LArHitContainer> larHitContainer(lArKey, sgStr);
       if (larHitContainer.isValid()) {
         for (const LArHit* larHit : *larHitContainer) {
           const CaloDetDescrElement *hitElement = caloMgr->get_element(larHit->cellID());

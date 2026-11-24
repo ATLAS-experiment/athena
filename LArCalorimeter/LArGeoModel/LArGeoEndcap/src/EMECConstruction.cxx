@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // EMECConstruction
@@ -637,9 +637,9 @@ void LArGeo::EMECConstruction::place_custom_solids(
       glue_phys->add(lead_phys);
     }
   }
-
+    const std::string customStr{"LArCustomShape"};
     for(const auto& name: electrodes){
-      GeoLogVol* log_volume = new GeoLogVol(name, new GeoUnidentifiedShape("LArCustomShape",name), Electrode);
+      GeoLogVol* log_volume = new GeoLogVol(name, new GeoUnidentifiedShape(customStr,name), Electrode);
       GeoIntrusivePtr<GeoPhysVol> phys_volume = new GeoPhysVol(log_volume);
       fullPV->add(new GeoIdentifierTag(1));
       fullPV->add(new GeoTransform(GeoTrf::Transform3D::Identity()));

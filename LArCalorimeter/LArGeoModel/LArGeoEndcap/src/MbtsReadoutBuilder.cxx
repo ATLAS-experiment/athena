@@ -42,7 +42,7 @@ StatusCode LArGeo::buildMbtsReadout(StoreGateSvc* detStore
     return sc;
   }
   
-  const IRDBRecord *posRec = GeoDBUtils::getTransformRecord(larPositionRec, "LARCRYO_EC_POS");
+  const IRDBRecord *posRec = GeoDBUtils::getTransformRecord(std::move(larPositionRec), "LARCRYO_EC_POS");
   if(!posRec) {
     log << MSG::ERROR << "No lar position record in the database" << endmsg;
     return StatusCode::FAILURE;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArHVPathologyDbAlg.h"
@@ -172,6 +172,8 @@ std::optional<LArHVPathologiesDb> LArHVPathologyDbAlg::createCondObjects (const 
           unsigned int bec,pos_neg,FT,slot,channel,hvModule,hvLine;
           infile >> bec >> pos_neg >> FT >> slot >> channel >> hvModule >> hvLine >> pathologyType;
           ATH_MSG_INFO(" read " << bec << " " << pos_neg << " " << FT << " " << slot << " " << channel << " " << hvModule << " " << hvLine << " " << pathologyType);
+          //should check inputs are sane before using them
+          //coverity[INTEGER_OVERFLOW]
           HWIdentifier hwid = m_laronline_id->channel_Id(bec,pos_neg,FT,slot,channel);
           Identifier id = cabling->cnvToIdentifier( hwid);
           cellID = (unsigned int)(id.get_identifier32().get_compact());
