@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #include "LArClusterCellDumper/EventReaderAlg.h"
 
@@ -550,6 +550,8 @@ StatusCode EventReaderAlg::dumpClusterCells(const xAOD::CaloCluster *cl, int clu
   if(!LArRawCnt.isValid()) ATH_MSG_ERROR("LArRawChannelContainer is not a valid container!");
   
   // calorimeter level
+  //Local variable larClusteredDigits uses 25000 bytes of stack space
+  //coverity[STACK_USE]
   std::bitset<200000>       larClusteredDigits;
   std::vector<size_t>       caloHashMap;
   std::vector<HWIdentifier> channelHwidInClusterMap; //unique for any readout in the ATLAS
@@ -828,8 +830,8 @@ StatusCode EventReaderAlg::dumpClusterCells(const xAOD::CaloCluster *cl, int clu
               m_c_channelDSPThreshold->push_back(m_run2DSPThresh->tQThr(digId));
               m_c_channelOfflEneRescaler->push_back(offl_EneRescaler);
               m_c_channelOfflHVScale->push_back(offl_hv);
-              m_c_channelShape->push_back(shape);
-              m_c_channelShapeDer->push_back(shapeDer);
+              m_c_channelShape->push_back(std::move(shape));
+              m_c_channelShapeDer->push_back(std::move(shapeDer));
             }
             // Cell / readout data
             m_c_channelEnergy->push_back(channelEnergyInClusterMap[k]);
@@ -917,7 +919,7 @@ StatusCode EventReaderAlg::dumpClusterCells(const xAOD::CaloCluster *cl, int clu
             int slot = m_onlineLArID->slot(channelID);
             int chn = m_onlineLArID->channel(channelID);      
             std::vector<int> chInfo {barrelEc, posNeg, feedThr, slot, chn } ; //unite info
-            m_c_rawChannelChInfo->push_back(chInfo); //add to the list of cell info (both calo)
+            m_c_rawChannelChInfo->push_back(std::move(chInfo)); //add to the list of cell info (both calo)
 
             if ( (rawEnergy != rawEnergyConv) || (rawTime != rawTimeConv) || (rawQuality != rawQualityConv) ){
               ATH_MSG_ERROR (" ###### (Cluster) LAR RAW CHANNEL: Value conversion from int to float of amplitude, time or quality (uint16_t) had changed its actual value !!!");

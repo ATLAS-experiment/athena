@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArHV2Ntuple.h"
@@ -151,14 +151,8 @@
                                                hvdata_FCAL,
                                                *cell_b,
 					       calodetdescrmgr);
-        for(unsigned i=0; i<hvlines.size(); ++i ) {
-          if(m_hvonlId_map.find(hvlines[i]) == m_hvonlId_map.end()) { // new key
-            std::vector<HWIdentifier> vec;
-            vec.push_back(onlid);
-            m_hvonlId_map[hvlines[i]] = vec;
-          } else { // existing key
-            m_hvonlId_map[hvlines[i]].push_back(onlid);
-          }
+        for(const auto thisLine : hvlines ) {
+          m_hvonlId_map[thisLine].push_back(onlid);
         }
       }// end map filling
     }
