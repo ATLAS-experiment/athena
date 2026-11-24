@@ -52,7 +52,6 @@ class ITkPixelDecodingAlg : public AthReentrantAlgorithm
     SG::UpdateHandleKey<PixelRDO_Cache> m_pixelRDOCacheKey{this, "RDOCacheKey", "", "Optional external cache"};
 
     const PixelID* m_idHelper{};
-
 };
 
 namespace ITkPixelDecoding{

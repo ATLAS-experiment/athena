@@ -42,6 +42,7 @@ if __name__ == "__main__":
     # converted to a consistent Detray geometry
     OnlyTrackingPreInclude(flags)
 
+    flags.Exec.MaxEvents = 1
     flags.fillFromArgs()
     flags.PerfMon.doFullMonMT = True
 
@@ -85,5 +86,5 @@ if __name__ == "__main__":
     ))
 
     cfg.merge(PerfMonMTSvcCfg(flags))
-    status = cfg.run(1)
+    status = cfg.run()
     sys.exit(0 if status.isSuccess() else 1)

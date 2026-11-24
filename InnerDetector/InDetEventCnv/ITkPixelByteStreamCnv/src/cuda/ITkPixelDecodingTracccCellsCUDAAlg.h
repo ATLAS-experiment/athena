@@ -5,11 +5,8 @@
 #define ITKPIXEL_DECODINGTRACCCCELLS_CUDA_ALG_H
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h"
-#include "GaudiKernel/ServiceHandle.h"
+#include "ITkPixelByteStreamCnv/ITkPixelDecodingTool.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "StoreGate/ReadCondHandleKey.h"
-#include "ITkPixelCabling/ITkPixelCablingData.h"
 #include "AthDeviceInterfaces/IMemoryResourcesTool.h"
 #include "AthDeviceInterfaces/ICopiesTool.h"
 #include "AthCUDAInterfaces/IStreamTool.h"
@@ -17,6 +14,7 @@
 #include "ActsGPUEvent/TracccSiliconCellCollection.h"
 #include "itksw/pix/endec/intf/Options.hpp"
 #include <Gaudi/Property.h>
+#include <cstdint>
 
 /*! \brief Decodes Pixel byte streams into Traccc cells hosted in GPU memory
  * 
@@ -38,10 +36,9 @@ public:
     StatusCode execute(const EventContext& ctx) const override;
 
 private:
-    ServiceHandle<IROBDataProviderSvc> m_robDataProviderSvc{this,
-        "ROBDataProvider", "ROBDataProviderSvc", "ROB data provider service"};
-    SG::ReadCondHandleKey<ITkPixelCablingData> m_pixelCablingKey{this,
-        "PixelCablingKey", "ITkPixelCablingData", "ITk Pixel cabling"};
+    ToolHandle<ITkPixelDecodingTool> m_decodingTool{this,
+        "PixelDecodingTool", "ITkPixelDecodingTool", "The decoding tool"};
+
     SG::WriteHandleKey<traccc::edm::silicon_cell_collection::buffer> m_tracccCellsKey{this,
         "TracccCells", "", "Output traccc cell collection buffer"};
 
@@ -58,11 +55,11 @@ private:
     ToolHandle<AthCUDA::IStreamTool> m_streamTool{this,
         "StreamTool", "", "Athena CUDA stream tool"};
 
-    const itksw::pix::endec::intf::Options m_decodingOptions{.en_eos = false};
-
-    Gaudi::Property<size_t> m_ExpectedDataSize{this,
-        "ExpectedDataSize", 2000000,
-        "Expected ITk Pixel data size, used to reserve memory"};
+    static constexpr itksw::pix::endec::intf::Options s_decodingOptions{
+        .en_eos = false};
+    const size_t m_frameSize{static_cast<size_t>(64 -
+        itksw::pix::endec::intf::reserved_bits(s_decodingOptions))};
+    StatusCode moduleIdToDetrayIndex(uint32_t module_id, uint32_t & detray_index) const;
 };
 
 #endif // ITKPIXEL_DECODINGTRACCCCELLS_CUDA_ALG_H

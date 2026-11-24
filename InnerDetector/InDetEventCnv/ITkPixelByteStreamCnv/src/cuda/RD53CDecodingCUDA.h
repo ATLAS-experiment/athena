@@ -53,13 +53,13 @@ struct StreamInfo : public BASE {
   // size_t: index at which the stream starts 
   TRACCC_HOST_DEVICE auto& dataOffset() { return BASE::template get<0>(); }
   TRACCC_HOST_DEVICE const auto& dataOffset() const { return BASE::template get<0>(); }
-  // size_t: size of the stream data
+  // uint16_t: size of the stream data
   TRACCC_HOST_DEVICE auto& dataSize() { return BASE::template get<1>(); }
   TRACCC_HOST_DEVICE const auto& dataSize() const { return BASE::template get<1>(); }
-  // unsigned int: detray module index associated with the stream
+  // uint32_t: detray module index associated with the stream
   TRACCC_HOST_DEVICE auto& moduleIndex() { return BASE::template get<2>(); }
   TRACCC_HOST_DEVICE const auto& moduleIndex() const { return BASE::template get<2>(); }
-  // ITkPixelCabling::TransformType: coordinate transform associated with the stream
+  // uint8_t: coordinate transform associated with the stream
   TRACCC_HOST_DEVICE auto& transformType() { return BASE::template get<3>(); }
   TRACCC_HOST_DEVICE const auto& transformType() const { return BASE::template get<3>(); }
   // uint_8: chip ID associated with the stream
@@ -70,9 +70,9 @@ struct StreamInfo : public BASE {
 using StreamInfoContainer = vecmem::edm::container<
   StreamInfo
   , vecmem::edm::type::vector<size_t> // data offset
-  , vecmem::edm::type::vector<size_t> // data size
-  , vecmem::edm::type::vector<unsigned int> // module index
-  , vecmem::edm::type::vector<ITkPixelCabling::TransformType> // transform type
+  , vecmem::edm::type::vector<uint16_t> // data size
+  , vecmem::edm::type::vector<uint32_t> // module index
+  , vecmem::edm::type::vector<uint8_t> // transform type
   , vecmem::edm::type::vector<uint8_t> // chip ID
   >;
 
