@@ -349,9 +349,12 @@ void TrigTauMonitorSingleAlgorithm::fillIDTrack(const std::string& trigger, cons
         auto track_dPhi = Monitored::Collection("track_dPhi", tracks, [&tau](const xAOD::TauTrack *track){ return track->p4().DeltaPhi(tau->p4()); });
 
         auto track_z0sinthetaTJVA_abs_log = Monitored::Collection("track_z0sinthetaTJVA_abs_log", tracks, [](const xAOD::TauTrack *track){return track->z0sinthetaTJVA(); }); 
-        auto track_d0_abs_log = Monitored::Collection("track_d0_abs_log", tracks, [](const xAOD::TauTrack *track){ return std::log10(std::abs(track->track()->d0()) + 1e-6); }); 
+         
+        if( trigger.find("_em_") == std::string::npos){
 
-        auto track_nIBLHitsAndExp = Monitored::Collection("track_nIBLHitsAndExp", tracks, [](const xAOD::TauTrack *track){
+	  auto track_d0_abs_log = Monitored::Collection("track_d0_abs_log", tracks, [](const xAOD::TauTrack *track){ return std::log10(std::abs(track->track()->d0()) + 1e-6); }); 
+
+          auto track_nIBLHitsAndExp = Monitored::Collection("track_nIBLHitsAndExp", tracks, [](const xAOD::TauTrack *track){
                                                             uint8_t inner_pixel_hits, inner_pixel_exp;
                                                             const auto success1_innerPixel_hits = track->track()->summaryValue(inner_pixel_hits, xAOD::numberOfInnermostPixelLayerHits);
                                                             const auto success2_innerPixel_exp = track->track()->summaryValue(inner_pixel_exp, xAOD::expectInnermostPixelLayerHit);
@@ -359,7 +362,7 @@ void TrigTauMonitorSingleAlgorithm::fillIDTrack(const std::string& trigger, cons
                                                             if(success1_innerPixel_hits && success2_innerPixel_exp) { detail = inner_pixel_exp ? inner_pixel_hits : 1.; };
                                                             return detail;
                                                         });
-        auto track_nPixelHitsPlusDeadSensors = Monitored::Collection("track_nPixelHitsPlusDeadSensors", tracks, [](const xAOD::TauTrack *track){
+          auto track_nPixelHitsPlusDeadSensors = Monitored::Collection("track_nPixelHitsPlusDeadSensors", tracks, [](const xAOD::TauTrack *track){
                                                                     uint8_t pixel_hits, pixel_dead;
                                                                     const auto success1_pixel_hits = track->track()->summaryValue(pixel_hits, xAOD::numberOfPixelHits);
                                                                     const auto success2_pixel_dead = track->track()->summaryValue(pixel_dead, xAOD::numberOfPixelDeadSensors);
@@ -367,7 +370,7 @@ void TrigTauMonitorSingleAlgorithm::fillIDTrack(const std::string& trigger, cons
                                                                     if(success1_pixel_hits && success2_pixel_dead) { detail = pixel_hits + pixel_dead; };
                                                                     return detail;
                                                                     });
-        auto track_nSCTHitsPlusDeadSensors = Monitored::Collection("track_nSCTHitsPlusDeadSensors", tracks, [](const xAOD::TauTrack *track){
+          auto track_nSCTHitsPlusDeadSensors = Monitored::Collection("track_nSCTHitsPlusDeadSensors", tracks, [](const xAOD::TauTrack *track){
                                                                     uint8_t sct_hits, sct_dead;
                                                                     const auto success1_sct_hits = track->track()->summaryValue(sct_hits, xAOD::numberOfSCTHits);
                                                                     const auto success2_sct_dead = track->track()->summaryValue(sct_dead, xAOD::numberOfSCTDeadSensors);
@@ -375,8 +378,12 @@ void TrigTauMonitorSingleAlgorithm::fillIDTrack(const std::string& trigger, cons
                                                                     if(success1_sct_hits && success2_sct_dead) { detail = sct_hits + sct_dead; };
                                                                     return detail;
                                                                 });
-                                                    
-        fill(monGroup, n_track, track_pt_log, track_eta, track_phi, track_dEta, track_dPhi, track_z0sinthetaTJVA_abs_log, track_d0_abs_log, track_nIBLHitsAndExp, track_nPixelHitsPlusDeadSensors, track_nSCTHitsPlusDeadSensors);
+                
+          fill(monGroup, n_track, track_pt_log, track_eta, track_phi, track_dEta, track_dPhi, track_z0sinthetaTJVA_abs_log, track_d0_abs_log, track_nIBLHitsAndExp, track_nPixelHitsPlusDeadSensors, track_nSCTHitsPlusDeadSensors);
+
+        } else {
+          fill(monGroup, n_track, track_pt_log, track_eta, track_phi, track_dEta, track_dPhi, track_z0sinthetaTJVA_abs_log); 
+        }
     }
 
     ATH_MSG_DEBUG("After fill ID input Track: " << trigger);
