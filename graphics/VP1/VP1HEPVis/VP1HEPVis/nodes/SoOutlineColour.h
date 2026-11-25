@@ -21,8 +21,11 @@ public:
   SoSFBool enabled;
   static bool get(SoState*, SbColor&);
 protected:
-  ~SoOutlineColour() override = default;
-  void GLRender(SoGLRenderAction*) override;
+  // Don't use override here; the SO_NODE_HEADER macro injects other overriding
+  // virtual functions without the override keyword, so if we use it here,
+  // we can get warnings.
+  ~SoOutlineColour() /*override*/ = default;
+  void GLRender(SoGLRenderAction*) /*override*/;
 };
 
 #endif
