@@ -27,6 +27,7 @@
 #include "Acts/Utilities/MathHelpers.hpp"
 #include "Acts/Utilities/Enumerate.hpp"
 
+#include <cmath>
 
 namespace {
     constexpr double c_inv = 1./ Gaudi::Units::c_light;
@@ -354,7 +355,7 @@ namespace MuonR4{
         if(spacePoint.type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
             
             const MuonCalib::MdtFullCalibData* calibConsts = m_mdtCalibrationTool->getCalibConstants(*ctx.get<const EventContext*>(), spacePoint.spacePoint()->identify());
-            const std::optional<double> driftTime = calibConsts->rtRelation->tr()->driftTime(spacePoint.driftRadius());
+            const std::optional<double> driftTime = calibConsts->rtRelation->tr()->driftTime(std::abs(spacePoint.driftRadius()));
             return ActsTrk::velocityToActs(calibConsts->rtRelation->rt()->driftVelocity(driftTime.value_or(0.)));
         }
         return 0.;
@@ -363,7 +364,7 @@ namespace MuonR4{
                                                    const CalibratedSpacePoint& spacePoint) const  {
         if(spacePoint.type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
             const MuonCalib::MdtFullCalibData* calibConsts = m_mdtCalibrationTool->getCalibConstants(*ctx.get<const EventContext*>(), spacePoint.spacePoint()->identify());
-            const std::optional<double> driftTime = calibConsts->rtRelation->tr()->driftTime(spacePoint.driftRadius());
+            const std::optional<double> driftTime = calibConsts->rtRelation->tr()->driftTime(std::abs(spacePoint.driftRadius()));
             return ActsTrk::accelerationToActs(calibConsts->rtRelation->rt()->driftAcceleration(driftTime.value_or(0.)));
         }
         return 0.;
