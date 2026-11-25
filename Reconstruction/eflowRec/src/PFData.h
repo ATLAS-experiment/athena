@@ -5,22 +5,21 @@
 #ifndef EFLOWREC_PFDATA_H
 #define EFLOWREC_PFDATA_H
 
-#include "EtaPhiLUT.h"
 #include <vector>
 
+#include "eflowRecCluster.h"
 class eflowCaloObjectContainer;
 class eflowRecTrack;
 class eflowRecCluster;
 
-struct PFData
-  {
-    eflowCaloObjectContainer *caloObjects{};
-    std::vector<eflowRecTrack *> tracks;
-    std::vector<eflowRecCluster *> clusters;
-    eflowRec::EtaPhiLUT clusterLUT;
+struct PFData {
+  eflowCaloObjectContainer* caloObjects{};
+  std::vector<eflowRecTrack*> tracks;
+  std::vector<eflowRecCluster*> clusters;
+  // eflowRec::EtaPhiLUT clusterLUT;
 
-    unsigned int nMatches = 0;
-    unsigned int nOrigCaloObj = 0;
-  };
+  unsigned int nMatches = 0;
+  unsigned int nOrigCaloObj = 0;
+};
 
 #endif
