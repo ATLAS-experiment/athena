@@ -1,16 +1,8 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SiPropertiesTool.h"
-
-SiPropertiesTool::SiPropertiesTool(const std::string& type, const std::string& name, const IInterface* parent) : 
-  base_class(type, name, parent),
-  m_propertiesVector{"SCTSiliconPropertiesVector"}
-{
-  declareProperty("DetectorName", m_detectorName="SCT", "Dectector name: Pixel, SCT or PLR");
-  declareProperty("ReadKey", m_propertiesVector, "Key of SiliconPropertiesVector");
-}
 
 StatusCode 
 SiPropertiesTool::initialize()
@@ -18,7 +10,7 @@ SiPropertiesTool::initialize()
   ATH_MSG_INFO("SiPropertiesTool Initialized");
   
   if ((m_detectorName != "Pixel") and (m_detectorName != "SCT") and (m_detectorName != "PLR")) {
-    ATH_MSG_FATAL("Invalid detector name: " << m_detectorName << ". Must be Pixel, SCT or PLR.");
+    ATH_MSG_FATAL("Invalid detector name: " << m_detectorName.value() << ". Must be Pixel, SCT or PLR.");
     return StatusCode::FAILURE;
   }
   ATH_CHECK(m_propertiesVector.initialize());

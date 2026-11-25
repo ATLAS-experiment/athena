@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file TRT_DCS_ConditionsSvc.cxx
@@ -21,64 +21,6 @@
 #include <sstream>
 
 //////////
-/// Constructor
-/////
-TRT_DCS_ConditionsSvc::TRT_DCS_ConditionsSvc( const std::string& name,
-					      ISvcLocator* pSvcLocator ) :
-  base_class( name, pSvcLocator ),
-  m_evtStore("StoreGateSvc",name),
-  m_detStore("DetectorStore",name),
-  m_mapSvc("TRT_HWMappingSvc",name),
-  m_condSvc("CondSvc",name),
-  m_barrelReadKey("/TRT/DCS/HV/BARREL"),
-  m_EAReadKey("/TRT/DCS/HV/ENDCAPA"),
-  m_ECReadKey("/TRT/DCS/HV/ENDCAPC"),
-  m_TRT_ID_Helper(nullptr),
-  m_numFlagRED(0),
-  m_numFlagNOINFO(0),
-  m_currentTimestamp(0),
-  m_doMonitoring(false),
-  m_h_Barrel_nRED(nullptr),
-  m_h_EndcapA_nRED(nullptr),
-  m_h_EndcapC_nRED(nullptr),
-  m_h_Barrel_nNOINFO(nullptr),
-  m_h_EndcapA_nNOINFO(nullptr),
-  m_h_EndcapC_nNOINFO(nullptr),
-  m_h_Barrel_HVvalAvg(nullptr),
-  m_h_EndcapA_HVvalAvg(nullptr),
-  m_h_EndcapC_HVvalAvg(nullptr),
-  m_nBAEvts(0),
-  m_nEAEvts(0),
-  m_nECEvts(0)
-{
-  // Get properties from job options
-  declareProperty( "Barrel_HV_COOLFolderName", m_Barrel_HV_COOLFolderName = "/TRT/DCS/HV/BARREL" );
-  declareProperty( "EndcapA_HV_COOLFolderName", m_EndcapA_HV_COOLFolderName = "/TRT/DCS/HV/ENDCAPA" );
-  declareProperty( "EndcapC_HV_COOLFolderName", m_EndcapC_HV_COOLFolderName = "/TRT/DCS/HV/ENDCAPC" );
-  declareProperty( "VeryVerbose", m_VeryVerbose = false );
-  declareProperty( "HV_WarningValueLow",  m_HVWarnValHi = 2000. );
-  declareProperty( "HV_WarningValueHigh", m_HVWarnValLo = 1000. );
-  declareProperty( "HWMapSvc", m_mapSvc );
-  declareProperty( "DoIOVChecking", m_doIOVchecking = false );
-  declareProperty( "IOVmaxLength", m_IOVmaxLength = 86400 /* 24 hours */ );
-  declareProperty( "FallBackOnCOOLChanNames", m_FallBackOnCOOLChanNames = false );
-  declareProperty( "EventStore", m_evtStore );
-  declareProperty( "DetectorStore", m_detStore );
-  declareProperty( "DoMonitoring", m_doMonitoring );
-  if ( m_doIOVchecking ) {
-    ATH_MSG_WARNING( "DoIOVChecking is deprecated and does nothing. Please remove from your job options configuration." );
-    m_doIOVchecking = false;
-  }
-  // initialize caches
-  m_evtBA.push_back(-1);
-  m_evtEA.push_back(-1);
-  m_evtEC.push_back(-1);
-  m_Barrel_HV_COOLCont.push_back(nullptr);
-  m_EndcapA_HV_COOLCont.push_back(nullptr);
-  m_EndcapC_HV_COOLCont.push_back(nullptr);
-}
-
-//////////
 /// Destructor
 /////
 TRT_DCS_ConditionsSvc::~TRT_DCS_ConditionsSvc() = default;
@@ -87,6 +29,9 @@ TRT_DCS_ConditionsSvc::~TRT_DCS_ConditionsSvc() = default;
 /// Initialize
 /////
 StatusCode TRT_DCS_ConditionsSvc::initialize() {
+  if ( m_doIOVchecking ) {
+    ATH_MSG_WARNING( "DoIOVChecking is deprecated and does nothing. Please remove from your job options configuration." );
+  }
   if (msgLvl(MSG::DEBUG)) msg() << "Initialize." << endmsg;
   StatusCode sc(StatusCode::SUCCESS);
 

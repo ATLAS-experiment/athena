@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SCT_CONDITIONSALGORITHMS_SCT_ALIGNCONDALG_H
@@ -37,7 +37,7 @@ namespace InDetDD {
 class SCT_AlignCondAlg : public AthCondAlgorithm
 {
  public:
-  SCT_AlignCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
+  using AthCondAlgorithm::AthCondAlgorithm;
   virtual ~SCT_AlignCondAlg() override = default;
 
   virtual StatusCode initialize() override;
@@ -50,10 +50,10 @@ class SCT_AlignCondAlg : public AthCondAlgorithm
   SG::ReadCondHandleKey<CondAttrListCollection> m_readKeyDynamicL1{this, "ReadKeyDynamicL1", "/Indet/AlignL1/ID", "Key for the dynamic L1 alignment folder"};
   SG::ReadCondHandleKey<CondAttrListCollection> m_readKeyDynamicL2{this, "ReadKeyDynamicL2", "/Indet/AlignL2/SCT", "Key for the dynamic L2 alignment folder"};
   SG::ReadCondHandleKey<AlignableTransformContainer> m_readKeyDynamicL3{this, "ReadKeyDynamicL3", "/Indet/AlignL3", "Key for the dynamic L3 alignment folder"};
-  SG::WriteCondHandleKey<GeoAlignmentStore> m_writeKey;
+  SG::WriteCondHandleKey<GeoAlignmentStore> m_writeKey{this, "WriteKey", "SCTAlignmentStore"};
 
   const InDetDD::SCT_DetectorManager* m_detManager{nullptr};
-  std::string m_DetManagerName;
+  StringProperty m_DetManagerName{this, "DetManagerName", "SCT"};
 };
 
 #endif // SCT_CONDITIONSALGORITHMS_SCT_ALIGNCONDALG_H

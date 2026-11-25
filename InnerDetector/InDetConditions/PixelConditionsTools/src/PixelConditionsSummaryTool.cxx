@@ -1,21 +1,10 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "PixelConditionsSummaryTool.h"
 #include "PixelReadoutGeometry/PixelDetectorElementStatus.h"
 #include "PixelReadoutGeometry/PixelFEUtils.h"
 #include "PixelConditionsData/PixelByteStreamErrors.h"
-
-PixelConditionsSummaryTool::PixelConditionsSummaryTool(const std::string& type, const std::string& name, const IInterface* parent)
-  :AthAlgTool(type, name, parent),
-  m_pixelID(nullptr)
-{
-  m_isActiveStatus.emplace_back("OK");
-  m_isActiveStates.emplace_back("READY");
-
-  declareProperty("IsActiveStatus", m_isActiveStatus);
-  declareProperty("IsActiveStates", m_isActiveStates);
-}
 
 PixelConditionsSummaryTool::~PixelConditionsSummaryTool()= default;
 

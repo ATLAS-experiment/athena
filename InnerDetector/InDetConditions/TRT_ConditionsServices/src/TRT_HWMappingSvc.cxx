@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -22,24 +22,6 @@
 
 #include <sstream>
 #include <fstream>
-
-//////////
-/// Constructor
-/////
-TRT_HWMappingSvc::TRT_HWMappingSvc( const std::string& name,
-				    ISvcLocator* pSvcLocator ) :
-  base_class( name, pSvcLocator ),
-  m_detStore("DetectorStore",name),
-  m_TRT_ID_Helper(nullptr),
-  m_TRTStrawNeighbourSvc("TRT_StrawNeighbourSvc",name)
-{
-  // Get properties from job options
-  declareProperty( "Barrel_HV_COOLFolderName", m_Barrel_HV_COOLFolderName = "/TRT/DCS/HV/BARREL" );
-  declareProperty( "EndcapA_HV_COOLFolderName", m_EndcapA_HV_COOLFolderName = "/TRT/DCS/HV/ENDCAPA" );
-  declareProperty( "EndcapC_HV_COOLFolderName", m_EndcapC_HV_COOLFolderName = "/TRT/DCS/HV/ENDCAPC" );
-  declareProperty( "TRTStrawNeighbourSvc", m_TRTStrawNeighbourSvc );
-  declareProperty( "DetectorStore", m_detStore );
-}
 
 //////////
 /// Destructor

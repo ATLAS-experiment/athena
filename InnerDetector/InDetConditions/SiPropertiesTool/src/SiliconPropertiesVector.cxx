@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
 //   Source file for class SiliconPropertiesVector for SiPropertiesTool
 ///////////////////////////////////////////////////////////////////
 
-#include "SiPropertiesTool/SiliconPropertiesVector.h"
+#include "SiliconPropertiesVector.h"
 
 namespace InDet {
   

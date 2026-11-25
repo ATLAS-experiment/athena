@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_STRAWNEIGHBOURSVC_H
@@ -24,7 +24,7 @@ class TRT_StrawNeighbourSvc: public extends<AthService, ITRT_StrawNeighbourSvc>
 {
  public:
   /// constructor
-  TRT_StrawNeighbourSvc( const std::string& name, ISvcLocator* pSvcLocator );
+  using base_class::base_class;
   
   /// destructor
   virtual ~TRT_StrawNeighbourSvc();
@@ -66,8 +66,8 @@ class TRT_StrawNeighbourSvc: public extends<AthService, ITRT_StrawNeighbourSvc>
 
   
  private:
-  ServiceHandle<StoreGateSvc> m_detStore;
-  const TRT_ID* m_trtid;
+  ServiceHandle<StoreGateSvc> m_detStore{this, "DetectorStore", "DetectorStore"};
+  const TRT_ID* m_trtid{};
 
   int m_numberOfStraws[75]{};
   int m_TripletOrientation[2][32]{};

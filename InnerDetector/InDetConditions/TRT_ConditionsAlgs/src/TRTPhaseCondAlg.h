@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRTPHASECONDALG_H
@@ -18,7 +18,7 @@ class TRTPhaseCondAlg : public AthCondAlgorithm
 {
  public:
   typedef TRTCond::StrawT0MultChanContainer StrawT0Container ;
-  TRTPhaseCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
+  using AthCondAlgorithm::AthCondAlgorithm;
   virtual ~TRTPhaseCondAlg() override;
 
   virtual StatusCode initialize() override;
@@ -29,8 +29,8 @@ class TRTPhaseCondAlg : public AthCondAlgorithm
  private:
   SG::ReadCondHandleKey<StrawT0Container> m_T0ReadKey{this,"T0ReadKey","/TRT/Calib/T0","T0 in-key"};
   SG::WriteCondHandleKey<TRTCond::AverageT0> m_T0WriteKey{this,"T0WriteKey","AverageT0","Average T0 out-key"};
-  ToolHandle<ITRT_CalDbTool> m_caldbtool;
-  const TRT_ID *m_trtId;
+  ToolHandle<ITRT_CalDbTool> m_caldbtool{this, "TRTCalDbTool", "TRT_CalDbTool"};
+  const TRT_ID *m_trtId{};
 
 };
 #endif

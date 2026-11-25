@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SCT_CONDITIONSALGORITHMS_SCT_DETECTORELEMENTCONDALG_H
@@ -27,7 +27,7 @@ namespace InDetDD {
 class SCT_DetectorElementCondAlg : public AthCondAlgorithm
 {
  public:
-  SCT_DetectorElementCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
+  using AthCondAlgorithm::AthCondAlgorithm;
   virtual ~SCT_DetectorElementCondAlg() override = default;
 
   virtual StatusCode initialize() override final;
@@ -35,7 +35,7 @@ class SCT_DetectorElementCondAlg : public AthCondAlgorithm
   virtual StatusCode finalize() override final;
 
  private:
-  SG::ReadCondHandleKey<GeoAlignmentStore> m_readKey;
+  SG::ReadCondHandleKey<GeoAlignmentStore> m_readKey{this, "ReadKey", "SCTAlignmentStore"};
   SG::WriteCondHandleKey<InDetDD::SiDetectorElementCollection> m_writeKey{this, "WriteKey", "SCT_DetectorElementCollection", "Key of output SiDetectorElementCollection for SCT"};
 
   // The DetElement Collection must have a life time <= the Tracking Geometry due to DetElt-> Surface -> Layer connection,
@@ -47,7 +47,7 @@ class SCT_DetectorElementCondAlg : public AthCondAlgorithm
   SG::ReadCondHandleKey<GeoAlignmentStore> m_pixelReadKey
     {this, "PixelAlignmentStore", "", "PixelAlignmentStore ReadKey for IOV Range intersection"};
 
-  std::string m_detManagerName;
+  StringProperty m_detManagerName{this, "DetManagerName", "SCT"};
   const InDetDD::SCT_DetectorManager* m_detManager{nullptr};
 };
 

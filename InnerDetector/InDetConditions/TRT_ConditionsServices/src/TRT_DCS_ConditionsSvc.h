@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_DCS_CONDITIONSSVC_H
@@ -36,7 +36,7 @@ class TRT_DCS_ConditionsSvc : public extends<AthService,
 
  public:
 
-  TRT_DCS_ConditionsSvc( const std::string& name, ISvcLocator* pSvcLocator );
+  using base_class::base_class;
   virtual ~TRT_DCS_ConditionsSvc();
 
   virtual StatusCode initialize();
@@ -83,61 +83,61 @@ class TRT_DCS_ConditionsSvc : public extends<AthService,
  private:
 
   // jobOptions properties
-  bool m_VeryVerbose{};
-  std::string m_Barrel_HV_COOLFolderName;
-  std::string m_EndcapA_HV_COOLFolderName;
-  std::string m_EndcapC_HV_COOLFolderName;
-  float m_HVWarnValLo{};
-  float m_HVWarnValHi{};
-  ServiceHandle<StoreGateSvc> m_evtStore;
-  ServiceHandle<StoreGateSvc> m_detStore;
-  ServiceHandle<ITRT_HWMappingSvc> m_mapSvc;
+  BooleanProperty m_VeryVerbose{this, "VeryVerbose", false};
+  StringProperty m_Barrel_HV_COOLFolderName{this, "Barrel_HV_COOLFolderName", "/TRT/DCS/HV/BARREL"};
+  StringProperty m_EndcapA_HV_COOLFolderName{this, "EndcapA_HV_COOLFolderName", "/TRT/DCS/HV/ENDCAPA"};
+  StringProperty m_EndcapC_HV_COOLFolderName{this, "EndcapC_HV_COOLFolderName", "/TRT/DCS/HV/ENDCAPC"};
+  FloatProperty m_HVWarnValLo{this, "HV_WarningValueHigh", 1000.};
+  FloatProperty m_HVWarnValHi{this, "HV_WarningValueLow", 2000.};
+  ServiceHandle<StoreGateSvc> m_evtStore{this, "EventStore", "StoreGateSvc"};
+  ServiceHandle<StoreGateSvc> m_detStore{this, "DetectorStore", "DetectorStore"};
+  ServiceHandle<ITRT_HWMappingSvc> m_mapSvc{this, "HWMapSvc", "TRT_HWMappingSvc"};
   SG::ReadHandleKey<xAOD::EventInfo> m_EventInfoKey{this,"EventInfoKey","EventInfo","RHK for EventInfo"};
   // Conditions access
-  ServiceHandle<ICondSvc> m_condSvc;
-  SG::ReadCondHandleKey<CondAttrListCollection> m_barrelReadKey{this,"BarrelKeyName","in","HV Barrel in-key"};
-  SG::ReadCondHandleKey<CondAttrListCollection> m_EAReadKey{this,"EAKeyName","in","HV EA in-key"};
-  SG::ReadCondHandleKey<CondAttrListCollection> m_ECReadKey{this,"ECKeyName","in","HV EC in-key"};
-  mutable std::vector<const CondAttrListCollection*> m_Barrel_HV_COOLCont ATLAS_THREAD_SAFE; // Guarded by m_cacheMutex
-  mutable std::vector<const CondAttrListCollection*> m_EndcapA_HV_COOLCont ATLAS_THREAD_SAFE; // Guarded by m_cacheMutex
-  mutable std::vector<const CondAttrListCollection*> m_EndcapC_HV_COOLCont ATLAS_THREAD_SAFE; // Guarded by m_cacheMutex
+  ServiceHandle<ICondSvc> m_condSvc{"CondSvc", name()};
+  SG::ReadCondHandleKey<CondAttrListCollection> m_barrelReadKey{this,"BarrelKeyName","/TRT/DCS/HV/BARREL","HV Barrel in-key"};
+  SG::ReadCondHandleKey<CondAttrListCollection> m_EAReadKey{this,"EAKeyName","/TRT/DCS/HV/ENDCAPA","HV EA in-key"};
+  SG::ReadCondHandleKey<CondAttrListCollection> m_ECReadKey{this,"ECKeyName","/TRT/DCS/HV/ENDCAPC","HV EC in-key"};
+  mutable std::vector<const CondAttrListCollection*> m_Barrel_HV_COOLCont ATLAS_THREAD_SAFE {nullptr}; // Guarded by m_cacheMutex
+  mutable std::vector<const CondAttrListCollection*> m_EndcapA_HV_COOLCont ATLAS_THREAD_SAFE {nullptr}; // Guarded by m_cacheMutex
+  mutable std::vector<const CondAttrListCollection*> m_EndcapC_HV_COOLCont ATLAS_THREAD_SAFE {nullptr}; // Guarded by m_cacheMutex
   mutable std::mutex m_cacheMutex;
-  mutable std::vector<EventContext::ContextEvt_t> m_evtBA ATLAS_THREAD_SAFE; // Guarded by m_cacheMutex
-  mutable std::vector<EventContext::ContextEvt_t> m_evtEA ATLAS_THREAD_SAFE; // Guarded by m_cacheMutex
-  mutable std::vector<EventContext::ContextEvt_t> m_evtEC ATLAS_THREAD_SAFE; // Guarded by m_cacheMutex
+  mutable std::vector<EventContext::ContextEvt_t> m_evtBA ATLAS_THREAD_SAFE {EventContext::INVALID_CONTEXT_EVT}; // Guarded by m_cacheMutex
+  mutable std::vector<EventContext::ContextEvt_t> m_evtEA ATLAS_THREAD_SAFE {EventContext::INVALID_CONTEXT_EVT}; // Guarded by m_cacheMutex
+  mutable std::vector<EventContext::ContextEvt_t> m_evtEC ATLAS_THREAD_SAFE {EventContext::INVALID_CONTEXT_EVT}; // Guarded by m_cacheMutex
 
-  int m_IOVmaxLength{};
-  bool m_doIOVchecking{};
-  bool m_FallBackOnCOOLChanNames{};
+  IntegerProperty m_IOVmaxLength{this, "IOVmaxLength", 86400 /* 24 hours */};
+  BooleanProperty m_doIOVchecking{this, "DoIOVChecking", false};
+  BooleanProperty m_FallBackOnCOOLChanNames{this, "FallBackOnCOOLChanNames", false};
 
 
   // Straw Helpers
-  const TRT_ID* m_TRT_ID_Helper;
+  const TRT_ID* m_TRT_ID_Helper{};
 
   /// Counters
   /** Counts the number of times getFlag returns each flag */
-  int m_numFlagRED;
-  int m_numFlagNOINFO;
+  int m_numFlagRED{};
+  int m_numFlagNOINFO{};
 
   
 
   // Other private variables
-  int m_currentTimestamp;
+  int m_currentTimestamp{};
 
   // Monitoring histograms
-  bool m_doMonitoring;
-  TH1D* m_h_Barrel_nRED;
-  TH1D* m_h_EndcapA_nRED;
-  TH1D* m_h_EndcapC_nRED;
-  TH1D* m_h_Barrel_nNOINFO;
-  TH1D* m_h_EndcapA_nNOINFO;
-  TH1D* m_h_EndcapC_nNOINFO;
-  TH1D* m_h_Barrel_HVvalAvg; // don't forget to divide by nEvts at end!
-  TH1D* m_h_EndcapA_HVvalAvg; // don't forget to divide by nEvts at end!
-  TH1D* m_h_EndcapC_HVvalAvg; // don't forget to divide by nEvts at end!
-  int m_nBAEvts;
-  int m_nEAEvts;
-  int m_nECEvts;
+  BooleanProperty m_doMonitoring{this, "DoMonitoring", false};
+  TH1D* m_h_Barrel_nRED{};
+  TH1D* m_h_EndcapA_nRED{};
+  TH1D* m_h_EndcapC_nRED{};
+  TH1D* m_h_Barrel_nNOINFO{};
+  TH1D* m_h_EndcapA_nNOINFO{};
+  TH1D* m_h_EndcapC_nNOINFO{};
+  TH1D* m_h_Barrel_HVvalAvg{}; // don't forget to divide by nEvts at end!
+  TH1D* m_h_EndcapA_HVvalAvg{}; // don't forget to divide by nEvts at end!
+  TH1D* m_h_EndcapC_HVvalAvg{}; // don't forget to divide by nEvts at end!
+  int m_nBAEvts{};
+  int m_nEAEvts{};
+  int m_nECEvts{};
 };
 
 #endif // TRT_DCS_CONDITIONSSVC_H

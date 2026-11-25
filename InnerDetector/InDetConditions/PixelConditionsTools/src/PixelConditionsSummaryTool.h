@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file PixelConditionsTools/PixelConditionsSummaryTool.h
@@ -50,7 +50,7 @@ class PixelConditionsSummaryTool: public AthAlgTool, virtual public IDetectorEle
   public:
     static InterfaceID& interfaceID();
 
-    PixelConditionsSummaryTool(const std::string& type, const std::string& name, const IInterface* parent);
+    using AthAlgTool::AthAlgTool;
     virtual ~PixelConditionsSummaryTool();
     virtual StatusCode initialize() override;
 
@@ -90,8 +90,8 @@ class PixelConditionsSummaryTool: public AthAlgTool, virtual public IDetectorEle
     const InDetDD::SiDetectorElement *getDetectorEelement(const IdentifierHash& moduleHash, const EventContext& ctx) const;
     const PixelID* m_pixelID{};
 
-    std::vector<std::string> m_isActiveStatus;
-    std::vector<std::string> m_isActiveStates;
+    Gaudi::Property<std::vector<std::string>> m_isActiveStatus{this, "IsActiveStatus", {"OK"}};
+    Gaudi::Property<std::vector<std::string>> m_isActiveStates{this, "IsActiveStates", {"READY"}};
     std::vector<int> m_activeState;
     std::vector<int> m_activeStatus;
     unsigned int m_activeStateMask{};  ///< mask in which each state is represented by a bit and for states which are cnsidered active the corresponding bit is set;

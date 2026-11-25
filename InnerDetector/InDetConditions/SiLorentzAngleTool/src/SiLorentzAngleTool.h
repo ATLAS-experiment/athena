@@ -15,11 +15,12 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "MagFieldConditions/AtlasFieldCacheCondObj.h"
-#include "SiLorentzAngleTool/SiLorentzAngleCondData.h"
+#include "SiLorentzAngleCondData.h"
 #include "StoreGate/ReadCondHandleKey.h"
 
 //Gaudi Includes
 #include "GaudiKernel/ServiceHandle.h"
+#include "GaudiKernel/SystemOfUnits.h"
 
 class IdentifierHash;
 namespace InDetDD {
@@ -36,7 +37,7 @@ class SiLorentzAngleTool: public extends<AthAlgTool, ISiLorentzAngleTool>
 {
 public:
 
-  SiLorentzAngleTool(const std::string& type, const std::string& name, const IInterface* parent);
+  using base_class::base_class;
   virtual ~SiLorentzAngleTool() = default;
 
   virtual StatusCode initialize() override;          //!< Service init
@@ -93,11 +94,12 @@ private:
   const InDetDD::SiDetectorElement* getDetectorElement(const IdentifierHash& waferHash, const EventContext& ctx) const;
 
   // Properties
-  std::string              m_detectorName;
-  double                   m_nominalField;
-  bool                     m_useMagFieldCache;
-  bool                     m_ignoreLocalPos;   // Makes methods using localPosition behave as method without passing localPosition.
-  SG::ReadCondHandleKey<SiLorentzAngleCondData> m_condData;
+  // YOU NEED TO USE THE SAME PROPERTIES AS USED IN Pixel/SCTSiLorentzAngleCondAlg!!!
+  StringProperty m_detectorName{this, "DetectorName", "Pixel", "Detector name (Pixel, SCT or PLR)"};
+  DoubleProperty m_nominalField{this, "NominalField", 2.0834*Gaudi::Units::tesla};
+  BooleanProperty m_useMagFieldCache{this, "UseMagFieldCache", true};
+  BooleanProperty m_ignoreLocalPos{this, "IgnoreLocalPos", false, "Treat methods that take a local position as if one called the methods without a local position"};
+  SG::ReadCondHandleKey<SiLorentzAngleCondData> m_condData{this, "SiLorentzAngleCondData", "SCTSiLorentzAngleCondData", "Key of input SiLorentzAngleCondData"};
   SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_detEleCollKey{this, "DetEleCollKey", "SCT_DetectorElementCollection", "Key of SiDetectorElementCollection for SCT or Pixel"};
   SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCondObjInputKey{this, "AtlasFieldCacheCondObj", "fieldCondObj", "Name of the Magnetic Field conditions object key"};
 

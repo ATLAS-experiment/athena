@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_AlignCondAlg.h"
@@ -8,15 +8,6 @@
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 
 #include <memory>
-
-SCT_AlignCondAlg::SCT_AlignCondAlg(const std::string& name, ISvcLocator* pSvcLocator)
-  : ::AthCondAlgorithm(name, pSvcLocator)
-  , m_writeKey{"SCTAlignmentStore", "SCTAlignmentStore"}
-  , m_DetManagerName("SCT")
-{
-  declareProperty("WriteKey", m_writeKey);
-  declareProperty("DetManagerName", m_DetManagerName);
-}
 
 StatusCode SCT_AlignCondAlg::initialize()
 {

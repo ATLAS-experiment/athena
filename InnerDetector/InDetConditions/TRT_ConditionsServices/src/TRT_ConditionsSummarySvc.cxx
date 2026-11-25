@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -17,15 +17,6 @@
 //Gaudi includes
 #include "StoreGate/StoreGateSvc.h"
 
-// Constructor
-TRT_ConditionsSummarySvc::TRT_ConditionsSummarySvc( const std::string& name, ISvcLocator* pSvcLocator ) : 
-  base_class(name, pSvcLocator),
-  m_svcCollection(name)
-{
-  // Get properties from job options
-  declareProperty( "ServiceList", m_svcCollection );
-}
-
 // Destructor
 TRT_ConditionsSummarySvc::~TRT_ConditionsSummarySvc()= default;
 
@@ -35,6 +26,7 @@ TRT_ConditionsSummarySvc::initialize(){
   ATH_MSG_DEBUG("TRT_ConditionsSummarySvc::initialize.");
 
   // Retrieve the services to be called.
+  ATH_CHECK(m_svcCollection.setTypesAndNames(m_svcNames.value()));
   if ( m_svcCollection.empty() ) {
     ATH_MSG_WARNING("No services to be called!");
   } else {

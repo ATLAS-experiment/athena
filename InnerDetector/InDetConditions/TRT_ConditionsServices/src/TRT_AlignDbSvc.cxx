@@ -12,7 +12,6 @@
 
 
 #include "RegistrationServices/IIOVRegistrationSvc.h"
-#include "AthenaKernel/IAthenaOutputStreamTool.h"
 #include "InDetIdentifier/TRT_ID.h"
 
 #include "TRT_ReadoutGeometry/TRT_DetElementCollection.h"
@@ -32,30 +31,6 @@
 #include <sstream>
 
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY; // This class uses const_cast and regFcn (callback). Legacy code
-
-TRT_AlignDbSvc::TRT_AlignDbSvc( const std::string& name, ISvcLocator* pSvcLocator )
-  : base_class(name,pSvcLocator),
-    m_detStore("DetectorStore",name),
-    m_trtStrawAlignDbSvc("TRT_StrawAlignDbSvc",name),
-    m_trtid(nullptr),
-    m_trtman(nullptr),
-    m_alignroot("/TRT/Align"),
-    m_alignString("AL"),
-    m_par_alitextfile(""),
-    m_streamer("AthenaOutputStreamTool/CondStream1"),
-    m_alignDBprefix("/TRT/Align/"),
-    m_dynamicDB(false),
-    m_forceUserDBConfig(false)
-{
-  declareProperty("StreamTool",m_streamer);
-  declareProperty("alignroot",m_alignroot);
-  declareProperty("alignTextFile",m_par_alitextfile);
-  declareProperty("DetectorStore",m_detStore);
-  declareProperty("TrtStrawAlignDbSvc",   m_trtStrawAlignDbSvc,"Service for interaction with the TRT straw alignment DB");
-  declareProperty("alignString",m_alignString);
-  declareProperty("alignDBprefix",m_alignDBprefix);
-  declareProperty("forceUserDBConfig",m_forceUserDBConfig, "Set to true to override any DB auto-configuration");
-}
 
 //-------------------------------------------------------------------------
 
@@ -141,7 +116,7 @@ StatusCode TRT_AlignDbSvc::initialize()
     
     /** Reminder that the constants will be read from text file. */
     if( alignTextFileExists ) 
-      ATH_MSG_INFO( "AlignableTransformContainer with name " << m_alignroot
+      ATH_MSG_INFO( "AlignableTransformContainer with name " << m_alignroot.value()
                     << " exists. Will read text file from callback function."  );
   
   } else if ( alignTextFileExists ) {
@@ -197,7 +172,7 @@ StatusCode TRT_AlignDbSvc::IOVCallBack()
   if(!m_par_alitextfile.empty()){
     ATH_CHECK( this->readAlignTextFile(m_par_alitextfile) );
   }else{
-    ATH_MSG_INFO( "Text file " << m_par_alitextfile << " is empty"  );
+    ATH_MSG_INFO( "Text file " << m_par_alitextfile.value() << " is empty"  );
   }
 
   /** print out the objects we have 
@@ -519,10 +494,10 @@ StatusCode TRT_AlignDbSvc::registerAlignObjects(const std::string & tag, int run
   
   if (StatusCode::SUCCESS==regsvc->registerIOV("AlignableTransformContainer",m_alignroot,tag,run1,run2,event1,event2)){
     ATH_MSG_INFO( " Register AlignableTransformContainer object " 
-                  << m_alignroot  );
+                  << m_alignroot.value()  );
   } else {
     ATH_MSG_ERROR( " Failed to register AlignableTranformContainer " 
-                   << m_alignroot  );
+                   << m_alignroot.value()  );
     return StatusCode::FAILURE;
   }
   
@@ -1171,7 +1146,7 @@ std::string TRT_AlignDbSvc::findkey(const Identifier& ident, const std::string& 
   
   if(type=="AL" || type=="ALold") {
     //    result << "/TRT/Align/";
-    result << m_alignDBprefix;
+    result << m_alignDBprefix.value();
   } else if(type=="DF") {
     result << "/TRT/Calib/DF";
   } else return result.str();
@@ -1286,7 +1261,7 @@ StatusCode TRT_AlignDbSvc::createAlignObjects() const{
 
   /** check if collection already exists */
   if (m_detStore->contains<AlignableTransformContainer>(m_alignroot)) {
-    ATH_MSG_WARNING( "createAlignObjects: AlignableTransformContainer with name " << m_alignroot
+    ATH_MSG_WARNING( "createAlignObjects: AlignableTransformContainer with name " << m_alignroot.value()
                      << " already exists."  );
     return StatusCode::FAILURE;
   }
@@ -1596,7 +1571,7 @@ const AlignableTransformContainer* TRT_AlignDbSvc::getContainer() const
 {
   const AlignableTransformContainer* ptr = nullptr;
   if (m_detStore->retrieve (ptr, m_alignroot).isFailure()) {
-    ATH_MSG_ERROR ("Cannot retrieve " << m_alignroot << " from detStore ");
+    ATH_MSG_ERROR ("Cannot retrieve " << m_alignroot.value() << " from detStore ");
   }
   return ptr;
 }

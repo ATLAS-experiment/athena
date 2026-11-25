@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -12,7 +12,7 @@
 #include "SiPropertiesTool/ISiPropertiesTool.h"
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "SiPropertiesTool/SiliconPropertiesVector.h"
+#include "SiliconPropertiesVector.h"
 #include "StoreGate/ReadCondHandleKey.h"
 
 /**
@@ -23,7 +23,7 @@
 class SiPropertiesTool: public extends<AthAlgTool, ISiPropertiesTool>
 {
 public:
-  SiPropertiesTool(const std::string& type, const std::string& name, const IInterface* parent);
+  using base_class::base_class;
   virtual ~SiPropertiesTool() = default;
  
   virtual StatusCode initialize() override;
@@ -34,8 +34,8 @@ public:
 
 private:
   // Properties
-  std::string m_detectorName;
-  SG::ReadCondHandleKey<InDet::SiliconPropertiesVector> m_propertiesVector;
+  StringProperty m_detectorName{this, "DetectorName", "SCT", "Dectector name: Pixel, SCT or PLR"};
+  SG::ReadCondHandleKey<InDet::SiliconPropertiesVector> m_propertiesVector{this, "ReadKey", "SCTSiliconPropertiesVector", "Key of SiliconPropertiesVector"};
 
   static const InDet::SiliconProperties s_defaultProperties;
 };

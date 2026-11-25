@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file SiLorentzAngleTool/PixelSiLorentzAngleCondAlg.h
@@ -24,7 +24,7 @@
 #include "GaudiKernel/SystemOfUnits.h" //for Gaudi::Units::tesla
 #include "SiPropertiesTool/ISiPropertiesTool.h"
 
-#include "SiLorentzAngleTool/SiLorentzAngleCondData.h"
+#include "SiLorentzAngleCondData.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // MagField cache

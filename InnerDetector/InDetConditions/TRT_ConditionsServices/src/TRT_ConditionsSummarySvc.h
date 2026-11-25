@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRT_CONDITIONSSERVICES_TRT_CONDITIONSSUMMARYSVC_H
 #define TRT_CONDITIONSSERVICES_TRT_CONDITIONSSUMMARYSVC_H
@@ -39,7 +39,7 @@ class TRT_ConditionsSummarySvc :
   public extends<AthService, IInDetConditionsSvc>
 {
  public:
-  TRT_ConditionsSummarySvc( const std::string& name, ISvcLocator* svc );//!< Service constructor
+  using base_class::base_class;
   virtual ~TRT_ConditionsSummarySvc();
   //@name Gaudi Service Implementation
   //@{
@@ -59,7 +59,8 @@ class TRT_ConditionsSummarySvc :
   //@}
 
 private:
-  ServiceHandleArray<ITRT_ConditionsSvc> m_svcCollection;
+  Gaudi::Property<std::vector<std::string>> m_svcNames{this, "ServiceList", {}, "Services to be called"};
+  ServiceHandleArray<ITRT_ConditionsSvc> m_svcCollection{name()};
   InDet::TRT_CondFlag condSummaryStatus( const Identifier & ident);
 
   const InDetDD::TRT_DetectorManager* m_manager{nullptr};

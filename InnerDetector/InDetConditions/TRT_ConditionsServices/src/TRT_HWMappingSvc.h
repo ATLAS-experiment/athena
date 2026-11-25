@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_HWMappingSvc_H
@@ -30,7 +30,7 @@ class TRT_HWMappingSvc : public extends<AthService, ITRT_HWMappingSvc> {
 
  public:
 
-  TRT_HWMappingSvc( const std::string&, ISvcLocator* );
+  using base_class::base_class;
   virtual ~TRT_HWMappingSvc();
 
   virtual StatusCode initialize();
@@ -65,16 +65,16 @@ class TRT_HWMappingSvc : public extends<AthService, ITRT_HWMappingSvc> {
 
  private:
 
-  ServiceHandle<StoreGateSvc> m_detStore;
+  ServiceHandle<StoreGateSvc> m_detStore{this, "DetectorStore", "DetectorStore"};
 
   /// jobOptions properties
-  std::string m_Barrel_HV_COOLFolderName;
-  std::string m_EndcapA_HV_COOLFolderName;
-  std::string m_EndcapC_HV_COOLFolderName;
+  StringProperty m_Barrel_HV_COOLFolderName{this, "Barrel_HV_COOLFolderName", "/TRT/DCS/HV/BARREL"};
+  StringProperty m_EndcapA_HV_COOLFolderName{this, "EndcapA_HV_COOLFolderName", "/TRT/DCS/HV/ENDCAPA"};
+  StringProperty m_EndcapC_HV_COOLFolderName{this, "EndcapC_HV_COOLFolderName", "/TRT/DCS/HV/ENDCAPC"};
 
   /// Straw Helpers
-  const TRT_ID* m_TRT_ID_Helper;
-  ServiceHandle<ITRT_StrawNeighbourSvc> m_TRTStrawNeighbourSvc;
+  const TRT_ID* m_TRT_ID_Helper{};
+  ServiceHandle<ITRT_StrawNeighbourSvc> m_TRTStrawNeighbourSvc{this, "TRTStrawNeighbourSvc", "TRT_StrawNeighbourSvc"};
 
   SG::ReadCondHandleKey<TRTCond::HWMap> m_HWMapReadKey{this,"HWMapReadKey","HWMap","HV map in-key"};
 
