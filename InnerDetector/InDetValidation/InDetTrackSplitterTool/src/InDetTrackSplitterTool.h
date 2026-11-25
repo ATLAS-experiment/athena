@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETINDETTRACKSPLITTERTOOL_H
@@ -15,6 +15,7 @@
 #include "GaudiKernel/IAlgTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "TrkFitterInterfaces/ITrackFitter.h"
 
 #include "TrkTrack/Track.h"
 #include "TrkTrack/TrackCollection.h"
@@ -26,7 +27,6 @@ class SCT_ID;
 class IInDetTrackSplitterTool;
 
 namespace Trk {
-  class ITrackFitter ;
   class ITrackSelectorTool;
   class RIO_OnTrack;
   class MeasurementBase;
@@ -163,17 +163,17 @@ namespace InDet{
 
       /** Output track collection names recorded in storgate 
        */
-      SG::WriteHandleKey<TrackCollection> m_outputUpperTracksName;
-      SG::WriteHandleKey<TrackCollection> m_outputLowerTracksName;
+      SG::WriteHandleKey<TrackCollection> m_outputUpperTracksName{this, "OutputUpperTracksName", "splitUpperTracks"};
+      SG::WriteHandleKey<TrackCollection> m_outputLowerTracksName{this, "OutputLowerTracksName", "splitLowerTracks"};
       
       /** Helper Functions */
-      ToolHandle<Trk::ITrackFitter>  m_trkfitter;
+      PublicToolHandle<Trk::ITrackFitter>  m_trkfitter{this, "TrackFitter", "Trk::GlobalChi2Fitter/InDetTrackFitter"};
       TRT_ID const* m_trtid{} ;
       SCT_ID const* m_sctid{} ;
       
       /** Do we use the material on the input track
        */
-      bool m_keepmaterial;
+      BooleanProperty m_keepmaterial{this, "KeepMaterialStates", true};
       
     };
 }

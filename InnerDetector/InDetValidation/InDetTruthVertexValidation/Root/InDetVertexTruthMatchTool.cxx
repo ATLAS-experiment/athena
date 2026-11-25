@@ -10,12 +10,6 @@
 #include "InDetTruthVertexValidation/InDetVertexTruthMatchUtils.h"
 using namespace InDetVertexTruthMatchUtils;
 
-InDetVertexTruthMatchTool::InDetVertexTruthMatchTool( const std::string & name ) : asg::AsgTool(name) {
-  declareProperty("trackMatchProb", m_trkMatchProb = 0.5 );
-  declareProperty("vertexMatchWeight", m_vxMatchWeight = 0.7 );
-  declareProperty("trackPtCut", m_trkPtCut = 500. );
-}
-
 StatusCode InDetVertexTruthMatchTool::initialize() {
   ATH_MSG_INFO("Initializing");
 

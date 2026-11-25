@@ -1,4 +1,4 @@
-#include "InDetRecStatistics/InDetRecStatisticsAlg.h"
+#include "../InDetRecStatisticsAlg.h"
 
 DECLARE_COMPONENT( InDet::InDetRecStatisticsAlg )
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef InDetVertexTruthMatchTool_h
@@ -7,6 +7,7 @@
 
 // Framework include(s):
 #include "AsgTools/AsgTool.h"
+#include "AsgTools/PropertyWrapper.h"
 
 // EDM include(s):
 #include "xAODTracking/VertexContainerFwd.h"
@@ -27,7 +28,7 @@ class InDetVertexTruthMatchTool : public virtual IInDetVertexTruthMatchTool,
 
  public:
 
-  InDetVertexTruthMatchTool( const std::string & name );
+  using asg::AsgTool::AsgTool;
 
   virtual StatusCode initialize() override final;
   virtual StatusCode finalize() override;
@@ -40,11 +41,11 @@ class InDetVertexTruthMatchTool : public virtual IInDetVertexTruthMatchTool,
   static const xAOD::TrackParticleContainer* findTrackParticleContainer( const xAOD::VertexContainer& vxContainer ) ;
 
   //required MC match probability to consider track a good match
-  float m_trkMatchProb;
+  Gaudi::Property<float> m_trkMatchProb{this, "trackMatchProb", 0.5};
   //relative weight threshold to consider vertex matched
-  float m_vxMatchWeight;
+  Gaudi::Property<float> m_vxMatchWeight{this, "vertexMatchWeight", 0.7};
   //pt cut to use on tracks
-  float m_trkPtCut;
+  Gaudi::Property<float> m_trkPtCut{this, "trackPtCut", 500.};
 
   mutable std::atomic<unsigned int> m_nVtx {};
   mutable std::atomic<unsigned int> m_nVtxWithBadLinks {};

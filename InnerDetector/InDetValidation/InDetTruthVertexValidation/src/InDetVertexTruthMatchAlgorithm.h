@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETVERTEXTRUTHMATCHALGORITHM_H
@@ -16,7 +16,7 @@ class InDetVertexTruthMatchAlgorithm : public AthAlgorithm {
 
  public:
   /// Regular Algorithm constructor
-  InDetVertexTruthMatchAlgorithm( const std::string& name, ISvcLocator* svcLoc );
+  using AthAlgorithm::AthAlgorithm;
 
   /// Function initialising the algorithm
   virtual StatusCode initialize() override final;
@@ -25,9 +25,9 @@ class InDetVertexTruthMatchAlgorithm : public AthAlgorithm {
 
  private:
   /// StoreGate key for the muon container to investigate
-  std::string m_sgKey;
+  Gaudi::Property<std::string> m_sgKey{this, "SGKey", "PrimaryVertices"};
   
-  ToolHandle<IInDetVertexTruthMatchTool> m_matchTool;
+  ToolHandle<IInDetVertexTruthMatchTool> m_matchTool{this, "VertexTruthMatchTool", "InDetVertexTruthMatchTool/InDetVertexTruthMatchTool"};
 
 };
 

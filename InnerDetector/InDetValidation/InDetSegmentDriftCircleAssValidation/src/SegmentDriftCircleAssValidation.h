@@ -41,7 +41,7 @@ namespace InDet {
       // Standard Algotithm methods
       ///////////////////////////////////////////////////////////////////
 
-      SegmentDriftCircleAssValidation(const std::string &name, ISvcLocator *pSvcLocator);
+      using AthAlgorithm::AthAlgorithm;
       virtual ~SegmentDriftCircleAssValidation() {}
       StatusCode initialize();
       StatusCode execute(const EventContext& ctx);
@@ -60,22 +60,22 @@ namespace InDet {
       // Protected data 
       ///////////////////////////////////////////////////////////////////
 
-      int                                           m_nprint                ;
+      int                                           m_nprint{}              ;
       SG::ReadHandleKey<Trk::SegmentCollection>     m_origtrackKey{ this, "OrigTracksLocation", "TRTSegments", "TRT Segments collection name" };
       SG::ReadHandleKey<PRD_MultiTruthCollection>   m_PRDTruthTRTKey{ this, "TruthNameTRT", "PRD_MultiTruthTRT", "PRD Multitruth collection name" };
       SG::ReadHandleKey<TRT_DriftCircleContainer>   m_circlesTRTKey{ this, "TRT_DriftCirclesName", "TRT_DriftCircles", "TRT Driftcircle container name" };
-      double                                        m_pTmin                 ;
-      double                                        m_tcut                  ;
-      double                                        m_rapcut                ;
-      int                                           m_dccut                 ;
-      double                                        m_rmin                  ;
-      double                                        m_rmax                  ;
+      DoubleProperty                                m_pTmin{this, "pTmin", 500.};
+      double                                        m_tcut{}                ;
+      DoubleProperty                                m_rapcut{this, "Pseudorapidity", 2.1};
+      IntegerProperty                               m_dccut{this, "MinNumberDCs", 10};
+      DoubleProperty                                m_rmin{this, "RadiusMin", 0.};
+      DoubleProperty                                m_rmax{this, "RadiusMax", 20.};
 
-      int                                           m_events                ;
-      int                                           m_ncircles              ;
+      int                                           m_events{}              ;
+      int                                           m_ncircles{}            ;
       std::multimap<int,const Trk::PrepRawData*>    m_kinecircle            ;
       std::list<int>                                m_allBarcodes           ;
-      int                                           m_nqsegments            ;
+      int                                           m_nqsegments{}          ;
       std::list<int>                                m_particles             ;
       std::multimap<int,int>                        m_allParticles          ;
       std::multimap<int,int>                        m_tracks                ;

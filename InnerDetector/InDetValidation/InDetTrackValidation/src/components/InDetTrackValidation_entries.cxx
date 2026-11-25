@@ -1,6 +1,6 @@
-#include "InDetTrackValidation/SCT_ClusterValidationNtupleWriter.h"
-#include "InDetTrackValidation/InDetSplittedTracksCreator.h"
-#include "InDetTrackValidation/HoleSearchValidation.h"
+#include "../SCT_ClusterValidationNtupleWriter.h"
+#include "../InDetSplittedTracksCreator.h"
+#include "../HoleSearchValidation.h"
 
 DECLARE_COMPONENT( InDet::SCT_ClusterValidationNtupleWriter )
 DECLARE_COMPONENT( InDet::InDetSplittedTracksCreator )

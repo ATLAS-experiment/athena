@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -38,7 +38,7 @@ namespace InDet {
       // Standard Algotithm methods
       ///////////////////////////////////////////////////////////////////
 
-      TrackClusterAssValidation(const std::string &name, ISvcLocator *pSvcLocator);
+      using AthReentrantAlgorithm::AthReentrantAlgorithm;
       virtual ~TrackClusterAssValidation();
       StatusCode initialize();
       StatusCode execute(const EventContext& ctx) const;
@@ -50,35 +50,35 @@ namespace InDet {
       // Protected data
       ///////////////////////////////////////////////////////////////////
 
-      bool                               m_usePIX{}                 ;
-      bool                               m_useSCT{}                 ;
-      bool                               m_useTRT{}                 ;
-      bool                               m_useOutliers{}            ;
-      int                                m_pdg{}                    ;
+      BooleanProperty m_usePIX{this, "usePixel", true};
+      BooleanProperty m_useSCT{this, "useSCT", true};
+      BooleanProperty m_useTRT{this, "useTRT", true};
+      BooleanProperty m_useOutliers{this, "useOutliers", false};
+      IntegerProperty m_pdg{this, "pdgParticle", 0};
 
       mutable std::mutex                           m_statMutex;
       mutable std::vector<TrackCollectionStat_t>   m_trackCollectionStat ATLAS_THREAD_SAFE; // Guarded by m_statMutex
       mutable EventStat_t                          m_eventStat ATLAS_THREAD_SAFE; // Guarded by m_statMutex
 
-      unsigned int                       m_clcut{}                  ;
-      unsigned int                       m_clcutTRT{}               ;
-      unsigned int                       m_spcut{}                  ;
-      double                             m_ptcut{}                  ;
-      double                             m_ptcutmax{}               ;
-      double                             m_rapcut{}                 ;
+      UnsignedIntegerProperty m_clcut{this, "MinNumberClusters", 6};
+      UnsignedIntegerProperty m_clcutTRT{this, "MinNumberClustersTRT", 0};
+      UnsignedIntegerProperty m_spcut{this, "MinNumberSpacePoints", 3};
+      DoubleProperty m_ptcut{this, "MomentumCut", 1000.};
+      DoubleProperty m_ptcutmax{this, "MomentumMaxCut", 1.e20};
+      DoubleProperty m_rapcut{this, "RapidityCut", 2.6};
       double                             m_tcut{}                   ;
-      double                             m_rmin{}                   ;
-      double                             m_rmax{}                   ;
-      SG::ReadHandleKeyArray<TrackCollection>        m_tracklocation;
-      SG::ReadHandleKey<SpacePointContainer>         m_spacepointsSCTname;
-      SG::ReadHandleKey<SpacePointContainer>         m_spacepointsPixelname;
-      SG::ReadHandleKey<SpacePointOverlapCollection> m_spacepointsOverlapname;
-      SG::ReadHandleKey<SiClusterContainer>          m_clustersSCTname;
-      SG::ReadHandleKey<SiClusterContainer>          m_clustersPixelname;
-      SG::ReadHandleKey<TRT_DriftCircleContainer>    m_clustersTRTname;
-      SG::ReadHandleKey<PRD_MultiTruthCollection>    m_truth_locationPixel;
-      SG::ReadHandleKey<PRD_MultiTruthCollection>    m_truth_locationSCT;
-      SG::ReadHandleKey<PRD_MultiTruthCollection>    m_truth_locationTRT;
+      DoubleProperty m_rmin{this, "RadiusMin", 0.};
+      DoubleProperty m_rmax{this, "RadiusMax", 30.};
+      SG::ReadHandleKeyArray<TrackCollection>        m_tracklocation{this, "TracksLocation", {}};
+      SG::ReadHandleKey<SpacePointContainer>         m_spacepointsSCTname{this, "SpacePointsSCTName", "SCT_SpacePoints"};
+      SG::ReadHandleKey<SpacePointContainer>         m_spacepointsPixelname{this, "SpacePointsPixelName", "PixelSpacePoints"};
+      SG::ReadHandleKey<SpacePointOverlapCollection> m_spacepointsOverlapname{this, "SpacePointsOverlapName", "OverlapSpacePoints"};
+      SG::ReadHandleKey<SiClusterContainer>          m_clustersSCTname{this, "SCT_ClusterContainer", "SCT_Clusters"};
+      SG::ReadHandleKey<SiClusterContainer>          m_clustersPixelname{this, "PixelClusterContainer", "PixelClusters"};
+      SG::ReadHandleKey<TRT_DriftCircleContainer>    m_clustersTRTname{this, "TRT_ClusterContainer", "TRT_DriftCircles"};
+      SG::ReadHandleKey<PRD_MultiTruthCollection>    m_truth_locationPixel{this, "TruthLocationPixel", "PRD_MultiTruthPixel"};
+      SG::ReadHandleKey<PRD_MultiTruthCollection>    m_truth_locationSCT{this, "TruthLocationSCT", "PRD_MultiTruthSCT"};
+      SG::ReadHandleKey<PRD_MultiTruthCollection>    m_truth_locationTRT{this, "TruthLocationTRT", "PRD_MultiTruthTRT"};
       // For P->T converter of PixelClusters
       SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_pixelDetEleCollKey{this, "PixelDetEleCollKey", "PixelDetectorElementCollection", "Key of SiDetectorElementCollection for Pixel"};
       // For P->T converter of SCT_Clusters

@@ -1,3 +1,3 @@
-#include "InDetTrackSplitterTool/InDetTrackSplitterTool.h"
+#include "../InDetTrackSplitterTool.h"
 DECLARE_COMPONENT( InDet::InDetTrackSplitterTool )
 

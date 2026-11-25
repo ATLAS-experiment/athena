@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkTrack/TrackCollection.h"
@@ -15,64 +15,8 @@
 #include <cmath>
 
 ///////////////////////////////////////////////////////////////////
-// Constructor
+// Destructor
 ///////////////////////////////////////////////////////////////////
-
-InDet::TrackClusterAssValidation::TrackClusterAssValidation
-(const std::string& name,ISvcLocator* pSvcLocator)
-  : AthReentrantAlgorithm(name,pSvcLocator),
-    m_spacepointsSCTname("SCT_SpacePoints"),
-    m_spacepointsPixelname("PixelSpacePoints"),
-    m_spacepointsOverlapname("OverlapSpacePoints"),
-    m_clustersSCTname("SCT_Clusters"),
-    m_clustersPixelname("PixelClusters"),
-    m_clustersTRTname("TRT_DriftCircles"),
-    m_truth_locationPixel( "PRD_MultiTruthPixel" ),
-    m_truth_locationSCT(   "PRD_MultiTruthSCT" ),
-    m_truth_locationTRT(   "PRD_MultiTruthTRT" )
-{
-
-  // TrackClusterAssValidation steering parameters
-  //
-  m_ptcut                  = 1000.                            ;
-  m_ptcutmax               = 1.e20                            ;
-  m_rapcut                 = 2.6                              ;
-  m_rmin                   = 0.                               ;
-  m_rmax                   = 30.                              ;
-  m_clcut                  = 6                                ;
-  m_clcutTRT               = 0                                ;
-  m_spcut                  = 3                                ;
-  m_usePIX                 = true                             ;
-  m_useSCT                 = true                             ;
-  m_useTRT                 = true                             ;
-  m_useOutliers            = false                            ;
-  m_pdg                    = 0                                ;
-  m_tcut                   = 0.                               ;
-
-  declareProperty("TracksLocation"        ,m_tracklocation         );
-  declareProperty("SpacePointsSCTName"    ,m_spacepointsSCTname    );
-  declareProperty("SpacePointsPixelName"  ,m_spacepointsPixelname  );
-  declareProperty("SpacePointsOverlapName",m_spacepointsOverlapname);
-  declareProperty("PixelClusterContainer" ,m_clustersPixelname     );
-  declareProperty("SCT_ClusterContainer"  ,m_clustersSCTname       );
-  declareProperty("TRT_ClusterContainer"  ,m_clustersTRTname       );
-  declareProperty("TruthLocationSCT"      ,m_truth_locationSCT     );
-  declareProperty("TruthLocationPixel"    ,m_truth_locationPixel   );
-  declareProperty("TruthLocationTRT"      ,m_truth_locationTRT     );
-  declareProperty("MomentumCut"           ,m_ptcut                 );
-  declareProperty("MomentumMaxCut"        ,m_ptcutmax              );
-  declareProperty("RapidityCut"           ,m_rapcut                );
-  declareProperty("RadiusMin"             ,m_rmin                  );
-  declareProperty("RadiusMax"             ,m_rmax                  );
-  declareProperty("MinNumberClusters"     ,m_clcut                 );
-  declareProperty("MinNumberClustersTRT"  ,m_clcutTRT              );
-  declareProperty("MinNumberSpacePoints"  ,m_spcut                 );
-  declareProperty("usePixel"              ,m_usePIX                );
-  declareProperty("useSCT"                ,m_useSCT                );
-  declareProperty("useTRT"                ,m_useTRT                );
-  declareProperty("useOutliers"           ,m_useOutliers           );
-  declareProperty("pdgParticle"           ,m_pdg                   );
-}
 
 InDet::TrackClusterAssValidation::~TrackClusterAssValidation() =default;
 
@@ -219,14 +163,14 @@ StatusCode InDet::TrackClusterAssValidation::finalize() {
   out<<topNtail(lineSeparator)<<"\n";
   out<<"|        TrackClusterAssValidation statistic for charge truth particles with        |\n";
   out<<topNtail(spaceSeparator)<<"\n";
-  out<<"|                    pT                      >="<<w13<<p5<<m_ptcut<<" MeV"<<"                    |\n";
+  out<<"|                    pT                      >="<<w13<<p5<<m_ptcut.value()<<" MeV"<<"                    |\n";
   if(m_ptcutmax < 1000000.) {
-    out<<"|                    pT                      <="<<w13<<p5<<m_ptcutmax<<" MeV"<<"                    |\n";
+    out<<"|                    pT                      <="<<w13<<p5<<m_ptcutmax.value()<<" MeV"<<"                    |\n";
   }
-  out<<"|                    |rapidity|              <="<<w13<<p5<<m_rapcut<<"                        |\n";
-  out<<"|                    max vertex radius       <="<<w13<<p5<<m_rmax<<" mm"<<"                     |\n";
-  out<<"|                    min vertex radius       >="<<w13<<p5<<m_rmin<<" mm"<<"                     |\n";
-  out<<"|                    particles pdg            ="<<std::setw(8)<<m_pdg<<"                             |\n";
+  out<<"|                    |rapidity|              <="<<w13<<p5<<m_rapcut.value()<<"                        |\n";
+  out<<"|                    max vertex radius       <="<<w13<<p5<<m_rmax.value()<<" mm"<<"                     |\n";
+  out<<"|                    min vertex radius       >="<<w13<<p5<<m_rmin.value()<<" mm"<<"                     |\n";
+  out<<"|                    particles pdg            ="<<std::setw(8)<<m_pdg.value()<<"                             |\n";
 
   auto yesNo=[](const bool predicate){return predicate ? "yes" : "no ";};
   out<<"|                    use Pixels information          "<<yesNo(m_usePIX)<<"                            |\n";
@@ -345,9 +289,9 @@ StatusCode InDet::TrackClusterAssValidation::finalize() {
 
   out<<topNtail(spaceSeparator)<<"\n";
   out<<"|               Additional cuts for truth particles are                             |\n";
-  out<<"|                    number silicon clusters >="<<w13<<m_clcut<<"                        |\n";
-  out<<"|                    number   trt   clusters >="<<w13<<m_clcutTRT<<"                        |\n";
-  out<<"|                    number  space    points >="<<w13<<m_spcut<<"                        |\n";
+  out<<"|                    number silicon clusters >="<<w13<<m_clcut.value()<<"                        |\n";
+  out<<"|                    number   trt   clusters >="<<w13<<m_clcutTRT.value()<<"                        |\n";
+  out<<"|                    number  space    points >="<<w13<<m_spcut.value()<<"                        |\n";
 
   pa  = coerceToOne(m_eventStat.m_particleClusters[0]);
   out<<"|           Probability find truth particles with this cuts is "<<w8<<p5<<double(m_eventStat.m_events)/pa<<"             |\n";
@@ -682,28 +626,28 @@ MsgStream& InDet::TrackClusterAssValidation::dumptools( MsgStream& out, MSG::Lev
   out<<"| Truth location  for sct                         | "<<s8<<"|\n";
   out<<"| Truth location  for trt                         | "<<s10<<"|\n";
   out<<"|         pT cut                                  | "
-     <<std::setw(14)<<std::setprecision(5)<<m_ptcut
+     <<std::setw(14)<<std::setprecision(5)<<m_ptcut.value()
      <<"                                                   |\n";
   out<<"|   max   pT cut                                  | "
-     <<std::setw(14)<<std::setprecision(5)<<m_ptcutmax
+     <<std::setw(14)<<std::setprecision(5)<<m_ptcutmax.value()
      <<"                                                   |\n";
   out<<"|   rapidity cut                                  | "
-     <<std::setw(14)<<std::setprecision(5)<<m_rapcut
+     <<std::setw(14)<<std::setprecision(5)<<m_rapcut.value()
      <<"                                                   |\n";
   out<<"| min Radius                                      | "
-     <<std::setw(14)<<std::setprecision(5)<<m_rmin
+     <<std::setw(14)<<std::setprecision(5)<<m_rmin.value()
      <<"                                                   |\n";
   out<<"| max Radius                                      | "
-     <<std::setw(14)<<std::setprecision(5)<<m_rmax
+     <<std::setw(14)<<std::setprecision(5)<<m_rmax.value()
      <<"                                                   |\n";
   out<<"| Min. number clusters      for generated track   | "
-     <<std::setw(14)<<std::setprecision(5)<<m_clcut
+     <<std::setw(14)<<std::setprecision(5)<<m_clcut.value()
      <<"                                                   |\n";
   out<<"| Min. number sp.points     for generated track   | "
-     <<std::setw(14)<<std::setprecision(5)<<m_spcut
+     <<std::setw(14)<<std::setprecision(5)<<m_spcut.value()
      <<"                                                   |\n";
   out<<"| Min. number TRT clusters  for generated track   | "
-     <<std::setw(14)<<std::setprecision(5)<<m_clcutTRT
+     <<std::setw(14)<<std::setprecision(5)<<m_clcutTRT.value()
      <<"                                                   |\n";
   out<<"|--------------------------------------------------------------------------------------------------------------------|\n";
   return out;

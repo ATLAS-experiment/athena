@@ -1,4 +1,4 @@
-#include "InDetSegmentDriftCircleAssValidation/SegmentDriftCircleAssValidation.h"
+#include "../SegmentDriftCircleAssValidation.h"
 
 DECLARE_COMPONENT( InDet::SegmentDriftCircleAssValidation )
 

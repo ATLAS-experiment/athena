@@ -1,32 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "InDetTrackValidation/InDetSplittedTracksCreator.h"
+#include "InDetSplittedTracksCreator.h"
 #include "TrkTrack/TrackCollection.h"
 #include "TrkTrack/Track.h"
 //#include "TrkParameters/MeasuredPerigee.h"
-#include "InDetTrackSplitterTool/IInDetTrackSplitterTool.h"
-
-
-
-
-/////////////////////////////////////////////////////////////////////////////
-InDet::InDetSplittedTracksCreator::InDetSplittedTracksCreator(const std::string& name, ISvcLocator* pSvcLocator) :
-AthReentrantAlgorithm(name, pSvcLocator),
-// m_sgSvc(0),
-m_TrackCol("Tracks"),
-m_trackSplitterTool()
-
-{
-  // Properties go here
-  declareProperty("TrackCollection"         , m_TrackCol);
-  declareProperty("OutputTrackCollection"   , m_OutputTrackCol);
-  declareProperty("TrackSplitterTool"       , m_trackSplitterTool);
-  declareProperty("makeSiOnlyTracks"        , m_makeSiOnlyTracks=false);
-  declareProperty("takeUpperSegment"        , m_takeUpperSegment=true);
-  declareProperty("takeLowerSegment"        , m_takeLowerSegment=true);
-}
 
 InDet::InDetSplittedTracksCreator::~InDetSplittedTracksCreator() = default;
 

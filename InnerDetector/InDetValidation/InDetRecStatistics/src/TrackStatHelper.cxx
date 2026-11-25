@@ -16,7 +16,7 @@
 //   o  add DR cut to the fake track cut
 //
 
-#include "InDetRecStatistics/TrackStatHelper.h"
+#include "TrackStatHelper.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/GenEvent.h"

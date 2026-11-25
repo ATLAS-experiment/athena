@@ -1,18 +1,17 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
 // HoleSearchValidation.cxx, (c) ATLAS Detector Software
 ///////////////////////////////////////////////////////////////////
 
-#include "InDetTrackValidation/HoleSearchValidation.h"
+#include "HoleSearchValidation.h"
 // Gaudi
 #include "GaudiKernel/MsgStream.h"
 // Trk
 #include "TrkTrack/Track.h"
 
-#include "TrkToolInterfaces/ITrackHoleSearchTool.h"
 
 #include "TrkMeasurementBase/MeasurementBase.h"
 
@@ -26,63 +25,6 @@
 #include "CLHEP/Random/RandFlat.h"
 
 using namespace InDet;
-
-HoleSearchValidation::HoleSearchValidation(const std::string& name, ISvcLocator* pSvcLocator):
-    AthReentrantAlgorithm(name, pSvcLocator),
-	m_idHelper(nullptr),
-	m_pixelID(nullptr),
-	m_sctID(nullptr),
-	m_trtID(nullptr),
-	m_siliconID(nullptr),
-    m_holeSearchTool("InDet::InDetTrackHoleSearchTool"),
-    m_trackCollectionKey("Tracks"),
-	m_saveNewTracksInSG(false),
-        m_removeParts {},
-	m_removeOverlapHitsOnly(false),
-    m_ignoreTrackEnds(true),
-	m_randomRemovalMode(false),
-    m_maxNumberOfHoles(3),
-  	m_rndmGenSvc("AthRNGSvc", name),
-  	m_randomEngineName("HoleSearchRnd")
-
-{
-  declareProperty("HoleSearchTool"          , m_holeSearchTool);
-  declareProperty("TrackCollection"         , m_trackCollectionKey, "Name of the reference track collection");
-
-  declareProperty("SaveNewTracksInSG"       , m_saveNewTracksInSG  , "Boolean: save tracks in SG");
-
-  // for (unsigned int part_i=0; part_i<Parts::kNParts; ++part_i) {
-  //   m_removeParts[part_i]=false;
-  // }
-  declareProperty("RemovePIX0"              , m_removeParts[Parts::kPix0]         , "Remove hit(s) in PIXEL layer 0");
-  declareProperty("RemovePIX1"              , m_removeParts[Parts::kPix1]         , "Remove hit(s) in PIXEL layer 1");
-  declareProperty("RemovePIX2"              , m_removeParts[Parts::kPix2]         , "Remove hit(s) in PIXEL layer 2");
-
-  declareProperty("RemoveSCT0"              , m_removeParts[Parts::kSct0]         , "Remove hit(s) in SCT layer 0");
-  declareProperty("RemoveSCT1"              , m_removeParts[Parts::kSct1]         , "Remove hit(s) in SCT layer 1");
-  declareProperty("RemoveSCT2"              , m_removeParts[Parts::kSct2]         , "Remove hit(s) in SCT layer 2");
-  declareProperty("RemoveSCT3"              , m_removeParts[Parts::kSct3]         , "Remove hit(s) in SCT layer 3");
-
-  declareProperty("RemoveSCT4"              , m_removeParts[Parts::kSct4]         , "Remove hit(s) in SCT endcap layer 4");
-  declareProperty("RemoveSCT5"              , m_removeParts[Parts::kSct5]         , "Remove hit(s) in SCT endcap layer 5");
-  declareProperty("RemoveSCT6"              , m_removeParts[Parts::kSct6]         , "Remove hit(s) in SCT endcap layer 6");
-  declareProperty("RemoveSCT7"              , m_removeParts[Parts::kSct7]         , "Remove hit(s) in SCT endcap layer 7");
-  declareProperty("RemoveSCT8"              , m_removeParts[Parts::kSct8]         , "Remove hit(s) in SCT endcap layer 8");
-
-  declareProperty("RemoveSCTSide0"          , m_removeParts[Parts::kSctSide0]     , "Remove SCT hits on side 0");
-  declareProperty("RemoveSCTSide1"          , m_removeParts[Parts::kSctSide1]     , "Remove SCT hits on side 1");
-
-  declareProperty("RemoveOverlapHitsOnly"  , m_removeOverlapHitsOnly, "Only remove overlap track hits");
-  declareProperty("IgnoreTrackEnds"        , m_ignoreTrackEnds     , "Ignore hits at the end of the track");
-
-  declareProperty("RandomRemovalMode"       , m_randomRemovalMode  , "Randomly remove track hits (overwrites the other flags!)");
-  declareProperty("MaximalHoles"            , m_maxNumberOfHoles   , "Number of maximal holes to be created");
-
-  declare( m_trackCollectionOutputKey );
-
-  // start with 10x10
-  m_trackStats = std::vector< std::vector< unsigned int> >(0, std::vector< unsigned int>(0));
-}
 
 HoleSearchValidation::~HoleSearchValidation() = default;
 
@@ -140,6 +82,7 @@ StatusCode HoleSearchValidation::initialize() {
   }
 
   ATH_CHECK(m_trackCollectionKey.initialize());
+  declare( m_trackCollectionOutputKey );
   if (m_saveNewTracksInSG) {
     m_trackCollectionOutputKey = m_trackCollectionKey.key() + "_removedHits";
     ATH_CHECK(m_trackCollectionOutputKey.initialize());
@@ -156,7 +99,7 @@ StatusCode HoleSearchValidation::execute(const EventContext& ctx) const {
 
   std::array<bool,Parts::kNParts> remove_parts{};
   for (unsigned int part_i=0; part_i<Parts::kNParts; ++part_i) {
-    remove_parts[part_i]=( !m_randomRemovalMode ? m_removeParts[part_i] : false );
+    remove_parts[part_i]=( !m_randomRemovalMode ? m_removeParts[part_i].value() : false );
   }
   ATH_MSG_VERBOSE( "HoleSearchValidation execute() start" ) ;
 
