@@ -20,6 +20,8 @@ atlas_add_component( RegistrationServices
                      src/components/*.cxx
                      INCLUDE_DIRS ${COOL_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
                      LINK_LIBRARIES ${COOL_LIBRARIES} ${CORAL_LIBRARIES} ${CHAI_LIBRARIES} AthenaBaseComps AthenaKernel AthenaPoolUtilities IOVDbSvcLib PersistentDataModel RegistrationServicesLib SGTools StoreGateLib CoralUtilitiesLib )
+# OutputConditionsAlg.cxx switches on the CHAI version
+target_compile_definitions( RegistrationServices PRIVATE CHAI_VERSION_MAJOR=${chai_VERSION_MAJOR} CHAI_VERSION_MINOR=${chai_VERSION_MINOR} )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

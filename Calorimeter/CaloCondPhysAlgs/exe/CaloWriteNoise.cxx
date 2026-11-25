@@ -202,7 +202,9 @@ int main(int argc, char ** argv) {
               .status=chai::Tag::Status::Unlocked,
               .nodeDescription =
                   chai::Tag::buildNodeDescription(
+#if CHAI_VERSION_MAJOR == 2 && CHAI_VERSION_MINOR < 8
                        chai::Tag::IovType::RunNumberLumiBlock,
+#endif
                        "CondAttrListCollection",
                        1238547719u
                   )

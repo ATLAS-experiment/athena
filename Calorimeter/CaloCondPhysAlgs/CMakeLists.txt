@@ -24,6 +24,8 @@ atlas_add_executable( CaloWriteNoise
                       exe/CaloWriteNoise.cxx
                       INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${CHAI_INCLUDE_DIR}
                       LINK_LIBRARIES CaloCondBlobObjs chai::chai ${Boost_LIBRARIES} )
+# CaloWriteNoise.cxx switches on the CHAI version
+target_compile_definitions( CaloWriteNoise PRIVATE CHAI_VERSION_MAJOR=${chai_VERSION_MAJOR} CHAI_VERSION_MINOR=${chai_VERSION_MINOR} )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py share/CaloNoise_fillDB.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
