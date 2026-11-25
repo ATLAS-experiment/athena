@@ -311,7 +311,8 @@ const PartonSchemeConfig& getSchemeConfig(const std::string& schemeName) {
       // Tzq
       // ------------------------------------------------------------------ //
       {"Tzq",
-       {{"TruthTop", "TruthBosonsWithDecayParticles", "TruthBottom"},
+       {{"TruthTop", "TruthBosonsWithDecayParticles", "TruthBottom",
+	 "TruthElectrons", "TruthMuons", "TruthTaus"},
         {DecoratorGroup::Top, DecoratorGroup::Bottom},
         {{DecoratorZW::Z, 1, false}},
         {
