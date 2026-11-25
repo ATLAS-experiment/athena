@@ -52,16 +52,14 @@ namespace {
         if (sp.type() == xAOD::UncalibMeasType::MMClusterType) {
             const auto* prd = static_cast<const xAOD::MMCluster*>(sp.primaryMeasurement());
             return 0.5* design.stripLength(prd->channelNumber());
-        } else{
-            const auto* prd = static_cast<const xAOD::sTgcMeasurement*>(sp.primaryMeasurement());
-            if(prd->channelType() == sTgcIdHelper::Pad){        
-                const auto& padDesign = static_cast<const MuonGMR4::PadDesign&>(design);
-                auto padCorners = padDesign.padCorners(prd->channelNumber());          
-                return 0.5* std::abs(padCorners[0].x() - padCorners[1].x());
-            }
-            return 0.5* design.stripLength(prd->channelNumber());
         }
-        return 0.;
+        const auto* prd = static_cast<const xAOD::sTgcMeasurement*>(sp.primaryMeasurement());
+        if(prd->channelType() == sTgcIdHelper::Pad){        
+            const auto& padDesign = static_cast<const MuonGMR4::PadDesign&>(design);
+            auto padCorners = padDesign.padCorners(prd->channelNumber());          
+            return 0.5* std::abs(padCorners[0].x() - padCorners[1].x());
+        }
+        return 0.5* design.stripLength(prd->channelNumber());
     }
     inline std::string sTgcChannelType(const int chType) {
         return chType == sTgcIdHelper::Strip ? "S" :

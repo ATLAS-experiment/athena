@@ -186,7 +186,7 @@ namespace MuonR4{
 
 
         for (const xAOD::MuonSegment* reFitMe: *segments){
-            auto saveDisplay = [&](const std::string& state) {
+            auto saveDisplay = [&](std::string_view state) {
                 if (!m_drawEvent) {
                     return;
                 }
