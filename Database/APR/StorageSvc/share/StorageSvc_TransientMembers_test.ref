@@ -2,9 +2,18 @@ TransientMembersTest                       INFO Created the test driver
 TransientMembersTest                       INFO Loading shared libraries:
 TransientMembersTest                       INFO  - loading library test_StorageTestDictionary
 TransientMembersTest                       INFO Testing the writing operations
+TransientMembersTest                       INFO Creating StorageTool
+TransientMembersTest                       INFO Starting ROOT_All WRITE     Session
+ToolSvc.Storage...    INFO Building shape according to reflection information using shape ID for: 
+ToolSvc.Storage...    INFO TestClassWithTransients [A1111111-B111-C111-D111-E22111111121]
+TransientMembersTest                       INFO Disconnecting StorageTool
+TransientMembersTest                       INFO Ending Session
 TransientMembersTest                       INFO  ...done
 TransientMembersTest                       INFO  Testing the reading operations
-TransientMembersTest                       INFO Closing the session
+TransientMembersTest                       INFO Creating StorageTool
+TransientMembersTest                       INFO Starting ROOT_All READ      Session
+TransientMembersTest                       INFO Disconnecting StorageTool
+TransientMembersTest                       INFO Ending Session
 TransientMembersTest                       INFO  ...done
 TransientMembersTest                       INFO  Exiting...
 TransientMembersTest                       INFO Number of floating tokens : 0

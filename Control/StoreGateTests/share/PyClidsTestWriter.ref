@@ -1,5 +1,5 @@
 Py:OutputStreamCfg    INFO No file name predefined for stream Stl. Using myStl.pool.root
-ApplicationMgr       INFO Application Manager Configured successfully
+ApplicationMgr        INFO Application Manager Configured successfully
 AthenaEventLoopMgr                                   INFO Initializing AthenaEventLoopMgr
 PyComponentMgr                                       INFO Initializing PyComponentMgr...
 PyClidsTestWriter                                    INFO Initializing PyClidsTestWriter...
@@ -34,20 +34,6 @@ Py:PyClidsTestWriter    INFO [TestInts] content: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 Py:PyClidsTestWriter    INFO [TestUInts] content: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 Py:PyClidsTestWriter    INFO [TestFloats] content: [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
 Py:PyClidsTestWriter    INFO [TestDoubles] content: [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
-StorageSvc                                           INFO Building shape according to reflection information using shape ID for: 
-StorageSvc                                           INFO EventInfo_p4 [C634FDB6-CC4B-4BA2-B8F9-A84BE6A786C7]
-StorageSvc                                           INFO Building shape according to reflection information using shape ID for: 
-StorageSvc                                           INFO vector<int> [BB17783A-34CE-ED5D-F610-99DD35AC5E66]
-StorageSvc                                           INFO Building shape according to reflection information using shape ID for: 
-StorageSvc                                           INFO vector<unsigned int> [AE69E9E7-BF52-0715-106E-BF6DC60AFB68]
-StorageSvc                                           INFO Building shape according to reflection information using shape ID for: 
-StorageSvc                                           INFO vector<float> [E6E7FE2A-D1E5-BD9D-782C-4DEC22AD899D]
-StorageSvc                                           INFO Building shape according to reflection information using shape ID for: 
-StorageSvc                                           INFO vector<double> [FF3DDE58-517D-F905-80B7-5D463011C6B2]
-StorageSvc                                           INFO Building shape according to reflection information using shape ID for: 
-StorageSvc                                           INFO DataHeader_p6 [4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D]
-StorageSvc                                           INFO Building shape according to reflection information using shape ID for: 
-StorageSvc                                           INFO DataHeaderForm_p6 [7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD]
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #1, run #1 1 events processed so far  <<<===
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #2, run #1 1 events processed so far  <<<===
 StoreGateSvc_Impl: <<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> 

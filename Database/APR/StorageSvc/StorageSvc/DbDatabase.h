@@ -17,8 +17,6 @@
 
 class StatusCode;
 class ITechFactory;
-
-// Forward declarations
 class ITechDatabase;
 class ITechContainer;
 class DbDomain;

@@ -159,7 +159,7 @@ StatusCode DbDatabaseObj::makeLink(Token* pTok, Token::OID_t& refLnk) {
   return StatusCode::FAILURE;
 }
 
-// Retrieve shape information for a specified object by shape ID
+// Retrieve type information for a specified object by typeID
 const DbTypeInfo* DbDatabaseObj::objectShape(const Guid& id) const {
   ShapeMap::const_iterator i = m_shapeMap.find(id);
   if( i != m_shapeMap.end() ) return (*i).second;
@@ -167,7 +167,7 @@ const DbTypeInfo* DbDatabaseObj::objectShape(const Guid& id) const {
   return nullptr;
 }
 
-// Retrieve shape information for a specified object by reflection handle
+// Retrieve type information for a specified object by reflection handle
 const DbTypeInfo* DbDatabaseObj::objectShape(const RootType& id) const {
   std::map<RootType, const DbTypeInfo*>::const_iterator i = m_classMap.find(id);
   if( i != m_classMap.end() ) return i->second;
@@ -178,7 +178,7 @@ const DbTypeInfo* DbDatabaseObj::objectShape(const RootType& id) const {
   return nullptr;
 }
 
-// Retrieve shape information for a specified object by container name
+// Retrieve type information for a specified object by container name
 const DbTypeInfo* DbDatabaseObj::contShape(const std::string& nam) const {
   LinkVector::const_iterator j=m_linkVec.begin();
   for(; j != m_linkVec.end(); ++j ) {
@@ -190,22 +190,22 @@ const DbTypeInfo* DbDatabaseObj::contShape(const std::string& nam) const {
   return 0;
 }
 
-// Add persistent shape to the Database
-StatusCode DbDatabaseObj::addShape(const DbTypeInfo* pShape) {
-  if ( pShape )    {
-    const Guid& id = pShape->typeID();
+// Add persistent typeinfo to the Database
+StatusCode DbDatabaseObj::addShape(const DbTypeInfo* tinfo) {
+  if ( tinfo )    {
+    const Guid& id = tinfo->typeID();
     ShapeMap::iterator i = m_shapeMap.find(id);
     if ( i != m_shapeMap.end() )   {
       return StatusCode::SUCCESS;
     }
-    else if ( m_string_t and (pShape == m_string_t) )  {
+    else if ( m_string_t and (tinfo == m_string_t) )  {
       return StatusCode::SUCCESS;
     }
     else if ( m_string_t and (id == m_string_t->typeID()) )  {
       return StatusCode::SUCCESS;
     }
     else if ( mode() != Io::READ )  {
-      const std::string& dsc = pShape->toString();
+      const std::string& dsc = tinfo->toString();
       // Add the persistent entry to the links container
       if ( 0 != m_string_t )   {
         // Update the transient list of links
@@ -214,11 +214,11 @@ StatusCode DbDatabaseObj::addShape(const DbTypeInfo* pShape) {
         // Otherwise save will add the type
         // again and again ending in an
         // infinite recursion
-        const DbTypeInfo::Columns& cols = pShape->columns();
+        const DbTypeInfo::Columns& cols = tinfo->columns();
         ATH_MSG_DEBUG("--->Adding Shape[" << m_shapeMap.size() << " , "
-                       << pShape->typeID().toString() << "]: "
+                       << tinfo->typeID().toString() << "]: "
                        << " [" << cols.size() << " Column(s)]" );
-        ATH_MSG_DEBUG("---->Class:" << (pShape->clazz() ? pShape->clazz().Name() : "<not available>"));
+        ATH_MSG_DEBUG("---->Class:" << (tinfo->clazz() ? tinfo->clazz().Name() : "<not available>"));
         for (size_t ic=0; ic < cols.size();++ic)  {
           const DbColumn* c = cols[ic];
           ATH_MSG_DEBUG("---->[" << ic << "]:" << c->name()
@@ -227,8 +227,8 @@ StatusCode DbDatabaseObj::addShape(const DbTypeInfo* pShape) {
               << " Offset:" << c->offset()
               << " #Elements:" << c->nElement());
         }
-        bool inserted = m_shapeMap.insert( ShapeMap::value_type(id, pShape) ).second;
-        if ( pShape == m_string_t || id == m_string_t->typeID() )   {
+        bool inserted = m_shapeMap.insert( ShapeMap::value_type(id, tinfo) ).second;
+        if ( tinfo == m_string_t || id == m_string_t->typeID() )   {
           return StatusCode::SUCCESS;
         }
         DbString shape_string(dsc);
@@ -237,9 +237,9 @@ StatusCode DbDatabaseObj::addShape(const DbTypeInfo* pShape) {
           m_shapeMap.erase(i);
           return StatusCode::FAILURE;
         }
-        if ( inserted ) pShape->addRef();
-        if ( pShape->clazz() )  {
-          m_classMap.insert(std::make_pair(pShape->clazz(), pShape));
+        if ( inserted ) tinfo->addRef();
+        if ( tinfo->clazz() )  {
+          m_classMap.insert(std::make_pair(tinfo->clazz(), tinfo));
         }
         return StatusCode::SUCCESS;
       }
@@ -320,14 +320,14 @@ StatusCode DbDatabaseObj::open()   {
           while (static_cast<uint64_t>(oid.second) <= m_shapes.size()) {
             auto result = m_shapes.ptr()->load(&ptr, m_string_t, oid, oid, true);
             if (!result.isSuccess() || !ptr) break;
-            const DbTypeInfo* pShape = DbTypeInfo::fromString(shape_str);
-            if( !pShape) {
+            const DbTypeInfo* tinfo = DbTypeInfo::fromString(shape_str);
+            if( !tinfo) {
               ATH_MSG_ERROR("Failed to decode Shape string: " << shape_str);
               return StatusCode::FAILURE;
             }
-            const DbTypeInfo::Columns& cols = pShape->columns();
+            const DbTypeInfo::Columns& cols = tinfo->columns();
             ATH_MSG_DEBUG("--->Reading Shape[" << m_shapeMap.size() << " , "
-                          << pShape->typeID().toString() << "]: "
+                          << tinfo->typeID().toString() << "]: "
                           << "[" << cols.size() << " Column(s)]" );
             for (size_t ic=0; ic < cols.size();++ic)  {
               const DbColumn* c = cols[ic];
@@ -338,11 +338,11 @@ StatusCode DbDatabaseObj::open()   {
                   << " #Elements:" << c->nElement());
             }
             // Update the transient list of links
-            if( m_shapeMap.insert(ShapeMap::value_type(pShape->typeID(), pShape)).second )
-               pShape->addRef();
+            if( m_shapeMap.insert(ShapeMap::value_type(tinfo->typeID(), tinfo)).second )
+               tinfo->addRef();
             const bool noIdScan = true;
-            if ( pShape->clazz(noIdScan) )  {
-               m_classMap.insert(std::make_pair(pShape->clazz(), pShape));
+            if ( tinfo->clazz(noIdScan) )  {
+               m_classMap.insert(std::make_pair(tinfo->clazz(), tinfo));
             }
             ++oid.second;
           }

@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "PersistentDataModel/Token.h"
-#include "DbStorageSvc.h"
+#include "DbStorageTool.h"
 #include "StorageSvc/DbTypeInfo.h"
 #include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DbContainer.h"
@@ -17,72 +17,27 @@
 
 #include <memory>
 
-// factory function implementation
-IStorageSvc* createStorageSvc(const std::string& componentName){
-  return new DbStorageSvc(componentName);
-}
-   
 /// Standard Constructor.
-DbStorageSvc::DbStorageSvc(const std::string& name)
-: APRMessaging(name),
+DbStorageTool::DbStorageTool(const std::string& type, const std::string& name, const IInterface* parent)
+: AthAlgTool(type, name, parent),
   m_name(name),
-  m_refCount(0),
   m_domH(pool::POOL_StorageType),
   m_ageLimit(2),
   m_type( m_domH.type() ),
-  m_implementation(nullptr)
-{
-  static const char * const als = getenv("POOL_STORAGESVC_DB_AGE_LIMIT");  
-  if ( als )    {
-    int alimit = 2;
-    std::istringstream buf(als);
-    buf >> alimit;
-    if ( alimit > 0 && buf.good() )  {
-      m_ageLimit = alimit;
-      ATH_MSG_INFO( ">   User defined db age limit ($POOL_STORAGESVC_DB_AGE_LIMIT) set to: " << m_ageLimit );
-    }
-  }  
-  // declareProperty("AgeLimit", m_ageLimit);
-}
+  m_techFactory(nullptr)
+{ }
 
 /// Standard destructor.
-DbStorageSvc::~DbStorageSvc() {
-  m_domH.close().ignore();
-  m_domH = 0;
-  if( m_implementation ) {
-    m_implementation->release();
-    m_implementation = nullptr;
+DbStorageTool::~DbStorageTool() {
+  endSession().ignore();
+  if( m_techFactory ) {
+    m_techFactory->release();
+    m_techFactory = nullptr;
   }
 }
 
-//--- IInterface::addRef
-unsigned int DbStorageSvc::addRef()   {
-  m_refCount++;
-  return m_refCount;
-}
 
-//--- IInterface::release
-unsigned int DbStorageSvc::release()   {
-  int count = --m_refCount;
-  if( count <= 0) {
-    delete this;
-  }
-  return count;
-}
-
-/// IService implementation: Initilize Service                          
-StatusCode DbStorageSvc::initialize()   {
-  return StatusCode::SUCCESS;
-}
-
-/// IService implementation: Finalize Service                           
-StatusCode DbStorageSvc::finalize()   {
-  StatusCode rc = m_domH.close();
-  m_domH = 0;
-  return rc;
-}
-
-std::string DbStorageSvc::getContName(FileDescriptor& refDB, Token& persToken) const {
+std::string DbStorageTool::getContName(FileDescriptor& refDB, Token& persToken) const {
   if ( m_domH.isValid() )   {
     DbDatabase dbH( refDB.dbc()->handle() );
     if ( dbH.isValid() )  {
@@ -93,7 +48,7 @@ std::string DbStorageSvc::getContName(FileDescriptor& refDB, Token& persToken) c
 }
 
 /// Retrieve persistent tinfo from Storage manager.
-StatusCode DbStorageSvc::getShape( FileDescriptor&       fDesc,
+StatusCode DbStorageTool::getShape( FileDescriptor&       fDesc,
                                    const Guid&           objType,
                                    const DbTypeInfo*&    tinfo)
 {
@@ -127,7 +82,7 @@ StatusCode DbStorageSvc::getShape( FileDescriptor&       fDesc,
 }
 
 /// Create a persistent tinfo.
-const DbTypeInfo* DbStorageSvc::createShape( const Guid& typeID )
+const DbTypeInfo* DbStorageTool::createShape( const Guid& typeID )
 {
   const DbTypeInfo* typ_info = nullptr;
   if( DbTransform::getShape(typeID, typ_info).isSuccess() ) {
@@ -144,7 +99,7 @@ const DbTypeInfo* DbStorageSvc::createShape( const Guid& typeID )
 }
 
 /// Register object for write
-StatusCode DbStorageSvc::write( FileDescriptor&       fDesc,
+StatusCode DbStorageTool::write( FileDescriptor&       fDesc,
                                 const std::string&    refCont,
                                 int                   technology,
                                 const void*           object,
@@ -187,7 +142,7 @@ StatusCode DbStorageSvc::write( FileDescriptor&       fDesc,
 
 
 /// Read a persistent object from the medium.
-StatusCode DbStorageSvc::read( FileDescriptor& fDesc,
+StatusCode DbStorageTool::read( FileDescriptor& fDesc,
                                const Token&    token,
                                void**          object)
 {
@@ -221,7 +176,7 @@ StatusCode DbStorageSvc::read( FileDescriptor& fDesc,
 
 
 /// Start a new Database Session.
-StatusCode DbStorageSvc::startSession(Io::IoFlag accessmode, int technology, int ageLimit) {
+StatusCode DbStorageTool::startSession(Io::IoFlag accessmode, int technology, int ageLimit) {
   m_type   = DbType(technology).majorType();
   if( m_domH.open(getTechFactory(), m_type, accessmode).isSuccess() )  {
       m_domH.setAgeLimit(ageLimit==-1 ? m_ageLimit : ageLimit);
@@ -232,7 +187,7 @@ StatusCode DbStorageSvc::startSession(Io::IoFlag accessmode, int technology, int
 }
 
 /// Connect to a logical Database unit.
-StatusCode DbStorageSvc::connect(Io::IoFlag mod, FileDescriptor& fDesc) {
+StatusCode DbStorageTool::connect(Io::IoFlag mod, FileDescriptor& fDesc) {
   StatusCode sc = StatusCode::FAILURE;
   fDesc.setDbc(0);
   DbDatabase dbH = m_domH.find(fDesc.FID());
@@ -252,7 +207,7 @@ StatusCode DbStorageSvc::connect(Io::IoFlag mod, FileDescriptor& fDesc) {
 }
 
 /// Disconnect from a logical Database unit.
-StatusCode DbStorageSvc::disconnect(FileDescriptor& fDesc) {
+StatusCode DbStorageTool::disconnect(FileDescriptor& fDesc) {
   DbConnection* dbc = fDesc.dbc();
   ATH_MSG_DEBUG( "Disconnect request for database: FID=" << fDesc.FID() << " PFN=" << fDesc.PFN() );
   if ( dbc )   {
@@ -266,7 +221,7 @@ StatusCode DbStorageSvc::disconnect(FileDescriptor& fDesc) {
 }
 
 /// Query the access mode of a Database unit.
-StatusCode DbStorageSvc::openMode(FileDescriptor& refDB, Io::IoFlag& mode) {
+StatusCode DbStorageTool::openMode(FileDescriptor& refDB, Io::IoFlag& mode) {
   DbConnection* dbc = refDB.dbc();
   if ( dbc )   {
     DbDatabase  dbH( dbc->handle() );
@@ -280,19 +235,19 @@ StatusCode DbStorageSvc::openMode(FileDescriptor& refDB, Io::IoFlag& mode) {
 }
 
 /// End/Finish an existing Transaction sequence.
-StatusCode DbStorageSvc::endTransaction(FileDescriptor& refDB, Transaction::Action typ)
+StatusCode DbStorageTool::endTransaction(FileDescriptor& refDB, Transaction::Action typ)
 {
    return refDB.dbc()->handle()->transAct( typ );
 }
 
 /// Access technology implementations
-ITechFactory* DbStorageSvc::getTechFactory() {
-  if( !m_implementation ) {
+ITechFactory* DbStorageTool::getTechFactory() {
+  if( !m_techFactory ) {
     const std::string &nam = m_type.storageName();
-    m_implementation = Gaudi::PluginService::Factory<ITechFactory*()>::create(nam).release();
-    if( !m_implementation ) {
+    m_techFactory = Gaudi::PluginService::Factory<ITechFactory*()>::create(nam).release();
+    if( !m_techFactory ) {
       ATH_MSG_FATAL( "Failed to load plugin for " << nam << " storage type" );
     }
   }
-  return m_implementation;
+  return m_techFactory;
 }

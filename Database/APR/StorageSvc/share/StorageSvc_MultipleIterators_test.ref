@@ -2,9 +2,18 @@ MultipleIteratorsTest                      INFO Created the test driver
 MultipleIteratorsTest                      INFO Loading shared libraries:
 MultipleIteratorsTest                      INFO  - loading library test_StorageTestDictionary
 MultipleIteratorsTest                      INFO  Testing the writing operations
+MultipleIteratorsTest                      INFO Creating StorageTool
+MultipleIteratorsTest                      INFO Starting ROOT_All WRITE     Session
+ToolSvc.Storage...    INFO Building shape according to reflection information using shape ID for: 
+ToolSvc.Storage...    INFO SimpleTestClass [4E1F4DBB-1973-1974-1999-204F37331A01]
+MultipleIteratorsTest                      INFO Disconnecting StorageTool
+MultipleIteratorsTest                      INFO Ending Session
 MultipleIteratorsTest                      INFO  ...done
 MultipleIteratorsTest                      INFO  Testing the parallel iterators in the same container
-MultipleIteratorsTest                      INFO Closing the session
+MultipleIteratorsTest                      INFO Creating StorageTool
+MultipleIteratorsTest                      INFO Starting ROOT_All READ      Session
+MultipleIteratorsTest                      INFO Disconnecting StorageTool
+MultipleIteratorsTest                      INFO Ending Session
 MultipleIteratorsTest                      INFO  ...done
 MultipleIteratorsTest                      INFO  Exiting...
 MultipleIteratorsTest                      INFO Number of floating tokens : 0

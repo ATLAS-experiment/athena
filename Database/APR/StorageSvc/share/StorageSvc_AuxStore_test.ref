@@ -2,12 +2,14 @@ AuxStoreTest                               INFO Created the test driver
 AuxStoreTest                               INFO Loading shared libraries:
 AuxStoreTest                               INFO  - loading library test_StorageTestDictionary
 AuxStoreTest                               INFO Testing writing, using ROOT_Tree storage type.
-AuxStoreTest                               INFO createStorageSvc
-AuxStoreTest                               INFO startSession
+AuxStoreTest                               INFO Creating StorageTool
+AuxStoreTest                               INFO Starting ROOT_Tree WRITE     Session
 AuxStoreTest                               INFO Session connect
 AuxStoreTest                               INFO Creating objects
 AuxStoreTest                               INFO Creating Shape
 AuxStoreTest                               INFO Writing objects
+ToolSvc.Storage...    INFO Building shape according to reflection information using shape ID for: 
+ToolSvc.Storage...    INFO APRTest::AuxStore [A2222222-B111-C111-D111-E22134511111]
 AuxStoreTest                               INFO Committing transaction
 AuxStoreTest                               INFO Committing transaction
 AuxStoreTest                               INFO Committing transaction
@@ -20,11 +22,12 @@ AuxStoreTest                               INFO Committing transaction
 AuxStoreTest                               INFO Committing transaction
 AuxStoreTest                               INFO Committing transaction
 AuxStoreTest                               INFO Deleting written data objects
-AuxStoreTest                               INFO Disconnecting StorageSvc
+AuxStoreTest                               INFO Disconnecting StorageTool
 AuxStoreTest                               INFO Ending Session
-AuxStoreTest                               INFO Releasing StorageSvc
 AuxStoreTest                               INFO  ...done
 AuxStoreTest                               INFO  Testing the reading operations
+AuxStoreTest                               INFO Creating StorageTool
+AuxStoreTest                               INFO Starting ROOT_All READ      Session
 AuxStoreTest                               INFO 0: 0   : 0  : withdict[0]:  val=0
 AuxStoreTest                               INFO  
 AuxStoreTest                               INFO 1: 1   : 2  : withdict[1]:  val=0
@@ -226,16 +229,19 @@ AuxStoreTest                               INFO
 AuxStoreTest                               INFO 9: 9009   : 45018  : withdict[9]:  val=9
 AuxStoreTest                               INFO  
 AuxStoreTest                               INFO Objects read: 10
-AuxStoreTest                               INFO Closing the session
+AuxStoreTest                               INFO Disconnecting StorageTool
+AuxStoreTest                               INFO Ending Session
 AuxStoreTest                               INFO  ...done
 AuxStoreTest                               INFO ----------------------------------------------------------------------------------------------------
 AuxStoreTest                               INFO Testing writing, using ROOT_RNTuple storage type.
-AuxStoreTest                               INFO createStorageSvc
-AuxStoreTest                               INFO startSession
+AuxStoreTest                               INFO Creating StorageTool
+AuxStoreTest                               INFO Starting ROOT_RNTuple WRITE     Session
 AuxStoreTest                               INFO Session connect
 AuxStoreTest                               INFO Creating objects
 AuxStoreTest                               INFO Creating Shape
 AuxStoreTest                               INFO Writing objects
+ToolSvc.Storage...    INFO Building shape according to reflection information using shape ID for: 
+ToolSvc.Storage...    INFO APRTest::AuxStore [A2222222-B111-C111-D111-E22134511111]
 AuxStoreTest                               INFO Committing transaction
 AuxStoreTest                               INFO Committing transaction
 AuxStoreTest                               INFO Committing transaction
@@ -248,11 +254,12 @@ AuxStoreTest                               INFO Committing transaction
 AuxStoreTest                               INFO Committing transaction
 AuxStoreTest                               INFO Committing transaction
 AuxStoreTest                               INFO Deleting written data objects
-AuxStoreTest                               INFO Disconnecting StorageSvc
+AuxStoreTest                               INFO Disconnecting StorageTool
 AuxStoreTest                               INFO Ending Session
-AuxStoreTest                               INFO Releasing StorageSvc
 AuxStoreTest                               INFO  ...done
 AuxStoreTest                               INFO  Testing the reading operations
+AuxStoreTest                               INFO Creating StorageTool
+AuxStoreTest                               INFO Starting ROOT_All READ      Session
 AuxStoreTest                               INFO 0: 0   : 0  : withdict[0]:  val=0
 AuxStoreTest                               INFO  
 AuxStoreTest                               INFO 1: 1   : 2  : withdict[1]:  val=0
@@ -454,6 +461,7 @@ AuxStoreTest                               INFO
 AuxStoreTest                               INFO 9: 9009   : 45018  : withdict[9]:  val=9
 AuxStoreTest                               INFO  
 AuxStoreTest                               INFO Objects read: 10
-AuxStoreTest                               INFO Closing the session
+AuxStoreTest                               INFO Disconnecting StorageTool
+AuxStoreTest                               INFO Ending Session
 AuxStoreTest                               INFO  ...done
 AuxStoreTest                               INFO Number of floating tokens : 0

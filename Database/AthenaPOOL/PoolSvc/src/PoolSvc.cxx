@@ -26,7 +26,6 @@
 #include "Container.h"
 #include "TokenIterator.h"
 #include "PoolSvc/FileCatalogUtils.h"
-#include "SessionTool.h"
 
 #include "StorageSvc/DbType.h"
 #include "StorageSvc/DbPrint.h"

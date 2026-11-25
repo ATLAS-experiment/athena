@@ -1,59 +1,17 @@
-Tue Aug 25 12:07:50 EDT 2026
-Preloading libexcabort.so
-ApplicationMgr     SUCCESS 
-====================================================================================================================================
-                                                   Welcome to ApplicationMgr (GaudiCoreSvc v27r1p99)
-                                          running on karma on Tue Aug 25 12:07:54 2026
-====================================================================================================================================
 ApplicationMgr        INFO Application Manager Configured successfully
-Py:ComponentAccumulator    INFO Athena job with pid 3659688
-CoreDumpSvc          INFO Handling signals: 11(Segmentation fault) 7(Bus error) 4(Illegal instruction) 6(Aborted) 8(Floating point exception) 14(Alarm clock) 
 AthenaEventLoopMgr   INFO Initializing AthenaEventLoopMgr
 PyComponentMgr       INFO Initializing PyComponentMgr...
 LoadReadDicts        INFO Initializing LoadReadDicts...
-ClassIDSvc           INFO getRegistryEntries: read 14994 CLIDRegistry entries for module ALL
-ClassIDSvc           INFO getRegistryEntries: read 688 CLIDRegistry entries for module ALL
 DecisionSvc          INFO Inserting stream: StreamStream1 with no Algs
 AthDictLoaderSvc     INFO in initialize...
 AthDictLoaderSvc     INFO acquired Dso-registry
 MetaDataSvc          INFO Initializing MetaDataSvc
 Stream...ream1Tool   INFO Initializing StreamStream1.StreamStream1Tool
-PoolSvc              INFO Set connectionsvc retry/timeout/IDLE timeout to  'ConnectionRetrialPeriod':300/ 'ConnectionRetrialTimeOut':3600/ 'ConnectionTimeOut':5 seconds with connection cleanup disabled
-PoolSvc              INFO Frontier compression level set to 5
-DBReplicaSvc         INFO Read replica configuration from /home/sss/atlas/rootaccess/build-clang/share/dbreplica.config
-DBReplicaSvc         INFO No specific match for domain found - use default fallback
-DBReplicaSvc         INFO Total of 1 servers found for host karma [atlas_dd ]
-PoolSvc              INFO Successfully setup replica sorting algorithm
-PoolSvc              INFO Setting up FileCatalog and Streams
-PoolSvc              INFO POOL WriteCatalog is file:xAODTestTypelessRead_catalog.xml
-Domain[ROOT_All]     INFO >   Access   DbDomain     NOT_OPEN  [ROOT_All]
-MetaDataSvc          INFO Found MetaDataTools = PublicToolHandleArray([])
-PoolSvc              INFO File is not in Catalog! Attempt to open it anyway.
-xaoddata.root        INFO ->  Access   DbDatabase   READ      [ROOT_All] 1AA9ED5E-1E4B-3A55-A718-0FF0FF0FF0FF
-RootDatabase         INFO xaoddata.root File version:64002
-xaoddata.root        INFO Database being retired...
-xaoddata.root        INFO ->  Deaccess DbDatabase   READ      [ROOT_All] 1AA9ED5E-1E4B-3A55-A718-0FF0FF0FF0FF
-Domain[ROOT_All]     INFO >   Deaccess DbDomain     NOT_OPEN  [ROOT_All]
-Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All]
-xaoddata.root        INFO ->  Access   DbDatabase   READ      [ROOT_All] 18D88254-A09F-11F1-94B2-CE324ACF4E4B
-RootDatabase         INFO xaoddata.root File version:64002
-StreamStream1        INFO Found HelperTools = PrivateToolHandleArray(['xAODMaker::EventFormatStreamHelperTool/Stream1_EventFormatStreamHelperTool','Athena::ThinningCacheTool/ThinningCacheTool_StreamStream1'])
 StreamStream1        INFO Data output: xaoddata3.root
-StreamStream1        INFO I/O reinitialization...
-ClassIDSvc           INFO getRegistryEntries: read 575 CLIDRegistry entries for module ALL
-ClassIDSvc           INFO getRegistryEntries: read 15 CLIDRegistry entries for module ALL
-ClassIDSvc           INFO getRegistryEntries: read 15 CLIDRegistry entries for module ALL
+StreamStream1        INFO ../O reinitialization...
 AthenaEventLoopMgr   INFO Setup EventSelector service EventSelector
 ApplicationMgr       INFO Application Manager Initialized successfully
-xaoddata.root        INFO Database being retired...
-xaoddata.root        INFO ->  Deaccess DbDatabase   READ      [ROOT_All] 18D88254-A09F-11F1-94B2-CE324ACF4E4B
-Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All]
-Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All]
-xaoddata.root        INFO ->  Access   DbDatabase   READ      [ROOT_All] 18D88254-A09F-11F1-94B2-CE324ACF4E4B
-RootDatabase         INFO xaoddata.root File version:64002
 ApplicationMgr       INFO Application Manager Started successfully
-EventP...stencySvc   INFO Added successfully Conversion service AthenaPoolCnvSvc
-TBranc...DynReader   INFO RootAuxDynIO/src/TBranchAuxDynReader.cxx:326 (TBranchAuxDynReader::BranchInfo&TBranchAuxDynReader::getBranchInfo(const unsigned long&, const SG::AuxStoreInternal&)): attribute 'mcEventNumber' (id=1 typename=unsigned long) has different type than the branch: ULong64_t  Marking for schema evolution.
 AthenaEventLoopMgr   INFO   ===>>>  start of run 0    <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #1, run #0 0 events processed so far  <<<===
 xAODTe...elessRead   INFO 1
@@ -285,8 +243,6 @@ xAODTe...elessRead   INFO
     dVar1: 901; 
 
 xAODTe...elessRead   INFO pvec types: dpInt1/unsigned int dpvFloat/std::vector<float,std::allocator<float> > pFloat/float pInt/unsigned int pvFloat/std::vector<float,std::allocator<float> > pvInt/std::vector<int,std::allocator<int> > 
-TBranc...DynReader   INFO RootAuxDynIO/src/TBranchAuxDynReader.cxx:326 (TBranchAuxDynReader::BranchInfo&TBranchAuxDynReader::getBranchInfo(const unsigned long&, const SG::AuxStoreInternal&)): attribute 'dpInt1' (id=354 typename=unsigned int) has different type than the branch: SG::PackedContainer<unsigned int,allocator<unsigned int> >  Marking for schema evolution.
-TBranc...DynReader   INFO RootAuxDynIO/src/TBranchAuxDynReader.cxx:326 (TBranchAuxDynReader::BranchInfo&TBranchAuxDynReader::getBranchInfo(const unsigned long&, const SG::AuxStoreInternal&)): attribute 'dpvFloat' (id=355 typename=std::vector<float>) has different type than the branch: SG::PackedContainer<vector<float>,allocator<vector<float> > >  Marking for schema evolution.
 xAODTe...elessRead   INFO   
     dpInt1: 101; 
     dpvFloat: []; 
@@ -516,16 +472,12 @@ xAODTe...elessRead   INFO
     plink: cvec[3]; 
     vlinks: [ctrig[4]; [inv]; cvec[6]; ]; 
 
-ClassIDSvc           INFO getRegistryEntries: read 328 CLIDRegistry entries for module ALL
-Domain[ROOT_All]     INFO >   Access   DbDomain     WRITE     [ROOT_All]
-xaoddata3.root       INFO ->  Access   DbDatabase   WRITE     [ROOT_All] 2928F17A-A09F-11F1-8360-CE324ACF4E4B
-RootDatabase         INFO xaoddata3.root File version:64002
-StorageSvc           INFO Building shape according to reflection information using shape ID for: 
-StorageSvc           INFO DataVector<DMTest::H_v2> [CD6C3074-425B-4C08-AF1C-43D7E8C84288]
-StorageSvc           INFO Building shape according to reflection information using shape ID for: 
-StorageSvc           INFO DMTest::HAuxContainer_v2 [2BDBFB04-C1C2-4B14-A977-3A61B8054700]
-StorageSvc           INFO Building shape according to reflection information using shape ID for: 
-StorageSvc           INFO ViewVector<DataVector<DMTest::H_v2> > [17849966-6667-4732-A1C7-096FBC778CF3]
+Pool...StorageTool   INFO Building shape according to reflection information using shape ID for: 
+Pool...StorageTool   INFO DataVector<DMTest::H_v2> [CD6C3074-425B-4C08-AF1C-43D7E8C84288]
+Pool...StorageTool   INFO Building shape according to reflection information using shape ID for: 
+Pool...StorageTool   INFO DMTest::HAuxContainer_v2 [2BDBFB04-C1C2-4B14-A977-3A61B8054700]
+Pool...StorageTool   INFO Building shape according to reflection information using shape ID for: 
+Pool...StorageTool   INFO ViewVector<DataVector<DMTest::H_v2> > [17849966-6667-4732-A1C7-096FBC778CF3]
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #1, run #0 1 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #2, run #0 1 events processed so far  <<<===
 xAODTe...elessRead   INFO 2
@@ -9055,29 +9007,9 @@ xAODTe...elessRead   INFO
     vlinks: [[inv]; cvec[4]; ]; 
 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #20, run #0 20 events processed so far  <<<===
-ClassIDSvc           INFO getRegistryEntries: read 61 CLIDRegistry entries for module ALL
-xaoddata.root        INFO Database being retired...
-xaoddata.root        INFO ->  Deaccess DbDatabase   READ      [ROOT_All] 18D88254-A09F-11F1-94B2-CE324ACF4E4B
-xaoddata3.root       INFO Database being retired...
-xaoddata3.root       INFO ->  Deaccess DbDatabase   WRITE     [ROOT_All] 2928F17A-A09F-11F1-8360-CE324ACF4E4B
-Domain[ROOT_All]     INFO >   Deaccess DbDomain     WRITE     [ROOT_All]
 ApplicationMgr       INFO Application Manager Stopped successfully
-LoadReadDicts        INFO Finalizing LoadReadDicts...
-Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All]
-AthenaPoolCnvSvc     INFO PerfStats ----------------------------------------
-AthenaPoolCnvSvc     INFO PerfStats Timing Measurements for AthenaPoolCnvSvc
-AthenaPoolCnvSvc     INFO PerfStats ----------------------------------------
-AthenaPoolCnvSvc     INFO PerfStats | cObjR_ALL       |             132 ms |
-AthenaPoolCnvSvc     INFO PerfStats | commitOutput    |              63 ms |
-AthenaPoolCnvSvc     INFO PerfStats | fRep_ALL        |             169 ms |
-AthenaPoolCnvSvc     INFO PerfStats | cObj_ALL        |             283 ms |
-AthenaPoolCnvSvc     INFO PerfStats | cRepR_ALL       |              67 ms |
-AthenaPoolCnvSvc     INFO PerfStats | cRep_ALL        |              10 ms |
-AthenaPoolCnvSvc     INFO PerfStats ----------------------------------------
 AthDictLoaderSvc     INFO in finalize...
-DecisionSvc          INFO Finalized successfully.
 ToolSvc              INFO Removing all tools created by ToolSvc
-PyComponentMgr       INFO Finalizing PyComponentMgr...
 ApplicationMgr       INFO Application Manager Finalized successfully
 ApplicationMgr       INFO Application Manager Terminated successfully
 Py:Athena            INFO leaving with code 0: "successful run"

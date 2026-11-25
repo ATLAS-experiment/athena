@@ -1,61 +1,56 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef STORAGESVC_ISTORAGESVC_H
-#define STORAGESVC_ISTORAGESVC_H
 
-// Framework include files
-#include "StorageSvc/pool.h"
-#include "DataModelRoot/RootType.h"
+#ifndef STORAGESVC_DBSTORAGETOOL_H
+#define STORAGESVC_DBSTORAGETOOL_H
 
-// STL include files
-#include <string>
+#include "StorageSvc/DbDomain.h"
+#include "StorageSvc/IStorageTool.h"
 
-// Forward declarations
-class Guid;
-class Token;
-class StatusCode;
-class FileDescriptor;
+class ITechFactory;
 class DbOption;
-class DbTypeInfo;
 
-/** @class IStorageSvc IStorageSvc.h StorageSvc/IStorageSvc.h
+/** @class DbStorageTool DbStorageTool.h StorageSvc/DbStorageTool.h
     *
-    * The IStorageSvc interface is able to handle user request for
+    * The DbStorageTool class is able to handle user request for
     *     - transient objects to become persistent and
-    *     - persistent objects to be made trasient.
+    *     - persistent objects to be made transient.
     *     What the storage manager however needs to perform this task 
     *     are object mappings, which translate between the two representations.
     *
-    * The activity of the storage manager includes the Transaction handling and
-    * hence the management of
-    *     - Database connections: 
-    *       For file based technologies, such as ROOT, this is involves the opening of the file.
-    *     - Database Transactions: Start and end a Transaction.
+    * This functionality is defined in the IStorageTool interface and 
+    * implemented in the DbStorageTool class. Please refer to the header
+    * file StorageSvc/IStorageTool for further details.
     *
     * @author  Markus Frank
     */
+class DbStorageTool  : public IStorageTool
+{
+  private:
+    /// Service Name                               
+    std::string         m_name;
+    /// Database domain handle
+    DbDomain            m_domH;
+    /// Property: AgeLimit indicating the maximal allowed age of files
+    int                 m_ageLimit;
+    /// Technology type
+    DbType              m_type;
+    /// Loaded StorageSvc implementation type (for m_type)
+    ITechFactory*       m_techFactory;
 
-class IStorageSvc   {
   public:
-    /// Destructor - not protected for now because we create multipile instnces of 
-    /// this object by hand and want to be able to use auto_ptr
-    virtual ~IStorageSvc()   { }
+    /// Standard constructor for a Gaudi component
+    explicit DbStorageTool(const std::string& type, const std::string& name, const IInterface* parent);
 
-    /// IInterface implementation: Reference Interface instance               
-    virtual unsigned int addRef() = 0;
+    /// Standard destructor.
+    virtual ~DbStorageTool();
 
-    /// IInterface implementation: Release Interface instance                 
-    virtual unsigned int release() = 0;
+    DbStorageTool (const DbStorageTool&) = delete;
+    DbStorageTool& operator= (const DbStorageTool&) = delete;
 
-    /// Get container name for object
-    /**
-      * @param   refDB     [IN] Reference to Database descriptor 
-      * @param   pToken    [IN] Token to the persistent object.
-      * @return                 std::string container name.
-      */
-    virtual std::string getContName(FileDescriptor& refDB,
-                                    Token&          pToken) const = 0;
+    /// Retrieve the name of this tool
+    virtual const std::string& name() const override final  { return m_name;  }
 
     /// Register object for write
     /**
@@ -69,48 +64,57 @@ class IStorageSvc   {
       *
       * @return                 StatusCode code indicating success or failure.
       */
-    virtual StatusCode write(  FileDescriptor&       refDB,
-                               const std::string&    refCont,
-                               int                   technology,
-                               const void*           object,
-                               const RootType        type,
-                               Token*&               refpTok) = 0;
-
+    virtual StatusCode write( FileDescriptor&       refDB,
+                              const std::string&    refCont,
+                              int                   technology,
+                              const void*           object,
+                              const RootType        type,
+                              Token*&               refpTok) override final;
 
     /// Read a persistent object from the medium.
     /** Reading an object does not create the object.
       *
       * @param   refDB     [IN] Reference to Database descriptor 
-      * @param   pToken    [IN] Reference to persistent token information.
+      * @param   persToken [IN] Reference to persistent token information.
       * @param   object   [OUT] Pointer to persistent data pointer.
-      * 
       * @return                 StatusCode code indicating success or failure.
       */
     virtual StatusCode read( FileDescriptor& refDB,
-                             const Token&    pToken,
-                             void**          object) = 0;
+                             const Token&    persToken,
+                             void**          object) override final;
 
-    /** Retrieve persistent tinfo from Storage manager.
-      * The persistent tinfo is saved at write time to a Database.
-      * It should match the transient type tinfo when reading
+    /// Get container name for object
+    /**
+      * @param   refDB     [IN] Reference to Database descriptor
+      * @param   pToken    [IN] Token to the persistent object.
+      * @return                 std::string container name.
+      */
+    virtual std::string getContName(FileDescriptor& refDB,
+                                    Token&          persToken) const override final;
+
+    /// Retrieve persistent tinfo from Storage manager.
+    /** The persistent tinfo is saved at write time to a Database.
+      * To match the transient tinfo of an object to the persistent tinfo of 
+      * the data at the time the data were written should allow for schema
+      * evolution and object transformation(s).
       *
       * @param   refDB     [IN] Reference to Database descriptor 
       * @param   objType   [IN] Shape identifier.
-      * @param   tinfo    [OUT] Persistent shpae of a given object type.
+      * @param   tinfo    [OUT] Persistent tinfo of a given object type.
       *
       * @return                 StatusCode code indicating success or failure.
       */
     virtual StatusCode getShape(  FileDescriptor&       refDB,
                                   const Guid&           objType,
-                                  const DbTypeInfo*&    tinfo) = 0;
+                                  const DbTypeInfo*&    tinfo) override final;
 
     /// Create a Shape representation based on a ShapeID
     /**
-      * @param   typeID   [IN] Shape identifier.
+      * @param   typeID   [IN] Type identifier.
       *
       * @return            Handle to persistent mapping of a given object type.
       */
-    virtual const DbTypeInfo* createShape( const Guid& typeID ) = 0;
+    virtual const DbTypeInfo* createShape( const Guid& typeID ) override final;
 
     /// Start a new Database Session.
     /** The Database session handles Databases of one given type. This
@@ -128,18 +132,18 @@ class IStorageSvc   {
       *
       * @return                 StatusCode code indicating success or failure.
       */
-      virtual StatusCode startSession(Io::IoFlag mode, int tech, int ageLimit = -1) = 0;
+    virtual StatusCode startSession(Io::IoFlag mode, int tech, int ageLimit = -1) override final;
 
     /// End the Database session.
     /** The  request to end a Database session requires, that all pending 
       * Transactions and connections are closed. Otherwise internally the
       * close will be forced and  potentially data on pending Transactions
-      * will be lost. The token will be invalidated may not be used at any 
-      * longer once the session ended.
+      * will be lost.
       *
       * @return                 StatusCode code indicating success or failure.
       */
-    virtual StatusCode endSession() = 0;
+    virtual StatusCode endSession() override final
+    { return m_domH.close(); }
 
     /// Connect to a logical Database unit.
     /** A connection is equivalent to the triple (OCISession, OCIServer, 
@@ -156,7 +160,7 @@ class IStorageSvc   {
       *
       * @return                 StatusCode code indicating success or failure.
       */
-    virtual StatusCode connect(Io::IoFlag mode, FileDescriptor& refDB) = 0;
+    virtual StatusCode connect(Io::IoFlag mode, FileDescriptor& refDB) override final;
 
     /// Disconnect from a logical Database unit.
     /** The  request for disconnect requires, that all pending Transactions
@@ -172,16 +176,18 @@ class IStorageSvc   {
       *
       * @return                 StatusCode code indicating success or failure.
       */
-    virtual StatusCode disconnect(FileDescriptor&     refDB) = 0;
+    virtual StatusCode disconnect(  FileDescriptor&  refDB) override final;
 
     /// Query the access mode of a Database unit.
     /**
-      * @param    refDB    [IN] Descriptor of the Database to be queried.
+      * @param    refDB    [IN] Descriptor of the Database to be queried. 
       * @param    mode    [OUT] Open mod to the database.
       *
       * @return                 StatusCode code indicating success or failure.
       */
-    virtual StatusCode openMode(FileDescriptor& refDB, Io::IoFlag& mode ) = 0;
+    virtual StatusCode openMode( FileDescriptor&     refDB,
+                                 Io::IoFlag&         mode ) override final;
+
 
     /// End/Finish an existing Transaction sequence.
     /** At  this  phase all  objects, which were marked for  write when 
@@ -190,13 +196,14 @@ class IStorageSvc   {
       * is invalidated and may no longer be used independent wether the 
       * Transaction was successful or not.
       *
-      * @param    conn  [IN]    Database connection
+      * @param    conn  [IN]    DB connection
       * @param    typ   [IN]    Enum indicating an action to be performed.
       *                         Valid arguments are COMMIT
       *
       * @return                 StatusCode code indicating success or failure.
       */
-    virtual StatusCode endTransaction(FileDescriptor& refDB, Transaction::Action typ) = 0;
+    virtual StatusCode endTransaction( FileDescriptor& refDB,
+                                       Transaction::Action typ) override final;
 
     /// Access options for a given database domain.
     /** Domain options are global options, which refer to the
@@ -207,9 +214,10 @@ class IStorageSvc   {
       *
       *  @param   opt       [IN] Reference to option object.
       *
-      *  @return StatusCode code indicating success or failure.
+      *  @return StatusCode code indicating success or failure.  
       */
-    virtual StatusCode getDomainOption(DbOption& opt) = 0;
+    virtual StatusCode getDomainOption(DbOption& opt) override final
+    { return m_domH.getOption(opt); }
 
     /// Set options for a given database domain.
     /** Domain options are global options, which refer to the
@@ -222,12 +230,13 @@ class IStorageSvc   {
       *
       *  @return StatusCode code indicating success or failure.
       */
-    virtual StatusCode setDomainOption(const DbOption& opt) = 0;
+    virtual StatusCode setDomainOption(const DbOption& opt) override final
+    { return m_domH.setOption(opt); }
+
+  private:
+    /// Access technology implementations
+    ITechFactory* getTechFactory();
 
 };
-
-// Factory function
-IStorageSvc* createStorageSvc(const std::string& componentName);
-  
 
 #endif

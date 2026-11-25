@@ -5,6 +5,14 @@ Persistency_Fun...    INFO  - loading library test_PoolSvcTestDictionaryDict
 Persistency_Fun...    INFO Writing objects in the database using ROOT_Key storage type.
 Persistency_Fun...    INFO Creating the persistency service
 Persistency_Fun...    INFO Writing 100 objects of each type
+ToolSvc.TestSes...    INFO Building shape according to reflection information using shape ID for: 
+ToolSvc.TestSes...    INFO SimpleTestClass [4E1F4DBB-1973-1974-1999-204F37331A01]
+ToolSvc.TestSes...    INFO Building shape according to reflection information using shape ID for: 
+ToolSvc.TestSes...    INFO TestClassPrimitives [4E1F4DBB-1973-1974-1999-204F37331A00]
+ToolSvc.TestSes...    INFO Building shape according to reflection information using shape ID for: 
+ToolSvc.TestSes...    INFO TestClassSTLContainers [4E1F4DBB-1973-1974-1999-204F37331A02]
+ToolSvc.TestSes...    INFO Building shape according to reflection information using shape ID for: 
+ToolSvc.TestSes...    INFO TestClassVectors [4E1F4DBB-1973-1974-1999-204F37331A03]
 Persistency_Fun...    INFO Committing the transaction.
 Persistency_Fun...    INFO ...done
 Persistency_Fun...    INFO Reading the objects back from the database.
@@ -26,6 +34,14 @@ Persistency_Fun...    INFO --------------------------------
 Persistency_Fun...    INFO Writing objects in the database using ROOT_Tree storage type.
 Persistency_Fun...    INFO Creating the persistency service
 Persistency_Fun...    INFO Writing 100 objects of each type
+ToolSvc.TestSes...    INFO Building shape according to reflection information using shape ID for: 
+ToolSvc.TestSes...    INFO SimpleTestClass [4E1F4DBB-1973-1974-1999-204F37331A01]
+ToolSvc.TestSes...    INFO Building shape according to reflection information using shape ID for: 
+ToolSvc.TestSes...    INFO TestClassPrimitives [4E1F4DBB-1973-1974-1999-204F37331A00]
+ToolSvc.TestSes...    INFO Building shape according to reflection information using shape ID for: 
+ToolSvc.TestSes...    INFO TestClassSTLContainers [4E1F4DBB-1973-1974-1999-204F37331A02]
+ToolSvc.TestSes...    INFO Building shape according to reflection information using shape ID for: 
+ToolSvc.TestSes...    INFO TestClassVectors [4E1F4DBB-1973-1974-1999-204F37331A03]
 Persistency_Fun...    INFO Committing the transaction.
 Persistency_Fun...    INFO ...done
 Persistency_Fun...    INFO Reading the objects back from the database.
@@ -47,6 +63,14 @@ Persistency_Fun...    INFO --------------------------------
 Persistency_Fun...    INFO Writing objects in the database using ROOT_TreeIndex storage type.
 Persistency_Fun...    INFO Creating the persistency service
 Persistency_Fun...    INFO Writing 100 objects of each type
+ToolSvc.TestSes...    INFO Building shape according to reflection information using shape ID for: 
+ToolSvc.TestSes...    INFO SimpleTestClass [4E1F4DBB-1973-1974-1999-204F37331A01]
+ToolSvc.TestSes...    INFO Building shape according to reflection information using shape ID for: 
+ToolSvc.TestSes...    INFO TestClassPrimitives [4E1F4DBB-1973-1974-1999-204F37331A00]
+ToolSvc.TestSes...    INFO Building shape according to reflection information using shape ID for: 
+ToolSvc.TestSes...    INFO TestClassSTLContainers [4E1F4DBB-1973-1974-1999-204F37331A02]
+ToolSvc.TestSes...    INFO Building shape according to reflection information using shape ID for: 
+ToolSvc.TestSes...    INFO TestClassVectors [4E1F4DBB-1973-1974-1999-204F37331A03]
 Persistency_Fun...    INFO Committing the transaction.
 Persistency_Fun...    INFO ...done
 Persistency_Fun...    INFO Reading the objects back from the database.
@@ -68,6 +92,14 @@ Persistency_Fun...    INFO --------------------------------
 Persistency_Fun...    INFO Writing objects in the database using ROOT_RNTuple storage type.
 Persistency_Fun...    INFO Creating the persistency service
 Persistency_Fun...    INFO Writing 100 objects of each type
+ToolSvc.TestSes...    INFO Building shape according to reflection information using shape ID for: 
+ToolSvc.TestSes...    INFO SimpleTestClass [4E1F4DBB-1973-1974-1999-204F37331A01]
+ToolSvc.TestSes...    INFO Building shape according to reflection information using shape ID for: 
+ToolSvc.TestSes...    INFO TestClassPrimitives [4E1F4DBB-1973-1974-1999-204F37331A00]
+ToolSvc.TestSes...    INFO Building shape according to reflection information using shape ID for: 
+ToolSvc.TestSes...    INFO TestClassSTLContainers [4E1F4DBB-1973-1974-1999-204F37331A02]
+ToolSvc.TestSes...    INFO Building shape according to reflection information using shape ID for: 
+ToolSvc.TestSes...    INFO TestClassVectors [4E1F4DBB-1973-1974-1999-204F37331A03]
 Persistency_Fun...    INFO Committing the transaction.
 Persistency_Fun...    INFO ...done
 Persistency_Fun...    INFO Reading the objects back from the database.

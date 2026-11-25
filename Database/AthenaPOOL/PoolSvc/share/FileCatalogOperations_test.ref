@@ -5,6 +5,8 @@ FileCatalogOper...    INFO  - loading library test_PoolSvcTestDictionaryDict
 FileCatalogOper...    INFO Writing objects in the database.
 FileCatalogOper...    INFO Creating the persistency service
 FileCatalogOper...    INFO Writing 100 objects
+ToolSvc.TestSes...    INFO Building shape according to reflection information using shape ID for: 
+ToolSvc.TestSes...    INFO SimpleTestClass [4E1F4DBB-1973-1974-1999-204F37331A01]
 FileCatalogOper...    INFO Committing the transaction.
 FileCatalogOper...    INFO ...done
 FileCatalogOper...    INFO Adding LFNs in the file catalog.

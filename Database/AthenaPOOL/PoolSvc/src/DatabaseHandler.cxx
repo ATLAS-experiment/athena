@@ -5,7 +5,7 @@
 #include "DatabaseHandler.h"
 #include "Container.h"
 #include "PersistentDataModel/Token.h"
-#include "StorageSvc/IStorageSvc.h"
+#include "StorageSvc/IStorageTool.h"
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbOption.h"
 #include "StorageSvc/DbConnection.h"
@@ -13,38 +13,38 @@
 #include <exception>
 #include <memory>
 
-DatabaseHandler::DatabaseHandler( IStorageSvc& storageSvc,
+DatabaseHandler::DatabaseHandler( ToolHandle<IStorageTool> storageTool,
                                   long technology,
                                   const std::string& fid,
                                   const std::string& pfn,
                                   Io::IoFlag accessmode ) :
-        m_storageSvc( storageSvc ),
+        m_storageTool( storageTool ),
         m_fileDescriptor( fid, pfn ),
         m_technology( technology ),
         m_accessMode( accessmode ) {
-   if ( ! m_storageSvc.connect( m_accessMode, m_fileDescriptor ).isSuccess() ) {
+   if ( ! m_storageTool->connect( m_accessMode, m_fileDescriptor ).isSuccess() ) {
       throw std::runtime_error( "Could not connect to the database (APR: \" DatabaseHandler::DatabaseHandler \" from \" PersistencySvc \")" );
    }
 }
 
 DatabaseHandler::~DatabaseHandler() {
    Io::IoFlag mode = Io::INVALID;
-   if( m_storageSvc.openMode(m_fileDescriptor, mode).isSuccess() ) {
-      m_storageSvc.disconnect( m_fileDescriptor ).ignore();
+   if( m_storageTool->openMode(m_fileDescriptor, mode).isSuccess() ) {
+      m_storageTool->disconnect( m_fileDescriptor ).ignore();
    }
 }
 
 bool DatabaseHandler::commitTransaction() {
-   return m_storageSvc.endTransaction( m_fileDescriptor, Transaction::TRANSACT_COMMIT ).isSuccess() &&
-          m_storageSvc.endTransaction( m_fileDescriptor, Transaction::TRANSACT_FLUSH ).isSuccess();
+   return m_storageTool->endTransaction( m_fileDescriptor, Transaction::TRANSACT_COMMIT ).isSuccess() &&
+          m_storageTool->endTransaction( m_fileDescriptor, Transaction::TRANSACT_FLUSH ).isSuccess();
 }
 
 bool DatabaseHandler::commitAndHoldTransaction() {
-   return m_storageSvc.endTransaction( m_fileDescriptor, Transaction::TRANSACT_COMMIT ).isSuccess();
+   return m_storageTool->endTransaction( m_fileDescriptor, Transaction::TRANSACT_COMMIT ).isSuccess();
 }
 
 bool DatabaseHandler::disconnectTransaction() {
-   return ( m_storageSvc.disconnect( m_fileDescriptor ).isSuccess() );
+   return ( m_storageTool->disconnect( m_fileDescriptor ).isSuccess() );
 }
 
 std::vector< std::string > DatabaseHandler::containers() {
@@ -57,7 +57,7 @@ std::vector< std::string > DatabaseHandler::containers() {
    for ( std::vector<const Token*>::const_iterator iToken = containerTokens.begin();
          iToken != containerTokens.end(); ++iToken ) {
       Token tok (*iToken);
-      result.push_back( m_storageSvc.getContName(m_fileDescriptor, tok) );
+      result.push_back( m_storageTool->getContName(m_fileDescriptor, tok) );
    }
    return result;
 }
@@ -95,7 +95,7 @@ Token* DatabaseHandler::writeObject( const std::string& containerName,
                                      const void* object,
                                      const RootType& type ) {
   Token* token = nullptr;
-  if( !m_storageSvc.write( m_fileDescriptor,
+  if( !m_storageTool->write( m_fileDescriptor,
                            containerName,
                            minorTechnology,
                            object,
@@ -108,7 +108,7 @@ Token* DatabaseHandler::writeObject( const std::string& containerName,
 
 void* DatabaseHandler::readObject( const Token& token, void* object ) {
   void* result( object );
-  if( !m_storageSvc.read( m_fileDescriptor, token, &result ).isSuccess() ) {
+  if( !m_storageTool->read( m_fileDescriptor, token, &result ).isSuccess() ) {
      return nullptr;
   }
   return result;
