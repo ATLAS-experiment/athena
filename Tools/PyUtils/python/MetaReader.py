@@ -2005,8 +2005,7 @@ def dataheader_nentries(infile):
         infile = ROOT.TFile.Open(infile)
 
     # with the canonical naming scheme the DataHeader is stored in the EventData RNTuple
-    for name in (PoolOpts.TTreeNames.DataHeader, PoolOpts.RNTupleNames.DataHeader,
-                 PoolOpts.RNTupleNames.EventData):
+    for name in {PoolOpts.TTreeNames.DataHeader} | PoolOpts.RNTupleNames.DataHeader:
         obj = infile.Get(name)
         msg.debug(f"dataheader_nentries: {name=}, {obj=}, {type(obj)=}")
         if not obj:
