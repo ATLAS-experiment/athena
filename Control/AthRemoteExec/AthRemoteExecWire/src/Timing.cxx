@@ -33,8 +33,8 @@ float percentile(const std::vector<float>& sorted, float fraction) {
 
 struct Phase {
   std::string_view name;
-  Clock::time_point RequestTiming::* from;
-  Clock::time_point RequestTiming::* to;
+  Clock::time_point RequestTiming::* from = nullptr;
+  Clock::time_point RequestTiming::* to = nullptr;
 };
 
 /// The phases, in the order a request meets them.
