@@ -33,6 +33,8 @@ class BTaggingLargeREfficiencyJsonTool: public asg::AsgTool,
   ASG_TOOL_CLASS2 (BTaggingLargeREfficiencyJsonTool, IBTaggingLargeREfficiencyJsonTool, CP::IReentrantSystematicsTool )
 
   public:
+  using json = nlohmann::ordered_json;
+
   BTaggingLargeREfficiencyJsonTool( const std::string& name );
   virtual ~BTaggingLargeREfficiencyJsonTool();
   StatusCode initialize() override;
@@ -49,14 +51,13 @@ class BTaggingLargeREfficiencyJsonTool: public asg::AsgTool,
   Gaudi::Property<std::string> m_outputName {this, "OutputName", "", "Output name of the tagger"};
   Gaudi::Property<std::string> m_OP {this, "OperatingPoint", "", "Operating point"};
   Gaudi::Property<std::string> m_jetAuthor {this, "JetAuthor", "", "Jet collection"};
-  Gaudi::Property<std::string> m_json_config_path {this, "JsonConfigFile", "", "Path to JSON config file"};
+  Gaudi::Property<std::string> m_jsonConfigPath{this, "JsonConfigFile", "", "Path to JSON config file"};
   Gaudi::Property<std::string> m_mcGenerator {this, "MCGenerator", "", "Name of the MC generator of the sample being processed (required for MC-MC scale factor)"};
 
   // In the initialize function the min pT is converted into GeV as in the JSON files numbers are in GeV 
   Gaudi::Property<float> m_minPt {this, "MinPt", -1 /*MeV*/, "Minimum jet pT cut (in MeV)"};
   Gaudi::Property<float> m_maxEta {this, "MaxEta", 2.5, "Maximum jet eta cut"};
- 
-  nlohmann::ordered_json m_json_config;
+  
   std::map<int, std::string> m_labelMap;
   std::map<int, std::string> m_labelMapMCMC;
 
@@ -65,7 +66,7 @@ class BTaggingLargeREfficiencyJsonTool: public asg::AsgTool,
   
   class LargeRMCMCHandler : public BTaggingBoundsHandler {
     public:
-      LargeRMCMCHandler(const nlohmann::ordered_json& jsonConfig, JetQuantityGetter* funcGetJetQuantity);
+      LargeRMCMCHandler(const json& jsonConfig, JetQuantityGetter* funcGetJetQuantity);
       // Prevent handler from being copied forcing passing them by (const) references or using pointers.
       // It ensures that the code is efficient memory wise as no duplicate can be created 
       // The handlers should only be stored in vectors or maps and used directly basically 
