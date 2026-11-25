@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "sTgcDigitizationR4/sTgcDigitMaker.h"
@@ -19,6 +19,7 @@
 #include <fstream>
 #include <algorithm>
 #include <ranges>
+#include <iterator>
 
 namespace MuonR4{
 //---------------------------------------------------
@@ -679,19 +680,12 @@ StatusCode sTgcDigitMaker::readFileOfTimeArrival() {
 // Retrieves gamma distribution parameters based on distance
 //------------------------------------------------------
 sTgcDigitMaker::GammaParameter sTgcDigitMaker::getGammaParameter(double distance) const {
+  //Find the parameters assuming the container is sorted in ascending order of 'lowEdge'; check in dbg build
+  assert(std::ranges::is_sorted(m_gammaParameter, {}, &GammaParameter::lowEdge));
   const double d = std::abs(distance); 
-  // Find the parameters assuming the container is sorted in ascending order of 'lowEdge'
-  if (d < m_gammaParameter.front().lowEdge) {
-    return m_gammaParameter.front();
-  }
-  int index{-1};
-  for (const auto& par: m_gammaParameter) {
-    if (d < par.lowEdge) {
-      break;
-    }
-    ++index;
-  }
-  return m_gammaParameter.at(index);
+  const auto it = std::ranges::upper_bound(m_gammaParameter, d, {}, 
+    &GammaParameter::lowEdge);
+  return it == m_gammaParameter.begin() ? *it : *std::prev(it);
 }
 
 //------------------------------------------------------
@@ -706,10 +700,10 @@ double sTgcDigitMaker::getMostProbableArrivalTime(double distance) const {
 
 double sTgcDigitMaker::chargeIntegral(double N, double M) const {
 
-    double term1 = 0.25 * std::erf( M / (std::sqrt(2) * m_clusterParams[0]));
-    double term2 = 0.25 * std::erf( N / (std::sqrt(2) * m_clusterParams[0]));
-    double term3 = 0.25 * std::erf( M / (std::sqrt(2) * m_clusterParams[1]));
-    double term4 = 0.25 * std::erf( N / (std::sqrt(2) * m_clusterParams[1]));
+    double term1 = 0.25 * std::erf( M / (M_SQRT2 * m_clusterParams[0]));
+    double term2 = 0.25 * std::erf( N / (M_SQRT2 * m_clusterParams[0]));
+    double term3 = 0.25 * std::erf( M / (M_SQRT2 * m_clusterParams[1]));
+    double term4 = 0.25 * std::erf( N / (M_SQRT2 * m_clusterParams[1]));
 
     return (term1 - term2 + term3 - term4);
 }
@@ -769,6 +763,6 @@ double sTgcDigitMaker::getPadChargeFraction(double distance) {
   // The modified error function perfectly describes
   // the pad charge sharing distribution figure 16 of the sTGC
   // testbeam paper https://arxiv.org/pdf/1509.06329.pdf
-  return 0.5 * (1.0 - std::erf( distance / (std::sqrt(2) * m_clusterParams[1])));
+  return 0.5 * (1.0 - std::erf( distance / (M_SQRT2 * m_clusterParams[1])));
 }
 }
