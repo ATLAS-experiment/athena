@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONRDO_TGCL1RAWDATA_H
@@ -7,7 +7,8 @@
 
 
 #include <inttypes.h>
-#include <ostream>
+#include <iosfwd>
+#include <string>
 
 class MsgStream;
 

@@ -4,6 +4,7 @@
 
 #include "MuonRDO/TgcL1RawData.h"
 #include "GaudiKernel/MsgStream.h"
+#include <iostream>
 
 void TgcL1RawData::clear(uint16_t bcTag,
                        uint16_t subDetectorId,

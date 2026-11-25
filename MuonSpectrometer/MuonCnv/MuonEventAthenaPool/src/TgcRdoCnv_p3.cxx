@@ -28,7 +28,7 @@ TgcRdoCnv_p3::transToPers(const TgcRdo* transColl, TgcRdo_p3* persColl, MsgStrea
     persColl->m_bcId          = transColl->bcId();
     persColl->m_l1Id          = transColl->l1Id();
 
-    persColl->m_errors = std::bit_cast<uint32_t>(transColl->errors());
+    persColl->m_errors = std::bit_cast<uint16_t>(transColl->errors());
 
     persColl->m_rodStatus = std::bit_cast<uint32_t>(transColl->rodStatus());
 

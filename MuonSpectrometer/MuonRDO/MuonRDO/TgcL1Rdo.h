@@ -1,16 +1,18 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONRDO_TGCL1RDO_H
 #define MUONRDO_TGCL1RDO_H
 
-#include <inttypes.h>
+
 #include "MuonRDO/TgcL1RawData.h"
 #include "AthContainers/DataVector.h"
 #include "AthenaKernel/CLASS_DEF.h"
 #include "Identifier/IdentifierHash.h"
-
+#include <iosfwd>
+#include <inttypes.h>
+#include <bit>
 /*
   TGC collection class used for bare RDO ByteStream Conversion.
   This class holds one ROD information
@@ -34,11 +36,12 @@ public:
 */
     struct Errors
     {
-        unsigned badBcID:1;
-        unsigned badL1Id:1;
-        unsigned timedout:1;
-        unsigned badData:1;
-        unsigned overflow:1;
+        uint16_t badBcID:1;
+        uint16_t badL1Id:1;
+        uint16_t timedout:1;
+        uint16_t badData:1;
+        uint16_t overflow:1;
+        uint16_t _:11;
     };
 
     struct SRodStatus
@@ -161,14 +164,7 @@ public:
     }
     void setErrors(uint16_t data)
     {
-        // FIXME BUG: This is not portable!
-        //   The layout of bitfields in a structure is implementation-defined.
-        union cnvErrors {
-          uint16_t data;
-          Errors errors;
-        } cnv;
-        cnv.data = data;
-        m_errors = cnv.errors;
+        m_errors = std::bit_cast<Errors>(data);
     }
 
     const SRodStatus& srodStatus() const
@@ -179,12 +175,7 @@ public:
     {
         // FIXME BUG: This is not portable!
         //   The layout of bitfields in a structure is implementation-defined.
-        union cnvSRodStatus {
-          uint16_t data;
-          SRodStatus srodStatus;
-        } cnv;
-        cnv.data = data;
-        m_srodStatus = cnv.srodStatus;
+        m_srodStatus = std::bit_cast<SRodStatus>(data);
     }
 
     const LocalStatus& localStatus() const
@@ -195,12 +186,7 @@ public:
     {
         // FIXME BUG: This is not portable!
         //   The layout of bitfields in a structure is implementation-defined.
-        union cnvLocalStatus {
-          uint16_t data;
-          LocalStatus localStatus;
-        } cnv;
-        cnv.data = data;
-        m_localStatus = cnv.localStatus;
+        m_localStatus = std::bit_cast<LocalStatus>(data);
     }
 
     uint32_t orbit() const

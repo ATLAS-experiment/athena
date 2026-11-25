@@ -4,8 +4,9 @@
 
 #include "MuonRDO/TgcL1Rdo.h"
 #include "AthenaKernel/errorcheck.h"
-#include <bit>
 #include <string.h>  // memset
+#include <iostream>
+#include <iomanip>
 
 // Default constructor
 TgcL1Rdo::TgcL1Rdo() : DataVector<TgcL1RawData>()
@@ -79,12 +80,12 @@ stream& dump(stream& sl, const TgcL1Rdo& coll)
     << ", id=" << std::hex << coll.identify() << std::dec
     << ", srodId=" << coll.srodId()
     << ", subDetectorId=" << std::hex << coll.subDetectorId() << std::dec
-    << ", triggerType=" << (int16_t)coll.triggerType()
+    << ", triggerType=" << static_cast<int16_t>(coll.triggerType())
     << ", bcId=" << coll.bcId()
     << ", l1Id=" << coll.l1Id()
-    << ", errors=" << std::hex << std::bit_cast<unsigned>(coll.errors())
-    << ", srodStatus=" << std::bit_cast<unsigned>(coll.srodStatus())
-    << ", localStatus=" << std::bit_cast<unsigned>(coll.localStatus()) << std::dec
+    << ", errors=" << std::hex << std::bit_cast<uint16_t>(coll.errors())
+    << ", srodStatus=" << std::bit_cast<uint32_t>(coll.srodStatus())
+    << ", localStatus=" << std::bit_cast<uint32_t>(coll.localStatus()) << std::dec
     << ", orbit=" << coll.orbit()
     << std::endl << "TgcL1RawData: [" << std::endl;
     int iRaw = 0;

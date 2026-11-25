@@ -1,11 +1,13 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonRDO/TgcRdo.h"
 #include "AthenaKernel/errorcheck.h"
 #include <bit>
 #include <cstring>  // memset
+#include <iostream>
+#include <iomanip>
 
 // Default constructor
 TgcRdo::TgcRdo() : DataVector<TgcRawData>()
@@ -87,12 +89,12 @@ stream& dump(stream& sl, const TgcRdo& coll)
     << ", id=" << std::hex << coll.identify() << std::dec
     << ", rodId=" << coll.rodId()
     << ", subDetectorId=" << std::hex << coll.subDetectorId() << std::dec
-    << ", triggerType=" << (int16_t)coll.triggerType()
+    << ", triggerType=" << static_cast<int16_t>(coll.triggerType())
     << ", bcId=" << coll.bcId()
     << ", l1Id=" << coll.l1Id()
-    << ", errors=" << std::hex << std::bit_cast<unsigned>(coll.errors())
-    << ", rodStatus=" << std::bit_cast<unsigned>(coll.rodStatus())
-    << ", localStatus=" << std::bit_cast<unsigned>(coll.localStatus()) << std::dec
+    << ", errors=" << std::hex << std::bit_cast<uint16_t>(coll.errors())
+    << ", rodStatus=" << std::bit_cast<uint32_t>(coll.rodStatus())
+    << ", localStatus=" << std::bit_cast<uint32_t>(coll.localStatus()) << std::dec
     << ", orbit=" << coll.orbit()
     << std::endl << "TgcRawData: [" << std::endl;
     int iRaw = 0;
