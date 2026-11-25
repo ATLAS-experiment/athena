@@ -252,7 +252,7 @@ std::unique_ptr<LogicalElement> L1Emu::parseDefinition(const std::string& def) {
                 ATH_MSG_DEBUG( "So far constructed " << *out );
             }
         }
-        ATH_MSG_DEBUG( "It[" << it << "]: " << out->to_string() );
+        ATH_MSG_DEBUG( "It[{}]: {}", it, out ? out->to_string() : "(null)" );
         ++it;
     }
     if(it==maxit) {
