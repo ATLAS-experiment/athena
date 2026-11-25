@@ -246,7 +246,11 @@ StatusCode OutputConditionsAlg::finalize() {
         std::string description;
         if (clid == 40774348 || clid == 1238547719) {
           // AthenaAttibuteList or CondAttrListCollection. The description can be build by chai ...
+#if CHAI_VERSION_MAJOR == 2 && CHAI_VERSION_MINOR < 8
           description = chai::Tag::buildNodeDescription(iovType, objt.type, clid);
+#else
+          description = chai::Tag::buildNodeDescription(objt.type, clid);
+#endif
         } else {
           // Pool referenced storage, need to build the node description by ourselves
           IOpaqueAddress* addr = objt.proxy->address();
