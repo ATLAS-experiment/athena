@@ -6,6 +6,7 @@
 #define POOLSVC_DATABASEHANDLER_H
 
 #include "GaudiKernel/IFileMgr.h"
+#include "GaudiKernel/ToolHandle.h"
 #include "DataModelRoot/RootType.h"
 #include "StorageSvc/FileDescriptor.h"
 
@@ -13,7 +14,7 @@
 #include <set>
 #include <utility>
 
-class IStorageSvc;
+class IStorageTool;
 class Guid;
 class Token;
 class Container;
@@ -28,7 +29,7 @@ class Container;
 class DatabaseHandler final {
 public:
   /// Constructor. Connects to the database
-  DatabaseHandler( IStorageSvc& storageSvc,
+  DatabaseHandler( ToolHandle<IStorageTool> storageTool,
                    long technology,
                    const std::string& fid,
                    const std::string& pfn,
@@ -89,14 +90,13 @@ public:
                      const std::string& option );
 
 private:
-  /// IStorageSvc reference
-  IStorageSvc&      m_storageSvc;
+  ToolHandle<IStorageTool>  m_storageTool;
   /// File descriptor for this database
-  FileDescriptor    m_fileDescriptor;
+  FileDescriptor           m_fileDescriptor;
   /// Technology identifier
-  long                    m_technology;
+  long                     m_technology;
   /// Current access mode
-  Io::IoFlag              m_accessMode;
+  Io::IoFlag               m_accessMode;
 };
 
 #endif

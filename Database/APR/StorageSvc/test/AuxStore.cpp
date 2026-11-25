@@ -8,7 +8,7 @@
 
 #include "PersistentDataModel/Token.h"
 
-#include "StorageSvc/IStorageSvc.h"
+#include "StorageSvc/IStorageTool.h"
 #include "StorageSvc/DbConnection.h"
 #include "StorageSvc/FileDescriptor.h"
 #include "StorageSvc/DbDatabase.h"
@@ -90,20 +90,12 @@ inline int getVal2(int objn, int idx) { return objn*5000 + (idx<<1); }
 
 std::string TestDriver::testWriting()
 {
-   ATH_MSG_INFO("createStorageSvc");
-   IStorageSvc* storSvc = createStorageSvc("StorageSvc");
-   if ( ! storSvc ) {
-      throw std::runtime_error( "Could not create a StorageSvc object" );
-   }
-   storSvc->addRef();
-   ATH_MSG_INFO("startSession");
-   if( !storSvc->startSession( Io::WRITE, m_storageType.type() ).isSuccess() ) {
-      throw std::runtime_error( "Could not start a session." );
-   }
+   auto storageTool = createStorageTool();
+   startSession(storageTool, Io::WRITE, m_storageType);
 
    ATH_MSG_INFO("Session connect");
    FileDescriptor fd( m_fileName, m_fileName );
-   if ( ! ( storSvc->connect( Io::WRITE, fd ).isSuccess() ) ) {
+   if ( ! ( storageTool->connect( Io::WRITE, fd ).isSuccess() ) ) {
       throw std::runtime_error( "Could not start a connection." );
    }
    DbOption opt("TREE_AUTO_FLUSH", "CollectionTree", 10);
@@ -154,12 +146,12 @@ std::string TestDriver::testWriting()
    ATH_MSG_INFO("Writing objects");
    for( int objn=0; objn <nObjects; objn++ ) {
       Token* token;
-      if( !storSvc->write( fd, container, m_storageType.type(),
+      if( !storageTool->write( fd, container, m_storageType.type(),
                            objs[objn], testtype, token ).isSuccess() ) {
          throw std::runtime_error( "Could not write an object" );
       }
       ATH_MSG_INFO("Committing transaction");
-      if( ! ( storSvc->endTransaction( fd, Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
+      if( ! ( storageTool->endTransaction( fd, Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
          throw std::runtime_error( "Commit ERROR" );
       }
       if( testTypeID.empty() )
@@ -169,7 +161,7 @@ std::string TestDriver::testWriting()
 
    // Closing the transaction.
    ATH_MSG_INFO("Committing transaction");
-   if ( ! ( storSvc->endTransaction( fd, Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
+   if ( ! ( storageTool->endTransaction( fd, Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
       throw std::runtime_error( "Could not end a transaction." );
    }
 
@@ -178,17 +170,7 @@ std::string TestDriver::testWriting()
    for( int objn=0; objn <nObjects; objn++ ) 
       delete objs[objn];
    
-   ATH_MSG_INFO("Disconnecting StorageSvc");
-   if ( ! ( storSvc->disconnect( fd ).isSuccess() ) ) {
-      throw std::runtime_error( "Could not disconnect." );
-   }
-   ATH_MSG_INFO("Ending Session");
-   if ( ! ( storSvc->endSession().isSuccess() ) ) {
-      throw std::runtime_error( "Could not end correctly the session." );
-   }
-   ATH_MSG_INFO("Releasing StorageSvc");
-   storSvc->release();
-
+   endSession(storageTool, fd);  
    return testTypeID;
 }
 
@@ -196,26 +178,19 @@ std::string TestDriver::testWriting()
 void
 TestDriver::testReading()
 {
-  IStorageSvc* storSvc = createStorageSvc("StorageSvc");
-  if ( ! storSvc ) {
-    throw std::runtime_error( "Could not create a StorageSvc object" );
-  }
-  storSvc->addRef();
+  auto storageTool = createStorageTool();
+  startSession(storageTool, Io::READ, pool::ROOT_StorageType);
 
   SG::auxid_t ityp1 = SG::AuxTypeRegistry::instance().getAuxID<int> ("anInt");
   SG::auxid_t ityp2 = SG::AuxTypeRegistry::instance().getAuxID<int> ("int2");
   SG::auxid_t dict_type = SG::AuxTypeRegistry::instance().getAuxID<AClassWithDict>("withdict");
   SG::auxid_t nodict_type = SG::AuxTypeRegistry::instance().getAuxID<TestClassNoDict>("nodict");
 
-  if( !storSvc->startSession( Io::READ, pool::ROOT_StorageType.type() ).isSuccess() ) {
-    throw std::runtime_error( "Could not start a session." );
-  }
-
-  FileDescriptor* fd = new FileDescriptor( m_fileName, m_fileName );
-  if( !storSvc->connect( Io::READ, *fd ).isSuccess() ) {
+  FileDescriptor fd( m_fileName, m_fileName );
+  if( !storageTool->connect( Io::READ, fd ).isSuccess() ) {
     throw std::runtime_error( "Could not start a connection." );
   }
-  DbDatabase dbH( fd->dbc()->handle() );
+  DbDatabase dbH( fd.dbc()->handle() );
   if ( !dbH.isValid() )  {
     throw std::runtime_error( "Database is not valid" );
   }
@@ -240,7 +215,7 @@ TestDriver::testReading()
     while ( cntH.next(linkH).isSuccess() ) {
       objectToken->oid() = linkH;
       void* ptr = 0;
-      if( !storSvc->read( *fd, *objectToken, &ptr ).isSuccess() ) {
+      if( !storageTool->read(    fd, *objectToken, &ptr ).isSuccess() ) {
 	      throw std::runtime_error( "failed to read an object back from the persistency" );
       }
 
@@ -277,15 +252,5 @@ TestDriver::testReading()
     throw std::runtime_error( "Objects read different from objects written" );
   }
 
-
-  if ( ! ( storSvc->disconnect( *fd ).isSuccess() ) ) {
-    throw std::runtime_error( "Could not disconnect." );
-  }
-  delete fd;
-
-  ATH_MSG_INFO("Closing the session");
-  if ( ! ( storSvc->endSession().isSuccess() ) ) {
-    throw std::runtime_error( "Could not end correctly the session." );
-  }
-  storSvc->release();
+  endSession(storageTool, fd);
 }

@@ -1,4 +1,4 @@
-ApplicationMgr       INFO Application Manager Configured successfully
+ApplicationMgr        INFO Application Manager Configured successfully
 AthenaEventLoopMgr   INFO Initializing AthenaEventLoopMgr
 EventInfoCnvAlg      INFO Initializing EventInfoCnvAlg
 EventI...foCnvTool   INFO Beam spot information not available
@@ -16,9 +16,37 @@ EventSelector        INFO  Enter McEventSelector Initialization
 AthenaEventLoopMgr   INFO Setup EventSelector service EventSelector
 ApplicationMgr       INFO Application Manager Initialized successfully
 ApplicationMgr       INFO Application Manager Started successfully
-EventP...stencySvc   INFO Added successfully Conversion service:McCnvSvc
+EventP...stencySvc   INFO Added successfully Conversion service McCnvSvc
 AthenaEventLoopMgr   INFO   ===>>>  start of run 0    <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #1, run #0 0 events processed so far  <<<===
+Pool...StorageTool   INFO Building shape according to reflection information using shape ID for: 
+Pool...StorageTool   INFO DMTest::BDer [F899E479-B507-44CD-B571-B3CD254D215D]
+Pool...StorageTool   INFO Building shape according to reflection information using shape ID for: 
+Pool...StorageTool   INFO DMTest::DDer [BF1FF2FB-332A-497B-B55E-D704108C68D0]
+Pool...StorageTool   INFO Building shape according to reflection information using shape ID for: 
+Pool...StorageTool   INFO DataVector<DMTest::B> [726A6BED-3DD9-4AD9-9F5E-1DCBFA42EB75]
+Pool...StorageTool   INFO Building shape according to reflection information using shape ID for: 
+Pool...StorageTool   INFO DataVector<DMTest::D> [14085919-C66D-45B2-A183-17D77986CACC]
+Pool...StorageTool   INFO Building shape according to reflection information using shape ID for: 
+Pool...StorageTool   INFO DMTest::ELVec [08A5FE26-1553-44E0-BFC4-196B96D3AD44]
+Pool...StorageTool   INFO Building shape according to reflection information using shape ID for: 
+Pool...StorageTool   INFO xAOD::EventAuxInfo_v3 [0D6FFB22-1BCB-49B9-BBFB-66B6DF352067]
+Pool...StorageTool   INFO Building shape according to reflection information using shape ID for: 
+Pool...StorageTool   INFO xAOD::EventInfo_v1 [AE8BED6D-1D41-4CAF-994B-42613FC91A0A]
+Pool...StorageTool   INFO Building shape according to reflection information using shape ID for: 
+Pool...StorageTool   INFO DataHeader_p6 [4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D]
+Pool...StorageTool   INFO Building shape according to reflection information using shape ID for: 
+Pool...StorageTool   INFO DataHeaderForm_p6 [7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD]
+Pool...StorageTool   INFO Building shape according to reflection information using shape ID for: 
+Pool...StorageTool   INFO Token [E013D4B1-CA9C-4E3C-9BE2-8691BBAFCB9A]
+Pool...StorageTool   INFO Building shape according to reflection information using shape ID for: 
+Pool...StorageTool   INFO bool [13FF06C5-AB4B-6EDD-68AB-3E6350E95305]
+Pool...StorageTool   INFO Building shape according to reflection information using shape ID for: 
+Pool...StorageTool   INFO unsigned int [BBACA313-D7B0-3A4C-9161-089CACF4B1CC]
+Pool...StorageTool   INFO Building shape according to reflection information using shape ID for: 
+Pool...StorageTool   INFO unsigned long long [388BE2E0-4452-7BB9-2563-DA3365C64623]
+Pool...StorageTool   INFO Building shape according to reflection information using shape ID for: 
+Pool...StorageTool   INFO float [64DE6A54-6E0B-BCDF-8A08-6EF31347E768]
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #1, run #0 1 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #2, run #0 1 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #2, run #0 2 events processed so far  <<<===

@@ -2,10 +2,21 @@ ParallelReadWriteTest                      INFO Created the test driver
 ParallelReadWriteTest                      INFO Loading shared libraries:
 ParallelReadWriteTest                      INFO  - loading library test_StorageTestDictionary
 ParallelReadWriteTest                      INFO ] Testing the writing operations
+ParallelReadWriteTest                      INFO Creating StorageTool
+ParallelReadWriteTest                      INFO Starting ROOT_All WRITE     Session
+ToolSvc.Storage...    INFO Building shape according to reflection information using shape ID for: 
+ToolSvc.Storage...    INFO SimpleTestClass [4E1F4DBB-1973-1974-1999-204F37331A01]
+ParallelReadWriteTest                      INFO Disconnecting StorageTool
+ParallelReadWriteTest                      INFO Ending Session
 ParallelReadWriteTest                      INFO ] ...done
 ParallelReadWriteTest                      INFO ] Testing the parrallel reading and writing operations
-ParallelReadWriteTest                      INFO Closing the session
+ParallelReadWriteTest                      INFO Creating StorageTool
+ParallelReadWriteTest                      INFO Starting ROOT_All WRITE     Session
+ParallelReadWriteTest                      INFO Ending Session
 ParallelReadWriteTest                      INFO ] ...done
 ParallelReadWriteTest                      INFO ] Testing the reading operations
-ParallelReadWriteTest                      INFO Closing the session
+ParallelReadWriteTest                      INFO Creating StorageTool
+ParallelReadWriteTest                      INFO Starting ROOT_All READ      Session
+ParallelReadWriteTest                      INFO Disconnecting StorageTool
+ParallelReadWriteTest                      INFO Ending Session
 ParallelReadWriteTest                      INFO Number of floating tokens : 0

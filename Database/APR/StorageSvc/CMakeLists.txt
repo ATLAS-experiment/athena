@@ -14,7 +14,7 @@ atlas_add_library( StorageSvc src/*.cpp
    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${UUID_LIBRARIES} AthenaBaseComps CxxUtils DataModelRoot
    GaudiKernel PersistentDataModel
-   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers AthenaKernel )
+   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers AthenaKernel)
 
 atlas_add_dictionary( StorageSvcDict
    StorageSvc/dict.h StorageSvc/dict.xml
@@ -37,6 +37,10 @@ endif()
 set( _storageTestDictDir ${CMAKE_CURRENT_SOURCE_DIR}/test/TestDictionary )
 
 # Component(s) in the package:
+atlas_add_component( StorageSvcComp
+                     src/components/*.cxx
+                     LINK_LIBRARIES AthenaBaseComps CxxUtils GaudiKernel StorageSvc)
+
 atlas_add_dictionary( test_StorageTestDictionary
    test/TestDictionary/dict_all.h test/TestDictionary/classes.xml
    INCLUDE_DIRS ${_storageTestDictDir}
@@ -49,7 +53,7 @@ function( _add_test name )
    cmake_parse_arguments( ARG "" "" "DEPENDS" ${ARGN} )
    # Set up the test:
    atlas_add_test( "StorageSvc_${name}_test"
-      SOURCES test/${name}.cpp
+      SOURCES test/${name}.cpp test/TestBase.cpp
       INCLUDE_DIRS ${_storageTestDictDir}
       LINK_LIBRARIES PoolSvcLib TestTools StorageSvc AthContainers PersistentDataModel AthenaKernel GaudiKernel
       # Need to explicitly link against ROOT libraries to suppress

@@ -5,6 +5,8 @@ Persistency_NoC...    INFO  - loading library test_PoolSvcTestDictionaryDict
 Persistency_NoC...    INFO Writing objects in the database.
 Persistency_NoC...    INFO Creating the persistency service
 Persistency_NoC...    INFO Writing 100 objects
+ToolSvc.TestSes...    INFO Building shape according to reflection information using shape ID for: 
+ToolSvc.TestSes...    INFO MyTestClass [F889AE0D-1F50-3768-46FE-50E400F72DDC]
 Persistency_NoC...    INFO Committing the transaction.
 Persistency_NoC...    INFO ...done
 Persistency_NoC...    INFO Reading the objects back from the database.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Trigger BS->RDO_TRIG athena test of the Dev_pp_run3_v1 menu
 # art-type: build
@@ -29,7 +29,7 @@ test.check_steps = CheckSteps.default_check_steps(test)
 msgcount = test.get_step("MessageCount")
 msgcount.thresholds = {
   'WARNING': 400,  # Remaining warnings are mostly from ATLASRECTS-3866
-  'INFO': 600,
+  'INFO': 700,
   'other': 20
 }
 msgcount.required = True # make the test exit code depend on this step

@@ -17,10 +17,11 @@
 #include "PersistentDataModel/Guid.h"
 #include "PersistentDataModel/Token.h"
 #include "GaudiKernel/StatusCode.h"
+#include "GaudiKernel/ToolHandle.h"
 
 #include "AthenaKernel/getMessageSvc.h"
 #include "StorageSvc/DbType.h"
-#include "StorageSvc/IStorageSvc.h"
+#include "StorageSvc/IStorageTool.h"
 #include "StorageSvc/FileDescriptor.h"
 #include "StorageSvc/DbConnection.h"
 #include "StorageSvc/DbDatabase.h"
@@ -75,19 +76,18 @@ void test(const DbType storageType, const std::string& filename) {
    }
    containerNameC = c_contNameC;
 
-   IStorageSvc* storSvc = createStorageSvc("StorageSvc");
-   if ( ! storSvc ) {
-      throw std::runtime_error( "Could not create a StorageSvc object" );
+   ToolHandle<IStorageTool> storageTool("DbStorageTool", Gaudi::svcLocator()->service("ToolSvc"));
+   if( !storageTool.retrieve().isSuccess() ) {
+      throw std::runtime_error( "Could not create a StorageTool" );
    }
-   storSvc->addRef();
    cout << "Start WRITE session" << endl;
-   if( !storSvc->startSession( Io::WRITE, storageType.type() ).isSuccess() ) {
+   if( !storageTool->startSession( Io::WRITE, storageType.type() ).isSuccess() ) {
       throw std::runtime_error( "Could not start a session." );
    }
 
    cout << "Session connect" << endl;
    FileDescriptor fd( filename, filename );
-   if ( ! ( storSvc->connect( Io::WRITE, fd ).isSuccess() ) ) {
+   if ( ! ( storageTool->connect( Io::WRITE, fd ).isSuccess() ) ) {
       throw std::runtime_error( "Could not start a connection." );
    }
    // Retrieve DbString dictionary
@@ -103,21 +103,21 @@ void test(const DbType storageType, const std::string& filename) {
      throw std::runtime_error( "Could not set master index option" );
    }
    // Commit here to test empty commits
-   if( ! ( storSvc->endTransaction( fd, Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
+   if( ! ( storageTool->endTransaction( fd, Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
       throw std::runtime_error( "Empty commit FAILED" );
    }
 
    // helper lambda to write a string object into a container
    auto writeStr = [&](const string& contName, DbString& str) {
       Token* token{nullptr};
-      if( !storSvc->write( fd, contName, storageType.type(), &str, class_String, token ).isSuccess() ) {
+      if( !storageTool->write( fd, contName, storageType.type(), &str, class_String, token ).isSuccess() ) {
          throw std::runtime_error( "Could not write an object" );
       }
       return token;
    };
 
    auto Commit = [&](const int) {
-      if( ! ( storSvc->endTransaction( fd, Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
+      if( ! ( storageTool->endTransaction( fd, Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
          throw std::runtime_error( "Commit FAILED" );
       }
    };
@@ -145,15 +145,12 @@ void test(const DbType storageType, const std::string& filename) {
    Commit(3);
 
    // Close session
-   if( !storSvc->disconnect( fd ).isSuccess() ) {
+   if( !storageTool->disconnect( fd ).isSuccess() ) {
       throw std::runtime_error( "Could not disconnect." );
    }
-   if( !storSvc->endSession().isSuccess() ) {
+   if( !storageTool->endSession().isSuccess() ) {
       throw std::runtime_error( "Could not end correctly the session." );
    }
-
-   // not realeasing if reading back in the same function
-   // storSvc->release();
 
    cout << "Sample Tokens to written objects:" << endl;
    cout << "Token for object A1 = " << refA1 << endl;
@@ -172,10 +169,10 @@ void test(const DbType storageType, const std::string& filename) {
 
    // ===============    READ back
    cout << endl << "Starting READ" << endl;
-   if( !storSvc->startSession( Io::READ, storageType.type()).isSuccess() ) {
+   if( !storageTool->startSession( Io::READ, storageType.type()).isSuccess() ) {
       throw std::runtime_error( "Could not start the read session." );
    }
-   if( !storSvc->connect( Io::READ, fd ).isSuccess() ) {
+   if( !storageTool->connect( Io::READ, fd ).isSuccess() ) {
       throw std::runtime_error( "Could not start a read connection." );
    }
 
@@ -184,7 +181,7 @@ void test(const DbType storageType, const std::string& filename) {
       Token token;
       token.fromString( ref );
       DbString *str_p = &readString;
-      if( !storSvc->read(fd, token, (void**)&str_p).isSuccess() ) {
+      if( !storageTool->read(fd, token, (void**)&str_p).isSuccess() ) {
          throw std::runtime_error( "Read FAILED" );
       }
    };
@@ -204,13 +201,12 @@ void test(const DbType storageType, const std::string& filename) {
    readfun(refA2);   cout << "read back A2: " << readString << endl;
    
    // Close session
-   if( !storSvc->disconnect( fd ).isSuccess() ) {
+   if( !storageTool->disconnect( fd ).isSuccess() ) {
       throw std::runtime_error( "Could not disconnect." );
    }
-   if( !storSvc->endSession().isSuccess() ) {
+   if( !storageTool->endSession().isSuccess() ) {
       throw std::runtime_error( "Could not end correctly the session." );
    }
-   storSvc->release();
 }
 
 int main() {

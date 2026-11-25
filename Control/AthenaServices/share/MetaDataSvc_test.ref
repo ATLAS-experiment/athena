@@ -1,8 +1,8 @@
 MDS_new              ERROR Unable to get FileName from EndInputFile incident
 MDS_new              ERROR Unable to call beginInputFile for ToolSvc.MDS_new_A
 RootFileHandler      ERROR Unable to open ROOT file "MetaDataSvc_test_missing.root" with options "READ"
-RootDatabase         ERROR You cannot open the ROOT file [MetaDataSvc_test_missing.root] in mode READ if it does not exists.
-StorageSvc           ERROR Cannot connect to Database: FID=921C3CA6-B930-FAFD-2E86-0FF0FF0FF0FF PFN=MetaDataSvc_test_missing.root
+RootDatabase         ERROR You cannot open the ROOT file [MetaDataSvc_test_missing.root] in mode READ if it does not exists. 
+PoolSvc.ReadSes...   ERROR Cannot connect to Database: FID=921C3CA6-B930-FAFD-2E86-0FF0FF0FF0FF PFN=MetaDataSvc_test_missing.root
 MDS_retire           ERROR Unable to get FileName from EndInputFile incident
 MDS_retire           ERROR ../MetaDataSvc.cxx (StatusCode MetaDataSvc::retireMetadataSource(const Incident&)): code FAILURE: tool->endInputFile(guid)
 MDS_handle           ERROR Unable to call beginInputFile for ToolSvc.MDS_handle_A

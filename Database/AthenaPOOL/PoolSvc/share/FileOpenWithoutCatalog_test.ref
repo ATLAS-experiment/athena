@@ -5,6 +5,8 @@ FileOpenWithout...    INFO  - loading library test_PoolSvcTestDictionaryDict
 FileOpenWithout...    INFO Writing objects in the database.
 FileOpenWithout...    INFO Creating the persistency service
 FileOpenWithout...    INFO Writing 100 objects.
+ToolSvc.TestSes...    INFO Building shape according to reflection information using shape ID for: 
+ToolSvc.TestSes...    INFO SimpleTestClass [4E1F4DBB-1973-1974-1999-204F37331A01]
 FileOpenWithout...    INFO Committing the transaction.
 FileOpenWithout...    INFO ...done
 FileOpenWithout...    INFO Reading the objects back from the database.

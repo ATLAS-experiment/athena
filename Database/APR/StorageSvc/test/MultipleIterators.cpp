@@ -8,7 +8,7 @@
 #include "PersistentDataModel/Token.h"
 #include "GaudiKernel/StatusCode.h"
 
-#include "StorageSvc/IStorageSvc.h"
+#include "StorageSvc/IStorageTool.h"
 #include "StorageSvc/DbConnection.h"
 #include "StorageSvc/FileDescriptor.h"
 #include "StorageSvc/DbDatabase.h"
@@ -60,17 +60,11 @@ int TestDriver::execute()
 void
 TestDriver::testWriting()
 {
-  IStorageSvc* storSvc = createStorageSvc("StorageSvc");
-  if ( ! storSvc ) {
-    throw std::runtime_error( "Could not create a StorageSvc object" );
-  }
-  storSvc->addRef();
-  if( !storSvc->startSession( Io::WRITE, pool::ROOT_StorageType.type() ).isSuccess() ) {
-    throw std::runtime_error( "Could not start a session." );
-  }
+  auto storageTool = createStorageTool();
+  startSession(storageTool, Io::WRITE, pool::ROOT_StorageType);
 
   FileDescriptor fd( file, file );
-  if( !storSvc->connect(Io::WRITE, fd ).isSuccess() ) {
+  if( !storageTool->connect(Io::WRITE, fd ).isSuccess() ) {
     throw std::runtime_error( "Could not start a connection." );
   }
   // Retrieve the dictionary
@@ -88,7 +82,7 @@ TestDriver::testWriting()
 
     // Writing the object.
     Token* token_SimpleTestClass;
-    if( !storSvc->write( fd, container, pool::ROOTKEY_StorageType.type(),
+    if( !storageTool->write( fd, container, pool::ROOTKEY_StorageType.type(),
                          myObject_SimpleTestClass, class_SimpleTestClass, token_SimpleTestClass ).isSuccess() ) {
       throw std::runtime_error( "Could not write an object" );
     }
@@ -101,7 +95,7 @@ TestDriver::testWriting()
 
     // Writing the object.
     Token* token_SimpleTestClass2;
-    if( !storSvc->write( fd, container, pool::ROOTKEY_StorageType.type(),
+    if( !storageTool->write( fd, container, pool::ROOTKEY_StorageType.type(),
                          myObject_SimpleTestClass2, class_SimpleTestClass, token_SimpleTestClass2 ).isSuccess() ) {
       throw std::runtime_error( "Could not write an object" );
     }
@@ -109,7 +103,7 @@ TestDriver::testWriting()
   }
 
   // Closing the transaction.
-  if ( ! ( storSvc->endTransaction( fd, Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
+  if ( ! ( storageTool->endTransaction( fd, Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
     throw std::runtime_error( "Could not end a transaction." );
   }
 
@@ -123,35 +117,22 @@ TestDriver::testWriting()
   myObjects_SimpleTestClass2.clear();
 
   // Disconnecting
-  if ( ! ( storSvc->disconnect( fd ).isSuccess() ) ) {
-    throw std::runtime_error( "Could not disconnect." );
-  }
-  if ( ! ( storSvc->endSession().isSuccess() ) ) {
-    throw std::runtime_error( "Could not end correctly the session." );
-  }
-  storSvc->release();
+  endSession(storageTool, fd);
 }
 
 
 void
 TestDriver::testReadingParallelSameContainer()
 {
-  IStorageSvc* storSvc = createStorageSvc("StorageSvc");
-  if ( ! storSvc ) {
-    throw std::runtime_error( "Could not create a StorageSvc object" );
-  }
-  storSvc->addRef();
+  auto storageTool = createStorageTool();
+  startSession(storageTool, Io::READ, pool::ROOT_StorageType);
 
-  if( !storSvc->startSession( Io::READ, pool::ROOT_StorageType.type() ).isSuccess() ) {
-    throw std::runtime_error( "Could not start a session." );
-  }
-
-  FileDescriptor* fd = new FileDescriptor( file, file );
-  if( !storSvc->connect( Io::READ, *fd ).isSuccess() ) {
+  FileDescriptor fd( file, file );
+  if( !storageTool->connect( Io::READ, fd ).isSuccess() ) {
     throw std::runtime_error( "Could not start a connection." );
   }
 
-  DbDatabase dbH( fd->dbc()->handle() );
+  DbDatabase dbH( fd.dbc()->handle() );
   if ( !dbH.isValid() )  {
     throw std::runtime_error( "Database is not valid" );
   }
@@ -190,7 +171,7 @@ TestDriver::testReadingParallelSameContainer()
     objectToken_SimpleTestClass1->oid() = link1H;
 
     void* ptr_SimpleTestClass1 = 0;
-    if ( !storSvc->read( *fd, *objectToken_SimpleTestClass1, &ptr_SimpleTestClass1 ).isSuccess() ) {
+    if ( !storageTool->read( fd, *objectToken_SimpleTestClass1, &ptr_SimpleTestClass1 ).isSuccess() ) {
       throw std::runtime_error( "failed to read a SimpleTestClass1 object back from the persistency" );
     }
     
@@ -222,7 +203,7 @@ TestDriver::testReadingParallelSameContainer()
     objectToken_SimpleTestClass2->oid() = link2H;
 
     void* ptr_SimpleTestClass2 = 0;
-    if( !storSvc->read( *fd, *objectToken_SimpleTestClass2, &ptr_SimpleTestClass2 ).isSuccess() ) {
+    if( !storageTool->read( fd, *objectToken_SimpleTestClass2, &ptr_SimpleTestClass2 ).isSuccess() ) {
       throw std::runtime_error( "failed to read a SimpleTestClass2 object back from the persistency" );
     }
 
@@ -246,18 +227,9 @@ TestDriver::testReadingParallelSameContainer()
   }
 
   // Closing the transaction.
-  if ( ! ( storSvc->endTransaction( *fd, Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
+  if( !storageTool->endTransaction( fd, Transaction::TRANSACT_COMMIT ).isSuccess() ) {
     throw std::runtime_error( "Could not end a transaction." );
   }
 
-  if ( ! ( storSvc->disconnect( *fd ).isSuccess() ) ) {
-    throw std::runtime_error( "Could not disconnect." );
-  }
-  delete fd;
-
-  ATH_MSG_INFO("Closing the session");
-  if ( ! ( storSvc->endSession().isSuccess() ) ) {
-    throw std::runtime_error( "Could not end correctly the session." );
-  }
-  storSvc->release();
+  endSession(storageTool, fd);
 }

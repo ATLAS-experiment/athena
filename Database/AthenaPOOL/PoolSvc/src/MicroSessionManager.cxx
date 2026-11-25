@@ -6,7 +6,7 @@
 #include "SessionTool.h"
 #include "DatabaseHandler.h"
 
-#include "StorageSvc/IStorageSvc.h"
+#include "StorageSvc/IStorageTool.h"
 #include "StorageSvc/DbConnection.h"
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbOption.h"
@@ -17,22 +17,18 @@
 
 MicroSessionManager::MicroSessionManager(SessionTool& sessionTool, long technology, int ageLimit) :
         m_sessionTool( sessionTool ),
-        m_storageSvc( 0 ),
-        m_technology( technology ),
-        m_databaseHandlers() {
-  m_storageSvc = createStorageSvc("StorageSvc");
-  if ( ! m_storageSvc ) {
-    throw std::runtime_error( "Could not create a StorageSvc object (APR: \" MicroSessionManager::MicroSessionManager \" from \" PoolSvc \"" );
-  }
-  if ( ! m_storageSvc->startSession(m_sessionTool.openMode(), m_technology, ageLimit).isSuccess() ) {
-    throw std::runtime_error( "Could not start StorageSvc (APR: \" MicroSessionManager::MicroSessionManager \" from \" PoolSvc \"" );
+        m_storageTool( "DbStorageTool/StorageTool", &sessionTool ),
+        m_technology( technology )
+{
+  if( !m_storageTool.retrieve().isSuccess()
+      || !m_storageTool->startSession(m_sessionTool.openMode(), m_technology, ageLimit).isSuccess() ) {
+    throw std::runtime_error( "PoolSvc could not initialize StorageTool " + m_storageTool.name() );
   }
 }
 
 MicroSessionManager::~MicroSessionManager() {
   this->disconnectAll();
-  m_storageSvc->endSession().ignore();
-  m_storageSvc->release();
+  m_storageTool->endSession().ignore();
 }
 
 DatabaseHandler* MicroSessionManager::connect( Io::IoFlag mode,
@@ -41,7 +37,7 @@ DatabaseHandler* MicroSessionManager::connect( Io::IoFlag mode,
   if( mode == Io::INVALID ) return 0;
   DatabaseHandler* db = 0;
   try {
-    db = new DatabaseHandler( *m_storageSvc, m_technology, fid, pfn, mode );
+    db = new DatabaseHandler( m_storageTool, m_technology, fid, pfn, mode );
     m_sessionTool.registerDatabaseHandler( db );
     m_databaseHandlers.insert( db );
   } catch( const std::runtime_error& /* error */) {
@@ -77,10 +73,10 @@ std::string MicroSessionManager::fidForPfn( const std::string& pfn ) {
   FileDescriptor fd( pfn, pfn );
   // this is only a temporary FID so use a special pattern to make that clear
   fd.setFID( fd.FID().substr(0,24) + "0FF0FF0FF0FF" );
-  if ( m_storageSvc->connect(Io::READ, fd).isSuccess() ) {
+  if ( m_storageTool->connect(Io::READ, fd).isSuccess() ) {
     DbDatabase dbH( fd.dbc()->handle() );
     if ( ! dbH.param( "FID", fid ).isSuccess() ) fid = "";
-    m_storageSvc->disconnect( fd ).ignore();
+    m_storageTool->disconnect( fd ).ignore();
   }
   return fid;
 }
@@ -90,7 +86,7 @@ bool MicroSessionManager::attributeOfType( const std::string& attributeName,
                                            const std::type_info& typeInfo,
                                            const std::string& option ) {
   DbOption domainOption( attributeName, option );
-  if( !m_storageSvc->getDomainOption(domainOption).isSuccess() ) return false;
+  if( !m_storageTool->getDomainOption(domainOption).isSuccess() ) return false;
   return domainOption.i_getValue(typeInfo, data).isSuccess();
 }
 
@@ -100,5 +96,5 @@ bool MicroSessionManager::setAttributeOfType( const std::string& attributeName,
                                               const std::string& option ) {
   DbOption domainOption( attributeName, option );
   if( !domainOption.i_setValue( typeInfo, const_cast<void*>( data ) ).isSuccess() ) return false;
-  return m_storageSvc->setDomainOption(domainOption).isSuccess();
+  return m_storageTool->setDomainOption(domainOption).isSuccess();
 }

@@ -9,7 +9,7 @@
 #include <stdexcept>
 #include <vector>
 
-#include "StorageSvc/IStorageSvc.h"
+#include "StorageSvc/IStorageTool.h"
 #include "StorageSvc/DbType.h"
 #include "StorageSvc/DbOption.h"
 #include "StorageSvc/FileDescriptor.h"
@@ -23,6 +23,9 @@ class SimpleUtilityBase {
      /// constructor taking commandline parmeters
      SimpleUtilityBase( int argc = 0, char* argv[] = 0 );
      virtual ~SimpleUtilityBase();
+     SimpleUtilityBase(const SimpleUtilityBase&) = delete;
+     SimpleUtilityBase& operator= (const SimpleUtilityBase&) = delete;
+
 
      virtual int	run();
 
@@ -40,7 +43,7 @@ class SimpleUtilityBase {
     protected:
      std::string	              m_executableName;
      std::string                m_technologyName;
-     IStorageSvc*               m_storageSvc = nullptr;
+     ToolHandle<IStorageTool>   m_storageTool;
 
      std::vector< std::string > m_args;
      std::vector< std::string > m_fileNames;

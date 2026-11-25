@@ -6,7 +6,7 @@
 #include <stdexcept>
 
 #include "StorageSvc/SimpleUtilityBase.h"
-#include "StorageSvc/IStorageSvc.h"
+#include "StorageSvc/IStorageTool.h"
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbType.h"
 #include "StorageSvc/DbOption.h"
@@ -39,10 +39,7 @@ SimpleUtilityBase::SimpleUtilityBase( int argc, char* argv[] ):
 
 SimpleUtilityBase::~SimpleUtilityBase()
 {
-   if( m_storageSvc ) {
-      m_storageSvc->endSession().ignore();
-      m_storageSvc->release();
-   }
+   m_storageTool->endSession().ignore();
 }
 
 
@@ -60,12 +57,12 @@ bool SimpleUtilityBase::parseArguments()
 
 void SimpleUtilityBase::startSession ATLAS_NOT_THREAD_SAFE ()
 {
-   m_storageSvc = createStorageSvc("StorageSvc");
-   if( !m_storageSvc ) {
-      throw std::runtime_error( "Could not create a StorageSvc object" );
+   m_storageTool = ToolHandle<IStorageTool>("DbStorageTool", Gaudi::svcLocator()->service("ToolSvc"));
+   if( !m_storageTool.retrieve().isSuccess() ) {
+      throw std::runtime_error( "Could not create a StorageTool object" );
    }
    long technologyId = DbType::getType( m_technologyName ).majorType();
-   if( ! m_storageSvc->startSession( Io::READ, technologyId).isSuccess() ) {
+   if( ! m_storageTool->startSession( Io::READ, technologyId).isSuccess() ) {
       throw std::runtime_error( "Could not start a new session" );
    }
    if( technologyId == pool::ROOT_StorageType.majorType() ) {
@@ -79,12 +76,12 @@ std::string SimpleUtilityBase::readFileGUID( const std::string& pfn )
 {
    std::string fid;
    FileDescriptor fd( fid, pfn );
-   if( !m_storageSvc->connect(Io::READ, fd).isSuccess() ) {
+   if( !m_storageTool->connect(Io::READ, fd).isSuccess() ) {
       throw std::runtime_error( "Could not open file \"" + pfn + "\"" );
    }
    DbDatabase dbH( fd.dbc()->handle() );
    StatusCode sc = dbH.param( "FID", fid );
-   if( !m_storageSvc->disconnect( fd ).isSuccess() or !sc.isSuccess() ) {
+   if( !m_storageTool->disconnect( fd ).isSuccess() or !sc.isSuccess() ) {
       throw std::runtime_error( "Could not retrieve the FID from file \"" + pfn + "\"" );
    }
    return fid;

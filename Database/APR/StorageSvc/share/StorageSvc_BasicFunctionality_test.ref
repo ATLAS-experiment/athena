@@ -1,13 +1,19 @@
 BasicFunctionalityTest                     INFO Created the test driver
 BasicFunctionalityTest                     INFO Loading shared libraries:
 BasicFunctionalityTest                     INFO  - loading library test_StorageTestDictionary
-BasicFunctionalityTest                     INFO  Testing StorageSvc functionality for ROOT_Tree storage technology
+BasicFunctionalityTest                     INFO  Testing StorageTool functionality for ROOT_Tree storage technology
 BasicFunctionalityTest                     INFO  Testing the writing operations
-BasicFunctionalityTest                     INFO createStorageSvc
-BasicFunctionalityTest                     INFO startSession
+BasicFunctionalityTest                     INFO Creating StorageTool
+BasicFunctionalityTest                     INFO Starting ROOT_Tree WRITE     Session
 BasicFunctionalityTest                     INFO Session connect
+ToolSvc.Storage...    INFO Building shape according to reflection information using shape ID for: 
+ToolSvc.Storage...    INFO SimpleTestClass [4E1F4DBB-1973-1974-1999-204F37331A01]
+BasicFunctionalityTest                     INFO Disconnecting StorageTool
+BasicFunctionalityTest                     INFO Ending Session
 BasicFunctionalityTest                     INFO  ...done
 BasicFunctionalityTest                     INFO  Testing the reading operations
+BasicFunctionalityTest                     INFO Creating StorageTool
+BasicFunctionalityTest                     INFO Starting ROOT_Tree READ      Session
 BasicFunctionalityTest                     INFO Read back string: This is my test DbString #0
 BasicFunctionalityTest                     INFO Read back string: This is my test DbString #1
 BasicFunctionalityTest                     INFO Read back string: This is my test DbString #2
@@ -18,16 +24,23 @@ BasicFunctionalityTest                     INFO Read back string: This is my tes
 BasicFunctionalityTest                     INFO Read back string: This is my test DbString #7
 BasicFunctionalityTest                     INFO Read back string: This is my test DbString #8
 BasicFunctionalityTest                     INFO Read back string: This is my test DbString #9
-BasicFunctionalityTest                     INFO Closing the session
+BasicFunctionalityTest                     INFO Disconnecting StorageTool
+BasicFunctionalityTest                     INFO Ending Session
 BasicFunctionalityTest                     INFO  ...done
 BasicFunctionalityTest                     INFO ----------------------------------------------------------------------------------------------------
-BasicFunctionalityTest                     INFO  Testing StorageSvc functionality for ROOT_Key storage technology
+BasicFunctionalityTest                     INFO  Testing StorageTool functionality for ROOT_Key storage technology
 BasicFunctionalityTest                     INFO  Testing the writing operations
-BasicFunctionalityTest                     INFO createStorageSvc
-BasicFunctionalityTest                     INFO startSession
+BasicFunctionalityTest                     INFO Creating StorageTool
+BasicFunctionalityTest                     INFO Starting ROOT_Key WRITE     Session
 BasicFunctionalityTest                     INFO Session connect
+ToolSvc.Storage...    INFO Building shape according to reflection information using shape ID for: 
+ToolSvc.Storage...    INFO SimpleTestClass [4E1F4DBB-1973-1974-1999-204F37331A01]
+BasicFunctionalityTest                     INFO Disconnecting StorageTool
+BasicFunctionalityTest                     INFO Ending Session
 BasicFunctionalityTest                     INFO  ...done
 BasicFunctionalityTest                     INFO  Testing the reading operations
+BasicFunctionalityTest                     INFO Creating StorageTool
+BasicFunctionalityTest                     INFO Starting ROOT_Key READ      Session
 BasicFunctionalityTest                     INFO Read back string: This is my test DbString #0
 BasicFunctionalityTest                     INFO Read back string: This is my test DbString #1
 BasicFunctionalityTest                     INFO Read back string: This is my test DbString #2
@@ -38,16 +51,23 @@ BasicFunctionalityTest                     INFO Read back string: This is my tes
 BasicFunctionalityTest                     INFO Read back string: This is my test DbString #7
 BasicFunctionalityTest                     INFO Read back string: This is my test DbString #8
 BasicFunctionalityTest                     INFO Read back string: This is my test DbString #9
-BasicFunctionalityTest                     INFO Closing the session
+BasicFunctionalityTest                     INFO Disconnecting StorageTool
+BasicFunctionalityTest                     INFO Ending Session
 BasicFunctionalityTest                     INFO  ...done
 BasicFunctionalityTest                     INFO ----------------------------------------------------------------------------------------------------
-BasicFunctionalityTest                     INFO  Testing StorageSvc functionality for ROOT_TreeIndex storage technology
+BasicFunctionalityTest                     INFO  Testing StorageTool functionality for ROOT_TreeIndex storage technology
 BasicFunctionalityTest                     INFO  Testing the writing operations
-BasicFunctionalityTest                     INFO createStorageSvc
-BasicFunctionalityTest                     INFO startSession
+BasicFunctionalityTest                     INFO Creating StorageTool
+BasicFunctionalityTest                     INFO Starting ROOT_TreeIndex WRITE     Session
 BasicFunctionalityTest                     INFO Session connect
+ToolSvc.Storage...    INFO Building shape according to reflection information using shape ID for: 
+ToolSvc.Storage...    INFO SimpleTestClass [4E1F4DBB-1973-1974-1999-204F37331A01]
+BasicFunctionalityTest                     INFO Disconnecting StorageTool
+BasicFunctionalityTest                     INFO Ending Session
 BasicFunctionalityTest                     INFO  ...done
 BasicFunctionalityTest                     INFO  Testing the reading operations
+BasicFunctionalityTest                     INFO Creating StorageTool
+BasicFunctionalityTest                     INFO Starting ROOT_TreeIndex READ      Session
 BasicFunctionalityTest                     INFO Read back string: This is my test DbString #0
 BasicFunctionalityTest                     INFO Read back string: This is my test DbString #1
 BasicFunctionalityTest                     INFO Read back string: This is my test DbString #2
@@ -58,16 +78,23 @@ BasicFunctionalityTest                     INFO Read back string: This is my tes
 BasicFunctionalityTest                     INFO Read back string: This is my test DbString #7
 BasicFunctionalityTest                     INFO Read back string: This is my test DbString #8
 BasicFunctionalityTest                     INFO Read back string: This is my test DbString #9
-BasicFunctionalityTest                     INFO Closing the session
+BasicFunctionalityTest                     INFO Disconnecting StorageTool
+BasicFunctionalityTest                     INFO Ending Session
 BasicFunctionalityTest                     INFO  ...done
 BasicFunctionalityTest                     INFO ----------------------------------------------------------------------------------------------------
-BasicFunctionalityTest                     INFO  Testing StorageSvc functionality for ROOT_RNTuple storage technology
+BasicFunctionalityTest                     INFO  Testing StorageTool functionality for ROOT_RNTuple storage technology
 BasicFunctionalityTest                     INFO  Testing the writing operations
-BasicFunctionalityTest                     INFO createStorageSvc
-BasicFunctionalityTest                     INFO startSession
+BasicFunctionalityTest                     INFO Creating StorageTool
+BasicFunctionalityTest                     INFO Starting ROOT_RNTuple WRITE     Session
 BasicFunctionalityTest                     INFO Session connect
+ToolSvc.Storage...    INFO Building shape according to reflection information using shape ID for: 
+ToolSvc.Storage...    INFO SimpleTestClass [4E1F4DBB-1973-1974-1999-204F37331A01]
+BasicFunctionalityTest                     INFO Disconnecting StorageTool
+BasicFunctionalityTest                     INFO Ending Session
 BasicFunctionalityTest                     INFO  ...done
 BasicFunctionalityTest                     INFO  Testing the reading operations
+BasicFunctionalityTest                     INFO Creating StorageTool
+BasicFunctionalityTest                     INFO Starting ROOT_RNTuple READ      Session
 BasicFunctionalityTest                     INFO Read back string: This is my test DbString #0
 BasicFunctionalityTest                     INFO Read back string: This is my test DbString #1
 BasicFunctionalityTest                     INFO Read back string: This is my test DbString #2
@@ -78,7 +105,8 @@ BasicFunctionalityTest                     INFO Read back string: This is my tes
 BasicFunctionalityTest                     INFO Read back string: This is my test DbString #7
 BasicFunctionalityTest                     INFO Read back string: This is my test DbString #8
 BasicFunctionalityTest                     INFO Read back string: This is my test DbString #9
-BasicFunctionalityTest                     INFO Closing the session
+BasicFunctionalityTest                     INFO Disconnecting StorageTool
+BasicFunctionalityTest                     INFO Ending Session
 BasicFunctionalityTest                     INFO  ...done
 BasicFunctionalityTest                     INFO  Exiting...
 BasicFunctionalityTest                     INFO Number of floating tokens : 0

@@ -6,11 +6,12 @@
 #define POOLSVC_MICROSESSIONMANAGER_H
 
 #include "GaudiKernel/IFileMgr.h"
+#include "GaudiKernel/ToolHandle.h"
 
 #include <string>
 #include <set>
 
-class IStorageSvc;
+class IStorageTool;
 class SessionTool;
 class DatabaseHandler;
 
@@ -28,6 +29,8 @@ public:
   MicroSessionManager( SessionTool& sessionTool, long technology, int ageLimit );
   /// Destructor
   ~MicroSessionManager();
+  MicroSessionManager (const MicroSessionManager&) = delete;
+  MicroSessionManager& operator= (const MicroSessionManager&) = delete;
 
   /// Connects to a database.
   DatabaseHandler* connect( Io::IoFlag transType,
@@ -55,7 +58,7 @@ public:
 
 private:
   SessionTool&               m_sessionTool;
-  IStorageSvc*               m_storageSvc;
+  ToolHandle<IStorageTool>   m_storageTool;
   long                       m_technology;
   std::set<DatabaseHandler*> m_databaseHandlers;
 };
