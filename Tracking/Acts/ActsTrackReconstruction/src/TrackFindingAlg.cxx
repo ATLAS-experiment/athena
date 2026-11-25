@@ -1160,23 +1160,24 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
         Acts::BoundTrackParameters secondInitialParameters = isBremTrackFinding
             ? seedParameters
             : firstTrack.createParametersFromState(detail::RecoConstTrackStateContainerProxy{firstMeasurement});
-        if (secondInitialParameters.referenceSurface().insideBounds(secondInitialParameters.localPosition())){ // #3751
-            // the seed parameters are not a smoothed state and are not inflated
-            if (m_inflateCovarianceTwoWay && not isBremTrackFinding){
-                inflateCovarianceTwoWay(secondInitialParameters);
-            }
-            auto secondRootBranch = tracksContainerTemp.makeTrack();
-            secondRootBranch.copyFromWithoutStates(firstTrack); // #3634
-            // addTrack extrapolates the joined track to the perigee again
-            if (searchInward) {
-                secondRootBranch.setReferenceSurface(nullptr);
-            }
+        // Smoothed states can lie outside the finite sensor bounds. Let the
+        // navigator validate the supporting surface and the start volume.
 
-            // perform track finding
-            auto secondResult = findTracksCKF(secondInitialParameters, secondOptions, tracksContainerTemp, secondRootBranch);
-            if (secondResult.ok()){
-                secondTracksForSeed = std::move(secondResult.value());
-            }
+        // the seed parameters are not a smoothed state and are not inflated
+        if (m_inflateCovarianceTwoWay && not isBremTrackFinding){
+            inflateCovarianceTwoWay(secondInitialParameters);
+        }
+        auto secondRootBranch = tracksContainerTemp.makeTrack();
+        secondRootBranch.copyFromWithoutStates(firstTrack); // #3634
+        // addTrack extrapolates the joined track to the perigee again
+        if (searchInward) {
+            secondRootBranch.setReferenceSurface(nullptr);
+        }
+
+        // perform track finding
+        auto secondResult = findTracksCKF(secondInitialParameters, secondOptions, tracksContainerTemp, secondRootBranch);
+        if (secondResult.ok()){
+            secondTracksForSeed = std::move(secondResult.value());
         }
 
         if ( secondTracksForSeed.empty() ) {
