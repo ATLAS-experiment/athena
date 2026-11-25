@@ -92,6 +92,32 @@ def VP1AlgCfg(flags, name="VP1AlgCA", **kwargs):
     return result
 
 
+def VP1EventInfoCfg(flags):
+    """Provide the xAOD EventInfo read by VP1 when opening legacy POOL files."""
+    cfg = ComponentAccumulator()
+    collections = flags.Input.TypedCollections
+    if "xAOD::EventInfo#EventInfo" in collections:
+        return cfg
+
+    legacy_keys = set()
+    for item in collections:
+        type_name, _, key = item.partition("#")
+        if type_name in ("EventInfo", "PileUpEventInfo") and key:
+            legacy_keys.add(key)
+    # Keep the historical MC key and recognize both legacy data keys.
+    for key in ("McEventInfo", "EventInfo", "ByteStreamEventInfo"):
+        if key in legacy_keys:
+            break
+    else:
+        if len(legacy_keys) != 1:
+            return cfg
+        key, = legacy_keys
+
+    from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
+    cfg.merge(EventInfoCnvAlgCfg(flags, inputKey=key))
+    return cfg
+
+
 def MuonRdoToDigitCfg(flags):
     """Decode only muon RDO containers present in the input metadata.
 
@@ -399,10 +425,7 @@ def SetupVP1():
             from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 
             cfg.merge(PoolReadCfg(flags))
-            # Check if running on legacy inputs
-            if "EventInfo" not in flags.Input.Collections:
-                from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
-                cfg.merge(EventInfoCnvAlgCfg(flags))
+            cfg.merge(VP1EventInfoCfg(flags))
 
             from TrkConfig.TrackCollectionReadConfig import TrackCollectionReadCfg
             cfg.merge(TrackCollectionReadCfg(flags, "Tracks"))

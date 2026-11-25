@@ -1,6 +1,6 @@
 # Copyright (C) 2026 CERN for the benefit of the ATLAS collaboration
 
-"""Regression tests for VP1 extrapolator configuration, without a GUI or geometry."""
+"""Regression tests for VP1 configuration, without a GUI or geometry."""
 
 import contextlib
 import io
@@ -10,7 +10,7 @@ from unittest.mock import patch
 
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from VP1Algs.VP1AlgConfig import SetupVP1, VP1AlgCfg
+from VP1Algs.VP1AlgConfig import SetupVP1, VP1AlgCfg, VP1EventInfoCfg
 
 
 class VP1AlgConfigTest(unittest.TestCase):
@@ -45,6 +45,29 @@ class VP1AlgConfigTest(unittest.TestCase):
     def test_explicitly_disabled_extrapolator_is_preserved(self):
         alg = self.algorithm(EmptyInput=False, ExtrapolatorTool="")
         self.assertEqual(alg.ExtrapolatorTool.getName(), "")
+
+    def test_pool_event_info_conversion_uses_typed_metadata(self):
+        cases = [
+            (["EventInfo#EventInfo"], "EventInfo"),
+            (["EventInfo#ByteStreamEventInfo"], "ByteStreamEventInfo"),
+            (["PileUpEventInfo#McEventInfo"], "McEventInfo"),
+            (["EventInfo#CustomEventInfo"], "CustomEventInfo"),
+            (["xAOD::EventInfo#EventInfo", "EventInfo#ByteStreamEventInfo"], None),
+            ([], None),
+        ]
+        for collections, key in cases:
+            with self.subTest(collections=collections):
+                flags = self.flags.clone()
+                flags.Input.TypedCollections = collections
+                flags.lock()
+                with patch("xAODEventInfoCnv.xAODEventInfoCnvConfig.EventInfoCnvAlgCfg",
+                           return_value=ComponentAccumulator()) as convert:
+                    cfg = VP1EventInfoCfg(flags)
+                    cfg.wasMerged()
+                    if key is None:
+                        convert.assert_not_called()
+                    else:
+                        convert.assert_called_once_with(flags, inputKey=key)
 
     def check_empty_input_launch(self, *options):
         cfg = ComponentAccumulator()
