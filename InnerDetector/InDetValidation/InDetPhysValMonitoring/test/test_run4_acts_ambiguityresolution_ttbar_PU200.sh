@@ -1,7 +1,5 @@
 #!/bin/bash
 # art-description: Run 4 configuration, ITK only recontruction with ACTS, PU 200
-# art-input: mc21_14TeV:mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700
-# art-input-nfiles: 1
 # art-type: grid
 # art-include: main/Athena
 # art-output: *.root
@@ -12,6 +10,7 @@
 
 lastref_dir=last_results
 dcubeXml=dcube_IDPVMPlots_ACTS_CKF_ITk.xml
+rdo=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.RDO_RUN4[0])")
 n_events=100
 
 # search in $DATAPATH for matching file
@@ -47,7 +46,7 @@ run "Reconstruction-ambi" \
     --conditionsTag "default:${conditionsTag}" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
     --preExec "all:flags.Scheduler.ShowDataDeps = True;flags.Scheduler.ShowDataFlow = True; flags.Acts.doAmbiguityResolution=True" \
-    --inputRDOFile ${ArtInFile} \
+    --inputRDOFile ${rdo} \
     --outputAODFile AOD.ambi.root \
     --postExec "cfg.printConfig(withDetails=True, summariseProps=True);" \
     --maxEvents ${n_events} \
@@ -78,7 +77,7 @@ run "Reconstruction" \
     Reco_tf.py \
     --conditionsTag "default:${conditionsTag}" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
-    --inputRDOFile ${ArtInFile} \
+    --inputRDOFile ${rdo} \
     --outputAODFile AOD.default.root \
     --maxEvents ${n_events} \
     --multithreaded
