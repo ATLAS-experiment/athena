@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PhiHoughTransformAlg.h"
@@ -213,6 +213,7 @@ std::unique_ptr<SegmentSeed>
     if (std::abs(tanAlpha) < Acts::s_epsilon) {
         return std::make_unique<SegmentSeed>(etaMax);
     }
+    if (counts == 0)[[unlikely]] return nullptr;
     tanAlpha /= counts;
     iceptX /= counts;
     auto hits = etaMax.getHitsInMax();
