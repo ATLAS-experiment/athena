@@ -6818,6 +6818,60 @@ leg001_EF_j165_0eta290_020jvt_bgn260_j55_0eta290_020jvt_bgn260_pf_ftf_preselj140
   stepFeatures:
     0: 6
   eventCount: 0
+EF_j175C_35smcINF_86bgntwox_j260C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1SC175-SCjJ10:
+  stepCounts:
+    0: 8
+  stepFeatures:
+    0: 8
+  eventCount: 0
+leg000_EF_j175C_35smcINF_86bgntwox_j260C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1SC175-SCjJ10:
+  stepCounts:
+    0: 8
+  stepFeatures:
+    0: 8
+  eventCount: 0
+leg001_EF_j175C_35smcINF_86bgntwox_j260C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1SC175-SCjJ10:
+  stepCounts:
+    0: 8
+  stepFeatures:
+    0: 8
+  eventCount: 0
+EF_j175C_35smcINF_86bgntwox_j260C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1gLJ140p0ETA25:
+  stepCounts:
+    0: 8
+  stepFeatures:
+    0: 8
+  eventCount: 0
+leg000_EF_j175C_35smcINF_86bgntwox_j260C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1gLJ140p0ETA25:
+  stepCounts:
+    0: 8
+  stepFeatures:
+    0: 8
+  eventCount: 0
+leg001_EF_j175C_35smcINF_86bgntwox_j260C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1gLJ140p0ETA25:
+  stepCounts:
+    0: 8
+  stepFeatures:
+    0: 8
+  eventCount: 0
+EF_j175C_35smcINF_86bgntwox_j260C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1jJ160:
+  stepCounts:
+    0: 8
+  stepFeatures:
+    0: 8
+  eventCount: 0
+leg000_EF_j175C_35smcINF_86bgntwox_j260C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1jJ160:
+  stepCounts:
+    0: 8
+  stepFeatures:
+    0: 8
+  eventCount: 0
+leg001_EF_j175C_35smcINF_86bgntwox_j260C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1jJ160:
+  stepCounts:
+    0: 8
+  stepFeatures:
+    0: 8
+  eventCount: 0
 EF_j175C_a10sd_cssk_pf_jes_ftf_preselj140_L1jJ70:
   stepCounts:
     0: 13
@@ -6896,6 +6950,16 @@ EF_j200_a10sd_cssk_pf_jes_ftf_L1jJ40:
     0: 20
     1: 8
   eventCount: 6
+EF_j20_boffperf_pf_ftf_preselj20_L1RD0_FILLED:
+  stepCounts:
+    0: 20
+    1: 20
+    2: 20
+  stepFeatures:
+    0: 20
+    1: 355
+    2: 355
+  eventCount: 20
 EF_j20_j20_pf_ftf_preselj100XX2j45_PhysicsTLA_L1jJ85p0ETA21_3jJ40p0ETA25:
   stepCounts:
     0: 11
@@ -7020,6 +7084,84 @@ EF_j25f_L1RD0_FILLED:
   stepFeatures:
     0: 3
   eventCount: 2
+EF_j260C_35smcINF_86bgntwox_j175C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1SC175-SCjJ10:
+  stepCounts:
+    0: 8
+  stepFeatures:
+    0: 8
+  eventCount: 0
+leg000_EF_j260C_35smcINF_86bgntwox_j175C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1SC175-SCjJ10:
+  stepCounts:
+    0: 8
+  stepFeatures:
+    0: 8
+  eventCount: 0
+leg001_EF_j260C_35smcINF_86bgntwox_j175C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1SC175-SCjJ10:
+  stepCounts:
+    0: 8
+  stepFeatures:
+    0: 8
+  eventCount: 0
+EF_j260C_35smcINF_86bgntwox_j175C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1gLJ140p0ETA25:
+  stepCounts:
+    0: 8
+  stepFeatures:
+    0: 8
+  eventCount: 0
+leg000_EF_j260C_35smcINF_86bgntwox_j175C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1gLJ140p0ETA25:
+  stepCounts:
+    0: 8
+  stepFeatures:
+    0: 8
+  eventCount: 0
+leg001_EF_j260C_35smcINF_86bgntwox_j175C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1gLJ140p0ETA25:
+  stepCounts:
+    0: 8
+  stepFeatures:
+    0: 8
+  eventCount: 0
+EF_j260C_35smcINF_86bgntwox_j175C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1jJ160:
+  stepCounts:
+    0: 8
+  stepFeatures:
+    0: 8
+  eventCount: 0
+leg000_EF_j260C_35smcINF_86bgntwox_j175C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1jJ160:
+  stepCounts:
+    0: 8
+  stepFeatures:
+    0: 8
+  eventCount: 0
+leg001_EF_j260C_35smcINF_86bgntwox_j175C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1jJ160:
+  stepCounts:
+    0: 8
+  stepFeatures:
+    0: 8
+  eventCount: 0
+EF_j260C_35smcINF_a10sd_cssk_90bgntwoxt_pf_jes_ftf_preselj200_L1SC175-SCjJ10:
+  stepCounts:
+    0: 8
+    1: 1
+  stepFeatures:
+    0: 8
+    1: 1
+  eventCount: 1
+EF_j260C_35smcINF_a10sd_cssk_90bgntwoxt_pf_jes_ftf_preselj200_L1gLJ140p0ETA25:
+  stepCounts:
+    0: 8
+    1: 1
+  stepFeatures:
+    0: 8
+    1: 1
+  eventCount: 1
+EF_j260C_35smcINF_a10sd_cssk_90bgntwoxt_pf_jes_ftf_preselj200_L1jJ160:
+  stepCounts:
+    0: 8
+    1: 1
+  stepFeatures:
+    0: 8
+    1: 1
+  eventCount: 1
 EF_j260C_a10sd_cssk_pf_jes_ftf_preselj200_L1jJ125:
   stepCounts:
     0: 8
