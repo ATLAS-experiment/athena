@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_CONDITIONSTESTSVC_H
@@ -10,7 +10,7 @@
  *  Inherits from ITRT_ConditionsSvc base class and returns InDet::TRT_GOOD.
  */
 
-#include "TRT_ConditionsServices/ITRT_ConditionsTestSvc.h"
+#include "ITRT_ConditionsTestSvc.h"
 #include "TRT_ConditionsServices/ITRT_ConditionsSvc.h"
 #include "AthenaBaseComps/AthService.h"
 

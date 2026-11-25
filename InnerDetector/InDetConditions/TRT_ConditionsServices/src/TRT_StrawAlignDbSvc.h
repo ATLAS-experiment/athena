@@ -14,15 +14,15 @@
 #include "AthenaBaseComps/AthService.h"
 #include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "AthenaKernel/IAthenaOutputStreamTool.h"
 #include "InDetIdentifier/TRT_ID.h"
-#include "TRT_ConditionsServices/ITRT_StrawAlignDbSvc.h"
+#include "ITRT_StrawAlignDbSvc.h"
 #include "TRT_ConditionsData/StrawDxContainer.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "GaudiKernel/ServiceHandle.h"
 
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY; // This class uses const_cast, regFcn (callback) and DataHandle. Legacy code
 
-class  IAthenaOutputStreamTool ;
 namespace InDetDD {
   class TRT_DetectorManager ;
 }
@@ -35,7 +35,7 @@ class TRT_StrawAlignDbSvc: public extends<AthService, ITRT_StrawAlignDbSvc>
  public:
   
   /// constructor
-  TRT_StrawAlignDbSvc( const std::string& name, ISvcLocator* pSvcLocator );
+  using base_class::base_class;
   
   /// destructor
   virtual ~TRT_StrawAlignDbSvc();
@@ -91,14 +91,14 @@ class TRT_StrawAlignDbSvc: public extends<AthService, ITRT_StrawAlignDbSvc>
 
  private:
 
-  ServiceHandle<StoreGateSvc> m_detStore;
-  std::string m_par_dxcontainerkey;   //!> folder name
-  std::string m_par_strawtextfile;    //!> input text file
-  bool m_par_forcecallback;           //!> force callback to manager
-  const TRT_ID* m_trtid;              //!> id helper
-  const InDetDD::TRT_DetectorManager* m_trtman; //!> detector manager
+  ServiceHandle<StoreGateSvc> m_detStore{this, "DetectorStore", "DetectorStore"};
+  std::string m_par_dxcontainerkey{"/TRT/Calib/DX"};   //!> folder name
+  StringProperty m_par_strawtextfile{this, "StrawTextFile", ""};    //!> input text file
+  BooleanProperty m_par_forcecallback{this, "ForceCallback", false};           //!> force callback to manager
+  const TRT_ID* m_trtid{};              //!> id helper
+  const InDetDD::TRT_DetectorManager* m_trtman{}; //!> detector manager
   
-  ToolHandle<IAthenaOutputStreamTool> m_streamer; //!> OutputStreamTool
+  PublicToolHandle<IAthenaOutputStreamTool> m_streamer{this, "StreamTool", "AthenaOutputStreamTool/CondStream1"}; //!> OutputStreamTool
 
 };
 

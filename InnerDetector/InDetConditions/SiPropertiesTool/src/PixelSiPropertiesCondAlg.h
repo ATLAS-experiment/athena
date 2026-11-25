@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */ 
 /**
  * @file SiPropertiesTool/PixelSiPropertiesCondAlg.h
@@ -18,7 +18,7 @@
 #include "PixelConditionsData/PixelDCSHVData.h"
 #include "PixelConditionsData/PixelDCSTempData.h"
 
-#include "SiPropertiesTool/SiliconPropertiesVector.h"
+#include "SiliconPropertiesVector.h"
 #include "InDetIdentifier/PixelID.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 

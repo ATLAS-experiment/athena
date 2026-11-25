@@ -1,18 +1,11 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRTPhaseCondAlg.h"
 #include "TRT_ConditionsData/RtRelation.h"
 #include "TRT_ConditionsData/BasicRtRelation.h"
 #include "InDetIdentifier/TRT_ID.h"
-
-TRTPhaseCondAlg::TRTPhaseCondAlg(const std::string& name
-				 , ISvcLocator* pSvcLocator )
-  : ::AthCondAlgorithm(name,pSvcLocator),
-    m_caldbtool("TRT_CalDbTool",this),
-    m_trtId(nullptr)
-{ declareProperty("TRTCalDbTool",m_caldbtool); }
 
 TRTPhaseCondAlg::~TRTPhaseCondAlg()= default;
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_DAQ_CONDITIONSSVC_H
@@ -33,7 +33,7 @@ class TRT_DAQ_ConditionsSvc : public extends<AthService,
 
  public:
 
-  TRT_DAQ_ConditionsSvc( const std::string&, ISvcLocator* );
+  using base_class::base_class;
   virtual ~TRT_DAQ_ConditionsSvc();
 
   virtual StatusCode initialize();
@@ -60,10 +60,10 @@ class TRT_DAQ_ConditionsSvc : public extends<AthService,
 
  private:
 
-  ServiceHandle<StoreGateSvc> m_detStore;
+  ServiceHandle<StoreGateSvc> m_detStore{this, "DetectorStore", "DetectorStore"};
 
   // jobOptions properties
-  std::string m_FolderName;
+  StringProperty m_FolderName{this, "FolderName", "/TDAQ/Resources/ATLAS/TRT/Robins"}; // For run1 the name is /TDAQ/EnabledResources/ATLAS/TRT/Robins
 
   // Straw Helpers
   const TRT_ID* m_TRT_ID_Helper{};

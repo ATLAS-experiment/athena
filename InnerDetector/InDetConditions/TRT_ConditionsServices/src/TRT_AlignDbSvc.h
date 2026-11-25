@@ -25,8 +25,9 @@
 #include "AthenaBaseComps/AthService.h"
 #include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "AthenaKernel/IAthenaOutputStreamTool.h"
 #include "TRT_ConditionsServices/ITRT_AlignDbSvc.h"
-#include "TRT_ConditionsServices/ITRT_StrawAlignDbSvc.h"
+#include "ITRT_StrawAlignDbSvc.h"
 #include "DetDescrConditions/AlignableTransformContainer.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "StoreGate/StoreGateSvc.h"
@@ -36,7 +37,6 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY; // This class uses const_cast. Legacy code
 namespace InDetDD {
   class TRT_DetectorManager ;
 }
-class IAthenaOutputStreamTool;
 class TRT_ID ;
 
 /** @class TRT_AlignDbSvc
@@ -47,7 +47,7 @@ class TRT_AlignDbSvc: public extends<AthService, ITRT_AlignDbSvc>
  public:
   
   /// constructor
-  TRT_AlignDbSvc( const std::string& name, ISvcLocator* pSvcLocator );
+  using base_class::base_class;
   
   /// destructor
   virtual ~TRT_AlignDbSvc();
@@ -155,22 +155,22 @@ class TRT_AlignDbSvc: public extends<AthService, ITRT_AlignDbSvc>
   /** Return the object key for a given identifier and data type */
   std::string findkey(const Identifier& ident, const std::string& type) const;
 
-  ServiceHandle<StoreGateSvc> m_detStore;
-  ServiceHandle<ITRT_StrawAlignDbSvc> m_trtStrawAlignDbSvc;
-  const TRT_ID* m_trtid;                 //!< trt id helper
-  const InDetDD::TRT_DetectorManager* m_trtman; //!< detector manager
-  std::string m_alignroot;               //!< root alignment folder
-  std::string m_alignString;               //!< alignment string searched for
-  std::string m_par_alitextfile;         //!< input text file
+  ServiceHandle<StoreGateSvc> m_detStore{this, "DetectorStore", "DetectorStore"};
+  ServiceHandle<ITRT_StrawAlignDbSvc> m_trtStrawAlignDbSvc{this, "TrtStrawAlignDbSvc", "TRT_StrawAlignDbSvc", "Service for interaction with the TRT straw alignment DB"};
+  const TRT_ID* m_trtid{};                 //!< trt id helper
+  const InDetDD::TRT_DetectorManager* m_trtman{}; //!< detector manager
+  StringProperty m_alignroot{this, "alignroot", "/TRT/Align"};               //!< root alignment folder
+  StringProperty m_alignString{this, "alignString", "AL"};               //!< alignment string searched for
+  StringProperty m_par_alitextfile{this, "alignTextFile", ""};         //!< input text file
   std::vector<std::string> m_alignobjs;  //!< folder names
   std::vector<int> m_alignchans;         //!< channels
-  ToolHandle<IAthenaOutputStreamTool> m_streamer; //!< OutputStreamTool
+  PublicToolHandle<IAthenaOutputStreamTool> m_streamer{this, "StreamTool", "AthenaOutputStreamTool/CondStream1"}; //!< OutputStreamTool
   mutable std::vector<Amg::Transform3D*> m_amgTransformCache;
 
-  std::string m_alignDBprefix;  // Not very elegant hack to make more modular for DB modifications
+  StringProperty m_alignDBprefix{this, "alignDBprefix", "/TRT/Align/"};  // Not very elegant hack to make more modular for DB modifications
 
-  bool m_dynamicDB;
-  bool m_forceUserDBConfig;     // DB folder scheme is auto-config now; This allows user override
+  bool m_dynamicDB{false};
+  BooleanProperty m_forceUserDBConfig{this, "forceUserDBConfig", false, "Set to true to override any DB auto-configuration"};     // DB folder scheme is auto-config now; This allows user override
 };
 
 #endif

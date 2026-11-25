@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_DetectorElementCondAlg.h"
@@ -11,15 +11,6 @@
 #include "AthenaKernel/IOVInfiniteRange.h"
 
 #include <map>
-
-SCT_DetectorElementCondAlg::SCT_DetectorElementCondAlg(const std::string& name, ISvcLocator* pSvcLocator)
-  : ::AthCondAlgorithm(name, pSvcLocator)
-  , m_readKey{"SCTAlignmentStore", "SCTAlignmentStore"}
-  , m_detManagerName("SCT")
-{
-  declareProperty("ReadKey", m_readKey);
-  declareProperty("DetManagerName", m_detManagerName);
-}
 
 StatusCode SCT_DetectorElementCondAlg::initialize()
 {

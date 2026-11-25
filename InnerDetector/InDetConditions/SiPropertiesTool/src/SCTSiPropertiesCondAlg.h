@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */ 
 
 #ifndef SCTSIPROPERTIESCONDALG
@@ -10,7 +10,7 @@
 #include "InDetConditionsSummaryService/ISiliconConditionsTool.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "SCT_ConditionsData/SCT_DCSFloatCondData.h"
-#include "SiPropertiesTool/SiliconPropertiesVector.h"
+#include "SiliconPropertiesVector.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 

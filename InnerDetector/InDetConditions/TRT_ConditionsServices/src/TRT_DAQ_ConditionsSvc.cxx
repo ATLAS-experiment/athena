@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*----------------------------------------------------
@@ -11,19 +11,6 @@
 
 #include "TRT_DAQ_ConditionsSvc.h"
 #include "StoreGate/ReadCondHandle.h"
-
-//////////
-/// Constructor
-/////
-TRT_DAQ_ConditionsSvc::TRT_DAQ_ConditionsSvc( const std::string& name, ISvcLocator* pSvcLocator ) :
-  base_class( name, pSvcLocator ),
-  m_detStore("DetectorStore",name),
-  m_FolderName("/TDAQ/Resources/ATLAS/TRT/Robins") // For run1 the name is /TDAQ/EnabledResources/ATLAS/TRT/Robins
-{
-  // Get properties from job options
-  declareProperty( "FolderName", m_FolderName );
-  declareProperty( "DetectorStore", m_detStore );
-}
 
 //////////
 /// Destructor

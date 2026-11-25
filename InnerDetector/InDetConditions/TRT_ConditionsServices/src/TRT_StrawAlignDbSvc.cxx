@@ -17,30 +17,11 @@
 
 #include "GaudiKernel/IToolSvc.h"
 #include "RegistrationServices/IIOVRegistrationSvc.h"
-#include "AthenaKernel/IAthenaOutputStreamTool.h"
 
 #include "Identifier/Identifier.h"
 #include "TRT_ReadoutGeometry/TRT_DetectorManager.h"
 
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY; // This class uses const_cast, regFcn (callback) and DataHandle. Legacy code
-
-TRT_StrawAlignDbSvc::TRT_StrawAlignDbSvc( const std::string& name,
-					  ISvcLocator* pSvcLocator )
-  : base_class(name,pSvcLocator),
-    m_detStore("DetectorStore",name),
-    m_par_dxcontainerkey("/TRT/Calib/DX"),
-    m_par_strawtextfile(""),
-    m_par_forcecallback(false),
-    m_trtid(nullptr),
-    m_trtman(nullptr),
-    m_streamer("AthenaOutputStreamTool/CondStream1")
-{
-  declareProperty("StrawTextFile",m_par_strawtextfile);
-  declareProperty("ForceCallback",m_par_forcecallback);
-  declareProperty("StreamTool",m_streamer);
-  declareProperty("DetectorStore",m_detStore);
-}
-
 
 TRT_StrawAlignDbSvc::~TRT_StrawAlignDbSvc()
 = default;

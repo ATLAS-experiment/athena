@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PIXELCONDITIONSALGORITHMS_PIXELDETECTORELEMENTCONDALG_H
@@ -27,7 +27,7 @@ namespace InDetDD {
 class PixelDetectorElementCondAlg : public AthCondAlgorithm
 {
  public:
-  PixelDetectorElementCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
+  using AthCondAlgorithm::AthCondAlgorithm;
   virtual ~PixelDetectorElementCondAlg() override = default;
 
   virtual StatusCode initialize() override final;

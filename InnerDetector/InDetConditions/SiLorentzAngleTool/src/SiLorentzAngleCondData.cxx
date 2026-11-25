@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -7,7 +7,7 @@
  * @author Susumu.Oda@cern.ch
 **/
 
-#include "SiLorentzAngleTool/SiLorentzAngleCondData.h"
+#include "SiLorentzAngleCondData.h"
 
 #include <limits>
 
