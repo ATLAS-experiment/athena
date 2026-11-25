@@ -6,6 +6,7 @@
 
 #include "MuonRDO/RpcFiredChannel.h"
 #include "GaudiKernel/MsgStream.h"
+#include <iostream>
 
 // default constructor
 

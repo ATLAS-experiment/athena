@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONBYTESTREAM_CSCRAWDATA_H
@@ -7,7 +7,7 @@
 
 #include <inttypes.h>
 #include <vector>
-#include <iostream>
+#include <iosfwd>
 
 class MsgStream;
 

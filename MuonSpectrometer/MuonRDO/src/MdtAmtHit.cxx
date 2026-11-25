@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonRDO/MdtAmtHit.h"
 #include "GaudiKernel/MsgStream.h"
+#include <iostream>
 
 MdtAmtHit::MdtAmtHit():
   m_tdcId(0), m_channelId(0), m_leading(false), m_coarse(0), 

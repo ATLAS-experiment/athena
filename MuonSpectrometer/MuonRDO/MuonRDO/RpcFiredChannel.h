@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // RpcFiredChannel.h
@@ -11,7 +11,7 @@
 // K. Assamagan 06/12/02
 
 #include <vector>
-#include <iostream>
+#include <iosfwd>
 
 typedef unsigned short int ubit16;
 
