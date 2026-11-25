@@ -375,6 +375,8 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
       if(!m_useGNTau &&  m_sCampaign=="mc23e")
 	ATH_MSG_WARNING("TauTrigger recommendations using offline RNN ID are NOT available for 2024. The tool is retrieving the offline GNTau ID based recommendations, which are NOT recommended to use");       
 
+      m_sVarName = "TauScaleFactorTriggerHadTau";
+      std::string sJetIDWP = ConvertTriggerIDToString(m_iJetIDLevel);
 
       if (m_sInputFilePathTriggerHadTau.empty()) {
         // Determine the input file name from the given trigger name.
@@ -402,7 +404,7 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
           }
         } else if(m_sCampaign=="mc23e"){
           if (m_sTriggerName.value().find("mediumRNN_tracktwoMVA") != std::string::npos) {
-            m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/GNTau/Trigger_TrueHadTau_data2024"+GetTriggerSFMeasurementString()+m_sTriggerName+".root";
+            m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/"+trigFold+"/Trigger_TrueHadTau_data2024"+GetTriggerSFMeasurementString()+m_sTriggerName+".root";
           }
           else {
             ATH_MSG_ERROR("Trigger " << m_sTriggerName << " is not supported for " << m_sCampaign << " campaign. Please fix \"TriggerName\" property. In case of doubt please consult with TauTrigger coordinators");
@@ -438,8 +440,7 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
 	    return StatusCode::FAILURE;
 	}
       }
-      m_sVarName = "TauScaleFactorTriggerHadTau";
-      std::string sJetIDWP = ConvertTriggerIDToString(m_iJetIDLevel);
+      
        
       if (m_tTool.empty()){  
         asg::AsgToolConfig config("TauAnalysisTools::CommonEfficiencyTool/TriggerHadTauTool_"+m_sTriggerName+"_tauID_"+sJetIDWP);
