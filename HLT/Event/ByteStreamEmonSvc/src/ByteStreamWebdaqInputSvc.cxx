@@ -95,7 +95,7 @@ StatusCode ByteStreamWebdaqInputSvc::initialize() {
   ATH_CHECK(m_inputMetaDataStore.retrieve());
   ATH_CHECK(m_robProvider.retrieve());
 
-  ATH_MSG_INFO("initialized for: " << m_partition);
+  ATH_MSG_INFO("Initialized for partition: " << m_partition);
 
   return StatusCode::SUCCESS;
 }
@@ -103,71 +103,81 @@ StatusCode ByteStreamWebdaqInputSvc::initialize() {
 bool ByteStreamWebdaqInputSvc::subscribe(State& state) {
   nlohmann::json runParams;
   while (!webdaq::is::get(m_partition, "RunParams", "RunParams", runParams)) {
+    if (m_signal_received) {
+      return false;
+    }
     ATH_MSG_INFO("No such partition (yet?): " << m_partition
                                               << " -> waiting...");
     sleep(10);
   }
 
-  if (m_readDetectorMask) {
-    // IS publishes the 128 bit detector mask as hex string
-    eformat::helper::DetectorMask mask(runParams["det_mask"].get<std::string>());
+  // Only the first slot to subscribe records the metadata
+  {
+    std::unique_lock lock(m_mutex);
+    if (!m_metadata_done) {
+      // IS publishes the 128 bit detector mask as hex string
+      eformat::helper::DetectorMask mask(runParams["det_mask"].get<std::string>());
 
-    auto metadatacont = std::make_unique<ByteStreamMetadataContainer>();
-    metadatacont->push_back(std::make_unique<ByteStreamMetadata>(
-      runParams["run_number"], 0, 0, runParams["recording_enabled"],
-    runParams["trigger_type"], mask.serialize().second,
-    runParams["beam_type"], runParams["beam_energy"], "", "",
-    runParams["T0_project_tag"], 0, std::vector<std::string>()));
+      auto metadatacont = std::make_unique<ByteStreamMetadataContainer>();
+      metadatacont->push_back(std::make_unique<ByteStreamMetadata>(
+                                                                   runParams["run_number"], 0, 0, runParams["recording_enabled"],
+                                                                   runParams["trigger_type"], mask.serialize().second,
+                                                                   runParams["beam_type"], runParams["beam_energy"], "", "",
+                                                                   runParams["T0_project_tag"], 0, std::vector<std::string>()));
 
-    // Record ByteStreamMetadataContainer in MetaData Store
-    if (m_inputMetaDataStore
-      ->record(std::move(metadatacont), "ByteStreamMetadata")
-      .isFailure()) {
-      ATH_MSG_WARNING("Unable to record MetaData in InputMetaDataStore");
-    } else {
+      // Record ByteStreamMetadataContainer in MetaData Store
+      if (m_inputMetaDataStore
+          ->record(std::move(metadatacont), "ByteStreamMetadata")
+          .isFailure()) {
+        ATH_MSG_WARNING("Unable to record MetaData in InputMetaDataStore");
+      } else {
         ATH_MSG_DEBUG("Recorded MetaData in InputMetaDataStore");
+      }
+      m_metadata_done = true;
     }
   }
 
-  ATH_MSG_INFO("subscribing to webdaq source: " << m_subscribe_criteria);
-  while (true) {
+  ATH_MSG_INFO("Ssubscribing to webdaq with: " << m_subscribe_criteria);
+  while (!m_signal_received) {
     state.m_subscription = webdaq::emon::subscribe(m_partition, m_subscribe_criteria);
     if (!state.m_subscription.empty()) {
       state.m_partition = m_partition;
-      ATH_MSG_INFO("subscribed successfully to webdaq source");
+      ATH_MSG_INFO("Subscribed successfully to webdaq");
       return true;
     } else {
-      ATH_MSG_INFO("Cannot connect to sampler (will wait 20s and retry)");
+      ATH_MSG_INFO("Cannot subscribe to webdaq (will wait 20s and retry)");
       sleep(20);
     }
   }
+  return false;
 }
 
 // Read previous event should not be called for this version of input svc
 const RawEvent* ByteStreamWebdaqInputSvc::previousEvent() {
   ATH_MSG_WARNING(
-      "previousEvent not implemented for ByteStreamWebdaqInputSvc");
+      "PreviousEvent not implemented for ByteStreamWebdaqInputSvc");
 
   return nullptr;
 }
 
 // Read the next event.
 const RawEvent* ByteStreamWebdaqInputSvc::nextEvent() {
-
   State& state = *m_slot_specific_data;
 
   // We only subscribe at the first event, otherwise we block in initialize()
   // the rest of athena
   if (state.m_subscription.empty()) {
     if (!subscribe(state)) {
-      ATH_MSG_ERROR("Cannot subscribe");
+      if (!m_signal_received) {
+        ATH_MSG_ERROR("Cannot subscribe");
+      }
       return nullptr;
     }
   }
 
   // Delete previous event, if any
   // We do this explicitly to avoid a situation where m_re and m_raw are
-  // inconsistent later in case of errors
+  // inconsistent later in case of errors when we are halfway through
   state.m_re.reset();
   state.m_raw.reset();
 
@@ -217,16 +227,17 @@ const RawEvent* ByteStreamWebdaqInputSvc::nextEvent() {
     m_robProvider->setNextEvent(Gaudi::Hive::currentContext(),
                                 state.m_re.get());
     m_robProvider->setEventStatus(Gaudi::Hive::currentContext(), 0);
-
-    ++m_totalEventCounter;
   }
+
+  const EventContext& context{Gaudi::Hive::currentContext()};
 
   // generate DataHeader
   DataHeader* Dh = new DataHeader();
   Dh->setStatus(DataHeader::Input);
 
-  CxxUtils::RefCountedPtr<ByteStreamAddress> iop(new ByteStreamAddress(
-      ClassID_traits<xAOD::EventInfo>::ID(), "EventInfo", ""));
+  CxxUtils::RefCountedPtr<ByteStreamAddress> iop(
+      new ByteStreamAddress(ClassID_traits<xAOD::EventInfo>::ID(), "EventInfo", ""));
+  iop->setEventContext(context);
   StatusCode ioc = m_sgSvc->recordAddress("EventInfo", std::move(iop));
   if (ioc.isSuccess()) {
     const SG::DataProxy* ptmp = m_sgSvc->transientProxy(
@@ -237,8 +248,9 @@ const RawEvent* ByteStreamWebdaqInputSvc::nextEvent() {
     }
   }
 
-  CxxUtils::RefCountedPtr<ByteStreamAddress> iopaux(new ByteStreamAddress(
-      ClassID_traits<xAOD::EventAuxInfo>::ID(), "EventInfoAux.", ""));
+  CxxUtils::RefCountedPtr<ByteStreamAddress> iopaux(
+      new ByteStreamAddress(ClassID_traits<xAOD::EventAuxInfo>::ID(), "EventInfoAux.", ""));
+  iopaux->setEventContext(context);
   StatusCode iocaux =
       m_sgSvc->recordAddress("EventInfoAux.", std::move(iopaux));
   if (iocaux.isSuccess()) {
