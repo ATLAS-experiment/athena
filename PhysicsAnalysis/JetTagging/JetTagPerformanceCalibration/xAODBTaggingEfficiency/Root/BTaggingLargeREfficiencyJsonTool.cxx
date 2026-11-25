@@ -34,33 +34,33 @@ StatusCode BTaggingLargeREfficiencyJsonTool::initialize()
   ATH_MSG_INFO("Initialize BTagging Efficiency Json Tool: retrieving corresponding selection tool");
   ANA_CHECK (m_selTool.retrieve());
 
-  ATH_MSG_INFO("Initialize BTagging Efficiency Json Tool from: " + m_json_config_path);
-  std::string pathToJsonConfigFile = PathResolverFindCalibFile(m_json_config_path);
+  ATH_MSG_INFO("Initialize BTagging Efficiency Json Tool from: " + m_jsonConfigPath);
+  std::string pathToJsonConfigFile = PathResolverFindCalibFile(m_jsonConfigPath);
   std::ifstream jsonFile(pathToJsonConfigFile);
 
   if (!jsonFile.is_open()) {
-    ATH_MSG_ERROR( "JSON file " + m_json_config_path + " does not exist. Please put the correct path of the file." );
+    ATH_MSG_ERROR( "JSON file " + m_jsonConfigPath + " does not exist. Please put the correct path of the file." );
     return StatusCode::FAILURE;
   }
-  m_json_config = json::parse(jsonFile);
+  json jsonConfig = json::parse(jsonFile);
   jsonFile.close();
 
-  if (m_outputName.empty() || !m_json_config.contains(m_outputName)){
-    ATH_MSG_ERROR( "The output name " + m_outputName + " not found in JSON file: " + m_json_config_path );
+  if (m_outputName.empty() || !jsonConfig.contains(m_outputName)){
+    ATH_MSG_ERROR( "The output name " + m_outputName + " not found in JSON file: " + m_jsonConfigPath );
     return StatusCode::FAILURE;
   }
 
-  if (m_jetAuthor.empty() || !m_json_config[m_outputName].contains(m_jetAuthor)){
-    ATH_MSG_ERROR( "Tagger: " +m_outputName+ " and Jet Collection: " +m_jetAuthor+ " not found in JSON file: " +m_json_config_path );
+  if (m_jetAuthor.empty() || !jsonConfig[m_outputName].contains(m_jetAuthor)){
+    ATH_MSG_ERROR( "Tagger: " +m_outputName+ " and Jet Collection: " +m_jetAuthor+ " not found in JSON file: " +m_jsonConfigPath );
     return StatusCode::FAILURE;
   }
 
-  if (m_OP.empty() || !m_json_config[m_outputName][m_jetAuthor].contains(m_OP)){
+  if (m_OP.empty() || !jsonConfig[m_outputName][m_jetAuthor].contains(m_OP)){
     ATH_MSG_ERROR( "OP " +m_OP+ " not available for " +m_outputName+ " tagger.");
     return StatusCode::FAILURE;
   }
 
-  const auto& meta = m_json_config[m_outputName][m_jetAuthor]["meta"];
+  const auto& meta = jsonConfig[m_outputName][m_jetAuthor]["meta"];
   const std::string truthLabel = meta["TruthLabel"];
   m_truthLabelAcc = std::make_unique<SG::ConstAccessor<int>>(truthLabel);
 
@@ -108,21 +108,21 @@ StatusCode BTaggingLargeREfficiencyJsonTool::initialize()
     }
   }
   // preload pt bins, systematics and SFs for each category
-  const auto& json_config_OP = m_json_config[m_outputName][m_jetAuthor][m_OP];
-  if (json_config_OP.contains("data_mc")) {
+  const auto& jsonConfigOP = jsonConfig[m_outputName][m_jetAuthor][m_OP];
+  if (jsonConfigOP.contains("data_mc")) {
     if (!meta.contains("labelMapping")) {
       ATH_MSG_ERROR("JSON contains data-mc scale factors but no 'labelMapping'.");
       return StatusCode::FAILURE;
     }
     for (const auto& label : meta["labelMapping"].items()) {
       std::string labelString = label.key();
-      if (json_config_OP["data_mc"].contains(labelString)) {
-        for (const auto& pt : json_config_OP["data_mc"][labelString]["pt"]) {
+      if (jsonConfigOP["data_mc"].contains(labelString)) {
+        for (const auto& pt : jsonConfigOP["data_mc"][labelString]["pt"]) {
           m_sfPtMap[labelString].push_back(BTaggingToolUtil::getExtendedFloat(pt));
         }
 
-        m_sfMap[labelString] = json_config_OP["data_mc"][labelString]["nominal"].get<std::vector<float>>();
-        for (auto& [systematicName, values] : json_config_OP["data_mc"][labelString]["systematics"].items()){
+        m_sfMap[labelString] = jsonConfigOP["data_mc"][labelString]["nominal"].get<std::vector<float>>();
+        for (auto& [systematicName, values] : jsonConfigOP["data_mc"][labelString]["systematics"].items()){
           m_sfSysMap[labelString][systematicName] = values.get<std::vector<float>>();
         }
       }
@@ -131,20 +131,20 @@ StatusCode BTaggingLargeREfficiencyJsonTool::initialize()
     ATH_MSG_WARNING("No calibration data-mc scale factors present in json.");
   }
 
-  if (meta.contains("labelMappingMCMC") && !json_config_OP.contains("mc_mc")) {
+  if (meta.contains("labelMappingMCMC") && !jsonConfigOP.contains("mc_mc")) {
     ATH_MSG_ERROR("JSON contains labelMappingMCMC but no mc-mc entry found for the WP used.");
     return StatusCode::FAILURE;
   }
   
-  if (json_config_OP.contains("mc_mc")) {
+  if (jsonConfigOP.contains("mc_mc")) {
     // Get the MC-MC json configuration related config
-    const auto &json_config_OPMCMC = json_config_OP["mc_mc"];
+    const auto &jsonConfigOPMCMC = jsonConfigOP["mc_mc"];
 
     if (!meta.contains("labelMappingMCMC")) {
       ATH_MSG_ERROR("JSON contains mc-to-mc corrections but no 'labelMappingMCMC'.");
       return StatusCode::FAILURE;
     }
-    if (!json_config_OPMCMC.contains("corrections")){
+    if (!jsonConfigOPMCMC.contains("corrections")){
       ATH_MSG_ERROR("No mc-to-mc corrections in JSON.");
       return StatusCode::FAILURE;
     }
@@ -155,12 +155,12 @@ StatusCode BTaggingLargeREfficiencyJsonTool::initialize()
       for (const auto& label : meta["labelMappingMCMC"].items()) {
         std::string labelStringMCMC = label.key();
 
-        if (!json_config_OPMCMC["corrections"].contains(labelStringMCMC)) {
+        if (!jsonConfigOPMCMC["corrections"].contains(labelStringMCMC)) {
           ATH_MSG_ERROR("JSON file contains labelStringMCMC=" << labelStringMCMC <<  " but no corresponding MC-MC SF found in the file");
           return StatusCode::FAILURE;
         }
         // Retrieve the corrections associted to the label string 
-        const auto& mcmcAtLabel = json_config_OPMCMC["corrections"][labelStringMCMC];
+        const auto& mcmcAtLabel = jsonConfigOPMCMC["corrections"][labelStringMCMC];
         if (mcmcAtLabel.contains("reference")) {
           // Retrieve the reference generator used for the calibration 
           m_mcReference[labelStringMCMC] = mcmcAtLabel["reference"];

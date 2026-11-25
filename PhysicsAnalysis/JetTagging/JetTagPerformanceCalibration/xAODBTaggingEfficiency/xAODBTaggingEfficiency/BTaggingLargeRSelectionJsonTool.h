@@ -9,7 +9,6 @@
 #include "AsgTools/AsgTool.h"
 #include <AsgTools/PropertyWrapper.h>
 #include <nlohmann/json.hpp>
-using json = nlohmann::ordered_json;
 
 class BTaggingLargeRSelectionJsonTool: public asg::AsgTool,
                                  public virtual IBTaggingLargeRSelectionJsonTool {
@@ -17,6 +16,9 @@ class BTaggingLargeRSelectionJsonTool: public asg::AsgTool,
   ASG_TOOL_CLASS( BTaggingLargeRSelectionJsonTool, IBTaggingLargeRSelectionJsonTool )
 
 public:
+
+  using json = nlohmann::ordered_json;
+  
   BTaggingLargeRSelectionJsonTool(const std::string& name);
   StatusCode initialize() override;
 
@@ -37,15 +39,13 @@ private:
   Gaudi::Property<std::string> m_outputName {this, "OutputName", "", "output name of the tagger"};
   Gaudi::Property<std::string> m_jetAuthor {this, "JetAuthor", "", "jet collection"};
   Gaudi::Property<std::string> m_OP {this, "OperatingPoint", "", "operating point"};
-  Gaudi::Property<std::string> m_json_config_path {this, "JsonConfigFile", "", "Path to JSON config file"};
+  Gaudi::Property<std::string> m_jsonConfigPath {this, "JsonConfigFile", "", "Path to JSON config file"};
   Gaudi::Property<bool> m_allowBinCountMismatch {this, "AllowBinCountMismatch", false,
     "If true, downgrade inconsistent pT/mass bin counts in loadBinConfig() from an ERROR "
     "(initialisation failure) to a WARNING and continue. Default false (fail on inconsistency)."};
 
   std::unique_ptr<SG::ConstAccessor<float>> m_massAcc;
   std::unique_ptr<SG::ConstAccessor<float>> m_ptAcc;
-
-  json m_json_config;
 
   struct BinConfig {
     std::vector<float> pTbins;

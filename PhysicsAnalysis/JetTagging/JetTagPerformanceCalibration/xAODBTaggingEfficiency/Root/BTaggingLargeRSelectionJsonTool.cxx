@@ -25,14 +25,14 @@ StatusCode BTaggingLargeRSelectionJsonTool::initialize() {
         m_minPt = BTaggingToolUtil::MeVToGeV( m_minPt ); 
     }
 
-    std::string pathToJsonConfigFile = PathResolverFindCalibFile(m_json_config_path);
+    std::string pathToJsonConfigFile = PathResolverFindCalibFile(m_jsonConfigPath);
     std::ifstream jsonFile(pathToJsonConfigFile);
     if (!jsonFile.is_open()) {
-        ATH_MSG_ERROR("JSON file " + m_json_config_path + " does not exist. Please put the correct path of the file.");
+        ATH_MSG_ERROR("JSON file " + m_jsonConfigPath + " does not exist. Please put the correct path of the file.");
         return StatusCode::FAILURE;
     }
 
-    m_json_config = json::parse(jsonFile);
+    json jsonConfig = json::parse(jsonFile);
     jsonFile.close();
 
     if (m_outputName.empty()) {
@@ -40,27 +40,27 @@ StatusCode BTaggingLargeRSelectionJsonTool::initialize() {
         return StatusCode::FAILURE;
     }
 
-    if (!m_json_config.contains(m_outputName)) {
-        ATH_MSG_ERROR("The output name " + m_outputName + " not found in JSON file: " + m_json_config_path);
+    if (!jsonConfig.contains(m_outputName)) {
+        ATH_MSG_ERROR("The output name " + m_outputName + " not found in JSON file: " + m_jsonConfigPath);
         return StatusCode::FAILURE;
     }
 
-    if (m_jetAuthor.empty() || !m_json_config[m_outputName].contains(m_jetAuthor)) {
+    if (m_jetAuthor.empty() || !jsonConfig[m_outputName].contains(m_jetAuthor)) {
         ATH_MSG_ERROR("Tagger: " + m_outputName + " and Jet Collection: " + m_jetAuthor +
-                      " not found in JSON file: " + m_json_config_path);
+                      " not found in JSON file: " + m_jsonConfigPath);
         return StatusCode::FAILURE;
     }
 
-    if (m_OP.empty() || !m_json_config[m_outputName][m_jetAuthor].contains(m_OP)) {
+    if (m_OP.empty() || !jsonConfig[m_outputName][m_jetAuthor].contains(m_OP)) {
         ATH_MSG_ERROR("OP " + m_OP + " not available for " + m_outputName + " tagger.");
         return StatusCode::FAILURE;
     }
 
-    const json& meta = m_json_config[m_outputName][m_jetAuthor]["meta"];
+    const json& meta = jsonConfig[m_outputName][m_jetAuthor]["meta"];
     m_fractionAccessors = loadFractionValues(meta);
 
     // Pre-load cut values
-    json& pT_mass_2d_tagger_cutvalue = m_json_config[m_outputName][m_jetAuthor][m_OP]["pT_mass_2d_cutvalue"];
+    json& pT_mass_2d_tagger_cutvalue = jsonConfig[m_outputName][m_jetAuthor][m_OP]["pT_mass_2d_cutvalue"];
     ATH_CHECK(loadBinConfig(pT_mass_2d_tagger_cutvalue, m_BinConfig));
 
     // Get mass decorator if specified
@@ -85,27 +85,27 @@ StatusCode BTaggingLargeRSelectionJsonTool::initialize() {
     m_veto = meta.contains("Veto");
     if (m_veto) {
         if (!meta["Veto"].contains("VetoTagger")) {
-            ATH_MSG_ERROR("Specific veto tagger not found in JSON file: " + m_json_config_path);
+            ATH_MSG_ERROR("Specific veto tagger not found in JSON file: " + m_jsonConfigPath);
             return StatusCode::FAILURE;
         }
         m_vetoTagger = meta["Veto"]["VetoTagger"];
         if (!meta["Veto"].contains("OperatingPoint")) {
-            ATH_MSG_ERROR("Specific operating point not found in JSON file: " + m_json_config_path);
+            ATH_MSG_ERROR("Specific operating point not found in JSON file: " + m_jsonConfigPath);
             return StatusCode::FAILURE;
         }
         m_vetoOP = meta["Veto"]["OperatingPoint"];
 
-        if (!m_json_config.contains(m_vetoTagger) ||
-            !m_json_config[m_vetoTagger].contains(m_jetAuthor) ||
-            !m_json_config[m_vetoTagger][m_jetAuthor].contains(m_vetoOP)) {
-            ATH_MSG_ERROR("Veto tagger configuration missing in JSON: " + m_json_config_path);
+        if (!jsonConfig.contains(m_vetoTagger) ||
+            !jsonConfig[m_vetoTagger].contains(m_jetAuthor) ||
+            !jsonConfig[m_vetoTagger][m_jetAuthor].contains(m_vetoOP)) {
+            ATH_MSG_ERROR("Veto tagger configuration missing in JSON: " + m_jsonConfigPath);
             return StatusCode::FAILURE;
         }
 
-        const json& veto_meta = m_json_config[m_vetoTagger][m_jetAuthor]["meta"];
+        const json& veto_meta = jsonConfig[m_vetoTagger][m_jetAuthor]["meta"];
         m_vetoFractionAccessors = loadFractionValues(veto_meta);
 
-        json& pT_mass_2d_veto_cutvalue = m_json_config[m_vetoTagger][m_jetAuthor][m_vetoOP]["pT_mass_2d_cutvalue"];
+        json& pT_mass_2d_veto_cutvalue = jsonConfig[m_vetoTagger][m_jetAuthor][m_vetoOP]["pT_mass_2d_cutvalue"];
         ATH_CHECK(loadBinConfig(pT_mass_2d_veto_cutvalue, m_VetoBinConfig));
     }
 
@@ -121,7 +121,7 @@ StatusCode BTaggingLargeRSelectionJsonTool::loadBinConfig(const json& pT_mass_2d
         const std::string binCountMsg = "We expect N bin edges for N-1 bins, but there are " +
             std::to_string(pT_mass_2d_cutvalue["pTbins"].size()) + " pT bin edges but " +
             std::to_string(pT_mass_2d_cutvalue.size() - 1) +
-            " entries in the pT_mass_2d_cutvalue dict. Please check the JSON file: " + m_json_config_path;
+            " entries in the pT_mass_2d_cutvalue dict. Please check the JSON file: " + m_jsonConfigPath;
         if (m_allowBinCountMismatch) {
             ATH_MSG_WARNING(binCountMsg + " Continuing because AllowBinCountMismatch is set.");
         } else {
@@ -141,7 +141,7 @@ StatusCode BTaggingLargeRSelectionJsonTool::loadBinConfig(const json& pT_mass_2d
 
             auto itr = pT_mass_2d_cutvalue.find(pT_key);
             if (itr == pT_mass_2d_cutvalue.end()) {
-                ATH_MSG_ERROR("pT_key=" + pT_key + " not found in JSON file: " + m_json_config_path);
+                ATH_MSG_ERROR("pT_key=" + pT_key + " not found in JSON file: " + m_jsonConfigPath);
                 return StatusCode::FAILURE;
             }
 
