@@ -3,6 +3,7 @@
  */
 
 #include "JET1Alg.h"
+#include "GlobalSimulation/Object.h"
 #include "GlobalSimulation/Tower.h"
 #include "GlobalSimulation/JET1Jet.h"
 #include "xAODCore/AuxContainerBase.h"

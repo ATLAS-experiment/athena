@@ -4,6 +4,7 @@
 
 #include "Jet_TagAlg.h"
 #include "GlobalSimulation/JET1Jet.h"
+#include "GlobalSimulation/Object.h"
 #include "GlobalSimulation/jet_tag_output.h"
 #include "GlobalSimulation/Tower.h"
 #include "Utilities/TowerLUTs.h"

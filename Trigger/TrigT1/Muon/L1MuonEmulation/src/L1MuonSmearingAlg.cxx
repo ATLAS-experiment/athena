@@ -162,7 +162,7 @@ StatusCode L1MuonSmearingAlg::execute(const EventContext& ctx) const {
       if (pt0 == 0.) pt0 = 1e-9; //set minimum value to avoid div-by-zero
       //units of outputRoIs->back()->pt() ?? something looks wrong here, division takes precedence over subtraction
       auto delta_pt = Monitored::Scalar<float>("delta_pt", (outputRoIs->back()->pt() - pt0/1000.) / (pt0/1000.));
-      //
+      //coverity[DIVIDE_BY_ZERO:FALSE]
       auto delta_curv = Monitored::Scalar<float>("delta_curv", ((outputRoIs->back()->getCharge() == 1 ? 1. : -1.)/outputRoIs->back()->pt() - (part->charge()*1000./pt0)) / (part->charge()*1000./pt0));
 
       auto monitorIt = Monitored::Group(m_monTool, roi_output_eta, roi_output_pt, roi_output_phi, roi_output_curv,

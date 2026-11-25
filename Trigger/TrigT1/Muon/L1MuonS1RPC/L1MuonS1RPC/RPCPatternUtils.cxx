@@ -152,7 +152,7 @@ void L1Muon::RPCPatternUtils::getStripIdforAlg(const RdoPairs& rdo_pair, std::ve
           strip_coordinates[phiStripID_2] = strip_coordinates[phiStripID];
         }
     } else {
-      if (stripId == static_cast<int>(0xFFFFFFFF)) { return; } // invalid strip number
+      //the following bits of stripId are known to be unset: 8-31
       uint32_t phiStripID = getSLStripId(side, sector, doubletPhi, RPClayer, doubletR, stationEta, doubletZ, stripId, measuresPhi);
       
       stripIDs.push_back(phiStripID);
