@@ -438,10 +438,14 @@ def ITkExtendedPRDInfoCfg(flags):
             ITkPixelPrepDataToxAODCfg as PixelPrepDataToxAODCfg,
             ITkStripPrepDataToxAODCfg as StripPrepDataToxAODCfg)
 
+    from TrkConfig.TrkConfigFlags import TrackingComponent
+    doGNNWithoutAmbiReso = (TrackingComponent.GNNChain in flags.Tracking.recoChain and (not flags.Tracking.GNN.doAmbiResolution))
+    skipClusterMerge = doGNNWithoutAmbiReso or flags.Tracking.doITkFastTracking
+
     result.merge(PixelPrepDataToxAODCfg(
         flags,
         ClusterSplitProbabilityName=(
-            "" if flags.Tracking.doITkFastTracking else
+            "" if skipClusterMerge else
             ITkClusterSplitProbabilityContainerName(flags))))
     result.merge(StripPrepDataToxAODCfg(flags))
 
