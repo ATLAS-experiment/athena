@@ -188,8 +188,15 @@ void gFEXaltMetAlgo::altMetAlgo(const EventContext& ctx, const gTowersCentral &A
             }
         }
 
-        MET_x += etasum * s_cosLUT[irow];
-        MET_y += etasum * s_sinLUT[irow];
+        if (FPGA_NO == 2) {
+            // FPGA C: each pair of phi rows uses the angle of the odd row, as in gFEXJwoJAlgo
+            int frow = 2*(irow/2) + 1;
+            MET_x += etasum * s_cosLUT[frow];
+            MET_y += etasum * s_sinLUT[frow];
+        } else {
+            MET_x += etasum * s_cosLUT[irow];
+            MET_y += etasum * s_sinLUT[irow];
+        }
     }
 
     MET_x >>= 5;
@@ -214,7 +221,7 @@ inline void gFEXaltMetAlgo::metTotal(const int A_MET_x, const int A_MET_y,
 
   int MET2 = MET_x * MET_x + MET_y * MET_y;
 
-  if (MET2 > 0x000FFF) MET = 0x000FFF;
+  if (MET2 > 0x0FFFFFF) MET = 0x000FFF;
   else if (MET2 < 0) MET = 0x000FFF;
   else MET = std::sqrt(MET2);
 
