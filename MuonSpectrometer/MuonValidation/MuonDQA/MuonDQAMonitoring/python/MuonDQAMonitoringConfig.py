@@ -17,9 +17,6 @@ def MuonDQAMonitoringConfig(flags):
             result.merge(MdtMonitoringConfig(flags))
             result.merge(RpcMonitoringConfig(flags))
             result.merge(TgcRawDataMonitoringConfig(flags))
-            if flags.Detector.GeometryCSC:
-                from CscRawDataMonitoring.CscMonitoringESD_Alg import CscMonitoringESD_AlgConfig
-                result.merge(CscMonitoringESD_AlgConfig(flags))
             if flags.Detector.GeometrysTGC:
                 from StgcRawDataMonitoring.StgcMonitorAlgorithm import sTgcMonitoringConfig
                 if flags.DQ.DataType is not DQDataType.MC:
@@ -31,9 +28,6 @@ def MuonDQAMonitoringConfig(flags):
                 result.merge(NSWMonitoringCfg(flags))
 
         if flags.DQ.Environment in ('online', 'tier0','tier0Raw'):
-            if flags.Detector.GeometryCSC:
-                from CscRawDataMonitoring.CscMonitoringRAW_Alg import CscMonitoringRAW_AlgConfig
-                result.merge(CscMonitoringRAW_AlgConfig(flags))
             if flags.Detector.GeometryMM:
                 from MMRawDataMonitoring.MMMonitorAlgorithm import MMMonitoringConfig
                 result.merge(MMMonitoringConfig(flags))
