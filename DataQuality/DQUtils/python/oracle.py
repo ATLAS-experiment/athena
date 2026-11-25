@@ -1,11 +1,12 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from sqlalchemy import (select, create_engine, MetaData, Table, Column, String, 
     Integer)
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import and_
+from sqlalchemy import __version__ as sa_version
 
 from DQUtils.sugar import IOVSet
 from xml.dom.minidom import parse
@@ -56,11 +57,18 @@ def get_authentication(connection="oracle://ATLAS_COOLPROD/ATLAS_COOLONL_GLOBAL"
 
 def make_oracle_connection(connection_string):
     "oracle://ATLAS_COOLPROD/ATLAS_COOLONL_GLOBAL"
+
+    # sqlalchemy 2.1 uses oracledb rather than cx_oracle.
+    # Need to explicitly enable thick mode in that case.
+    kw = {}
+    if [int(x) for x in sa_version.split('.')] >= [2,1]:
+        kw['thick_mode'] = True
+
     assert connection_string.startswith("oracle://"), "Not a connection string"
     host = urlparse (connection_string[len("oracle:"):]).netloc
     username, password = get_authentication(connection_string)
     conn_str = "oracle://%s:%s@%s" % (username, password, host)
-    engine = create_engine(conn_str, pool_recycle=10*60)
+    engine = create_engine(conn_str, pool_recycle=10*60, **kw)
     metadata = MetaData()
     metadata.reflect(engine)
     return engine, metadata
