@@ -31,7 +31,7 @@
 /// A log_ prefix is the natural log of the training preprocessing,
 /// log(max(x, 1e-8)) with zero kept at zero.
 namespace TausRUsClusterVars {
-  // Kinematics of the raw cluster, clust(), not of the vertex-corrected p4
+  // Kinematics of the raw cluster. dEtaRaw / dPhiRaw are w.r.t. the seed-jet axis
   bool dEtaRaw  (const xAOD::TauJet& tau, const xAOD::CaloVertexedTopoCluster& cluster, float& out);
   bool dPhiRaw  (const xAOD::TauJet& tau, const xAOD::CaloVertexedTopoCluster& cluster, float& out);
   bool etaRaw   (const xAOD::TauJet& tau, const xAOD::CaloVertexedTopoCluster& cluster, float& out);
@@ -41,6 +41,8 @@ namespace TausRUsClusterVars {
 } // namespace TausRUsClusterVars
 
 namespace TausRUsTrackVars {
+  bool dEta  (const xAOD::TauJet& tau, const xAOD::TauTrack& track, float& out);
+  bool dPhi  (const xAOD::TauJet& tau, const xAOD::TauTrack& track, float& out);
   bool log_pt(const xAOD::TauJet& tau, const xAOD::TauTrack& track, float& out);
   bool log_e (const xAOD::TauJet& tau, const xAOD::TauTrack& track, float& out);
   bool z0    (const xAOD::TauJet& tau, const xAOD::TauTrack& track, float& out);
@@ -141,8 +143,8 @@ private:
   };
 
   inline static const std::unordered_map<std::string, TrackFunc_t> m_trackFuncs = {
-    {"dEta",                            TauTrackVars::dEta},
-    {"dPhi",                            TauTrackVars::dPhi},
+    {"dEta",                            TausRUsTrackVars::dEta},
+    {"dPhi",                            TausRUsTrackVars::dPhi},
     {"log_pt",                          TausRUsTrackVars::log_pt},
     {"log_e",                           TausRUsTrackVars::log_e},
     {"trackEta",                        TauTrackVars::trackEta},
@@ -151,7 +153,6 @@ private:
     {"qOverP",                          TauTrackVars::qOverP},
     {"d0_old",                          TauTrackVars::d0_old},
     {"z0",                              TausRUsTrackVars::z0},
-    {"z0sinthetaTJVA",                  TauTrackVars::z0sinthetaTJVA},
     {"numberOfTRTHits",                 TauTrackVars::numberOfTRTHits},
     {"numberOfTRTHighThresholdHits",    TauTrackVars::numberOfTRTHighThresholdHits},
     {"numberOfSCTHits",                 TauTrackVars::numberOfSCTHits},

@@ -5,6 +5,7 @@
 #include "tauRecTools/TausRUsEvaluator.h"
 
 #include "AsgDataHandles/ReadHandle.h"
+#include "FourMomUtils/xAODP4Helpers.h"
 #include "TruthUtils/ParticleConstants.h"
 #include "xAODTracking/TrackParticle.h"
 
@@ -25,6 +26,7 @@ constexpr char TAU_ID_SCORE[] = "TausRUsTauIDScore";
 constexpr char ELE_REJ_SCORE[] = "TausRUsEleRejScore";
 constexpr char DECAY_MODE[] = "TausRUsDecayMode";
 constexpr char DECAY_MODE_SCORE_PREFIX[] = "TausRUsDecayModeScore";
+constexpr char DECAY_MODE_PROB_PREFIX[] = "TausRUsDecayModeProb";
 constexpr char TAU_P4[] = "TausRUsTauP4";
 constexpr char CHARGED_PION_P4[] = "TausRUsChargedPionP4";
 constexpr char NEUTRAL_PION_P4[] = "TausRUsNeutralPionP4";
@@ -33,8 +35,21 @@ constexpr char TAU_CHARGE[] = "TausRUsTauCharge";
 
 constexpr char TRACK_CLASS[] = "TausRUsTrackClass";
 constexpr char TRACK_SCORE_PREFIX[] = "TausRUsTrackScore";
+constexpr char TRACK_PROB_PREFIX[] = "TausRUsTrackProb";
 
 constexpr char METADATA_KEY[] = "metadata";
+/// Marker in the 'note' of an eta / phi head regressed w.r.t. the seed-jet axis
+constexpr char SEED_RELATIVE_NOTE[] = "relative to the seed jet";
+
+/// The (pt, eta, phi) heads of each regressed object
+struct FourMomHeads { const char* pt; const char* eta; const char* phi; };
+constexpr FourMomHeads TAU_HEADS{"tes", "tau_eta", "tau_phi"};
+constexpr FourMomHeads CHARGED_PION_HEADS{"charged_pion_sum_pt", 
+                                          "charged_pion_sum_eta", 
+                                          "charged_pion_sum_phi"};
+constexpr FourMomHeads NEUTRAL_PION_HEADS{"neutral_pion_sum_pt", 
+                                          "neutral_pion_sum_eta", 
+                                          "neutral_pion_sum_phi"};
 
 constexpr char P4_SUFFIXES[4][5] = {"_pt", "_eta", "_phi", "_m"};
 constexpr char POSITION_SUFFIXES[3][3] = {"_x", "_y", "_z"};
@@ -43,6 +58,20 @@ constexpr char POSITION_SUFFIXES[3][3] = {"_x", "_y", "_z"};
 /// classification head. Written as a sigmoid of the difference
 float twoClassScore(float signal, float background) {
   return 1.f / (1.f + std::exp(background - signal));
+}
+
+/// Softmax of the logits @p scores, shifted by their maximum for stability.
+std::vector<float> softmax(std::span<const float> scores) {
+  std::vector<float> probs(scores.size());
+  if (scores.empty()) return probs;
+  const float largest = *std::max_element(scores.begin(), scores.end());
+  float sum = 0.f;
+  for (size_t i = 0; i < scores.size(); ++i) {
+    probs[i] = std::exp(scores[i] - largest);
+    sum += probs[i];
+  }
+  for (float& p : probs) p /= sum;
+  return probs;
 }
 
 /// Index of the largest of @p scores, or DEFAULT_CLASS if empty.
@@ -150,6 +179,8 @@ StatusCode TausRUsEvaluator::readModel(const std::string& path) {
       return StatusCode::FAILURE;
     }
     output.dims = shape->second;
+    output.seedRelative =
+      node.value("note", std::string{}).find(SEED_RELATIVE_NOTE) != std::string::npos;
     output.size = std::accumulate(output.dims.begin(), output.dims.end(), size_t{1},
                                   std::multiplies<>());
     outputMetadata[output.name] = node;
@@ -159,10 +190,15 @@ StatusCode TausRUsEvaluator::readModel(const std::string& path) {
   // The heads the decoding needs to size itself.
   m_nDecayModes = outputMetadata.at("decay_mode").at("num_classes").get<size_t>();
   m_nTrackClasses = outputMetadata.at("tautrack_class").at("num_classes").get<size_t>();
+  if (m_nDecayModes != N_DECAY_MODES) {
+    ATH_MSG_ERROR("The 'decay_mode' head has " << m_nDecayModes << " classes, but the pion-sum "
+                  "masses are assigned for the " << N_DECAY_MODES << " PanTau decay modes");
+    return StatusCode::FAILURE;
+  }
 
   // The pt heads share one set of quantiles, and the median is decorated.
   const auto quantiles = outputMetadata.at("tes").at("quantiles").get<std::vector<double>>();
-  for (const char* name : {"charged_pion_pt", "neutral_pion_pt"}) {
+  for (const char* name : {CHARGED_PION_HEADS.pt, NEUTRAL_PION_HEADS.pt}) {
     if (outputMetadata.at(name).at("quantiles").get<std::vector<double>>() != quantiles) {
       ATH_MSG_ERROR("Output '" << name << "' regresses other quantiles than 'tes'");
       return StatusCode::FAILURE;
@@ -177,11 +213,21 @@ StatusCode TausRUsEvaluator::readModel(const std::string& path) {
   m_nQuantiles = quantiles.size();
   m_ptMedianQuantile = std::distance(quantiles.begin(), median);
 
-  // The per-slot heads are decoded against the track and vertex inputs.
-  if (m_loader->maxTracks() == 0 || m_loader->maxVertices() == 0) {
-    ATH_MSG_ERROR("The model needs both a track and a vertex input");
+  // The per-slot heads are decoded against the track and (optional) vertex inputs.
+  if (m_loader->maxTracks() == 0) {
+    ATH_MSG_ERROR("The model needs a track input");
     return StatusCode::FAILURE;
   }
+  const bool hasVertexOutput = outputMetadata.count("vertex_classification") > 0;
+  if (hasVertexOutput != (m_loader->maxVertices() > 0)) {
+    ATH_MSG_ERROR("The model has " << (hasVertexOutput ? "a" : "no")
+                  << " 'vertex_classification' head but " << (hasVertexOutput ? "no" : "a")
+                  << " vertex input");
+    return StatusCode::FAILURE;
+  }
+  m_hasVertexHead = hasVertexOutput;
+  ATH_MSG_INFO("TausRUs vertex head: " << (m_hasVertexHead ? "yes" : "no, "
+               "TausRUsVertex_* stay at their defaults"));
 
   return StatusCode::SUCCESS;
 }
@@ -225,18 +271,26 @@ StatusCode TausRUsEvaluator::initialize() {
   ATH_CHECK(checkNode("primary", "classification", {1, 3}));
   ATH_CHECK(checkNode("decay_mode", "classification",
                       {1, static_cast<int64_t>(m_nDecayModes)}));
-  for (const char* name : {"tes", "charged_pion_pt", "neutral_pion_pt"}) {
-    ATH_CHECK(checkNode(name, "quantile_regression",
+  for (const FourMomHeads& heads : {TAU_HEADS, CHARGED_PION_HEADS, NEUTRAL_PION_HEADS}) {
+    ATH_CHECK(checkNode(heads.pt, "quantile_regression",
                         {1, static_cast<int64_t>(m_nQuantiles)}));
+    ATH_CHECK(checkNode(heads.eta, "regression", {1, 1}));
+    // phi is either regressed directly (wrapped on decoding) or as (sin, cos)
+    const Output* phi = findOutput(heads.phi);
+    if (phi && phi->type == "periodic_regression") {
+      ATH_CHECK(checkNode(heads.phi, "periodic_regression", {1, 2}));
+    } else {
+      ATH_CHECK(checkNode(heads.phi, "regression", {1, 1}));
+    }
+    ATH_MSG_INFO("TausRUs heads " << heads.pt << ", " << heads.eta << ", " << heads.phi
+                 << ": eta " << (findOutput(heads.eta)->seedRelative ? "relative to" : "absolute, not")
+                 << " the seed jet, phi " << (findOutput(heads.phi)->seedRelative ? "relative to" : "absolute, not")
+                 << " the seed jet");
   }
-  for (const char* name : {"tau_eta", "charged_pion_eta", "neutral_pion_eta"}) {
-    ATH_CHECK(checkNode(name, "regression", {1, 1}));
+  if (m_hasVertexHead) {
+    ATH_CHECK(checkNode("vertex_classification", "classification",
+                        {1, static_cast<int64_t>(m_loader->maxVertices())}));
   }
-  for (const char* name : {"tau_phi", "charged_pion_phi", "neutral_pion_phi"}) {
-    ATH_CHECK(checkNode(name, "periodic_regression", {1, 2}));
-  }
-  ATH_CHECK(checkNode("vertex_classification", "classification",
-                      {1, static_cast<int64_t>(m_loader->maxVertices())}));
   ATH_CHECK(checkNode("tautrack_class", "classification",
                       {1, static_cast<int64_t>(m_loader->maxTracks()),
                        static_cast<int64_t>(m_nTrackClasses)}));
@@ -245,6 +299,7 @@ StatusCode TausRUsEvaluator::initialize() {
   for (size_t i = 0; i < m_nDecayModes; ++i) {
     m_decayModeScores.emplace_back(std::string(DECAY_MODE_SCORE_PREFIX)
                                    + std::to_string(i));
+    m_decayModeProbs.emplace_back(std::string(DECAY_MODE_PROB_PREFIX) + std::to_string(i));
   }
   for (const auto& suffix : P4_SUFFIXES) {
     m_tauP4.emplace_back(std::string(TAU_P4) + suffix);
@@ -256,6 +311,7 @@ StatusCode TausRUsEvaluator::initialize() {
   }
   for (size_t i = 0; i < m_nTrackClasses; ++i) {
     m_trackScores.emplace_back(std::string(TRACK_SCORE_PREFIX) + std::to_string(i));
+    m_trackProbs.emplace_back(std::string(TRACK_PROB_PREFIX) + std::to_string(i));
   }
 
   ATH_MSG_INFO("TausRUs decorates " << tauDecorationNames().size()
@@ -299,6 +355,9 @@ std::vector<std::string> TausRUsEvaluator::tauDecorationNames() const {
   for (size_t iMode = 0; iMode < m_nDecayModes; ++iMode) {
     names.emplace_back(std::string(DECAY_MODE_SCORE_PREFIX) + std::to_string(iMode));
   }
+  for (size_t iMode = 0; iMode < m_nDecayModes; ++iMode) {
+    names.emplace_back(std::string(DECAY_MODE_PROB_PREFIX) + std::to_string(iMode));
+  }
   for (const char* base : {TAU_P4, CHARGED_PION_P4, NEUTRAL_PION_P4}) {
     for (const auto& suffix : P4_SUFFIXES) {
       names.emplace_back(std::string(base) + suffix);
@@ -315,6 +374,9 @@ std::vector<std::string> TausRUsEvaluator::trackDecorationNames() const {
   for (size_t iClass = 0; iClass < m_nTrackClasses; ++iClass) {
     names.emplace_back(std::string(TRACK_SCORE_PREFIX) + std::to_string(iClass));
   }
+  for (size_t iClass = 0; iClass < m_nTrackClasses; ++iClass) {
+    names.emplace_back(std::string(TRACK_PROB_PREFIX) + std::to_string(iClass));
+  }
   return names;
 }
 
@@ -323,8 +385,10 @@ void TausRUsEvaluator::setDefaults(xAOD::TauJet& tau) const {
   m_eleRejScore(tau) = DEFAULT_VALUE;
   m_decayMode(tau) = DEFAULT_VALUE;
   m_tauCharge(tau) = DEFAULT_VALUE;
-  for (const SG::Accessor<float>& decorator : m_decayModeScores) {
-    decorator(tau) = DEFAULT_VALUE;
+  for (const auto* decorators : {&m_decayModeScores, &m_decayModeProbs}) {
+    for (const SG::Accessor<float>& decorator : *decorators) {
+      decorator(tau) = DEFAULT_VALUE;
+    }
   }
   for (const FourMomDecorators* decorators : {&m_tauP4, &m_chargedPionP4, &m_neutralPionP4}) {
     for (const SG::Accessor<float>& decorator : *decorators) {
@@ -340,16 +404,27 @@ void TausRUsEvaluator::setDefaults(xAOD::TauJet& tau) const {
   for (const xAOD::TauTrack* track : tau.allTracks()) {
     if (!track) continue;
     m_trackClass(*track) = DEFAULT_CLASS;
-    for (const SG::Decorator<float>& decorator : m_trackScores) {
-      decorator(*track) = DEFAULT_VALUE;
+    for (const auto* decorators : {&m_trackScores, &m_trackProbs}) {
+      for (const SG::Decorator<float>& decorator : *decorators) {
+        decorator(*track) = DEFAULT_VALUE;
+      }
     }
   }
 }
 
+const TausRUsEvaluator::Output* TausRUsEvaluator::findOutput(const std::string& name) const {
+  auto output = std::find_if(m_outputs.begin(), m_outputs.end(),
+                             [&name](const Output& o) { return o.name == name; });
+  return output == m_outputs.end() ? nullptr : &*output;
+}
+
 void TausRUsEvaluator::decorateFourMomentum(xAOD::TauJet& tau,
                                             const FourMomDecorators& decorators,
+                                            const Output& /*ptHead*/,
                                             std::span<const float> ptQuantiles,
+                                            const Output& etaHead,
                                             std::span<const float> etaValues,
+                                            const Output& phiHead,
                                             std::span<const float> phiValues,
                                             float mass) const {
   // The pt heads regress quantiles of the log response, log(ptJetSeed / pt), so
@@ -363,8 +438,15 @@ void TausRUsEvaluator::decorateFourMomentum(xAOD::TauJet& tau,
 
   const float response = ptQuantiles[m_ptMedianQuantile];
   decorators[0](tau) = std::exp(std::log(ptJetSeed) - response);
-  decorators[1](tau) = etaValues[0];
-  decorators[2](tau) = std::atan2(phiValues[PHI_SIN], phiValues[PHI_COS]);
+  // eta and phi heads may be regressed w.r.t. the seed-jet axis
+  decorators[1](tau) = etaValues[0] + (etaHead.seedRelative ? tau.etaJetSeed() : 0.f);
+  const float phi = phiHead.type == "periodic_regression"
+    ? std::atan2(phiValues[PHI_SIN], phiValues[PHI_COS])
+    : phiValues[0];
+  // deltaPhi(a, -b) wraps a + b into [-pi, pi)
+  decorators[2](tau) = phiHead.seedRelative
+    ? static_cast<float>(xAOD::P4Helpers::deltaPhi(phi, -tau.phiJetSeed()))
+    : phi;
   decorators[3](tau) = mass;
 }
 
@@ -392,25 +474,25 @@ void TausRUsEvaluator::decorateTracks(xAOD::TauJet& tau,
 
   const std::vector<const xAOD::TauTrack*> tracks = m_loader->selectTracks(tau);
 
-  int tauCharge = 0; // set default value of charge
+  // As TauTrackRNNClassifier: the charge is the sum over the tracks classified
+  // as tau tracks (0 if there are none).
+  float tauCharge = 0.f;
   for (size_t iTrack = 0; iTrack < tracks.size(); ++iTrack) {
     const std::span<const float> slot =
       scores.subspan(iTrack * m_nTrackClasses, m_nTrackClasses);
     const int trackClass = argMax(slot);
     m_trackClass(*tracks[iTrack]) = trackClass;
+    const std::vector<float> probs = softmax(slot);
     for (size_t iClass = 0; iClass < m_nTrackClasses; ++iClass) {
       m_trackScores[iClass](*tracks[iTrack]) = slot[iClass];
+      m_trackProbs[iClass](*tracks[iTrack]) = probs[iClass];
     }
     // only add charge to tau charge if the track is the correct one.
     if (trackClass == TAU_TRACK_CLASS) {
-      tauCharge += static_cast<int>(tracks[iTrack]->track()->charge());
+      tauCharge += tracks[iTrack]->track()->charge();
     }
   }
-
-  // Only append a valid charge
-  if (tauCharge == -1 || tauCharge == 1) {
-    m_tauCharge(tau) = tauCharge;
-  }
+  m_tauCharge(tau) = tauCharge;
 }
 
 StatusCode TausRUsEvaluator::executeTool(xAOD::TauJet& tau,
@@ -424,14 +506,20 @@ StatusCode TausRUsEvaluator::executeTool(xAOD::TauJet& tau,
     return StatusCode::SUCCESS;
   }
 
-  SG::ReadHandle<xAOD::VertexContainer> vertexInHandle(m_vertexInputContainer, ctx);
-  if (!vertexInHandle.isValid()) {
-    ATH_MSG_ERROR("Could not retrieve vertex container "
-                  << m_vertexInputContainer.key());
-    return StatusCode::FAILURE;
+  // The vertex collection is only read for a model with a vertex input
+  const xAOD::VertexContainer emptyVertices;
+  const xAOD::VertexContainer* vertices = &emptyVertices;
+  if (m_hasVertexHead) {
+    SG::ReadHandle<xAOD::VertexContainer> vertexInHandle(m_vertexInputContainer, ctx);
+    if (!vertexInHandle.isValid()) {
+      ATH_MSG_ERROR("Could not retrieve vertex container "
+                    << m_vertexInputContainer.key());
+      return StatusCode::FAILURE;
+    }
+    vertices = vertexInHandle.cptr();
   }
 
-  AthInfer::InputDataMap inputData = m_loader->loadInputs(tau, *vertexInHandle);
+  AthInfer::InputDataMap inputData = m_loader->loadInputs(tau, *vertices);
 
   AthInfer::OutputDataMap outputData;
   for (const Output& output : m_outputs) {
@@ -459,25 +547,34 @@ StatusCode TausRUsEvaluator::executeTool(xAOD::TauJet& tau,
   m_eleRejScore(tau) = twoClassScore(primary[Tau], primary[Electron]);
 
   const std::span<const float> decayMode = raw.at("decay_mode");
-  m_decayMode(tau) = static_cast<float>(argMax(decayMode));
+  const int predictedMode = argMax(decayMode);
+  m_decayMode(tau) = static_cast<float>(predictedMode);
+  const std::vector<float> decayModeProbs = softmax(decayMode);
   for (size_t iMode = 0; iMode < m_nDecayModes; ++iMode) {
     m_decayModeScores[iMode](tau) = decayMode[iMode];
+    m_decayModeProbs[iMode](tau) = decayModeProbs[iMode];
   }
 
   // The network gives pt, eta and phi only, so the four-momenta are completed
-  // with the PDG masses.
-  decorateFourMomentum(tau, m_tauP4, raw.at("tes"), raw.at("tau_eta"),
-                       raw.at("tau_phi"),
-                       ParticleConstants::PDG2024::tauMassInMeV);
-  decorateFourMomentum(tau, m_chargedPionP4, raw.at("charged_pion_pt"),
-                       raw.at("charged_pion_eta"), raw.at("charged_pion_phi"),
-                       ParticleConstants::PDG2024::chargedPionMassInMeV);
-  decorateFourMomentum(tau, m_neutralPionP4, raw.at("neutral_pion_pt"),
-                       raw.at("neutral_pion_eta"), raw.at("neutral_pion_phi"),
-                       ParticleConstants::PDG2024::piZeroMassInMeV);
+  // with a mass: the PDG tau mass for the tau, and for the pion sums the masses
+  // of the pions the predicted decay mode holds, counted as PanTau does.
+  auto decorate = [&](const FourMomDecorators& decorators, const FourMomHeads& heads,
+                      float mass) {
+    decorateFourMomentum(tau, decorators,
+                         *findOutput(heads.pt), raw.at(heads.pt),
+                         *findOutput(heads.eta), raw.at(heads.eta),
+                         *findOutput(heads.phi), raw.at(heads.phi), mass);
+  };
+  decorate(m_tauP4, TAU_HEADS, ParticleConstants::PDG2024::tauMassInMeV);
+  decorate(m_chargedPionP4, CHARGED_PION_HEADS,
+           N_CHARGED_PIONS[predictedMode] * ParticleConstants::PDG2024::chargedPionMassInMeV);
+  decorate(m_neutralPionP4, NEUTRAL_PION_HEADS,
+           N_NEUTRAL_PIONS[predictedMode] * ParticleConstants::PDG2024::piZeroMassInMeV);
 
-  decorateVertex(tau, raw.at("vertex_classification"),
-                 m_loader->selectVertices(*vertexInHandle));
+  if (m_hasVertexHead) {
+    decorateVertex(tau, raw.at("vertex_classification"),
+                   m_loader->selectVertices(*vertices));
+  }
   decorateTracks(tau, raw.at("tautrack_class"));
 
   return StatusCode::SUCCESS;

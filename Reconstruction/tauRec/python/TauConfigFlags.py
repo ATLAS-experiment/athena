@@ -92,7 +92,7 @@ def createTauConfigFlags():
 
 
     tau_cfg.addFlag("Tau.doTausRUs", False)
-    tau_cfg.addFlag("Tau.TausRUsModelFile", "dev/tauRecTools/tausrus_6.8.26.onnx")
+    tau_cfg.addFlag("Tau.TausRUsModelFile", "dev/tauRecTools/tausrus_countup_19.11.26.onnx")
     tau_cfg.addFlag("Tau.TausRUsMinPt", lambda prevFlags: prevFlags.Tau.MinPtDAOD)
     # Inference-as-a-service config (optional)
     tau_cfg.addFlag("Tau.TausRUsUseTriton", False)
