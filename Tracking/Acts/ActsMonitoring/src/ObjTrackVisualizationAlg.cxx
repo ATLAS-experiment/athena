@@ -61,7 +61,7 @@ namespace ActsTrk {
             std::optional<Acts::BoundTrackParameters> startPars{};
             if (track) {
                 startPars = track->createParametersAtReference();
-                for (const auto& state : track->trackStates()) {
+                for (const auto state : track->trackStates()) {
                     Acts::GeometryView3D::drawSurface(visualHelper, state.referenceSurface(),
                                                   tgContext, Acts::Transform3::Identity(),
                                                   Acts::s_viewSensitive);

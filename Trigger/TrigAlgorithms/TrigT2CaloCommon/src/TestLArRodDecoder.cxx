@@ -98,7 +98,7 @@ TestLArRodDecoder::execute( const EventContext& context) {
    delay*=1e-3;
    std::cout << "TIME : " << delay << "; n unpacked : " << nunpacked << "; TIME/unpacked : " << delay/((double)nunpacked) << std::endl; 
    for( auto coll : coll_of_coll )
-            for( const auto& cell : *coll ) 
+            for( const CaloCell* cell : *coll )
                 if ( cell && cell->caloDDE() ) std::cout << "Cell : 0x" << std::hex << cell->ID().get_identifier32().get_compact() << std::dec << " " <<  cell->energy() << " " << cell->eta() << " " << cell->phi() << " " << cell->caloDDE()->getSampling() << std::endl;
 
    return StatusCode::SUCCESS;
