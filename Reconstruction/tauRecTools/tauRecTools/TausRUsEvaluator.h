@@ -44,18 +44,25 @@
  *
  *   TausRUsTauIDScore      tau vs QCD, a two-class softmax over those two logits of the 'primary' head
  *   TausRUsEleRejScore     tau vs electron, the same over that pair
- *   TausRUsDecayMode       decay mode decision, and
- *   TausRUsDecayModeScore<i>   the raw scores it is the argmax of
+ *   TausRUsDecayMode       decay mode decision (0=1p0n, 1=1p1n, 2=1pXn, 3=3p0n, 4=3pXn),
+ *   TausRUsDecayModeScore<i>   the raw scores (logits) it is the argmax of, and
+ *   TausRUsDecayModeProb<i>    their softmax
  *   TausRUsTauP4_*         the regressed tau four-momentum, and
- *   TausRUsChargedPionP4_* the two pion four-momenta, each four floats,
- *   TausRUsNeutralPionP4_* _pt, _eta, _phi and _m. The mass is the PDG mass of the particle.
- *   TausRUsVertex_x/_y/_z  position of the vertex the 'vertex_classification' head picks out of the event vertex collection
- *   TausRUsTauCharge       sum of the charges of the tracks classified as tau tracks, kept only when it is -1 or +1, else 0
+ *   TausRUsChargedPionP4_* the charged and neutral pion-sum four-momenta, each four floats,
+ *   TausRUsNeutralPionP4_* _pt, _eta, _phi and _m. The tau gets the PDG tau mass; the pion sums the
+ *                          mass of the pions the predicted decay mode holds, counted as PanTau does
+ *                          (nCharged x m(pi+-), nPi0 x m(pi0) with 1pXn = 2 pi0, 3pXn = 1 pi0, 0n = 0).
+ *                          pt is undone from the log response w.r.t. ptJetSeed; eta and phi
+ *                          heads flagged as relative to the seed jet get etaJetSeed / phiJetSeed added.
+ *   TausRUsVertex_x/_y/_z  position of the vertex the 'vertex_classification' head picks out of the
+ *                          event vertex collection; left at the default if the model has no vertex head
+ *   TausRUsTauCharge       sum of the charges of the tracks classified as tau tracks
  *
  * Then, per xAOD::TauTrack the following are parsed
  *
- *   TausRUsTrackClass      track class decision, and
- *   TausRUsTrackScore<i>   the raw scores it is the argmax of
+ *   TausRUsTrackClass      track class decision (0=TT, 1=CT, 2=IT, 3=FT),
+ *   TausRUsTrackScore<i>   the raw scores (logits) it is the argmax of, and
+ *   TausRUsTrackProb<i>    their softmax
  */
 class TausRUsEvaluator : public TauRecToolBase {
 public:
@@ -79,6 +86,7 @@ public:
     std::string type;                   ///< head type from the metadata
     std::vector<int64_t> dims;
     size_t size{0};                     ///< product of dims
+    bool seedRelative{false};           ///< eta / phi head regressed w.r.t. the seed-jet axis
   };
 
   /// Class order of the 'primary' head, which is three raw logits.
@@ -86,6 +94,13 @@ public:
 
   /// Class for true-tau track from tau_track_class head
   static constexpr int TAU_TRACK_CLASS = 0;
+
+  /// The 'decay_mode' classes, in PanTau order, and the charged and neutral
+  /// pion multiplicities PanTau gives each of them (Tool_DetailsArranger: one
+  /// pi0 for 3pXn, two for 1pXn). They set the masses of the pion sums.
+  static constexpr size_t N_DECAY_MODES = 5;
+  static constexpr int N_CHARGED_PIONS[N_DECAY_MODES] = {1, 1, 1, 3, 3};
+  static constexpr int N_NEUTRAL_PIONS[N_DECAY_MODES] = {0, 1, 2, 0, 1};
 
   /// The two components of a phi head, which regresses the angle as a point on
   /// the unit circle: phi = atan2(sin, cos).
@@ -101,13 +116,16 @@ private:
 
   void setDefaults(xAOD::TauJet& tau) const;
 
-  /// Decorate the four floats of @p decorators from a pt, an eta and a phi
-  /// head, taking the mass from @p mass.
+  /// Decorate the four floats of @p decorators from the pt, eta and phi heads
+  /// named @p prefix + "_pt", "_eta", "_phi" (or "tes", "tau_eta", "tau_phi"),
+  /// taking the mass from @p mass.
   void decorateFourMomentum(xAOD::TauJet& tau, const FourMomDecorators& decorators,
-                            std::span<const float> ptQuantiles,
-                            std::span<const float> etaValues,
-                            std::span<const float> phiValues,
+                            const Output& ptHead, std::span<const float> ptQuantiles,
+                            const Output& etaHead, std::span<const float> etaValues,
+                            const Output& phiHead, std::span<const float> phiValues,
                             float mass) const;
+
+  const Output* findOutput(const std::string& name) const;
 
   /// Decorate the position of the vertex that @p scores picks out of
   /// @p vertices, which must be the list the input tensor was built from.
@@ -148,7 +166,9 @@ private:
   size_t m_nDecayModes{0};
   size_t m_nTrackClasses{0};
   size_t m_nQuantiles{0};
-  /// The pt heads ('tes', 'charged_pion_pt', 'neutral_pion_pt') regress
+  /// Whether the model has a vertex input and 'vertex_classification' head
+  bool m_hasVertexHead{false};
+  /// The pt heads ('tes', 'charged_pion_sum_pt', 'neutral_pion_sum_pt') regress
   /// quantiles of the log response, log(pt_seedjet / pt_true). This is the index
   /// of the median, the one to take as the point estimate; the pt then follows as
   ///   pt = exp(log(ptJetSeed) - quantile[m_ptMedianQuantile]).
@@ -161,6 +181,7 @@ private:
   SG::Accessor<float> m_decayMode;
   SG::Accessor<float> m_tauCharge;
   std::vector<SG::Accessor<float>> m_decayModeScores;
+  std::vector<SG::Accessor<float>> m_decayModeProbs;
   FourMomDecorators m_tauP4;
   FourMomDecorators m_chargedPionP4;
   FourMomDecorators m_neutralPionP4;
@@ -168,6 +189,7 @@ private:
   // decorators to the tracks
   SG::Decorator<int> m_trackClass;
   std::vector<SG::Decorator<float>> m_trackScores;
+  std::vector<SG::Decorator<float>> m_trackProbs;
 
   std::vector<SG::WriteDecorHandleKey<xAOD::TauJetContainer>> m_decorKeys;
   std::vector<SG::WriteDecorHandleKey<xAOD::TauTrackContainer>> m_trackDecorKeys;

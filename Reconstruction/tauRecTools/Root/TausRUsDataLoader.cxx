@@ -17,12 +17,22 @@ float logNonzero(double raw) {
   return raw == 0. ? 0.f : static_cast<float>(std::log(std::max(raw, 1e-8)));
 }
 
+/// Column of the cluster and track inputs (log_et / log_pt) from which the
+/// network infers padding: a slot is real iff this column is nonzero.
+constexpr size_t PRESENCE_IDX = 2;
+/// Value a real slot whose presence column is exactly zero is nudged to, as in
+/// the training preprocessing.
+constexpr float REAL_SLOT_EPS = 1e-10f;
+
 /// Write the variables of @p sequence for each of @p constituents into a
 /// zero-padded (maxObjects, nVariables) tensor. A function returning false
-/// leaves its slot at zero.
+/// leaves its slot at zero. If @p enforcePresence, a real slot whose presence
+/// column came out zero is nudged to REAL_SLOT_EPS so the network does not
+/// take it for padding.
 template <class Sequence, class Constituent>
 std::vector<float> fillTensor(const Sequence& sequence, const xAOD::TauJet& tau,
-                              const std::vector<const Constituent*>& constituents) {
+                              const std::vector<const Constituent*>& constituents,
+                              bool enforcePresence = false) {
   const size_t nVariables = sequence.funcs.size();
   std::vector<float> tensor(sequence.maxObjects * nVariables, 0.f);
   for (size_t iObject = 0; iObject < constituents.size(); ++iObject) {
@@ -32,6 +42,10 @@ std::vector<float> fillTensor(const Sequence& sequence, const xAOD::TauJet& tau,
         tensor[iObject * nVariables + iVar] =
           (value + sequence.offsets[iVar]) * sequence.scales[iVar];
       }
+    }
+    if (enforcePresence && nVariables > PRESENCE_IDX) {
+      float& presence = tensor[iObject * nVariables + PRESENCE_IDX];
+      if (presence == 0.f) presence = REAL_SLOT_EPS;
     }
   }
   return tensor;
@@ -43,16 +57,16 @@ std::vector<float> fillTensor(const Sequence& sequence, const xAOD::TauJet& tau,
 // MARK: TausRUs-only variables
 // --------------------------------------------------------------------------
 
-// uncorrected cluster variables
+// Uncorrected cluster variables. The separations are w.r.t. the seed-jet axis
 namespace TausRUsClusterVars {
 
 bool dEtaRaw(const xAOD::TauJet& tau, const xAOD::CaloVertexedTopoCluster& cluster, float& out) {
-  out = cluster.clust().eta() - tau.eta();
+  out = cluster.clust().eta() - tau.etaJetSeed();
   return true;
 }
 
 bool dPhiRaw(const xAOD::TauJet& tau, const xAOD::CaloVertexedTopoCluster& cluster, float& out) {
-  out = xAOD::P4Helpers::deltaPhi(cluster.clust().phi(), tau.phi());
+  out = xAOD::P4Helpers::deltaPhi(cluster.clust().phi(), tau.phiJetSeed());
   return true;
 }
 
@@ -79,6 +93,17 @@ bool log_eRaw(const xAOD::TauJet&, const xAOD::CaloVertexedTopoCluster& cluster,
 } // namespace TausRUsClusterVars
 
 namespace TausRUsTrackVars {
+
+// Separations w.r.t. the seed-jet axis
+bool dEta(const xAOD::TauJet& tau, const xAOD::TauTrack& track, float& out) {
+  out = track.track()->eta() - tau.etaJetSeed();
+  return true;
+}
+
+bool dPhi(const xAOD::TauJet& tau, const xAOD::TauTrack& track, float& out) {
+  out = xAOD::P4Helpers::deltaPhi(track.track()->phi(), tau.phiJetSeed());
+  return true;
+}
 
 bool log_pt(const xAOD::TauJet&, const xAOD::TauTrack& track, float& out) {
   out = logNonzero(track.track()->pt());
@@ -244,10 +269,10 @@ AthInfer::InputDataMap TausRUsDataLoader::loadInputs(const xAOD::TauJet& tau,
 
   if (!m_clusters.name.empty()) {
     std::vector<xAOD::CaloVertexedTopoCluster> storage;
-    add(m_clusters, fillTensor(m_clusters, tau, selectClusters(tau, storage)), false);
+    add(m_clusters, fillTensor(m_clusters, tau, selectClusters(tau, storage), true), false);
   }
   if (!m_tracks.name.empty()) {
-    add(m_tracks, fillTensor(m_tracks, tau, selectTracks(tau)), false);
+    add(m_tracks, fillTensor(m_tracks, tau, selectTracks(tau), true), false);
   }
   if (!m_vertices.name.empty()) {
     add(m_vertices, fillTensor(m_vertices, tau, selectVertices(vertices)), false);

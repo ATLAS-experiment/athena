@@ -830,6 +830,7 @@ def TausRUsDecorationNames():
     ]
     # The class counts must match 'num_classes' in the model metadata
     names += [f"TausRUsDecayModeScore{i}" for i in range(5)]
+    names += [f"TausRUsDecayModeProb{i}" for i in range(5)]
     names += [f"TausRUs{particle}P4_{component}"
               for particle in ("Tau", "ChargedPion", "NeutralPion")
               for component in ("pt", "eta", "phi", "m")]
@@ -838,7 +839,9 @@ def TausRUsDecorationNames():
 
 def TausRUsTrackDecorationNames():
     """Decorations TausRUs writes on each of the tau's xAOD::TauTrack."""
-    return ["TausRUsTrackClass"] + [f"TausRUsTrackScore{i}" for i in range(4)]
+    return (["TausRUsTrackClass"]
+            + [f"TausRUsTrackScore{i}" for i in range(4)]
+            + [f"TausRUsTrackProb{i}" for i in range(4)])
 
 def TausRUsEvaluatorCfg(flags, name="", tauContainerName="", tauTrackContainerName=""):
     """TausRUs multi-output tau network."""
