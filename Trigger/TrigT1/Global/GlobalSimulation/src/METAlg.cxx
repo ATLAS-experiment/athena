@@ -4,6 +4,7 @@
 
 #include "METAlg.h"
 #include "GlobalSimulation/JET1Jet.h"
+#include "GlobalSimulation/Object.h"
 #include "GlobalSimulation/Tower.h"
 #include "GlobalSimulation/met_output.h"
 #include "Utilities/TowerLUTs.h"

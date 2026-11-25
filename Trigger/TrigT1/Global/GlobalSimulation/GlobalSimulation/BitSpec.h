@@ -5,19 +5,7 @@
 #ifndef GLOBALSIM_BITSPEC_H
 #define GLOBALSIM_BITSPEC_H
 
-#include <bit>
-#include <bitset>
-#include <cstddef>
-#include <cstdint>
-#include <stdexcept>
-#include <string>
-#include <string_view>
-#include <tuple>
-#include <type_traits>
-#include <utility>
-#include <algorithm>
 
-#include <nlohmann/json.hpp>
 
 #include "AthContainers/AuxElement.h"
 
@@ -27,7 +15,25 @@
 #include "TMethod.h"
 #include "TMethodArg.h"
 #include "TList.h"
-#include <iostream>
+
+#include <nlohmann/json.hpp>
+
+#include <bit>
+#include <bitset>
+#include <cstddef>
+#include <cmath> //std::floor, std::ceil etc.
+#include <cstdint> //std::uint64_t etc
+#include <stdexcept>
+#include <string>
+#include <string_view>
+#include <tuple>
+#include <type_traits>
+#include <utility> //std::pair
+#include <algorithm> //std::clamp
+#include <limits> 
+#include <system_error> //std::errc
+#include <functional> //std::function
+#include <charconv> //std::from_chars
 
 namespace GlobalSimDetail {
     struct DynamicMethod {
@@ -281,8 +287,8 @@ namespace GlobalSim {
                 : auxspec(AuxSpec::parse(auxvar)),
                   name(name_),
                   description(description_),
-                  m_encoder(encoder),
-                  m_decoder(decoder),
+                  m_encoder(std::move(encoder)),
+                  m_decoder(std::move(decoder)),
                   m_acc(std::string{auxspec.name}), m_wacc(std::string{auxspec.name}) {
                 if(!m_encoder && !m_decoder && scale) {
                     if constexpr (Signed) {
@@ -1001,7 +1007,5 @@ namespace GlobalSim {
                                                                   \
     }
 
-
-#include "GlobalSimulation/Object.h"
 
 #endif

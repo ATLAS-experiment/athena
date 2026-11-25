@@ -1,6 +1,6 @@
 
 /*
- *   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "./GepJetAlg.h"
@@ -24,6 +24,8 @@
 
 #include <tuple>
 #include <vector>
+
+using namespace std::string_literals; //suffix s
 
 GepJetAlg::GepJetAlg( const std::string& name, ISvcLocator* pSvcLocator ) :
     AthReentrantAlgorithm( name, pSvcLocator ){
@@ -317,6 +319,18 @@ StatusCode GepJetAlg::execute(const EventContext& context) const {
     ATH_MSG_DEBUG("JetTaggerLRJ produced " << lrjs.size() << " large-R jets");
 
     if (!lrjs.empty()) {
+      static constexpr std::array attributeNames{ //all names are <15 char long
+       "RCut"s,        
+       "SeedEt"s,      
+       "SeedEta"s,     
+       "SeedPhi"s,     
+       "NSubjets"s,    
+       "Psi_R"s,       
+       "Tau_1"s,       
+       "Tau_2"s,       
+       "Tau_21"s,      
+       "MassApprox"s  
+      };//10 entries
       for (const auto& lrj : lrjs) {
         std::unique_ptr<xAOD::Jet> xAODJet{new xAOD::Jet()};
         xAOD::Jet* p = xAODJet.get();
@@ -329,16 +343,16 @@ StatusCode GepJetAlg::execute(const EventContext& context) const {
         p4.SetM  (lrj.vec.M());
         p->setJetP4(p4);
 
-        p->setAttribute("RCut",        lrj.radius);
-        p->setAttribute("SeedEt",      lrj.seedEt);
-        p->setAttribute("SeedEta",     lrj.seedEta);
-        p->setAttribute("SeedPhi",     lrj.seedPhi);
-        p->setAttribute("NSubjets",    lrj.nSubjets);
-        p->setAttribute("Psi_R",       lrj.psi_R);
-        p->setAttribute("Tau_1",       lrj.tau_1);
-        p->setAttribute("Tau_2",       lrj.tau_2);
-        p->setAttribute("Tau_21",      lrj.tau_21);
-        p->setAttribute("MassApprox",  lrj.massApprox);
+        p->setAttribute(attributeNames[0],        lrj.radius);
+        p->setAttribute(attributeNames[1],      lrj.seedEt);
+        p->setAttribute(attributeNames[2],     lrj.seedEta);
+        p->setAttribute(attributeNames[3],     lrj.seedPhi);
+        p->setAttribute(attributeNames[4],    lrj.nSubjets);
+        p->setAttribute(attributeNames[5],       lrj.psi_R);
+        p->setAttribute(attributeNames[6],       lrj.tau_1);
+        p->setAttribute(attributeNames[7],       lrj.tau_2);
+        p->setAttribute(attributeNames[8],      lrj.tau_21);
+        p->setAttribute(attributeNames[9],  lrj.massApprox);
         // Per-subjet kinematics as indexed SCALAR attributes (SubjetEt0,
         // SubjetEt1, ...). std::vector<float> jet attributes do not round-trip
         // to the reader here (neither setAttribute nor auxdata), whereas
@@ -377,6 +391,23 @@ StatusCode GepJetAlg::execute(const EventContext& context) const {
     return StatusCode::SUCCESS;
   }
   
+  static constexpr std::array names{ //all names are <15 char long
+    "RCut"s,
+    "SeedEta"s, // < gep attributes
+    "SeedPhi"s, //
+    "SeedEt"s, //
+    "Ring0_Et"s,
+    "Ring1_Et"s,
+    "Ring2_Et"s,
+    "Ring3_Et"s,
+    "Ring4_Et"s,
+    "Total_TobN"s,
+    "Ring0_TobN"s,
+    "Ring1_TobN"s,
+    "Ring2_TobN"s,
+    "Ring3_TobN"s,
+    "Ring4_TobN"s
+  };//15 entries
   // store gep jets in athena format
   for(const auto& gjet: gepJets){
     
@@ -396,21 +427,21 @@ StatusCode GepJetAlg::execute(const EventContext& context) const {
 
     p_xAODJet->setJetP4(p4);
     
-    p_xAODJet->setAttribute("RCut", gjet.radius);
-    p_xAODJet->setAttribute("SeedEta", gjet.seedEta); // < gep attributes
-    p_xAODJet->setAttribute("SeedPhi", gjet.seedPhi); //
-    p_xAODJet->setAttribute("SeedEt", gjet.seedEt); //
-    p_xAODJet->setAttribute("Ring0_Et", gjet.ring0_Et);
-    p_xAODJet->setAttribute("Ring1_Et", gjet.ring1_Et);
-    p_xAODJet->setAttribute("Ring2_Et", gjet.ring2_Et);
-    p_xAODJet->setAttribute("Ring3_Et", gjet.ring3_Et);
-    p_xAODJet->setAttribute("Ring4_Et", gjet.ring4_Et);
-    p_xAODJet->setAttribute("Total_TobN", gjet.total_TobN);
-    p_xAODJet->setAttribute("Ring0_TobN", gjet.ring0_TobN);
-    p_xAODJet->setAttribute("Ring1_TobN", gjet.ring1_TobN);
-    p_xAODJet->setAttribute("Ring2_TobN", gjet.ring2_TobN);
-    p_xAODJet->setAttribute("Ring3_TobN", gjet.ring3_TobN);
-    p_xAODJet->setAttribute("Ring4_TobN", gjet.ring4_TobN);
+    p_xAODJet->setAttribute(names[0], gjet.radius);
+    p_xAODJet->setAttribute(names[1], gjet.seedEta); // < gep attributes
+    p_xAODJet->setAttribute(names[2], gjet.seedPhi); //
+    p_xAODJet->setAttribute(names[3], gjet.seedEt); //
+    p_xAODJet->setAttribute(names[4], gjet.ring0_Et);
+    p_xAODJet->setAttribute(names[5], gjet.ring1_Et);
+    p_xAODJet->setAttribute(names[6], gjet.ring2_Et);
+    p_xAODJet->setAttribute(names[7], gjet.ring3_Et);
+    p_xAODJet->setAttribute(names[8], gjet.ring4_Et);
+    p_xAODJet->setAttribute(names[9], gjet.total_TobN);
+    p_xAODJet->setAttribute(names[10], gjet.ring0_TobN);
+    p_xAODJet->setAttribute(names[11], gjet.ring1_TobN);
+    p_xAODJet->setAttribute(names[12], gjet.ring2_TobN);
+    p_xAODJet->setAttribute(names[13], gjet.ring3_TobN);
+    p_xAODJet->setAttribute(names[14], gjet.ring4_TobN);
 
     for (const auto& i: gjet.constituentsIndices) {
       p_xAODJet->addConstituent(clusters.at(i));
