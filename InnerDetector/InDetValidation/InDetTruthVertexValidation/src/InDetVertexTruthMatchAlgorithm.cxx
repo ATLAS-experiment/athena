@@ -1,26 +1,16 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetVertexTruthMatchAlgorithm.h"
 
 #include "xAODTracking/VertexContainer.h"
 
-
-InDetVertexTruthMatchAlgorithm::InDetVertexTruthMatchAlgorithm( const std::string& name, ISvcLocator* svcLoc )
-   : AthAlgorithm( name, svcLoc ),
-     m_matchTool( "InDetVertexTruthMatchTool/InDetVertexTruthMatchTool", this ) {
-
-   declareProperty( "SGKey", m_sgKey = "PrimaryVertices" );
-
-   declareProperty( "VertexTruthMatchTool", m_matchTool );
-}
-
 StatusCode InDetVertexTruthMatchAlgorithm::initialize() {
 
    // Greet the user:
    ATH_MSG_INFO( "Initialising" );
-   ATH_MSG_DEBUG( "SGKey = " << m_sgKey );
+   ATH_MSG_DEBUG( "SGKey = " << m_sgKey.value() );
 
    // Retrieve the tools:
    ATH_CHECK( m_matchTool.retrieve() );

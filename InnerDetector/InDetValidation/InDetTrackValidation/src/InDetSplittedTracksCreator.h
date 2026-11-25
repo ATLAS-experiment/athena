@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -13,6 +13,7 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "TrkTrack/TrackCollection.h"
+#include "InDetTrackSplitterTool/IInDetTrackSplitterTool.h"
 
 namespace InDet {
 
@@ -23,12 +24,11 @@ namespace InDet {
 
    @author Manuel.Kayl@cern.ch
 */
-  class IInDetTrackSplitterTool;
 
 class InDetSplittedTracksCreator : public AthReentrantAlgorithm {
 public:
     /** Standard Athena-Algorithm Constructor */
-    InDetSplittedTracksCreator(const std::string& name, ISvcLocator* pSvcLocator);
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
     /** Default Destructor */
     ~InDetSplittedTracksCreator();
 
@@ -41,19 +41,19 @@ public:
 
 private:
     /**  holds the name of the track coll to be used*/
-    SG::ReadHandleKey<TrackCollection>     m_TrackCol;
+    SG::ReadHandleKey<TrackCollection>     m_TrackCol{this, "TrackCollection", "Tracks"};
     /**  holds the names the output track collection written to store gate*/
-    SG::WriteHandleKey<TrackCollection>    m_OutputTrackCol;
+    SG::WriteHandleKey<TrackCollection>    m_OutputTrackCol{this, "OutputTrackCollection", ""};
     /** flag for using TRT standalone tracks **/
     //bool                                   m_makeTRTStandaloneTracks;
     /** flag for using si only tracks **/
-    bool                                   m_makeSiOnlyTracks;
+    BooleanProperty                        m_makeSiOnlyTracks{this, "makeSiOnlyTracks", false};
     /** flag to accept the upper segment **/
-    bool                                   m_takeUpperSegment;
+    BooleanProperty                        m_takeUpperSegment{this, "takeUpperSegment", true};
     /** flag to accept the lower segment **/
-    bool                                   m_takeLowerSegment;
+    BooleanProperty                        m_takeLowerSegment{this, "takeLowerSegment", true};
     /** instances of IInDet */
-    ToolHandle< InDet::IInDetTrackSplitterTool >  m_trackSplitterTool;
+    PublicToolHandle< InDet::IInDetTrackSplitterTool >  m_trackSplitterTool{this, "TrackSplitterTool", ""};
 
 };
 

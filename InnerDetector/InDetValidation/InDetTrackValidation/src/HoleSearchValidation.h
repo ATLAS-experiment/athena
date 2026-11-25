@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -14,9 +14,11 @@
 #include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
+#include "TrkToolInterfaces/ITrackHoleSearchTool.h"
 #include "AthenaKernel/IAthRNGSvc.h"
 
 #include "TrkTrack/TrackCollection.h"
+#include <array>
 #include <mutex>
 
 // forward declarations
@@ -31,7 +33,6 @@ namespace CLHEP {
 }
 
 namespace Trk {
-    class ITrackHoleSearchTool;
     class TrackStateOnSurface;
     class Track;
 }
@@ -52,7 +53,7 @@ namespace InDet {
   class HoleSearchValidation : public AthReentrantAlgorithm {
   public:
     /** Standard Athena-Algorithm Constructor */
-    HoleSearchValidation(const std::string& name, ISvcLocator* pSvcLocator);
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
     /** Default Destructor */
     ~HoleSearchValidation();
 
@@ -68,18 +69,18 @@ namespace InDet {
     void printInfoTSoS( const Trk::TrackStateOnSurface* tsos) const;
     unsigned int doHoleSearch( const Trk::Track* track) const;
 
-    const AtlasDetectorID*                m_idHelper;
-    const PixelID*                        m_pixelID;
-    const SCT_ID*                         m_sctID; 
-    const TRT_ID*                         m_trtID; 
-    const SiliconID*                      m_siliconID; 
+    const AtlasDetectorID*                m_idHelper{};
+    const PixelID*                        m_pixelID{};
+    const SCT_ID*                         m_sctID{}; 
+    const TRT_ID*                         m_trtID{}; 
+    const SiliconID*                      m_siliconID{}; 
 
-    ToolHandle<Trk::ITrackHoleSearchTool>    m_holeSearchTool;
-    SG::ReadHandleKey<TrackCollection> m_trackCollectionKey;     //!< jobOption: name of the TrackCollection
+    PublicToolHandle<Trk::ITrackHoleSearchTool>    m_holeSearchTool{this, "HoleSearchTool", "InDet::InDetTrackHoleSearchTool"};
+    SG::ReadHandleKey<TrackCollection> m_trackCollectionKey{this, "TrackCollection", "Tracks", "Name of the reference track collection"};     //!< jobOption: name of the TrackCollection
     SG::WriteHandleKey<TrackCollection> m_trackCollectionOutputKey;     //!< jobOption: name of the TrackCollection
     //unsigned int   m_numberHitsToRemove;  //!< jobOption: number of hits to remove from tracks
     //unsigned int   m_numberHitsToKeep;    //!< jobOption: number of hits to remove 
-    bool           m_saveNewTracksInSG;   //!< jobOption: save new tracks to SG ?
+    BooleanProperty m_saveNewTracksInSG{this, "SaveNewTracksInSG", false, "Boolean: save tracks in SG"};   //!< jobOption: save new tracks to SG ?
    
 
     struct Parts {
@@ -103,15 +104,31 @@ namespace InDet {
       };
     };
 
-    bool m_removeParts[Parts::kNParts];
-    bool           m_removeOverlapHitsOnly;
-    bool           m_ignoreTrackEnds;
+    // the order must follow Parts::EParts
+    std::array<BooleanProperty, Parts::kNParts> m_removeParts{{
+      {this, "RemovePIX0", false, "Remove hit(s) in PIXEL layer 0"},
+      {this, "RemovePIX1", false, "Remove hit(s) in PIXEL layer 1"},
+      {this, "RemovePIX2", false, "Remove hit(s) in PIXEL layer 2"},
+      {this, "RemoveSCT0", false, "Remove hit(s) in SCT layer 0"},
+      {this, "RemoveSCT1", false, "Remove hit(s) in SCT layer 1"},
+      {this, "RemoveSCT2", false, "Remove hit(s) in SCT layer 2"},
+      {this, "RemoveSCT3", false, "Remove hit(s) in SCT layer 3"},
+      {this, "RemoveSCT4", false, "Remove hit(s) in SCT endcap layer 4"},
+      {this, "RemoveSCT5", false, "Remove hit(s) in SCT endcap layer 5"},
+      {this, "RemoveSCT6", false, "Remove hit(s) in SCT endcap layer 6"},
+      {this, "RemoveSCT7", false, "Remove hit(s) in SCT endcap layer 7"},
+      {this, "RemoveSCT8", false, "Remove hit(s) in SCT endcap layer 8"},
+      {this, "RemoveSCTSide0", false, "Remove SCT hits on side 0"},
+      {this, "RemoveSCTSide1", false, "Remove SCT hits on side 1"}
+    }};
+    BooleanProperty m_removeOverlapHitsOnly{this, "RemoveOverlapHitsOnly", false, "Only remove overlap track hits"};
+    BooleanProperty m_ignoreTrackEnds{this, "IgnoreTrackEnds", true, "Ignore hits at the end of the track"};
 
-    bool           m_randomRemovalMode;
-    unsigned int   m_maxNumberOfHoles;   
+    BooleanProperty m_randomRemovalMode{this, "RandomRemovalMode", false, "Randomly remove track hits (overwrites the other flags!)"};
+    UnsignedIntegerProperty m_maxNumberOfHoles{this, "MaximalHoles", 3, "Number of maximal holes to be created"};
 
-    ServiceHandle<IAthRNGSvc>    m_rndmGenSvc;       //!< Random number generator
-    std::string                  m_randomEngineName; //!< Name of the random number stream
+    ServiceHandle<IAthRNGSvc>    m_rndmGenSvc{"AthRNGSvc", name()};       //!< Random number generator
+    std::string                  m_randomEngineName{"HoleSearchRnd"}; //!< Name of the random number stream
 
     // some information for statistics -> printout in finalize
     mutable std::mutex                                  m_trackStatsMutex;

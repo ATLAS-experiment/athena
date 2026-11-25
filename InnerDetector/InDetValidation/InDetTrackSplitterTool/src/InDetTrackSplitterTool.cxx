@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -7,7 +7,7 @@
    AUTHOR: John Alison <johnda@hep.upenn.edu>
  */
 
-#include "InDetTrackSplitterTool/InDetTrackSplitterTool.h"
+#include "InDetTrackSplitterTool.h"
 #include "InDetIdentifier/TRT_ID.h"
 #include "InDetIdentifier/SCT_ID.h"
 #include "InDetRIO_OnTrack/TRT_DriftCircleOnTrack.h"
@@ -15,7 +15,6 @@
 #include "InDetRIO_OnTrack/SCT_ClusterOnTrack.h"
 //#include "TrkFitterUtils/FitterTypes.h"
 #include "GaudiKernel/MsgStream.h"
-#include "TrkFitterInterfaces/ITrackFitter.h"
 #include "TrkPseudoMeasurementOnTrack/PseudoMeasurementOnTrack.h"
 #include "TrkEventPrimitives/ParticleHypothesis.h"
 //#include "TrkParameters/MeasuredPerigee.h" //use perigee
@@ -79,15 +78,9 @@
 
 
 InDet::InDetTrackSplitterTool::InDetTrackSplitterTool( std::string const & type, std::string const & name, IInterface const* parent ) :
-  AthAlgTool( type, name, parent ),
-  m_trkfitter("Trk::GlobalChi2Fitter/InDetTrackFitter")
+  AthAlgTool( type, name, parent )
 {
-
   declareInterface<IInDetTrackSplitterTool>(this);
-  declareProperty("TrackFitter", m_trkfitter);
-  declareProperty("OutputUpperTracksName", m_outputUpperTracksName="splitUpperTracks");
-  declareProperty("OutputLowerTracksName", m_outputLowerTracksName="splitLowerTracks");
-  declareProperty("KeepMaterialStates",m_keepmaterial=true);
 }
 
 //=========================================================

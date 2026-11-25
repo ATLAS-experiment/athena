@@ -17,7 +17,6 @@
 //     o follow atlas naming conventions for all variable and method names
 
 #include "GaudiKernel/SmartDataPtr.h"
-#include "CLHEP/Units/SystemOfUnits.h"
 #include "TruthUtils/HepMCHelpers.h"
 
 
@@ -37,7 +36,6 @@
 #include "TrkEventPrimitives/LocalParameters.h"
 #include "TrkCompetingRIOsOnTrack/CompetingRIOsOnTrack.h"
 #include "TrkTruthData/TrackTruth.h"
-#include "TrkTruthData/TrackTruthCollection.h"
 #include "TrkEventPrimitives/JacobianThetaPToCotThetaPt.h"
 #include "TrkParameters/TrackParameters.h"       //vv
 #include "TrkToolInterfaces/IExtendedTrackSummaryTool.h"
@@ -49,15 +47,14 @@
 // Other
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include "IdDictDetDescr/IdDictManager.h"
-#include "GeneratorObjects/McEventCollection.h"
 #include "InDetRIO_OnTrack/TRT_DriftCircleOnTrack.h"
 #include "VxVertex/VxContainer.h"
 #include "VxVertex/RecVertex.h"
 
-#include "InDetRecStatistics/InDetRecStatisticsAlg.h"
-#include "InDetRecStatistics/TrackStatHelper.h"
+#include "InDetRecStatisticsAlg.h"
+#include "TrackStatHelper.h"
 #include "AtlasHepMC/GenParticle.h"
-#include "InDetRecStatistics//PileUpType.h"
+#include "PileUpType.h"
 #include "TruthUtils/HepMCHelpers.h"
 #include "IdDict/IdDictDictionary.h"
 #include "IdDict/IdDictMgr.h"
@@ -68,91 +65,8 @@
 #include <iostream>
 #include <sstream>
 
-
-
 static const char * const s_linestr = "----------------------------------------------------------------------------------------------------------------------------------------------";
 static const char * const s_linestr2 = "..............................................................................................................................................";
-
-InDet::InDetRecStatisticsAlg::InDetRecStatisticsAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthReentrantAlgorithm(name, pSvcLocator),
-  m_trtID                      (nullptr),
-  m_idDictMgr                  (nullptr),
-  m_truthToTrack               ("Trk::TruthToTrack"),
-  m_trkSummaryTool             ("Trk::TrackSummaryTool/InDetTrackSummaryTool"),
-  m_updatorHandle              ("Trk::KalmanUpdator/TrkKalmanUpdator"),
-  m_updator                    (nullptr),
-  m_residualPullCalculator     ("Trk::ResidualPullCalculator/ResidualPullCalculator"),
-  m_McTrackCollection_key      ("TruthEvent"),
-  m_trackSelectorTool          ("InDet::InDetDetailedTrackSelectorTool"),
-  m_UseTrackSummary            (true),
-  m_printSecondary             (false),
-  m_minPt                      (1000),
-  m_maxEta                     (4.2),
-  m_maxEtaBarrel               (0.8),
-  m_maxEtaTransition           (1.6),
-  m_maxEtaEndcap               (2.5),
-  m_fakeTrackCut               (0.9),
-  m_fakeTrackCut2              (0.7),
-  m_matchTrackCut              (0.5),
-  m_maxRStartPrimary           (  25.0*CLHEP::mm),
-  m_maxRStartSecondary         ( 360.0*CLHEP::mm),
-  m_maxZStartPrimary           ( 200.0*CLHEP::mm),
-  m_maxZStartSecondary         (2000.0*CLHEP::mm),
-  m_minREndPrimary             ( 400.0*CLHEP::mm),
-  m_minREndSecondary           (1000.0*CLHEP::mm),
-  m_minZEndPrimary             (2300.0*CLHEP::mm),
-  //m_maxZIndet                (),
-  m_minZEndSecondary           (3200.0*CLHEP::mm),
-  m_useTrackSelection          (false),
-  m_doTruth                    (true),
-  m_minEtaFORWARD              (2.5),
-  m_maxEtaFORWARD              (4.2),
-  m_isUnbiased                 (0),
-  m_events_processed           (0)
-{
-  // m_RecTrackCollection_keys.push_back(std::string("Tracks"));
-  // m_TrackTruthCollection_keys.push_back(std::string("TrackTruthCollection"));
-
-  // Algorithm properties
-  declareProperty("SummaryTool",                m_trkSummaryTool);
-  declareProperty("TruthToTrackTool",           m_truthToTrack);
-  declareProperty("UpdatorTool",                m_updatorHandle,
-		  "Measurement updator to calculate unbiased track states");
-  declareProperty("ResidualPullCalculatorTool", m_residualPullCalculator,
-		  "Tool to calculate residuals and pulls");
-  declareProperty("TrackCollectionKeys",        m_RecTrackCollection_keys);
-  declareProperty("McTrackCollectionKey",       m_McTrackCollection_key);
-  declareProperty("TrackTruthCollectionKeys",   m_TrackTruthCollection_keys);
-  declareProperty("UseTrackSelection"       ,   m_useTrackSelection);
-  declareProperty("DoTruth"                 ,   m_doTruth);
-  declareProperty("TrackSelectorTool"       ,   m_trackSelectorTool);
-  declareProperty("UseTrackSummary",            m_UseTrackSummary);
-  declareProperty("PrintSecondary",             m_printSecondary);
-  declareProperty("minPt",		        m_minPt);
-  declareProperty("maxEta",		        m_maxEta);
-  declareProperty("maxEtaBarrel",               m_maxEtaBarrel  );
-  declareProperty("maxEtaTransition",           m_maxEtaTransition);
-  declareProperty("maxEtaEndcap",               m_maxEtaEndcap);
-  declareProperty("maxEtaFORWARD", m_maxEtaFORWARD);
-  declareProperty("minEtaFORWARD", m_minEtaFORWARD);
-  declareProperty("fakeTrackCut",               m_fakeTrackCut);
-  declareProperty("fakeTrackCut2",              m_fakeTrackCut2);
-  declareProperty("matchTrackCut",              m_matchTrackCut);
-  declareProperty("maxRStartPrimary",	        m_maxRStartPrimary);
-  declareProperty("maxRStartSecondary",	        m_maxRStartSecondary);
-  declareProperty("maxZStartPrimary",	        m_maxZStartPrimary);
-  declareProperty("maxZStartSecondary",         m_maxZStartSecondary);
-  declareProperty("minREndPrimary",		m_minREndPrimary);
-  declareProperty("minREndSecondary",		m_minREndSecondary);
-  declareProperty("minZEndPrimary",		m_minZEndPrimary);
-  declareProperty("minZEndSecondary",	        m_minZEndSecondary);
-  m_idHelper  = nullptr;
-  m_pixelID   = nullptr;
-  m_sctID     = nullptr;
-  m_UpdatorWarning = false;
-  m_pullWarning = false;
-}
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 StatusCode InDet::InDetRecStatisticsAlg::initialize(){
@@ -650,36 +564,36 @@ void InDet :: InDetRecStatisticsAlg :: printStatistics() {
 	  << "\t" << "TrackSummary Statistics" << "\t"
 	  << (m_UseTrackSummary     ? "YES" : "NO") << "\n"
 	  << "\t" << "Signal                \t" << "pT > "
-	  << m_minPt/1000 << " GeV/c, |eta| < " << m_maxEta << "\t\t"
+	  << m_minPt.value()/1000 << " GeV/c, |eta| < " << m_maxEta.value() << "\t\t"
 	  << "\t" << "Primary track start   \t" << "R < "
-	  << m_maxRStartPrimary << "mm and |z| < "
-	  << m_maxZStartPrimary << "mm" << "\n"
+	  << m_maxRStartPrimary.value() << "mm and |z| < "
+	  << m_maxZStartPrimary.value() << "mm" << "\n"
 	  << "\t" << "Barrel                \t" << 0.0
-	  << "< |eta| < " << m_maxEtaBarrel     << "\t\t\t"
+	  << "< |eta| < " << m_maxEtaBarrel.value()     << "\t\t\t"
 	  << "\t" << "Primary track end     \t" << "R > "
-	  << m_minREndPrimary   << "mm or |z| > " << m_minZEndPrimary
+	  << m_minREndPrimary.value()   << "mm or |z| > " << m_minZEndPrimary.value()
 	  << "mm" << "\n"
-	  << "\t" << "Transition Region     \t" << m_maxEtaBarrel
-	  << "< |eta| < " << m_maxEtaTransition << "\t\t\t"
+	  << "\t" << "Transition Region     \t" << m_maxEtaBarrel.value()
+	  << "< |eta| < " << m_maxEtaTransition.value() << "\t\t\t"
 	  << "\t" << "Secondary (non-Primary) start \t"
-	  << " R < "    << m_maxRStartSecondary << "mm and"
-	  << " |z| < "  << m_maxZStartSecondary << " mm" << "\n"
-	  << "\t" << "Endcap                \t" << m_maxEtaTransition
-	  << "< |eta| < " << m_maxEtaEndcap     << "\t\t\t"
+	  << " R < "    << m_maxRStartSecondary.value() << "mm and"
+	  << " |z| < "  << m_maxZStartSecondary.value() << " mm" << "\n"
+	  << "\t" << "Endcap                \t" << m_maxEtaTransition.value()
+	  << "< |eta| < " << m_maxEtaEndcap.value()     << "\t\t\t"
 	  << "\t" << "Secondary (non-primary) end   \t"
-	  << " R > "    << m_minREndSecondary   << "mm or"
-	  << " |z| > "  << m_minREndSecondary   << "mm" << "\n"
+	  << " R > "    << m_minREndSecondary.value()   << "mm or"
+	  << " |z| > "  << m_minREndSecondary.value()   << "mm" << "\n"
           << "\t" << "Forward                \t"
-          << "|eta| > " << m_minEtaFORWARD     << "\n"
+          << "|eta| > " << m_minEtaFORWARD.value()     << "\n"
 	  << "\t" << "Low prob tracks #1    \t" << "< "
-	  << m_fakeTrackCut  << " of hits from single Truth Track "
+	  << m_fakeTrackCut.value()  << " of hits from single Truth Track "
 	  << "\n"
 	  << "\t" << "Low prob tracks #2    \t" << "< "
-	  << m_fakeTrackCut2 << " of hits from single Truth Track "
+	  << m_fakeTrackCut2.value() << " of hits from single Truth Track "
 	  << "\n"
 	  << "\t" << "No link tracks        \t  Track has no link associated to an HepMC Particle" << "\n"
 	  << "\t" << "Good reco tracks      \t" << "> "
-	  << m_matchTrackCut << " of hits from single Truth Track + a link !";
+	  << m_matchTrackCut.value() << " of hits from single Truth Track + a link !";
   ATH_MSG_INFO(outstr.str());
   outstr.str("");
 
@@ -728,11 +642,11 @@ void InDet :: InDetRecStatisticsAlg :: printStatistics() {
            <<s_linestr<<"\n"
            <<"Statistics for Secondaries (non-Primaries)"<<"\n"
            << "\t" << "Secondary track start \t"
-	   << " R < "   << m_maxRStartSecondary << "mm and"
-	   << " |z| < " << m_maxZStartSecondary << " mm" << "\n"
+	   << " R < "   << m_maxRStartSecondary.value() << "mm and"
+	   << " |z| < " << m_maxZStartSecondary.value() << " mm" << "\n"
            << "\t" << "Secondary track end   \t"
-	   << " R > "    << m_minREndSecondary << "mm or"
-           << " |z| > "  << m_minZEndSecondary << "mm";
+	   << " R > "    << m_minREndSecondary.value() << "mm or"
+           << " |z| > "  << m_minZEndSecondary.value() << "mm";
     ATH_MSG_INFO(outstr.str());
     outstr.str("");
     out << "\n" << s_linestr2 << "\n";

@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "InDetSegmentDriftCircleAssValidation/SegmentDriftCircleAssValidation.h"
+#include "SegmentDriftCircleAssValidation.h"
 
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/DataSvc.h"
@@ -25,34 +25,6 @@
 #include "TruthUtils/HepMCHelpers.h"
 
 using HepGeom::Point3D;
-
-///////////////////////////////////////////////////////////////////
-// Constructor
-///////////////////////////////////////////////////////////////////
-
-InDet::SegmentDriftCircleAssValidation::SegmentDriftCircleAssValidation (const std::string& name,ISvcLocator* pSvcLocator) : 
-  AthAlgorithm(name,pSvcLocator),
-  m_nprint            (0),
-  m_tcut              (0.),
-  m_events            (0),
-  m_ncircles          (0),
-  m_nqsegments        (0)
-{
-
-  // SegmentDriftCircleAssValidation steering parameters
-  //
-  m_pTmin             = 500.                    ;
-  m_rapcut            = 2.1                     ;
-  m_dccut             = 10                      ;
-  m_rmin              = 0.                      ;
-  m_rmax              = 20.                     ;
-
-  declareProperty("pTmin",                  m_pTmin             );
-  declareProperty("Pseudorapidity",         m_rapcut            );
-  declareProperty("MinNumberDCs"  ,         m_dccut             );
-  declareProperty("RadiusMin",              m_rmin              );
-  declareProperty("RadiusMax",              m_rmax              );
-}
 
 ///////////////////////////////////////////////////////////////////
 // Initialisation
@@ -217,23 +189,23 @@ MsgStream& InDet::SegmentDriftCircleAssValidation::dumptools( MsgStream& out ) c
   out<<"| Truth location  for trt                         | "<<m_PRDTruthTRTKey.key()     <<s3
      <<std::endl;
   out<<"|         pT cut                                  | "
-     <<std::setw(14)<<std::setprecision(5)<<m_pTmin
+     <<std::setw(14)<<std::setprecision(5)<<m_pTmin.value()
      <<"                                                   |"
      <<std::endl;
   out<<"|   rapidity cut                                  | "
-     <<std::setw(14)<<std::setprecision(5)<<m_rapcut
+     <<std::setw(14)<<std::setprecision(5)<<m_rapcut.value()
      <<"                                                   |"
      <<std::endl;
   out<<"| min Radius                                      | "
-     <<std::setw(14)<<std::setprecision(5)<<m_rmin
+     <<std::setw(14)<<std::setprecision(5)<<m_rmin.value()
      <<"                                                   |"
      <<std::endl;
   out<<"| max Radius                                      | "
-     <<std::setw(14)<<std::setprecision(5)<<m_rmax
+     <<std::setw(14)<<std::setprecision(5)<<m_rmax.value()
      <<"                                                   |"
      <<std::endl;
   out<<"| Min. number drift circles for generated segment  | "
-     <<std::setw(14)<<std::setprecision(5)<<m_dccut
+     <<std::setw(14)<<std::setprecision(5)<<m_dccut.value()
      <<"                                                   |"
      <<std::endl;
   out<<"|----------------------------------------------------------------"

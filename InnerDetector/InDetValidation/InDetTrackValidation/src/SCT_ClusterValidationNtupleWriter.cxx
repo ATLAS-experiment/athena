@@ -6,7 +6,7 @@
 // SCT_ClusterValidationNtupleWriter.cxx
 ///////////////////////////////////////////////////////////////////
 
-#include "InDetTrackValidation/SCT_ClusterValidationNtupleWriter.h"
+#include "SCT_ClusterValidationNtupleWriter.h"
 
 #include "AthContainers/DataVector.h"
 #include "EventPrimitives/EventPrimitivesHelpers.h"
