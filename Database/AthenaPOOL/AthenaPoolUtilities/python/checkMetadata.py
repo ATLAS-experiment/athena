@@ -78,18 +78,22 @@ def validateInputMetadata(infile):
     if isinstance(dataHeaderTree, ROOT.TTree):
         nevts_dh = dataHeaderTree.GetEntriesFast()
     else:
-        if (
-            current_file.GetListOfKeys().Contains(PoolOpts.RNTupleNames.DataHeader)
-            and ROOT.gROOT.GetVersionInt() < 63100
-        ):
-            raise RuntimeError(
-                "ROOT ver. 6.31/01 or greater needed to read RNTuple files"
-            )
-        dataHeaderRNT = current_file.Get(PoolOpts.RNTupleNames.DataHeader)
-        if isRNTuple( dataHeaderRNT ):
-            nevts_dh = ROOT.Experimental.RNTupleReader.Open(dataHeaderRNT).GetNEntries()
-        else:
-            nevts_dh = None
+        nevts_dh = None
+        for name in PoolOpts.RNTupleNames.DataHeader:
+            if not current_file.GetListOfKeys().Contains(name):
+                continue
+            if ROOT.gROOT.GetVersionInt() < 63100:
+                raise RuntimeError(
+                    "ROOT ver. 6.31/01 or greater needed to read RNTuple files"
+                )
+            dataHeaderRNT = current_file.Get(name)
+            if isRNTuple( dataHeaderRNT ):
+                try:
+                    nevts_dh = ROOT.Experimental.RNTupleReader.Open(dataHeaderRNT).GetNEntries()
+                except AttributeError:
+                    # ROOT 6.36 and later
+                    nevts_dh = ROOT.RNTupleReader.Open(dataHeaderRNT).GetNEntries()
+                break
 
     if not (md[infile]["nentries"] == nevts_esi == nevts_dh):
         logging.error(
