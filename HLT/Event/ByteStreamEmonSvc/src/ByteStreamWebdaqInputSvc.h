@@ -21,7 +21,9 @@
 #include "ByteStreamData/RawEvent.h"
 #include "GaudiKernel/ServiceHandle.h"
 
+#include <atomic>
 #include <memory>
+#include <mutex>
 #include <vector>
 #include <nlohmann/json.hpp>
 
@@ -39,8 +41,6 @@ class ByteStreamWebdaqInputSvc
   /// Implementation of the ByteStreamInputSvc interface methods.
   virtual const RawEvent* previousEvent() override;
   virtual const RawEvent* nextEvent() override;
-
-  /// Implementation of the ByteStreamInputSvc interface methods.
   virtual const RawEvent* currentEvent() const override;
 
   /// Implementation of graceful stop
@@ -57,8 +57,6 @@ class ByteStreamWebdaqInputSvc
   };
 
   bool subscribe(State& state);
-
-  int m_totalEventCounter{0};  //!< event Counter
 
   // Properties
   Gaudi::Property<std::string> m_partition{
@@ -83,9 +81,6 @@ class ByteStreamWebdaqInputSvc
       this, "Criteria", "",
       "Event sampling subscription criteria as JSON formatted string"};
 
-  Gaudi::Property<bool> m_readDetectorMask{this, "ReadDetectorMaskFromIS", true,
-                                           "Read detector mask from IS"};
-
   Gaudi::Property<int> m_timeout{
       this, "Timeout", 60, "Event receive timeout in seconds, -1 == infinity"};
 
@@ -101,8 +96,12 @@ class ByteStreamWebdaqInputSvc
   ServiceHandle<IROBDataProviderSvc> m_robProvider;
   nlohmann::json m_subscribe_criteria;
 
-  // To indicate that a signal has been received and we should stop
+  // Set by stop() to make blocking loops in nextEvent()/subscribe() return,
   std::atomic<bool> m_signal_received;
+
+  // To guard against multiple metadata storage
+  std::mutex       m_mutex;
+  bool             m_metadata_done{false};
 };
 
 #endif

@@ -111,8 +111,6 @@ def main():
                      help="Status word mask")
     grp.add_argument("--timeout", type=int, default=60,
                      help="Event receive timeout in seconds, -1 == infinity")
-    grp.add_argument("--noDetectorMaskFromIS", action="store_true",
-                     help="Do not read the detector mask from IS")
     grp.add_argument("--processCorrupted", action="store_true",
                      help="Also process corrupted events")
     grp.add_argument("--reco", action="store_true",
@@ -158,7 +156,6 @@ def main():
         GroupID=args.groupID,
         Criteria=json.dumps(criteria) if criteria else "",
         Timeout=args.timeout,
-        ReadDetectorMaskFromIS=not args.noDetectorMaskFromIS,
         ProcessCorruptedEvents=args.processCorrupted)
 
     acc.printConfig(withDetails=False)

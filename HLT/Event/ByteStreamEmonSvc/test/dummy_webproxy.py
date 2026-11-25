@@ -25,6 +25,7 @@ import libpyevent_storage
 import json
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 import struct
+import threading
 import uuid
 
 subscriptions = {}
@@ -33,6 +34,9 @@ file_name = None
 # URL prefix for the served partition, set from --partition
 base = '/info/current/test'
 data_file = None
+# Serializes access to data_file: the eformat.istream generator must not
+# be advanced concurrently by the request handler threads
+event_lock = threading.Lock()
 
 # IS RunParams.run_type strings for eformat run types
 RUN_TYPES = {
@@ -104,30 +108,38 @@ def next_event():
     """Return the next event from the input file as read-only FullEventFragment,
     restarting from the beginning when the file is exhausted"""
     global data_file
-    try:
+    with event_lock:
         if data_file is None:
             data_file = iter(eformat.istream(file_name))
-        return next(data_file)
-    except StopIteration:
-        data_file = iter(eformat.istream(file_name))
-        return next(data_file)
+        try:
+            return next(data_file)
+        except StopIteration:
+            data_file = iter(eformat.istream(file_name))
+            return next(data_file)
 
 class WebISHandler(BaseHTTPRequestHandler):
 
     # we want HTTP/1.1 for pipelining and keeping connections open
-    version = "1.1"
+    protocol_version = "HTTP/1.1"
+
+    def send_empty(self, code):
+        """Send a response without body"""
+        self.send_response(code)
+        self.send_header('Content-Length', '0')
+        self.end_headers()
 
     def do_GET(self):
         path = self.path.split('?')[0]
         if path == f'{base}/is/RunParams/RunParams.RunParams':
+            body = json.dumps(runparams).encode('utf-8')
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
+            self.send_header('Content-Length', len(body))
             self.end_headers()
-            self.wfile.write(json.dumps(runparams).encode('utf-8'))
+            self.wfile.write(body)
         elif path.startswith(f'{base}/event/'):
             if not path.split('/')[-1] in subscriptions:
-                self.send_response(404)
-                self.end_headers()
+                self.send_empty(404)
             else:
                 ev = next_event()
                 self.send_response(200)
@@ -146,34 +158,33 @@ class WebISHandler(BaseHTTPRequestHandler):
 
                 self.wfile.write(raw_bytes)
         else:
-            self.send_response(404)
-            self.end_headers()
+            self.send_empty(404)
 
     def do_POST(self):
+        # always consume the request body to keep the connection usable
+        content_length = int(self.headers.get("Content-Length", 0))
+        data = self.rfile.read(content_length)
         if self.path.split('?')[0].rstrip('/') != f'{base}/event':
-            self.send_response(400);
-            self.end_headers()
+            self.send_empty(400)
         else:
             sub = str(uuid.uuid4())
-            content_length = int(self.headers.get("Content-Length", 0))
-            subscriptions[sub] = json.loads(self.rfile.read(content_length).decode('utf-8'))
+            subscriptions[sub] = json.loads(data.decode('utf-8'))
+            body = json.dumps({ "id": sub}).encode('utf-8')
             self.send_response(201)
             self.send_header('Content-type', 'application/json')
+            self.send_header('Content-Length', len(body))
             self.end_headers()
-            self.wfile.write(json.dumps({ "id": sub}).encode('utf-8'))
+            self.wfile.write(body)
 
     def do_DELETE(self):
         path = self.path.split('?')[0]
         if path.startswith(f'{base}/event/'):
             sub = path.split('/')[-1]
-            if sub in subscriptions:
-                del subscriptions[sub]
-                self.send_response(200)
-                self.end_headers()
+            if subscriptions.pop(sub, None) is not None:
+                self.send_empty(200)
                 return
 
-        self.send_response(404)
-        self.end_headers()
+        self.send_empty(404)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser();
