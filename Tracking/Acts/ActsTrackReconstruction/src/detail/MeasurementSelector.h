@@ -798,6 +798,16 @@ struct MeasurementSelectorWithDispatch : public MeasurementSelectorBase< NMeasMa
       }
       else {
          result = Acts::Result<boost::container::small_vector< typename TrackStateProxy::IndexType, s_maxBranchesPerSurface> >::success({});
+         // Empty modules need the same edge-hole check as modules whose
+         // measurements all fail the selection cuts.
+         const auto configForSurface = this->m_config.find(surface.geometryId());
+         if (configForSurface != this->m_config.end() && configForSurface->edgeTolerance.has_value()) {
+            const auto local = this->derived().boundParams(boundState).parameters().template head<2>();
+            if (!surface.insideBounds(local, *configForSurface->edgeTolerance)) {
+               result = result.failure(Acts::CombinatorialKalmanFilterError::NoMeasurementExpected);
+            }
+         }
+
       }
       return result;
    }
