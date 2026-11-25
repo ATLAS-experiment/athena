@@ -157,6 +157,21 @@ TrackParticleClusterAssociationAlg::associatedClusters(const Trk::CaloExtension 
   } 
   double uncertExtrp = uncertEta*uncertEta + uncertPhi*uncertPhi;
 
+  // --- covariance of the extrapolated (eta, phi) at the calo entry (used when Chi2Match is on) ---
+  // eta = -ln tan(theta/2) => d eta/d theta = -1/sin(theta)
+  double covEtaEta = 0.;
+  double covPhiPhi = 0.;
+  double covEtaPhi = 0.;
+  if (m_chi2Match) {
+    if (const auto* cov = pars->covariance()) {
+      const double sinTheta = std::sin(pars->position().theta());
+      covEtaEta = (*cov)(Trk::theta, Trk::theta) / (sinTheta * sinTheta);
+      covPhiPhi = (*cov)(Trk::phi, Trk::phi);
+      covEtaPhi = -(*cov)(Trk::theta, Trk::phi) / sinTheta;
+    }
+  }
+  // largest eigenvalue of the extrapolation covariance (rotation invariant, includes correlations)
+  const double lambdaExtrp = 0.5 * (covEtaEta + covPhiPhi) + std::sqrt(0.25 * (covEtaEta - covPhiPhi) * (covEtaEta - covPhiPhi) + covEtaPhi * covEtaPhi);
   const float dr2Cut0 = m_dr * m_dr;
   // to access the pre-calculated width :
   static const SG::ConstAccessor<float> sig_acc("sigmaWidth");
@@ -178,12 +193,30 @@ TrackParticleClusterAssociationAlg::associatedClusters(const Trk::CaloExtension 
 
     if (m_useCovariance) {
       const double sigmaWidth = sig_acc(*cl);
+      if (m_chi2Match) {
+        // Mahalanobis distance using the full 2x2 covariance
+        // (extrapolation + isotropic cluster width): chi2 = d^T (S_extrp + sigmaWidth^2 * 1)^-1 d
+        const double s2 = sigmaWidth * sigmaWidth;
+        // correlation-aware analogue of "extrapolation uncertainty larger than cluster width":
+        // skip if the extrapolation error ellipse extends beyond the cluster width in any direction
+        if (lambdaExtrp > s2) {
+          ATH_MSG_DEBUG("Extrapolation uncertainty larger than cluster width! Skipping cluster.");
+          continue;
+        }
+        const double a = covEtaEta + s2;
+        const double c = covPhiPhi + s2;
+        const double b = covEtaPhi;
+        const double det = a * c - b * b;
+        if (det <= 0.) continue; // degenerate covariance, skip this cluster
+        if ( (c * dEta * dEta - 2. * b * dEta * dPhi + a * dPhi * dPhi) / det >= m_chi2Cut) continue;
+      } else {
       const double uncertClus = 2. * sigmaWidth * sigmaWidth;
       if (uncertExtrp > uncertClus) {
         ATH_MSG_DEBUG("Extrapolation uncertainty larger than cluster width! Skipping cluster.");
         continue;
       }
       if (dr2 >= (sigmaWidth + uncertEta) * (sigmaWidth + uncertEta) + (sigmaWidth + uncertPhi) * (sigmaWidth + uncertPhi)) continue;
+      }
 
     } else {
       if (dr2 >= dr2Cut0) continue;

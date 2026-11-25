@@ -56,6 +56,8 @@ class TrackParticleClusterAssociationAlg : public AthReentrantAlgorithm
 
   Gaudi::Property<float> m_dr {this, "DeltaR", 0.1, "max deltaR to match track and cluster" };
   Gaudi::Property<bool> m_useCovariance {this, "UseCovariance", true, "use covariance from TrkParameters to evaluate angular uncertainties"};
+  Gaudi::Property<bool> m_chi2Match {this, "Chi2Match", false, "use the chi2 (Mahalanobis, full covariance) matching instead of the original uncertainty-based matching (only with UseCovariance)"};
+  Gaudi::Property<double> m_chi2Cut {this, "Chi2Cut", 2.0, "max Mahalanobis distance squared of a cluster from the extrapolated track when Chi2Match and UseCovariance are true"};
   Gaudi::Property<double> m_ptCut {this, "PtCut", 25000., ""};
 
   // input containers
