@@ -6,7 +6,6 @@
 #
 
 import os
-import sys
 import subprocess
 import unittest
 
@@ -24,14 +23,8 @@ class SignatureTest(unittest.TestCase):
     def test_Signatures(self):
         cmd = ['makeTrfJSONSignatures.py',  '--output', 'test.json']
         msg.info('Will generate transform signatures: {}'.format(cmd))
-        with subprocess.Popen(cmd, shell = False, stdout = subprocess.PIPE, stderr = subprocess.STDOUT) as p:
-            while p.poll() is None:
-                line = p.stdout.readline()
-                sys.stdout.write(line.decode())
-            # Hoover up remaining buffered output lines
-            for line in p.stdout:
-                sys.stdout.write(line)
-            self.assertEqual(p.returncode, 0)
+        p = subprocess.run(cmd)
+        self.assertEqual(p.returncode, 0)
 
 if __name__ == '__main__':
     unittest.main()
