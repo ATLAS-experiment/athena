@@ -38,8 +38,8 @@ StatusCode TriggerEDMSerialiserTool::initialize() {
   // Initialise tools and services
   ATH_CHECK( m_serializerSvc.retrieve() );
   ATH_CHECK( m_clidSvc.retrieve() );
-  ATH_CHECK( m_debugInfoWHKey.initialize() );
-  ATH_CHECK( m_debugNavigationSummaryRHKey.initialize() );
+  ATH_CHECK( m_debugInfoWHKey.initialize(SG::AllowEmpty) );
+  ATH_CHECK( m_debugNavigationSummaryRHKey.initialize(SG::AllowEmpty) );
   if (!m_monTool.empty()) ATH_CHECK(m_monTool.retrieve());
   // Parse the list of collections to serialise
   for ( const std::string& typeKeyAuxIDs : m_collectionsToSerialize.value() ) {
@@ -421,11 +421,14 @@ StatusCode TriggerEDMSerialiserTool::fill( HLT::HLTResultMT& resultToFill, const
   TruncationInfoMap truncationInfoMap;
 
   // Record debug info container to be filled in case of truncation
-  auto debugInfo = SG::makeHandle(m_debugInfoWHKey, ctx);
-  auto debugInfoData = std::make_unique<xAOD::TrigCompositeContainer>();
-  auto debugInfoAux  = std::make_unique<xAOD::TrigCompositeAuxContainer>();
-  debugInfoData->setStore(debugInfoAux.get());
-  ATH_CHECK(debugInfo.record(std::move(debugInfoData), std::move(debugInfoAux)));
+  SG::WriteHandle<xAOD::TrigCompositeContainer> debugInfo;
+  if (!m_debugInfoWHKey.empty()) {
+    debugInfo = SG::makeHandle(m_debugInfoWHKey, ctx);
+    auto debugInfoData = std::make_unique<xAOD::TrigCompositeContainer>();
+    auto debugInfoAux  = std::make_unique<xAOD::TrigCompositeAuxContainer>();
+    debugInfoData->setStore(debugInfoAux.get());
+    ATH_CHECK(debugInfo.record(std::move(debugInfoData), std::move(debugInfoAux)));
+  }
 
   // Find a list of active moduleIDs in this event to skip inactive ones
   std::set<uint16_t> activeModules = activeModuleIDs(resultToFill);
@@ -494,7 +497,9 @@ StatusCode TriggerEDMSerialiserTool::fill( HLT::HLTResultMT& resultToFill, const
   }
 
   // Handle truncation
-  ATH_CHECK(fillDebugInfo(truncationInfoMap, *debugInfo, resultToFill, evtStore));
+  if (!m_debugInfoWHKey.empty()) {
+    ATH_CHECK(fillDebugInfo(truncationInfoMap, *debugInfo, resultToFill, evtStore));
+  }
 
   return StatusCode::SUCCESS;
 }
