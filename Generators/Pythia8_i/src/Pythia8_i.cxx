@@ -233,7 +233,7 @@ StatusCode Pythia8_i::genInitialize() {
     ATH_MSG_INFO(" !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ");
 
     m_atlasRndmEngine = std::make_shared<customRndm>();
-    CLHEP::HepRandomEngine* rndmEngine = getRandomEngineDuringInitialize(s_pythia_stream, m_randomSeed, m_dsid); // NOT THREAD-SAFE
+    CLHEP::HepRandomEngine* rndmEngine = getRandomEngineDuringInitialize(s_pythia_stream, m_randomSeedOffset, m_dsid); // NOT THREAD-SAFE
     m_atlasRndmEngine->init(rndmEngine);
 #if PYTHIA_VERSION_INTEGER >= 8310
     m_pythia->setRndmEnginePtr(m_atlasRndmEngine);
@@ -376,7 +376,7 @@ StatusCode Pythia8_i::callGenerator(){
     //Re-seed the random number stream
     long seeds[7];
     const EventContext& ctx = Gaudi::Hive::currentContext();
-    ATHRNG::calculateSeedsMC21(seeds, s_pythia_stream,  ctx.eventID().event_number(), m_dsid, m_randomSeed);
+    ATHRNG::calculateSeedsMC21(seeds, s_pythia_stream,  ctx.eventID().event_number(), m_dsid, m_randomSeedOffset);
     m_atlasRndmEngine->getEngine()->setSeeds(seeds, 0); // NOT THREAD-SAFE
     m_seeds.clear();
     m_seeds.push_back(seeds[0]);

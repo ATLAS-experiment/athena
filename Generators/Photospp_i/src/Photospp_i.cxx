@@ -42,7 +42,7 @@ StatusCode Photospp_i::initialize() {
     ATH_MSG_DEBUG("Photospp_i initializing");
 
     ATH_CHECK(m_rndmSvc.retrieve());
-    p_rndmEngine = getRandomEngineDuringInitialize("PHOTOSPP_INIT", m_randomSeed, m_dsid);
+    p_rndmEngine = getRandomEngineDuringInitialize("PHOTOSPP_INIT", m_randomSeedOffset, m_dsid);
 
     if(!m_delayInitialisation) setupPhotos();
 
@@ -93,7 +93,7 @@ void Photospp_i::setupPhotos() {
 void Photospp_i::reseedRandomEngine(const std::string& streamName, const EventContext& ctx)
 {
   long seeds[7];
-  ATHRNG::calculateSeedsMC21(seeds, streamName,  ctx.eventID().event_number(), m_dsid, m_randomSeed);
+  ATHRNG::calculateSeedsMC21(seeds, streamName,  ctx.eventID().event_number(), m_dsid, m_randomSeedOffset);
   p_rndmEngine->setSeeds(seeds, 0); // NOT THREAD-SAFE
 }
 

@@ -136,7 +136,7 @@ StatusCode Hijing::genInitialize()
     else ATH_MSG_INFO( "===> NOT keeping all decay vertices" );
 
     //CLHEP::HepRandomEngine* engine
-    p_Engine = getRandomEngineDuringInitialize(hijing_stream, m_randomSeed, m_dsid); // NOT THREAD-SAFE
+    p_Engine = getRandomEngineDuringInitialize(hijing_stream, m_randomSeedOffset, m_dsid); // NOT THREAD-SAFE
     hijing_stream       =       "HIJING";
 
     // Set the users' initialisation parameters choices
@@ -168,7 +168,7 @@ StatusCode Hijing::callGenerator()
     //Re-seed the random number stream
     long seeds[7];
     const EventContext& ctx = Gaudi::Hive::currentContext();
-    ATHRNG::calculateSeedsMC21(seeds, hijing_stream, ctx.eventID().event_number(), m_dsid, m_randomSeed);
+    ATHRNG::calculateSeedsMC21(seeds, hijing_stream, ctx.eventID().event_number(), m_dsid, m_randomSeedOffset);
     p_Engine->setSeeds(seeds, 0); // NOT THREAD-SAFE
     m_seeds.clear();
     m_seeds.push_back(seeds[0]);

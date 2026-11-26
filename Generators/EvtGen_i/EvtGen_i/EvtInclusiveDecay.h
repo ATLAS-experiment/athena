@@ -98,7 +98,7 @@ private:
   IntegerProperty m_dsid{this, "Dsid", 999999};
 
   /// Seed for random number engine
-  IntegerProperty m_randomSeed{this, "RandomSeed", 1234567, "Random seed for the built-in random engine"}; // FIXME make this into an unsigned long int?
+  IntegerProperty m_randomSeedOffset{this, "RandomSeed", 1234567, "Random seed offset for the built-in random engine"}; // FIXME make this into an unsigned long int?
 
   // EvtGen interface
   EvtInclusiveAtRndmGen*  m_evtAtRndmGen{};

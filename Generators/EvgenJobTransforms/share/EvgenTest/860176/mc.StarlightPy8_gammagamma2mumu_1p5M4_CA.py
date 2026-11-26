@@ -2,6 +2,7 @@
 
 from EvgenJobTransforms.EvgenCAConfig import EvgenConfig
 
+
 class Sample(EvgenConfig):
 
     def setupFlags(self, flags):

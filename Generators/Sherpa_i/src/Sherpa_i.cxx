@@ -75,7 +75,7 @@ StatusCode Sherpa_i::genInitialize(){
   }
 
   ATH_MSG_DEBUG("... seeding Athena random number generator");
-  p_rndEngine = getRandomEngineDuringInitialize("SHERPA", m_randomSeed, m_dsid); // NOT THREAD-SAFE
+  p_rndEngine = getRandomEngineDuringInitialize("SHERPA", m_randomSeedOffset, m_dsid); // NOT THREAD-SAFE
 
   #ifdef IS_SHERPA_3
   ATH_MSG_DEBUG("... adapting output level");
@@ -182,7 +182,7 @@ StatusCode Sherpa_i::callGenerator() {
   //Re-seed the random number stream
   long seeds[7];
   const EventContext& ctx = Gaudi::Hive::currentContext();
-  ATHRNG::calculateSeedsMC21(seeds, "SHERPA",  ctx.eventID().event_number(), m_dsid, m_randomSeed);
+  ATHRNG::calculateSeedsMC21(seeds, "SHERPA",  ctx.eventID().event_number(), m_dsid, m_randomSeedOffset);
   p_rndEngine->setSeeds(seeds, 0); // NOT THREAD-SAFE
 
   do {

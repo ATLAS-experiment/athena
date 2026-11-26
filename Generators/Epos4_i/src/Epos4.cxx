@@ -284,7 +284,7 @@ std::string Epos4::create_file(const std::string &filein) {
 
 // ----------------------------------------------------------------------
 StatusCode Epos4::genInitialize() {
-  p_rndmEngine = getRandomEngineDuringInitialize(epos_rndm_stream, m_randomSeed,
+  p_rndmEngine = getRandomEngineDuringInitialize(epos_rndm_stream, m_randomSeedOffset,
                                                  m_dsid); // NOT THREAD-SAFE
   epos_rndm_stream = "EPOS4";
   m_events = 0;
@@ -318,7 +318,7 @@ StatusCode Epos4::callGenerator() {
   const EventContext &ctx = Gaudi::Hive::currentContext();
   ATHRNG::calculateSeedsMC21(seeds, epos_rndm_stream,
                              ctx.eventID().event_number(), m_dsid,
-                             m_randomSeed);
+                             m_randomSeedOffset);
   p_rndmEngine->setSeeds(seeds, 0); // NOT THREAD-SAFE
   // save the random number seeds in the event
   const long *s = p_rndmEngine->getSeeds();

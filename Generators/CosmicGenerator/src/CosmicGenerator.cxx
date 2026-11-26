@@ -96,7 +96,7 @@ StatusCode CosmicGenerator::genInitialize() {
   m_rejected=0;
 
   if(m_infile.value()=="NONE") {
-    COSMIC_RANDOM_ENGINE = getRandomEngineDuringInitialize("COSMICS", m_randomSeed, m_dsid); // NOT THREAD-SAFE
+    COSMIC_RANDOM_ENGINE = getRandomEngineDuringInitialize("COSMICS", m_randomSeedOffset, m_dsid); // NOT THREAD-SAFE
     CosmicGun* gun = CosmicGun::GetCosmicGun();
 
     gun->SetEnergyRange(m_emin/m_GeV,m_emax/m_GeV);
@@ -223,7 +223,7 @@ StatusCode CosmicGenerator::callGenerator() {
   //Re-seed the random number stream
   long seeds[7];
   const EventContext& ctx = Gaudi::Hive::currentContext();
-  ATHRNG::calculateSeedsMC21(seeds, "COSMICS",  ctx.eventID().event_number(), m_dsid, m_randomSeed);
+  ATHRNG::calculateSeedsMC21(seeds, "COSMICS",  ctx.eventID().event_number(), m_dsid, m_randomSeedOffset);
   COSMIC_RANDOM_ENGINE->setSeeds(seeds, 0); // NOT THREAD-SAFE
   CLHEP::HepRandomEngine* engine = COSMIC_RANDOM_ENGINE;
 

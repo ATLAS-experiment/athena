@@ -156,7 +156,7 @@ StatusCode EvtInclusiveDecay::initialize() {
     msg(MSG::INFO) << (*i) << " ";
   msg(MSG::INFO) << endmsg;
 
-  CLHEP::HepRandomEngine* rndmEngine = getRandomEngineDuringInitialize(m_randomStreamName, m_randomSeed, m_dsid);
+  CLHEP::HepRandomEngine* rndmEngine = getRandomEngineDuringInitialize(m_randomStreamName, m_randomSeedOffset, m_dsid);
   // Obtain random number generator for EvtGen
   m_evtAtRndmGen = new EvtInclusiveAtRndmGen(rndmEngine);
 
@@ -182,7 +182,7 @@ void EvtInclusiveDecay::reseedRandomEngine(const std::string& streamName,
                                            const EventContext& ctx)
 {
   long seeds[7];
-  ATHRNG::calculateSeedsMC21(seeds, streamName,  ctx.eventID().event_number(), m_dsid, m_randomSeed);
+  ATHRNG::calculateSeedsMC21(seeds, streamName,  ctx.eventID().event_number(), m_dsid, m_randomSeedOffset);
   m_evtAtRndmGen->getEngine()->setSeeds(seeds, 0); // NOT THREAD-SAFE
 }
 

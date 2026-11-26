@@ -7,7 +7,7 @@ from GeneratorConfig.GeneratorSettingsSemantics import (
     GeneratorSettingsPrecedence,
 )
 from GeneratorConfig.Sequences import EvgenSequence, EvgenSequenceFactory
-from EvgenJobTransforms.EvgenHelpers import _get_nevents, BeamType
+from EvgenJobTransforms.EvgenHelpers import _get_nevents, BeamSpecies
 from Pythia8_i.Pythia8Config import Pythia8_A14_NNPDF23LO_Common_Cfg
 from AthenaCommon.SystemOfUnits import GeV
 
@@ -40,6 +40,9 @@ def StarlightBaseCfg(flags, name="Starlight_i", safety=1., **kwargs):
     By default Starlight is set to Pb+Pb collisions.
     """
 
+    kwargs.setdefault("RandomSeed", flags.Random.SeedOffset)
+    kwargs.setdefault("Dsid", flags.Generator.DSID)
+
     # By default write output directly to HepMC
     kwargs.setdefault("lheOutput", False)
 
@@ -48,8 +51,8 @@ def StarlightBaseCfg(flags, name="Starlight_i", safety=1., **kwargs):
     kwargs.setdefault("maxevents", _get_nevents(flags, safety))
 
     # By default symmetric LEAD beams are assumed.
-    beam1 = kwargs.pop("beam1", BeamType.LEAD)
-    beam2 = kwargs.pop("beam2", BeamType.LEAD)
+    beam1 = kwargs.pop("beam1", BeamSpecies.LEAD)
+    beam2 = kwargs.pop("beam2", BeamSpecies.LEAD)
 
     # Default beam energy is 1/2 of centre of mass energy from `--ecmEnergy` flag. 
     kwargs.setdefault("beam1Energy", flags.Beam.Energy/GeV)

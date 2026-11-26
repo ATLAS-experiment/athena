@@ -2,6 +2,7 @@
 
 from EvgenJobTransforms.EvgenCAConfig import EvgenConfig
 
+
 class Sample(EvgenConfig):
 
     def setupFlags(self, flags):
@@ -18,13 +19,13 @@ class Sample(EvgenConfig):
             "ihpr2 21 1" # turns ON retaining of particle history - truth information
         ]
 
-        from EvgenJobTransforms.EvgenHelpers import BeamType
+        from EvgenJobTransforms.EvgenHelpers import BeamSpecies
         from Hijing_i.HijingConfig import HijingBaseCfg
         sampleConfig = HijingBaseCfg(
             flags,
             Initialize=Initialize,
-            projecBeam=BeamType.OXYGEN,
-            targetBeam=BeamType.OXYGEN,
+            projecBeam=BeamSpecies.OXYGEN,
+            targetBeam=BeamSpecies.OXYGEN,
             McEventKey="HIJING_EVENT"
         )
 

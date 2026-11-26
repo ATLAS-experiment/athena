@@ -81,7 +81,7 @@ protected:
   //@}
 
   /// Seed for random number engine
-  IntegerProperty m_randomSeed{this, "RandomSeed", 1234567, "Random seed for the built-in random engine"}; // FIXME make this into an unsigned long int?
+  IntegerProperty m_randomSeedOffset{this, "RandomSeed", 1234567, "Random seed offset for the built-in random engine"}; // FIXME make this into an unsigned long int?
 
   /// Flag for normal vs. afterburner generators
   BooleanProperty m_isAfterburner{this, "IsAfterburner", false, "Set true if generator modifies existing events rather than creating new ones"};

@@ -155,6 +155,7 @@ def SuperChicLheEvntFillerCfg(flags, name="LheEVNTFiller", **kwargs):
 
     return ca
 
+
 def _get_path_to_LHE(Config):
     LHEFile = "evrecs/evrecout.dat"
 

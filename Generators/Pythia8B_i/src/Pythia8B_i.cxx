@@ -160,7 +160,7 @@ StatusCode Pythia8B_i::callGenerator(){
        //Re-seed the random number stream
        long seeds[7];
        const EventContext& ctx = Gaudi::Hive::currentContext();
-       ATHRNG::calculateSeedsMC21(seeds, "PYTHIA8B",  ctx.eventID().event_number(), m_dsid, m_randomSeed);
+       ATHRNG::calculateSeedsMC21(seeds, "PYTHIA8B",  ctx.eventID().event_number(), m_dsid, m_randomSeedOffset);
        m_atlasRndmEngine->getEngine()->setSeeds(seeds, 0); // NOT THREAD-SAFE
        m_seeds.clear();
        m_seeds.push_back(seeds[0]);

@@ -75,7 +75,7 @@ StatusCode Herwig7::genInitialize() {
 
   // Get random number seeds from Atlas RNG service, and pass them as Hw7 RNG
   // default seeds (they can be overridden with an explicit Hw7 set command in the JO)
-  CLHEP::HepRandomEngine* engine = this->getRandomEngineDuringInitialize("Herwig7", m_randomSeed); // conditionsRun=1, lbn=1
+  CLHEP::HepRandomEngine* engine = this->getRandomEngineDuringInitialize("Herwig7", m_randomSeedOffset); // conditionsRun=1, lbn=1
   const long* seeds = engine->getSeeds();
   // The RNG service supplies two seeds, but Hw7 only uses one. To avoid the situation
   // where varying one seed has no effect (this already stung us in pre-production
