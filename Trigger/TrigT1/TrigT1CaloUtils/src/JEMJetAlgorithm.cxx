@@ -220,9 +220,14 @@ void LVL1::JEMJetAlgorithm::passesTrigger() {
   int threshLarge{0}; // the minimum pT of large jet objects sent to TOPO (in counts, not in GeV)
 
  
-  float scale = m_l1menu->thrExtraInfo().JET().jetScale();
-  threshSmall = m_l1menu->thrExtraInfo().JET().ptMinToTopoSmallWindowCounts()*scale;
-  threshLarge = m_l1menu->thrExtraInfo().JET().ptMinToTopoLargeWindowCounts()*scale;
+  float scale = 2; // default scale
+  try {
+      scale = m_l1menu->thrExtraInfo().JET().jetScale();
+      threshSmall = m_l1menu->thrExtraInfo().JET().ptMinToTopoSmallWindowCounts()*scale;
+      threshLarge = m_l1menu->thrExtraInfo().JET().ptMinToTopoLargeWindowCounts()*scale;
+  } catch(const std::out_of_range&) {
+      // legacy JET not present in menu removed, so use default
+  }
 
   int etLarge = m_ET8x8;
   if constexpr (sizeLarge == 6)      etLarge = m_ET6x6;

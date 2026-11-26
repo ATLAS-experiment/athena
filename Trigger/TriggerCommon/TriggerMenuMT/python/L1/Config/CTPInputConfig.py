@@ -21,21 +21,21 @@ class CTPInputConfig:
             },
             "electrical": {
                 "connector0": "Topo3El",
-                "connector1": "LegacyTopoMerged",
+                "connector1": "",
                 "connector2": "Topo2El"
             },
             "ctpin": {
                 "slot7": {
-                    "connector0": "EM1",
-                    "connector1": "EM2",
-                    "connector2": "TAU1",
-                    "connector3": "TAU2"
+                    "connector0": "",
+                    "connector1": "",
+                    "connector2": "",
+                    "connector3": ""
                 },
                 "slot8": {
-                    "connector0": "JET1",
-                    "connector1": "JET2",
-                    "connector2": "EN1",
-                    "connector3": "EN2"
+                    "connector0": "",
+                    "connector1": "",
+                    "connector2": "",
+                    "connector3": ""
                 },
                 "slot9": {
                     "connector0": "",

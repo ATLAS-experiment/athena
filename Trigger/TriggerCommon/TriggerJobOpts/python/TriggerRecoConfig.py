@@ -66,11 +66,14 @@ def TriggerRecoCfgData(flags):
     else:
         raise RuntimeError("Invalid EDMVersion=%s " % flags.Trigger.EDMVersion)
 
-    # Legacy L1Calo, L1Topo reco
-    if flags.Trigger.enableL1CaloLegacy:
+    # RoIBResultToxAOD
+    if flags.Trigger.EDMVersion in [1, 2] or flags.Trigger.enableL1CaloLegacy or not flags.Trigger.enableL1MuonPhase1:
         from AnalysisTriggerAlgs.AnalysisTriggerAlgsConfig import RoIBResultToxAODCfg
         xRoIBResultAcc, _ = RoIBResultToxAODCfg(flags)
         acc.merge( xRoIBResultAcc )
+
+    # Legacy L1Calo, L1Topo reco
+    if flags.Trigger.enableL1CaloLegacy:
 
         if flags.Input.Format is Format.BS and flags.Input.DataYear < 2024: 
             from L1TopoByteStream.L1TopoByteStreamConfig import L1TopoRawDataContainerBSCnvCfg
@@ -83,6 +86,7 @@ def TriggerRecoCfgData(flags):
     acc.merge(TriggerEDMCfg(flags))
 
     return acc
+
 
 def TriggerRecoCfgMC(flags):
     """

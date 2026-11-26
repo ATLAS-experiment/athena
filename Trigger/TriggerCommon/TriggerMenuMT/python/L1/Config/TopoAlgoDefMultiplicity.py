@@ -270,7 +270,7 @@ class TopoAlgoDefMultiplicity:
         ]
 
         for conn in l1menu.connectors:
-            if 'Topo1' not in conn.name or conn.legacy: continue
+            if 'Topo1' not in conn.name: continue
 
             for tl in conn.triggerLines:
                 if 'Perf' in tl.name: continue

@@ -43,7 +43,6 @@ class L1MenuFlagsCont(object):
         "BunchGroupNames"         :  FlagArgs( Iterable, val_check = lambda x: len(list(filter(lambda y: not isinstance(y, str), x)))==0),
         "items"                   :  FlagArgs( Iterable, val_check = lambda x: len(list(filter(lambda y: not isinstance(y, str), x)))==0),
         "boards"                  :  FlagArgs( dict, dict() ),
-        "legacyBoards"            :  FlagArgs( dict, dict() ),
         "prescales"               :  FlagArgs( dict, dict() ),
         "RemapThresholdsAsListed" :  FlagArgs( bool, False ),
         "CtpIdMap"                :  FlagArgs( dict, dict() ),

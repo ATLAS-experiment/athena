@@ -95,8 +95,8 @@ class L1MenuJSONConverter:
         confObj["thresholds"].update( menu.thresholds.json() )
 
         # legacy calo thresholds
-        confObj["thresholds"]["legacyCalo"] = menu.thresholds.jsonLegacy()
-
+        confObj["thresholds"]["legacyCalo"] = {}
+        
         # topo algorithms
         confObj["topoAlgorithms"] = menu.topoAlgos.json()
 

@@ -19,8 +19,7 @@ class AlgType(Enum):
 class AlgCategory(Enum):
     TOPO = (1, 'TOPO', 'new topo', 'TopoAlgoDef')
     MUCTPI = (2, 'MUTOPO', 'muctpi topo', 'TopoAlgoDefMuctpi')
-    LEGACY = (3, 'R2TOPO', 'legacy topo', 'TopoAlgoDefLegacy')
-    MULTI = (4, 'MULTTOPO', 'multiplicity topo', 'TopoAlgoDefMultiplicity')
+    MULTI = (3, 'MULTTOPO', 'multiplicity topo', 'TopoAlgoDefMultiplicity')
 
     def __init__(self, _, key, desc, defFile ):
         self.key = key
@@ -33,17 +32,14 @@ class AlgCategory(Enum):
 
     @staticmethod
     def getAllCategories():
-        return [ AlgCategory.TOPO, AlgCategory.MUCTPI, AlgCategory.LEGACY, AlgCategory.MULTI ]
+        return [ AlgCategory.TOPO, AlgCategory.MUCTPI, AlgCategory.MULTI ]
 
     @staticmethod
     def getCategoryFromBoardName(boardName):
         if 'muctpi' in boardName.lower():
             currentTopoCategory = AlgCategory.MUCTPI
         elif 'topo' in boardName.lower():
-            if 'legacy' in boardName.lower():
-                currentTopoCategory = AlgCategory.LEGACY
-            else:
-                currentTopoCategory = AlgCategory.TOPO
+            currentTopoCategory = AlgCategory.TOPO
         else:
             raise RuntimeError("Board %s is not a topo board" % boardName )
         return currentTopoCategory
@@ -52,11 +48,11 @@ class AlgCategory(Enum):
 class MenuTopoAlgorithmsCollection(object):
 
     def __init__(self):
-        # all algos that are in menu (new and legacy)
+        # all algos that are in menu
         self.topoAlgos = {}
         for cat in AlgCategory:
             self.topoAlgos[cat] = {}
-            if cat in [AlgCategory.TOPO, AlgCategory.MUCTPI, AlgCategory.LEGACY]:
+            if cat in [AlgCategory.TOPO, AlgCategory.MUCTPI]:
                 self.topoAlgos[cat][AlgType.DEC] = {}
                 self.topoAlgos[cat][AlgType.SORT] = {}
             elif cat in [AlgCategory.MULTI]:

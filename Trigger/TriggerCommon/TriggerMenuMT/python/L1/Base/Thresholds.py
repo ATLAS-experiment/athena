@@ -1197,7 +1197,7 @@ class TopoThreshold( Threshold ):
         if ','  in name:
             raise RuntimeError("%s is not a valid topo output name, it should not contain a ','" % name)
         self.algCategory = algCategory
-        if algCategory==AlgCategory.LEGACY:
+        if algCategory == getattr(AlgCategory, "LEGACY", None): # TODO: remove support for invalid AlgCategory LEGACY
             run = 2
         else:
             run = 3

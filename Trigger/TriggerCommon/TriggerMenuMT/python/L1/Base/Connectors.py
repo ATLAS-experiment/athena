@@ -68,18 +68,17 @@ class MenuConnectorsCollection:
 
     def addConnector(self, connDef):
         name, cformat, ctype = map(connDef.__getitem__,["name", "format", "type"])
-        legacy = connDef.get("legacy", False)
 
         if name in self.connectors:
             raise RuntimeError("Connector %s has already been defined" % name)
 
-        log.debug("Adding connector %s, format %s, legacy set to %s, and connType %s", name, cformat, legacy, ctype)
+        log.debug("Adding connector %s, format %s, legacy set to %s, and connType %s", name, cformat, ctype)
         if CType.from_str(ctype) is CType.ELEC:
-            newConnector = ElectricalConnector(name, cformat, legacy, connDef)
+            newConnector = ElectricalConnector(name, cformat, connDef)
         elif CType.from_str(ctype) is CType.CTPIN:
-            newConnector = CtpinConnector(name, legacy, connDef)
+            newConnector = CtpinConnector(name, connDef)
         elif CType.from_str(ctype) is CType.OPT:
-            newConnector = OpticalConnector(name, cformat, ctype, legacy, connDef)
+            newConnector = OpticalConnector(name, cformat, ctype, connDef)
         else:
             newConnector = GlobalConnector(name, connDef)
         self.connectors[name] = newConnector
@@ -94,7 +93,7 @@ class MenuConnectorsCollection:
 
 
 class Connector:
-    __slots__ = ['name', 'cformat', 'ctype', 'legacy', 'boardName', 'triggerLines', 'emptyTriggerLines']
+    __slots__ = ['name', 'cformat', 'ctype', 'boardName', 'triggerLines', 'emptyTriggerLines']
     def __init__(self, connDef):
         """
         @param name name of the connector
@@ -102,11 +101,9 @@ class Connector:
         @param ctype can be 'ctpin', 'electrical', or 'optical'
         """
         name, cformat, ctype, boardName = map(connDef.__getitem__,["name", "format", "type", "board"])
-        legacy = connDef.get("legacy", False)
         self.name    = name
         self.cformat = CFormat.from_str(cformat)
         self.ctype   = CType.from_str(ctype)
-        self.legacy  = bool(legacy)
         self.boardName = boardName
         self.triggerLines = []
         self.emptyTriggerLines = [] # Empty placeholders in the output fibers/cables, to ensure correst alignment of the triggerLines bits
@@ -117,17 +114,12 @@ class Connector:
     def addEmptyTriggerLine(self, tl):
         self.emptyTriggerLines.append(tl)
 
-    def isLegacy(self):
-        return self.legacy
-
     def triggerThresholds(self):
         return [x.name for x in self.triggerLines]
 
     def json(self):
         confObj = {}
         confObj["type"] = str(self.ctype)
-        if self.legacy:
-            confObj["legacy"] = self.legacy
         confObj["triggerlines"] = [tl.json() for tl in self.triggerLines]
         return confObj
 
@@ -161,11 +153,10 @@ class GlobalConnector(Connector):
 
 
 class CtpinConnector(Connector):
-    __slots__ = ['name', 'legacy', 'triggerLines', 'emptyTriggerLines']
-    def __init__(self, name, legacy, connDef):
+    __slots__ = ['name', 'triggerLines', 'emptyTriggerLines']
+    def __init__(self, name, connDef):
         """
         @param name name of the connector
-        @param legacy is 'true' for legacy L1Calo connectors
         """
         super(CtpinConnector,self).__init__(connDef = connDef)
 
@@ -185,8 +176,8 @@ class CtpinConnector(Connector):
 
 
 class OpticalConnector(Connector):
-    __slots__ = ['name', 'cformat', 'ctype', 'legacy', 'triggerLines', 'emptyTriggerLines']
-    def __init__(self, name, cformat, ctype, legacy, connDef):
+    __slots__ = ['name', 'cformat', 'ctype', 'triggerLines', 'emptyTriggerLines']
+    def __init__(self, name, cformat, ctype, connDef):
         """
         @param name name of the connector
         @param cformat can be 'topological' or 'multiplicity'
@@ -215,7 +206,7 @@ class OpticalConnector(Connector):
 
 
 class ElectricalConnector(Connector):
-    def __init__(self, name, cformat, legacy, connDef):
+    def __init__(self, name, cformat, connDef):
         """
         @param name name of the connector
         @param cformat can be 'topological' or 'simple'
@@ -268,8 +259,6 @@ class ElectricalConnector(Connector):
     def json(self):
         confObj = {}
         confObj["type"] = str(self.ctype)
-        if self.legacy:
-            confObj["legacy"] = self.legacy
         confObj["triggerlines"] = {}
         if self.cformat == CFormat.TOPO:
             _triggerLines = []

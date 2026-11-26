@@ -213,10 +213,14 @@ void LVL1::CPMTobAlgorithm::emAlgorithm() {
   
   // Does this pass min TOB pT cut?
   // Need to worry about digit scale not being GeV
-  float emEnergyScale{1}; 
-  unsigned int tobPtMinEM{0};
-  emEnergyScale = m_l1menu->thrExtraInfo().EM().emScale();
-  tobPtMinEM = m_l1menu->thrExtraInfo().EM().ptMinToTopo();
+  float emEnergyScale = 2; // default scale
+  float tobPtMinEM = 3; // default ptmin
+  try {
+    emEnergyScale = m_l1menu->thrExtraInfo().EM().emScale();
+    tobPtMinEM = m_l1menu->thrExtraInfo().EM().ptMinToTopo();
+  } catch(const std::out_of_range&) {
+    // legacy EM not present in menu, so use default
+  }
 
   unsigned int thresh = tobPtMinEM * emEnergyScale;
 
@@ -249,6 +253,8 @@ void LVL1::CPMTobAlgorithm::emAlgorithm() {
   std::vector<int> emisolcuts(5,m_noIsol);
   std::vector<int> hadisolcuts(5,m_noIsol);
   const std::string emIsolationStr1{"EMIsoForEMthr"};
+  const std::string emIsolationStr2{"HAIsoForEMthr"};
+  try {
   for(size_t bit = 1; bit<=5; ++bit) {
     const TrigConf::IsolationLegacy & iso = m_l1menu->thrExtraInfo().EM().isolation(emIsolationStr1, bit);
     if(! iso.isDefined() ) {
@@ -265,7 +271,6 @@ void LVL1::CPMTobAlgorithm::emAlgorithm() {
       emisolcuts[bit-1] = cut;
     }
   }
-  const std::string emIsolationStr2{"HAIsoForEMthr"};
   for(size_t bit = 1; bit<=5; ++bit) {
     const TrigConf::IsolationLegacy & iso = m_l1menu->thrExtraInfo().EM().isolation(emIsolationStr2, bit);
     if(! iso.isDefined() ) {
@@ -281,6 +286,9 @@ void LVL1::CPMTobAlgorithm::emAlgorithm() {
       if (cut < mincut) cut = mincut;
       hadisolcuts[bit-1] = cut;
     }
+  }
+  } catch(const std::out_of_range&) {
+  // legacy EM not present in menu removed, so use default
   }
 
   // Set isolation bits
@@ -303,10 +311,14 @@ void LVL1::CPMTobAlgorithm::tauAlgorithm() {
   
   // Does this pass min TOB pT cut?
   // Need to worry about digit scale not being GeV
-  float emEnergyScale{1}; 
-  unsigned int tobPtMinTau{0};
-  emEnergyScale = m_l1menu->thrExtraInfo().EM().emScale();
-  tobPtMinTau = m_l1menu->thrExtraInfo().TAU().ptMinToTopo();
+  float emEnergyScale = 2; // default scale
+  unsigned int tobPtMinTau = 8; //default tau ptmin
+  try {
+    emEnergyScale = m_l1menu->thrExtraInfo().EM().emScale();
+    tobPtMinTau = m_l1menu->thrExtraInfo().TAU().ptMinToTopo();
+  } catch(const std::out_of_range&) {
+    // legacy EM/TAU not present in menu removed, so use default
+  }
   unsigned int thresh = tobPtMinTau * emEnergyScale;
 
   if (m_TauClus <= thresh) return;
@@ -332,6 +344,7 @@ void LVL1::CPMTobAlgorithm::tauAlgorithm() {
   // Get isolation values from menu (placeholder code - example logic)
   std::vector<int> emisolcuts(5,m_noIsol);
   const std::string tauIsolationStr{"EMIsoForTAUthr"};
+  try{
   for(size_t bit = 1; bit<=5; ++bit) {
     const TrigConf::IsolationLegacy & iso = m_l1menu->thrExtraInfo().TAU().isolation(tauIsolationStr, bit);
     if(! iso.isDefined() ) {
@@ -347,6 +360,9 @@ void LVL1::CPMTobAlgorithm::tauAlgorithm() {
       if (cut < mincut) cut = mincut;
       emisolcuts[bit-1] = cut;
     }
+  }
+  } catch(const std::out_of_range&) {
+    // legacy TAU not present in menu removed, so use default
   }
 
   // Set isolation bits
