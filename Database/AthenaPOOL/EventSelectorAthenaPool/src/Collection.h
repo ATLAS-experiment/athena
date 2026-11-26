@@ -22,8 +22,17 @@
 class Collection : public APRMessaging {
 
      public:
+        /// What to read for each row.
+        enum class Content {
+           TokenAndAttributes,  ///< the Token and all EventTag attributes
+           TokenOnly            ///< the Token only; attributeList() stays empty
+        };
+
         /// Construct from an already-connected file descriptor.
-        explicit Collection( FileDescriptor& fileDescr );
+        explicit Collection( FileDescriptor& fileDescr, Content content = Content::TokenAndAttributes );
+
+        Collection(const Collection &) = delete;
+        Collection& operator = (const Collection &) = delete;
 
         /// Advances to the next row.
         bool next();
@@ -34,19 +43,22 @@ class Collection : public APRMessaging {
         /// Positions the reader before the requested row; next() reads it.
         bool seek(std::size_t position);
 
+        /// Token of the DataHeader of the current row.
         const Token& eventRef() const { return m_token; }
+        /// Attribute values of the current row; empty with Content::TokenOnly.
         const coral::AttributeList& attributeList() const { return m_attributeList; }
 
      private:
-        Collection(const Collection &) = delete;
-        Collection& operator = (const Collection &) = delete;
-
-        /// Attribute-name to container mapping for EventTag attributes.
-        std::map<std::string, DbContainer>  m_containerMap;
+        /// Attribute-name to container mapping for the EventTag attribute columns.
+        std::map<std::string, DbContainer>  m_attributeContainers;
+        /// Container providing the tokens: the EventTag Token column or the DataHeader container.
         DbContainer                         m_tokenContainer;
+        /// DataHeader token of the current row.
         Token                               m_token;
+        /// Attribute values of the current row.
         coral::AttributeList                m_attributeList;
-        std::size_t                         m_idx;
+        /// Index of the row that the next call to next() reads.
+        std::size_t                         m_nextRow{0};
 };
 
 #endif
