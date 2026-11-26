@@ -366,6 +366,7 @@ StatusCode TriggerEDMDeserialiserAlg::deserialise( const EventContext& ctx,
       const SG::BaseInfoBase* bib = getBaseInfo(clid);
       if(!bib){
         ATH_MSG_WARNING("No BaseInfoBase for CLID "<< clid << " and name " << outputName);
+        return StatusCode::FAILURE;
       }
 
       auto dataBucket = new TypelessDataBucket( obj, *bib );

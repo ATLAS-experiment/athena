@@ -192,7 +192,7 @@ StatusCode HLTEDMCreator::initialize()
 #define INIT_SHALLOW(__TYPE) \
   ATH_CHECK( m_##__TYPE##ShallowCopy.initialize() ); \
   renounceArray( m_##__TYPE##ShallowCopy ); \
-  for ( auto k: m_##__TYPE##ShallowCopy ) \
+  for ( const auto & k: m_##__TYPE##ShallowCopy ) \
     m_##__TYPE##ShallowCopyOut.push_back(k.key()); \
   ATH_CHECK( m_##__TYPE##ShallowCopyOut.initialize() ); \
   if(m_renounceOutputs) { renounceArray( m_##__TYPE##ShallowCopyOut ); }
