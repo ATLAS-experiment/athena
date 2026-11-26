@@ -14,7 +14,7 @@ atlas_add_tpcnv_library( MuonEventAthenaPoolLib
    LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaPoolUtilities
    MuonRDO MuonRIO_OnTrack MuonSegment AthAllocators
    AthContainers AthenaKernel StoreGateLib AthenaPoolCnvSvcLib
-   Identifier GaudiKernel CscCalibEvent MuonEventTPCnv RPC_CondCablingLib
+   Identifier GaudiKernel  MuonEventTPCnv RPC_CondCablingLib
    MuonReadoutGeometry MuonDigitContainer MuonIdHelpersLib MuonChamberT0s
    MuonPrepRawData MuonTrigCoinData MuonSimData )
 
@@ -30,7 +30,6 @@ atlas_add_poolcnv_library( MuonEventAthenaPoolPoolCnv
          MuonDigitContainer/CscDigitContainer.h
          MuonDigitContainer/MmDigitContainer.h
          MuonDigitContainer/sTgcDigitContainer.h
-         CscCalibEvent/CscCalibDataContainer.h
          MuonPrepRawData/CscPrepDataContainer.h
          MuonPrepRawData/CscStripPrepDataContainer.h
          MuonPrepRawData/RpcPrepDataContainer.h
@@ -56,7 +55,7 @@ atlas_add_poolcnv_library( MuonEventAthenaPoolPoolCnv
                   MuonRDO MuonRIO_OnTrack MuonSegment
                   AthAllocators AthContainers AthenaKernel StoreGateLib
                   AthenaPoolCnvSvcLib Identifier GaudiKernel
-                  CscCalibEvent MuonEventTPCnv RPC_CondCablingLib
+                   MuonEventTPCnv RPC_CondCablingLib
                   MuonReadoutGeometry MuonDigitContainer MuonIdHelpersLib
                   MuonChamberT0s MuonPrepRawData MuonTrigCoinData MuonSimData
                   RPC_CondCablingLib MuonEventAthenaPoolLib )
