@@ -434,7 +434,7 @@ def SetupVP1():
             from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
             toolAtlasExtrapolator = cfg.popToolsAndMerge(AtlasExtrapolatorCfg(flags))
             cfg.addPublicTool(toolAtlasExtrapolator)
-            vp1config.setdefault("ExtrapolatorTool", toolAtlasExtrapolator)
+            vp1config.setdefault("ExtrapolatorTool", toolAtlasExtrapolator.getFullJobOptName())
 
 
             from TrkEventCnvTools.TrkEventCnvToolsConfig import TrkEventCnvSuperToolCfg

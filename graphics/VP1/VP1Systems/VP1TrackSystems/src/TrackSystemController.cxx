@@ -96,7 +96,7 @@ public:
   QString restoredLastFitter;
   QStringList lastUpdatedAvailableExtrapolators;
   QStringList lastUpdatedAvailableFitters;
-  static bool updateComboBoxContents(QComboBox*cb,const QStringList& l,QString& restoredSelection);
+  static bool updateComboBoxContents(QComboBox*cb,const QStringList& l,QString& restoredSelection, bool preferAtlas = false);
   static const QString noneAvailString;
   unsigned numberOfSelectedPRDs = 0U;
   unsigned numberOfSelectedTracks = 0U;
@@ -199,7 +199,7 @@ void TrackSystemController::Imp::ensureExtrapolatorsCreated(IVP1System * sys) {
   extrapolatorsCreated = true;
 
   //Get available extrapolators:
-  QString tooltype("Trk::IExtrapolator");
+  QString tooltype("Trk::Extrapolator");
   VP1AvailableToolsHelper * availTools = new VP1AvailableToolsHelper(sys);
   availTools->addMonitoredType(tooltype);
   QStringList existingExtrapolators =  availTools->availableTools();
@@ -1876,7 +1876,7 @@ bool TrackSystemController::cutTruthExcludeNeutrals() const
 
 //____________________________________________________________________
 //Returns false if "none available"
-bool TrackSystemController::Imp::updateComboBoxContents(QComboBox*cb,const QStringList& l,QString& restoredSelection)
+bool TrackSystemController::Imp::updateComboBoxContents(QComboBox*cb,const QStringList& l,QString& restoredSelection, bool preferAtlas)
 {
   //current selection:
   QString ct = cb->currentText();
@@ -1914,7 +1914,11 @@ bool TrackSystemController::Imp::updateComboBoxContents(QComboBox*cb,const QStri
       	if (i_atlas==-1&&cb->itemText(j).contains("atlas",Qt::CaseInsensitive))
       	  i_atlas = j;
       }
-      if (i_vp1>=0)
+      const int standard = preferAtlas
+          ? cb->findText("Trk::Extrapolator/AtlasExtrapolator") : -1;
+      if (standard >= 0)
+        cb->setCurrentIndex(standard);
+      else if (i_vp1>=0)
       	cb->setCurrentIndex(i_vp1);
       else if (i_atlas>=0)
       	cb->setCurrentIndex(i_atlas);
@@ -1944,11 +1948,18 @@ void TrackSystemController::availableFittersChanged(const QStringList& af)
 //____________________________________________________________________
 void TrackSystemController::availableExtrapolatorsChanged(const QStringList& ae)
 {
-  if (m_d->lastUpdatedAvailableExtrapolators==ae)
+  QStringList publicExtrapolators;
+  if (m_d->toolaccesshelper) {
+    for (const QString& key : ae) {
+      if (m_d->toolaccesshelper->getToolPointer<Trk::IExtrapolator>(key, true))
+        publicExtrapolators << key;
+    }
+  }
+  if (m_d->lastUpdatedAvailableExtrapolators==publicExtrapolators)
     return;
-  m_d->lastUpdatedAvailableExtrapolators=ae;
+  m_d->lastUpdatedAvailableExtrapolators=publicExtrapolators;
 
-  if (!m_d->updateComboBoxContents(m_d->ui_extrap.comboBox_propagator,ae,m_d->restoredLastPropagator)) {
+  if (!m_d->updateComboBoxContents(m_d->ui_extrap.comboBox_propagator,publicExtrapolators,m_d->restoredLastPropagator, true)) {
     m_d->ui_extrap.radioButton_athenaExtrapolator->setEnabled(false);
     bool save1 = m_d->ui_extrap.radioButton_none->blockSignals(true);
     bool save2 = m_d->ui_extrap.radioButton_helical->blockSignals(true);

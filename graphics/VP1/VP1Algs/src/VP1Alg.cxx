@@ -95,6 +95,35 @@ StatusCode VP1Alg::initialize()
       ATH_MSG_INFO("VP1 has been started with no input data files; so we don't need to retrieve the Extrapolator tool.");
   }
 
+  if (std::getenv("VP1_EXTRAPOLATOR_DIAGNOSTIC_PROBE")) {
+      const std::string type = m_extrapolator.type();
+      const std::string key = m_extrapolator.typeAndName();
+      ATH_MSG_INFO("Extrapolator probe: configured handle " << key);
+      auto logInstances = [this, &type](const char* stage) {
+          const auto instances = toolSvc()->getInstances(type);
+          ATH_MSG_INFO("Extrapolator probe " << stage << ": " << instances.size()
+                       << " instance(s) of " << type);
+          for (const auto& instance : instances)
+              ATH_MSG_INFO("Extrapolator probe " << stage << ": " << instance);
+      };
+      if (!m_vp1Conf_emptyInput && !m_extrapolator.empty()) {
+          logInstances("before public creation");
+          ToolHandle<Trk::IExtrapolator> publicTool(key, nullptr, false);
+          const StatusCode lookup = publicTool.retrieve();
+          ATH_MSG_INFO("Extrapolator probe: existing public tool "
+                       << (lookup.isSuccess() ? publicTool->name() : "not found"));
+          if (lookup.isFailure()) {
+              ToolHandle<Trk::IExtrapolator> createTool(key, nullptr, true);
+              const StatusCode created = createTool.retrieve();
+              ATH_MSG_INFO("Extrapolator probe: public creation "
+                           << (created.isSuccess() ? createTool->name() : "failed"));
+          }
+          logInstances("after public creation");
+      } else {
+          ATH_MSG_INFO("Extrapolator probe: skipped public lookup and creation for empty input or disabled handle");
+      }
+  }
+
   std::vector<std::string>::iterator it, itE = m_initialvp1files.end();
   for (it = m_initialvp1files.begin();it!=itE;++it) {
     std::string file = PathResolver::find_file (*it, "DATAPATH");
