@@ -356,8 +356,8 @@ public:
     // shower. Resolve the actual incoming resonance instead of guessing iSys.
     auto scale = m_vetoResScale.find(resonanceKey(iRes, e));
     if (scale == m_vetoResScale.end()) {
-      if (loggerPtr) loggerPtr->ABORT_MSG("Cannot find the resonance the showering is coming from");
-      exit(1);
+      if (loggerPtr) loggerPtr->ERROR_MSG("Warning in PowhegHooksST::doVetoFSREmission: emission in resonance not from a POWHEG resonance, not vetoing");
+      return false;
     }
     const double pTmax = scale->second;
     if (pTmax == 1e30) return false;
