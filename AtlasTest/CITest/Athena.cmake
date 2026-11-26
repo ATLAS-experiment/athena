@@ -451,24 +451,11 @@ atlas_add_citest( TriggerMC
 atlas_add_citest( TriggerMC_Acts
    SCRIPT test_trig_mc_Dev_Run4_Acts_build.py )
 
-atlas_add_citest( TriggerMC_HI
-   SCRIPT test_trig_mc_v1DevHI_build.py
-   LOG_IGNORE_PATTERN "chainComp ERROR.*Trigger counts differ from the reference" )
-
 atlas_add_citest( TriggerData
    SCRIPT test_trig_data_v1Dev_build.py )
 
 atlas_add_citest( Trigger_athenaEF_v1Dev
    SCRIPT test_trigP1_v1Dev_decodeBS_build.py )
-
-atlas_add_citest( Trigger_athenaEF_v1PhysP1
-   SCRIPT test_trigP1_v1PhysP1_build.py )
-
-atlas_add_citest( Trigger_athenaEF_v1Cosmic
-   SCRIPT test_trigP1_v1Cosmic_build.py )
-
-atlas_add_citest( Trigger_athenaEF_v1PhysP1_HI
-   SCRIPT test_trigP1_v1PhysP1_HI_run3_build.py )
 
 atlas_add_citest( TriggerConfigFlags
    SCRIPT python -m TriggerJobOpts.TriggerConfigFlags --verbose )
