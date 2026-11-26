@@ -4,25 +4,28 @@
 
 #include "test_bytestream_utils.h"
 
+#include <AthRemoteExecCodecs/Bytestream.h>
 #include <CxxUtils/StringUtils.h>
 #include <SGTools/BuiltinsClids.h>
 #include <StoreGate/ReadHandle.h>
 #include <StoreGate/WriteHandle.h>
 
 #include <algorithm>
+#include <cstddef>
 #include <charconv>
+#include <cstring>
 #include <iterator>
+#include <span>
 
 namespace AthRemoteExec {
 
 namespace {
 
-/// FNV-1a over the raw bytes of @c count words
-uint32_t digest(const uint32_t* words, size_t count) {
-  const unsigned char* bytes = reinterpret_cast<const unsigned char*>(words);
+/// FNV-1a over the raw bytes
+uint32_t digest(std::span<const std::byte> bytes) {
   uint32_t hash = 2166136261u;
-  for (size_t i = 0; i < count * sizeof(uint32_t); ++i) {
-    hash ^= bytes[i];
+  for (const std::byte byte : bytes) {
+    hash ^= std::to_integer<uint32_t>(byte);
     hash *= 16777619u;
   }
   return hash;
@@ -141,7 +144,7 @@ StatusCode test_RawEventDigestAlg::execute(const EventContext& ctx) const {
   }
 
   const std::vector<uint32_t>& words = cache->words();
-  const uint32_t hash = digest(words.data(), words.size());
+  const uint32_t hash = digest(std::as_bytes(std::span{words}));
 
   SG::WriteHandle<uint32_t> size(m_size, ctx);
   ATH_CHECK(size.record(
@@ -159,6 +162,15 @@ StatusCode test_RawEventVerifyAlg::initialize() {
   ATH_CHECK(m_size.initialize());
   ATH_CHECK(m_hash.initialize());
   ATH_CHECK(m_robsSvc.retrieve());
+
+  for (const std::string& name : m_keepDetectors) {
+    const eformat::SubDetectorGroup group = eformat::helper::SubDetectorGroupDictionary.enumeration(name);
+    if (eformat::helper::SubDetectorGroupDictionary.string(group) != name) {
+      ATH_MSG_ERROR("Unknown sub-detector group '{}'", name);
+      return StatusCode::FAILURE;
+    }
+    m_keep.insert(group);
+  }
 
   return StatusCode::SUCCESS;
 }
@@ -179,14 +191,32 @@ StatusCode test_RawEventVerifyAlg::execute(const EventContext& ctx) const {
     return StatusCode::FAILURE;
   }
 
-  const size_t nWords = std::distance(original->start(), original->end());
+  // The bytes the server should have received: either the whole event or rebuild over the detector subset.
+  std::string wire;
+  if (m_keep.empty()) {
+    const size_t nBytes = std::distance(original->start(), original->end()) * sizeof(uint32_t);
+    wire.resize_and_overwrite(nBytes, [&](char* out, size_t size) {
+      std::memcpy(out, original->start(), size);
+      return size;
+    });
+  } else {
+    auto filtered = Bytestream::toBytes(original, m_keep);
+    if (!filtered) {
+      ATH_MSG_ERROR("Event {}: encoding the {} kept group(s) failed: {}", ctx.eventID().event_number(), m_keep.size(),
+                    filtered.error().diagnostics);
+      return StatusCode::FAILURE;
+    }
+    wire = std::move(*filtered);
+  }
+
+  const size_t nWords = wire.size() / sizeof(uint32_t);
   if (*size != nWords) {
     ATH_MSG_ERROR("Event {} has {} words but {} came back",
                   ctx.eventID().event_number(), nWords, *size);
     return StatusCode::FAILURE;
   }
 
-  const uint32_t expected = digest(original->start(), nWords);
+  const uint32_t expected = digest(std::as_bytes(std::span{wire.data(), wire.size()}));
   if (*hash != expected) {
     ATH_MSG_ERROR("Event {} digest is 0x{:08x} but 0x{:08x} came back",
                   ctx.eventID().event_number(), expected, *hash);
@@ -194,8 +224,8 @@ StatusCode test_RawEventVerifyAlg::execute(const EventContext& ctx) const {
   }
 
   ++m_checked;
-  ATH_MSG_INFO("Event {}: {} words, digest 0x{:08x} verified",
-               ctx.eventID().event_number(), nWords, expected);
+  ATH_MSG_INFO("Event {}: {} words, digest 0x{:08x} verified{}", ctx.eventID().event_number(), nWords, expected,
+               m_keep.empty() ? "" : " (filtered)");
 
   return StatusCode::SUCCESS;
 }

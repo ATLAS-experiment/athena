@@ -4,9 +4,16 @@
 
 #include <AthRemoteExecCodecs/Bytestream.h>
 #include <eformat/HeaderMarker.h>
+#include <eformat/SourceIdentifier.h>
+#include <eformat/compression.h>
+#include <eformat/write/FullEventFragment.h>
+#include <eformat/write/ROBFragment.h>
+#include <eformat/write/node.h>
 
 #include <cstring>
+#include <deque>
 #include <format>
+#include <set>
 #include <utility>
 #include <vector>
 
@@ -14,7 +21,7 @@ namespace AthRemoteExec::Bytestream {
 
 namespace { constexpr std::size_t wordSize = sizeof(uint32_t); }
 
-std::expected<std::string, Failure> toBytes(const RawEvent* event) {
+std::expected<std::string, Failure> toBytes(const RawEvent* event, const std::set<eformat::SubDetectorGroup>& keep) {
   if (event == nullptr) {
     return std::unexpected(Failure{Error::NullEvent, "RawEvent is null!"});
   }
@@ -23,14 +30,52 @@ std::expected<std::string, Failure> toBytes(const RawEvent* event) {
     return std::unexpected(Failure{Error::EmptyEvent, "RawEvent is empty; nothing to encode"});
   }
 
-  const std::size_t nBytes = std::distance(event->start(), event->end()) * wordSize;
-  if (nBytes == 0) {
-    return std::unexpected(Failure{Error::EmptyEvent, "RawEvent is empty; nothing to encode"});
+  // No selection -> copy entire event
+  if (keep.empty()) {
+    const std::size_t nBytes = std::distance(event->start(), event->end()) * wordSize;
+    if (nBytes == 0) {
+      return std::unexpected(Failure{Error::EmptyEvent, "RawEvent is empty; nothing to encode"});
+    }
+
+    std::string bytes;
+    bytes.resize_and_overwrite(nBytes, [&](char* dest, std::size_t count) {
+      std::memcpy(dest, event->start(), count);
+      return count;
+    });
+
+    return bytes;
   }
 
+  // Rebuild event using only matching sub-detectors
+  eformat::write::FullEventFragment full;
+  full.copy_header(event->start());
+  full.compression_type(eformat::UNCOMPRESSED);
+
+  // To keep fragmens addresses stable until fragments are written
+  std::deque<eformat::write::ROBFragment> wrappers;
+  std::size_t nSelected = 0;
+  for (auto it = event->child_iter(); const uint32_t* fp = it.next();) {
+    const eformat::helper::SourceIdentifier sid(eformat::ROBFragment<const uint32_t*>(fp).source_id());
+    if (!keep.contains(sid.subdetector_group())) {
+      continue;
+    }
+
+    wrappers.emplace_back(fp);
+    full.append(&wrappers.back());
+    ++nSelected;
+  }
+
+  if (nSelected == 0) {
+    return std::unexpected(Failure{Error::NoMatchingRobs, "No ROB of the requested detectors found in the event"});
+  }
+
+  const uint32_t nWords = full.size_word();
+  std::vector<uint32_t> words(nWords);
+  eformat::write::copy(*full.bind(), words.data(), nWords);
+
   std::string bytes;
-  bytes.resize_and_overwrite(nBytes, [&](char* dest, std::size_t count) {
-    std::memcpy(dest, event->start(), count);
+  bytes.resize_and_overwrite(nWords * wordSize, [&](char* dest, std::size_t count) {
+    std::memcpy(dest, words.data(), count);
     return count;
   });
 

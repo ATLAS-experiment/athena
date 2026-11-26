@@ -5,9 +5,11 @@
 #define ATHREMOTEEXECCODECS_BYTESTREAM_H
 
 #include <AthRemoteExecCodecs/RawEventCache.h>
+#include <eformat/SourceIdentifier.h>
 
 #include <expected>
 #include <memory>
+#include <set>
 #include <string>
 #include <string_view>
 
@@ -17,6 +19,7 @@ namespace AthRemoteExec::Bytestream {
 enum class Error {
   NullEvent,          // toBytes: no event to encode
   EmptyEvent,         // toBytes: the event carries no data
+  NoMatchingRobs,     // toBytes: the detector selection matched no ROB
   EmptyPayload,       // fromBytes: zero bytes received
   MisalignedPayload,  // fromBytes: size is not a multiple of the word size
   BadMarker,          // fromBytes: doesn't start with a FullEventFragment
@@ -29,8 +32,11 @@ struct Failure {
   std::string diagnostics;  ///< human-readable specifics, for log messages
 };
 
-/// Encode a RawEvent into wire bytes. If RawEvent is invalid (null or has no data) it will fail here.
-[[nodiscard]] std::expected<std::string, Failure> toBytes(const RawEvent* event);
+/// Encode a RawEvent into wire bytes. If RawEvent is invalid (null or has no data) it will fail here. If @c keep is
+/// non-empty, the event is rebuilt with only the ROBs whose source identifier's sub-detector groups are listed – event
+/// here is uncompressed.
+[[nodiscard]] std::expected<std::string, Failure> toBytes(const RawEvent* event,
+                                                          const std::set<eformat::SubDetectorGroup>& keep = {});
 
 /// Decode wire bytes into a fully validated RawEventCache. The received bytes are checked for size and eformat
 /// structure before anything reads into them.

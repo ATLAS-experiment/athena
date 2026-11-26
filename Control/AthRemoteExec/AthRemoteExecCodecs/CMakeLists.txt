@@ -23,6 +23,7 @@ atlas_add_component( AthRemoteExecCodecsTest
 
 atlas_install_scripts(
    test/test_remote_exec_bytestream_roundtrip.sh
+   test/test_remote_exec_bytestream_selection.sh
    test/test_remote_exec_run_codecs_server.py
    test/test_remote_exec_run_codecs_client.py )
 
@@ -33,5 +34,10 @@ atlas_add_test( Bytestream
 
 atlas_add_test( BytestreamRoundtrip
    SCRIPT test_remote_exec_bytestream_roundtrip.sh
+   POST_EXEC_SCRIPT noerror.sh
+   PRIVATE_WORKING_DIRECTORY )
+
+atlas_add_test( BytestreamSelection
+   SCRIPT test_remote_exec_bytestream_selection.sh
    POST_EXEC_SCRIPT noerror.sh
    PRIVATE_WORKING_DIRECTORY )

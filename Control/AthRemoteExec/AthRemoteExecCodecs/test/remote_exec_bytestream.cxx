@@ -13,11 +13,14 @@
  */
 
 #include <AthRemoteExecCodecs/Bytestream.h>
+#include <eformat/ROBFragment.h>
+#include <eformat/SourceIdentifier.h>
 #include <eformat/Status.h>
 #include <eformat/write/FullEventFragment.h>
 #include <eformat/write/ROBFragment.h>
 #include <eformat/write/node.h>
 
+#include <algorithm>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
@@ -42,16 +45,9 @@ void check(bool condition, const std::string& what) {
   }
 }
 
-/// A small but complete full event: one ROB carrying two data words.
-std::vector<uint32_t> makeEvent() {
+/// A small but complete full event: one ROB per given source id, each carrying two data words.
+std::vector<uint32_t> makeEvent(const std::vector<uint32_t>& robSourceIds = {0x00000011}) {
   const std::vector<uint32_t> rodData = {0x11223344, 0x55667788};
-  eformat::write::ROBFragment rob(0x00000011,  // ROB source id
-                                  456789,      // run number
-                                  4242,        // LVL1 id
-                                  1234,        // bunch crossing id
-                                  0x1a,        // LVL1 trigger type
-                                  0,           // detector event type
-                                  rodData.size(), rodData.data(), eformat::STATUS_FRONT);
   eformat::write::FullEventFragment fe(0x00000001,     // source id
                                        1700000000, 0,  // bunch crossing time
                                        0xdeadbeef,     // global id
@@ -61,7 +57,22 @@ std::vector<uint32_t> makeEvent() {
                                        4242,           // LVL1 id
                                        1234,           // bunch crossing id
                                        0x1a);          // LVL1 trigger type
-  fe.append(&rob);
+  // append() links the ROBs by pointer: they must outlive the serialization below.
+  std::vector<eformat::write::ROBFragment> robs;
+  robs.reserve(robSourceIds.size());
+  std::transform(robSourceIds.begin(), robSourceIds.end(), std::back_inserter(robs),
+                 [&rodData](const uint32_t sourceId) {
+                   return eformat::write::ROBFragment(sourceId,  // ROB source id
+                                                      456789,    // run number
+                                                      4242,      // LVL1 id
+                                                      1234,      // bunch crossing id
+                                                      0x1a,      // LVL1 trigger type
+                                                      0,         // detector event type
+                                                      rodData.size(), rodData.data(), eformat::STATUS_FRONT);
+                 });
+  for (auto& rob : robs) {
+    fe.append(&rob);
+  }
 
   std::vector<uint32_t> words(fe.size_word());
   eformat::write::copy(*fe.bind(), words.data(), words.size());
@@ -147,6 +158,64 @@ int main() {
       ++robs;
     }
     check(robs == 1, "The decoded event still has one ROB");
+  }
+
+  // -- ROB selection by sub-detector
+  const std::vector<uint32_t> multiWords =
+      makeEvent({eformat::helper::SourceIdentifier(eformat::PIXEL_BARREL, 1).code(),
+                 eformat::helper::SourceIdentifier(eformat::TILECAL_BARREL_A_SIDE, 1).code()});
+  const RawEvent multiEvent(multiWords.data());
+
+  {
+    auto whole_bytes = toBytes(&multiEvent);
+    auto empty_bytes = toBytes(&multiEvent, {});
+    check(whole_bytes.has_value() && empty_bytes.has_value() && *whole_bytes == *empty_bytes,
+          "An empty selection serializes the entire event verbatim");
+  }
+
+  {
+    auto selected = toBytes(&multiEvent, {eformat::PIXEL});
+    check(selected.has_value(), "toBytes() encodes a filtered event");
+    if (selected) {
+      auto decoded = fromBytes(*selected);
+      check(decoded.has_value(), "fromBytes() accepts a filtered event");
+      if (decoded) {
+        check((*decoded)->event()->lvl1_id() == 4242u, "A filtered event keeps the meta-data");
+
+        std::set<eformat::SubDetectorGroup> found;
+        size_t robs = 0;
+        auto iter = (*decoded)->event()->child_iter();
+        while (const uint32_t* fp = iter.next()) {
+          found.insert(eformat::helper::SourceIdentifier(eformat::ROBFragment<const uint32_t*>(fp).source_id())
+                           .subdetector_group());
+          ++robs;
+        }
+        check(robs == 1, "A filtered event keeps only the matching ROBs");
+        check(found == std::set<eformat::SubDetectorGroup>{eformat::PIXEL}, "The kept ROB is the requested detector");
+      }
+    }
+  }
+
+  {
+    auto selected = toBytes(&multiEvent, {eformat::PIXEL, eformat::TILECAL});
+    check(selected.has_value(), "toBytes() encodes with both detectors selected");
+    if (selected) {
+      auto decoded = fromBytes(*selected);
+      check(decoded.has_value(), "fromBytes() accepts the fully selected event");
+      if (decoded) {
+        size_t robs = 0;
+        auto iter = (*decoded)->event()->child_iter();
+        while (iter.next() != nullptr) {
+          ++robs;
+        }
+        check(robs == 2, "Both ROBs survive a full selection");
+      }
+    }
+  }
+
+  {
+    auto none = toBytes(&multiEvent, {eformat::MUON});
+    check(!none && none.error().error == Error::NoMatchingRobs, "toBytes() rejects a selection matching no ROB");
   }
 
   if (s_failures != 0) {

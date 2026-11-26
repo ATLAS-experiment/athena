@@ -19,6 +19,17 @@ class ByteStream(Codec):
         ...
     )
     ```
+    or if only a subset of detectors is needed:
+    ```python
+    remote.add(
+        ...
+        boundaries={
+            "bytestream": ByteStream(KeepDetectors=["PIXEL", "SCT"]),
+            ...
+        },
+        ...
+    )
+    ```
     """
 
     encoding = "bytestream"

@@ -14,13 +14,17 @@
 #include <AthRemoteExecCore/PayloadCodecBase.h>
 #include <AthenaBaseComps/AthReentrantAlgorithm.h>
 #include <ByteStreamCnvSvcBase/IROBDataProviderSvc.h>
+#include <Gaudi/Property.h>
 #include <GaudiKernel/ServiceHandle.h>
 #include <StoreGate/ReadHandleKey.h>
 #include <StoreGate/WriteHandleKey.h>
+#include <eformat/SourceIdentifier.h>
 
 #include <atomic>
 #include <cstdint>
+#include <set>
 #include <string>
+#include <vector>
 
 namespace AthRemoteExec {
 
@@ -88,6 +92,13 @@ class test_RawEventVerifyAlg : public AthReentrantAlgorithm {
                                      "Key with the event's digest"};
   ServiceHandle<IROBDataProviderSvc> m_robsSvc{
       this, "ROBDataProvider", "ROBDataProviderSvc/ROBDataProviderSvc"};
+
+  /// Sub-detectors whose ROBs are encoded; empty means the entire event
+  Gaudi::Property<std::vector<std::string>> m_keepDetectors{
+      this, "KeepDetectors", {}, "Sub-detectors whose ROBs are encoded; empty -> the entire event"};
+
+  /// The decoded KeepDetectors
+  std::set<eformat::SubDetectorGroup> m_keep;
 
   mutable std::atomic<size_t> m_checked{0};
 };
