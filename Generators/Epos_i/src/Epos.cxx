@@ -144,7 +144,7 @@ StatusCode Epos::genInitialize()
     ATH_MSG_INFO( " CRMC INITIALISING.\n" );
     ATH_MSG_INFO( "signal_rocess_id 101-ND, 105-DD, 102-CD, 103 AB->XB, 104 AB->AX \n");
 
-    p_rndmEngine = getRandomEngineDuringInitialize(epos_rndm_stream, m_randomSeed, m_dsid); // NOT THREAD-SAFE
+    p_rndmEngine = getRandomEngineDuringInitialize(epos_rndm_stream, m_randomSeedOffset, m_dsid); // NOT THREAD-SAFE
     const long *sip = p_rndmEngine->getSeeds();
     long int si1 = sip[0];
 
@@ -170,7 +170,7 @@ StatusCode Epos::callGenerator()
     //Re-seed the random number stream
     long seeds[7];
     const EventContext& ctx = Gaudi::Hive::currentContext();
-    ATHRNG::calculateSeedsMC21(seeds, epos_rndm_stream, ctx.eventID().event_number(), m_dsid, m_randomSeed);
+    ATHRNG::calculateSeedsMC21(seeds, epos_rndm_stream, ctx.eventID().event_number(), m_dsid, m_randomSeedOffset);
     p_rndmEngine->setSeeds(seeds, 0); // NOT THREAD-SAFE
 
     // save the random number seeds in the event

@@ -77,8 +77,8 @@ StatusCode GenModule::execute(const EventContext& /*ctx*/) {
   // Example 1 - seeded based on the current event number (+ slot, run, streamName)
   //CLHEP::HepRandomEngine* rndmEngine = this->getRandomEngine("MyStream", ctx);
 
-  // Example 2 - seeded based on the m_randomSeed property (+ slot, run, streamName)
-  //CLHEP::HepRandomEngine* rndmEngine = this->getRandomEngine("MyStream", m_randomSeed.value(), ctx);
+  // Example 2 - seeded based on the m_randomSeedOffset property (+ slot, run, streamName)
+  //CLHEP::HepRandomEngine* rndmEngine = this->getRandomEngine("MyStream", m_randomSeedOffset.value(), ctx);
 
   // Call the code that generates an event
   CHECK(this->callGenerator());

@@ -300,7 +300,7 @@ def _get_nevents(flags, safety):
     return int(base_events * sf)
 
 
-class BeamType(Enum):
+class BeamSpecies(Enum):
     """Helper class for storing the information
     on beam type: (Z, A, atomic mass in u).
     Masses are taken from AME2020 atomic mass evaluation

@@ -40,7 +40,7 @@ TauolaPP::TauolaPP(const std::string& name, ISvcLocator* pSvcLocator)
 StatusCode TauolaPP::initialize(){
 
   ATH_CHECK(m_rndmSvc.retrieve());
-  p_rndmEngine = getRandomEngineDuringInitialize("TAUOLAPP_INIT", m_randomSeed, m_dsid);
+  p_rndmEngine = getRandomEngineDuringInitialize("TAUOLAPP_INIT", m_randomSeedOffset, m_dsid);
   const long*  sip  =  p_rndmEngine->getSeeds();
 
   // Setup and intialise Tauola Interface
@@ -77,7 +77,7 @@ StatusCode TauolaPP::initialize(){
 void TauolaPP::reseedRandomEngine(const std::string& streamName, const EventContext& ctx)
 {
   long seeds[7];
-  ATHRNG::calculateSeedsMC21(seeds, streamName,  ctx.eventID().event_number(), m_dsid, m_randomSeed);
+  ATHRNG::calculateSeedsMC21(seeds, streamName,  ctx.eventID().event_number(), m_dsid, m_randomSeedOffset);
   p_rndmEngine->setSeeds(seeds, 0); // NOT THREAD-SAFE
 }
 

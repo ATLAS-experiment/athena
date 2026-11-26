@@ -2,6 +2,7 @@
 
 from EvgenJobTransforms.EvgenCAConfig import EvgenConfig
 
+
 class Sample(EvgenConfig):
 
     def setupFlags(self, flags):
@@ -11,57 +12,33 @@ class Sample(EvgenConfig):
 
     def setupProcess(self, flags):
 
-        Config = {
-            "isurv": 4,
-            "PDFname": 'MSHT20qed_nnlo',
-            "PDFmember": 0,
-            "proc": 55,
-            "beam": 'prot',
-            "sfaci": False,
-            "diff": 'el',
-            "genunw": True,
-            "ymin": -5.0,
-            "ymax": 5.0,
-            "mmin": 0,
-            "mmax": 100000,
-            "gencuts": True,
-            "scorr": True,
-            "fwidth": True,
-            "ptxmax": 300,
-            "ptamin": 3.0,
-            "ptbmin": 3.0,
-            "etaamin": -3.0,
-            "etaamax": 3.0,
-            "etabmin": -3.0,
-            "etabmax": 3.0,
-            "acoabmax": 100,
-            "wlp": 'tau',
-            "wlm": 'tau',
-            "ncall": 100000,
-            "ncall1": 100000
-        }
+        from Analysis_Common_yyWW import GetSuperChicConfig
+        scConfig = GetSuperChicConfig()
+
+        safFactor = 16
+
+        scConfig['proc'] = 55
+        scConfig['sfaci'] = False
+        scConfig['diff'] = 'el'
+        scConfig['mmin'] = 0
+        scConfig['mmax'] = 100000
+        scConfig['wlp'] = 'tau'
+        scConfig['wlm'] = 'tau'
+
+        MLFil = True
+        NchFil = False
 
         # Set up SuperChic
         from Superchic_i.SuperChicConfig import SuperChicBaseCfg
         sampleConfig = SuperChicBaseCfg(
             flags,
-            Config=Config,
-            safety=20
+            Config=scConfig,
+            safety=safFactor
         )
 
-        Commands = [
-            "TimeShower:recoilStrategyRF = 1",
-            "PartonLevel:MPI = off",
-            "SpaceShower:pTmaxMatch = 2",
-            "SpaceShower:pTdampMatch = 1",
-            "LesHouches:matchInOut = off",
-            "SpaceShower:dipoleRecoil = on",
-            "PDF:BeamA2gamma = on",
-            "PDF:BeamB2gamma = on",
-            "Photon:ProcessType = 4",
-            "PDF:Proton2gammaSet = 1",
-            "Photon:sampleQ2 = off"
-        ]
+        # Get Pythia8 commands
+        from Analysis_Common_yyWW import GetPythia8DissociationCommands
+        Commands = GetPythia8DissociationCommands(scConfig)
 
         # Set up base Pythia8 for showering
         from Superchic_i.SuperChicConfig import SuperChicPythia8BaseCfg
@@ -78,5 +55,9 @@ class Sample(EvgenConfig):
             EtaCut=2.6,
             NLeptons=2
         ))
+
+        # Set up filters
+        from Analysis_Common_yyWW import SetUpFilters
+        SetUpFilters(flags, sampleConfig, MLFil, NchFil)
 
         return sampleConfig

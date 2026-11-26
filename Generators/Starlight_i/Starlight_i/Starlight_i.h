@@ -25,10 +25,10 @@
 
 #include "starlight.h"
 #include "upcevent.h"
-#include "upcXevent.h" // not compatible with Starlight older than r330
+#include "upcXevent.h"
 #include "inputParameters.h"
 
-class Starlight_i:public GenModule {
+class Starlight_i: public GenModule {
 public:
     Starlight_i(const std::string& name, ISvcLocator* pSvcLocator);
     virtual ~Starlight_i();
@@ -39,71 +39,71 @@ public:
     virtual StatusCode fillEvt(HepMC::GenEvent* evt);
 
 protected:
-  IntegerProperty m_dsid{this, "Dsid", 999999, "Dataset ID number"};
-  StringProperty  m_configFileName{this, "ConfigFileName", ""};
-  BooleanProperty  m_lheOutput{this, "lheOutput", false};
-  UnsignedIntegerProperty m_maxevents{this, "maxevents", 5500};
-  BooleanProperty m_doTauolappLheFormat{this, "doTauolappLheFormat", false};
-  BooleanProperty m_suppressVMdecay{this, "suppressVMdecay", false};
-  // Commands to setup starlight
-  StringArrayProperty m_InitializeVector{this,
-                                         "Initialize",
-                                         {},
-                                         "List of parameters for Starlight initialization",
-                                         "GeneratorSettings<std::string>"};
+    IntegerProperty m_dsid{this, "Dsid", 999999, "Dataset ID number"};
+    StringProperty  m_configFileName{this, "ConfigFileName", ""};
+    BooleanProperty  m_lheOutput{this, "lheOutput", false};
+    UnsignedIntegerProperty m_maxevents{this, "maxevents", 5500};
+    BooleanProperty m_doTauolappLheFormat{this, "doTauolappLheFormat", false};
+    BooleanProperty m_suppressVMdecay{this, "suppressVMdecay", false};
+    // Commands to setup starlight
+    StringArrayProperty m_InitializeVector{this,
+                                            "Initialize",
+                                            {},
+                                            "List of parameters for Starlight initialization",
+                                            "GeneratorSettings<std::string>"};
 
-  int              m_events{0}; // event counter
-  std::unique_ptr<starlight> m_starlight{};   // pointer to starlight instance
-  std::shared_ptr<randomGenerator> m_randomGenerator{};
-  inputParameters  m_inputParameters;   // parameter instance
-  double           m_axionMass{1.};
-  std::variant<
-      std::unique_ptr<upcEvent>,  // Starting from version r330 m_event can be either
-      std::unique_ptr<upcXEvent>  // upcEvent or upcXEvent depending on the process
-  >                m_event{};
+    int              m_events{0}; // event counter
+    std::unique_ptr<starlight> m_starlight{};   // pointer to starlight instance
+    std::shared_ptr<randomGenerator> m_randomGenerator{};
+    inputParameters  m_inputParameters;   // parameter instance
+    double           m_axionMass{1.};
+    std::variant<
+        std::unique_ptr<upcEvent>,  // Starting from version r330 m_event can be either
+        std::unique_ptr<upcXEvent>  // upcEvent or upcXEvent depending on the process
+    >                m_event{};
 
-  // beam energy dropped to LHE file (GeV)
-  DoubleProperty m_beam1_energy{this, "beam1Energy", 2.51e+03};
-  DoubleProperty m_beam2_energy{this, "beam2Energy", 2.51e+03};
+    // beam energy dropped to LHE file (GeV)
+    DoubleProperty m_beam1_energy{this, "beam1Energy", 2.51e+03};
+    DoubleProperty m_beam2_energy{this, "beam2Energy", 2.51e+03};
 
-  unsigned int m_beam1Z{0};
-  unsigned int m_beam1A{0};
-  unsigned int m_beam2Z{0};
-  unsigned int m_beam2A{0};
-  double       m_beam1Gamma{0.};
-  double       m_beam2Gamma{0.};
-  double       m_maxW{0.};
-  double       m_minW{0.};
-  unsigned int m_nmbWBins{0};
-  double       m_maxRapidity{0.};
-  unsigned int m_nmbRapidityBins{0};
-  bool         m_accCutPt{false};
-  double       m_minPt{0.};
-  double       m_maxPt{0.};
-  bool         m_accCutEta{false};
-  double       m_minEta{0.};
-  double       m_maxEta{0.};
-  int          m_productionMode{0};
-  unsigned int m_nmbEventsTot{0};
-  int          m_prodParticleId{0};
-  int          m_outputFormat{0};
-  int          m_beamBreakupMode{0};
-  bool         m_interferenceEnabled{false};
-  double       m_interferenceStrength{0.};
-  bool         m_coherentProduction{false};
-  double       m_incoherentFactor{0.};
-  double       m_maxPtInterference{0.};
-  int          m_nmbPtBinsInterference{0};
-  double       m_ptBinWidthInterference{0.};
-  bool         m_xsecMethod{false};
-  int          m_nThreads{1};
-  bool         m_pythFullRec{false};
+    unsigned int m_beam1Z{0};
+    unsigned int m_beam1A{0};
+    unsigned int m_beam2Z{0};
+    unsigned int m_beam2A{0};
+    double       m_beam1Gamma{0.};
+    double       m_beam2Gamma{0.};
+    double       m_maxW{0.};
+    double       m_minW{0.};
+    unsigned int m_nmbWBins{0};
+    double       m_maxRapidity{0.};
+    unsigned int m_nmbRapidityBins{0};
+    bool         m_accCutPt{false};
+    double       m_minPt{0.};
+    double       m_maxPt{0.};
+    bool         m_accCutEta{false};
+    double       m_minEta{0.};
+    double       m_maxEta{0.};
+    int          m_productionMode{0};
+    unsigned int m_nmbEventsTot{0};
+    int          m_prodParticleId{0};
+    int          m_beamBreakupMode{0};
+    bool         m_interferenceEnabled{false};
+    double       m_interferenceStrength{0.};
+    bool         m_coherentProduction{false};
+    double       m_incoherentFactor{0.};
+    double       m_maxPtInterference{0.};
+    int          m_nmbPtBinsInterference{0};
+    double       m_ptBinWidthInterference{0.};
+    bool         m_xsecMethod{false};
+    int          m_nThreads{1};
+    bool         m_pythFullRec{false};
 
-  bool starlight2lhef();
+    bool starlight2lhef();
 
-  bool set_user_params();
-  bool prepare_params_file();
-  double getAcceptedCrossSection();
+    bool load_user_params();
+    bool parse_init_vector();
+    bool write_params_file();
+    double getAcceptedCrossSection();
 };
 
 #endif
