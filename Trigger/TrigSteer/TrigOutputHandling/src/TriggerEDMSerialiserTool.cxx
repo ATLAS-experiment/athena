@@ -96,10 +96,18 @@ StatusCode TriggerEDMSerialiserTool::addCollectionToSerialise(const std::string&
     ATH_MSG_ERROR("Invalid EDM collection specification: " << typeKeyAuxIDs);
     return StatusCode::FAILURE;
   }
-
   const std::string_view typeKeyAux = def[0];
-  const std::string_view configuredType = typeKeyAux.substr( 0, typeKeyAux.find('#') );
-  const std::string_view key = typeKeyAux.substr( typeKeyAux.find('#')+1, typeKeyAux.find('.')-typeKeyAux.find('#') );
+  //check format; dedicated regex would be better.
+  const auto hashPos = typeKeyAux.find('#');
+  const auto pointPos = typeKeyAux.find('.');
+  //the string might not contain a '.' in fact.
+  if ((hashPos == std::string_view::npos))[[unlikely]]{
+    ATH_MSG_ERROR("Invalid key format: " << typeKeyAux);
+    return  StatusCode::FAILURE;
+  }
+  
+  const std::string_view configuredType = typeKeyAux.substr( 0, hashPos );
+  const std::string_view key = typeKeyAux.substr( hashPos+1, pointPos - hashPos );
 
   Address::Truncation truncationMode{Address::Truncation::Error};
 

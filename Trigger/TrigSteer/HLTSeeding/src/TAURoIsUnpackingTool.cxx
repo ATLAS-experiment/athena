@@ -123,8 +123,9 @@ StatusCode TAURoIsUnpackingTool::unpack(const EventContext& ctx,
   if (overflow) {
     ATH_MSG_WARNING("L1Calo overflow for TAU TOBs to CMX detected");
   }
+  const std::string ovflStr{"overflow"};
   for (Decision* decision : *decisionOutput) {
-    decision->setDetail("overflow", static_cast<char>(overflow));
+    decision->setDetail(ovflStr, static_cast<char>(overflow));
   }
 
   for ( auto roi: *trigRoIs ) {
