@@ -8,7 +8,6 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 def IsolationSteeringDerivCfg(flags, name = 'IsolationSteeringDeriv', inType = 'EMPFlow'):
 
-    includeFwdElectrons = "ForwardElectrons" in flags.Input.Collections 
     mlog = logging.getLogger(name)
     mlog.info('Starting Isolation steering')
 
@@ -50,10 +49,6 @@ def IsolationSteeringDerivCfg(flags, name = 'IsolationSteeringDeriv', inType = '
     kwargs['PhIsoTypes'] = isoType
     kwargs['PhCorTypes'] = isoCor
     kwargs['PhCorTypesExtra'] = isoExCor
-    if includeFwdElectrons:
-        kwargs['FwdElIsoTypes'] = isoType
-        kwargs['FwdElCorTypes'] = isoCor
-        kwargs['FwdElCorTypesExtra'] = isoExCor
         
     kwargs['name'] = suff+'PFlowIsolationBuilder'
     
