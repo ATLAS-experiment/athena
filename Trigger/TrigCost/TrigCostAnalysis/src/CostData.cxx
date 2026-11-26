@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CostData.h"
@@ -25,11 +25,14 @@ StatusCode CostData::set(const xAOD::TrigCompositeContainer* costCollection, uin
 }
 
 StatusCode CostData::cache() {
+  static constexpr std::string stopStr{"stop"};
+  static constexpr std::string startStr{"start"};
+  static constexpr std::string slotStr{"slot"};
   for (const xAOD::TrigComposite* tc : costCollection()) {
-    if (tc->getDetail<uint32_t>("slot") != onlineSlot()) {
+    if (tc->getDetail<uint32_t>(slotStr) != onlineSlot()) {
       continue; // When monitoring the master slot, ignores algs running in different slots 
     }
-    m_algTotalTime += (tc->getDetail<uint64_t>("stop") - tc->getDetail<uint64_t>("start"));
+    m_algTotalTime += (tc->getDetail<uint64_t>(stopStr) - tc->getDetail<uint64_t>(startStr));
   }
   return StatusCode::SUCCESS;
 }
