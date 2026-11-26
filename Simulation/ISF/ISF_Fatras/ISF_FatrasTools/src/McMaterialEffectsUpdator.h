@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FATRASTOOLS_TRACKONLAYERUPDATOR_H
@@ -26,6 +26,22 @@
 
 // ISF
 #include "ISF_Event/ISFParticleContainer.h"
+#include "ISF_Interfaces/IParticleBroker.h"
+#include "ISF_Interfaces/ITruthSvc.h"
+#include "ISF_FatrasInterfaces/IHadronicInteractionProcessor.h"
+#include "ISF_FatrasInterfaces/IParticleDecayHelper.h"
+#include "ISF_FatrasInterfaces/IPhotonConversionTool.h"
+#include "ISF_FatrasInterfaces/IPhysicsValidationTool.h"
+#include "ISF_FatrasInterfaces/IProcessSamplingTool.h"
+
+// Trk
+#include "TrkExInterfaces/IEnergyLossUpdator.h"
+#include "TrkExInterfaces/IMultipleScatteringUpdator.h"
+
+// CLHEP
+#include "CLHEP/Units/SystemOfUnits.h"
+
+#include <cmath>
 
 #ifndef MAXHADINTCHILDREN
 #define MAXHADINTCHILDREN 20
@@ -38,15 +54,11 @@ class TTree;
 namespace Trk {
 class EnergyLoss;
 class CylinderVolumeBounds;
-class IEnergyLossUpdator;
-class IMultipleScatteringUpdator;
 class TrackingGeometry;
 }
 
 namespace ISF {
-class IParticleBroker;
 class ISFParticle;
-class ITruthSvc;
 }
 
 namespace iFatras {
@@ -59,12 +71,6 @@ class McMaterialEffectsUpdatorException : public std::exception
     return "Problem with TrackingGeometry loading";
   }
 };
-
-class IProcessSamplingTool;
-class IPhysicsValidationTool;
-class IHadronicInteractionProcessor;
-class IPhotonConversionTool;
-class IParticleDecayHelper;
 
 /** @class McMaterialEffectsUpdator
 
@@ -83,9 +89,7 @@ class ATLAS_NOT_THREAD_SAFE McMaterialEffectsUpdator  // deprecated: ATLASSIM-60
 {
 public:
   /**AlgTool constructor for McMaterialEffectsUpdator*/
-  McMaterialEffectsUpdator(const std::string&,
-                           const std::string&,
-                           const IInterface*);
+  using base_class::base_class;
   /**Destructor*/
   virtual ~McMaterialEffectsUpdator();
 
@@ -218,65 +222,65 @@ private:
     const EventContext& ctx) const;
 
   /** IEnergyLossUpdator */
-  bool m_eLoss;
-  ToolHandle<Trk::IEnergyLossUpdator> m_eLossUpdator;
+  BooleanProperty m_eLoss{this, "EnergyLoss", true};
+  PublicToolHandle<Trk::IEnergyLossUpdator> m_eLossUpdator{this, "EnergyLossUpdator", "iFatras::McEnergyLossUpdator/FatrasEnergyLossUpdator"};
 
   /** IMultipleScatteringUpdator */
-  bool m_ms;
-  ToolHandle<Trk::IMultipleScatteringUpdator> m_msUpdator;
+  BooleanProperty m_ms{this, "MultipleScattering", true};
+  PublicToolHandle<Trk::IMultipleScatteringUpdator> m_msUpdator{this, "MultipleScatteringUpdator", "Trk::MultipleScatteringUpdator/AtlasMultipleScatteringUpdator"};
 
   /** IPhotonConversionTool */
-  ToolHandle<iFatras::IPhotonConversionTool> m_conversionTool;
+  PublicToolHandle<iFatras::IPhotonConversionTool> m_conversionTool{this, "PhotonConversionTool", "iFatras::McConversionCreator/FatrasConversionCreator"};
 
   /** MCTruth process code for TruthIncidents created by this tool */
-  int m_processCode;
+  IntegerProperty m_processCode{this, "BremProcessCode", 3, "MCTruth Physics Process Code"};
 
   /** MCTruth process sampling */
-  ToolHandle<iFatras::IProcessSamplingTool> m_samplingTool;
+  PublicToolHandle<iFatras::IProcessSamplingTool> m_samplingTool{this, "ProcessSamplingTool", ""};
 
   /** hadronic interaction setting */
-  bool m_hadInt;
-  ToolHandle<IHadronicInteractionProcessor> m_hadIntProcessor;
+  BooleanProperty m_hadInt{this, "HadronicInteraction", true};
+  PublicToolHandle<IHadronicInteractionProcessor> m_hadIntProcessor{this, "HadronicInteractionProcessor", "iFatras::G4HadIntProcessor/FatrasG4HadIntProcessor"};
 
   /** Particle Decay */
-  ToolHandle<IParticleDecayHelper> m_particleDecayer;
+  PublicToolHandle<IParticleDecayHelper> m_particleDecayer{this, "ParticleDecayHelper", ""};
 
   /** Minimum momentum cut */
-  double m_minimumMomentum;
+  DoubleProperty m_minimumMomentum{this, "MomentumCut", 50.*CLHEP::MeV};
 
   /** Minimum momentum for brem photons */
-  double m_minimumBremPhotonMomentum;
+  DoubleProperty m_minimumBremPhotonMomentum{this, "MinimumBremPhotonMomentum", 50.*CLHEP::MeV};
 
   /** describe deflection parametric/do real deflection */
-  bool m_parametricScattering;
+  BooleanProperty m_parametricScattering{this, "ParametericScattering", false};
 
   /** switch between MSUpdator and local parametrization */
-  bool m_use_msUpdator;
+  BooleanProperty m_use_msUpdator{this, "UseMultipleScatteringUpdator", false};
 
   /** use the relativistic hertz dipole for brem photon radiation */
-  bool m_uniformHertzDipoleAngle;
+  bool m_uniformHertzDipoleAngle{false};
 
   /** Switch to use reference material */
-  bool m_referenceMaterial;
+  BooleanProperty m_referenceMaterial{this, "ReferenceMaterial", true};
 
   /** Switch to use bending correction */
-  bool m_bendingCorrection;
+  BooleanProperty m_bendingCorrection{this, "BendingCorrection", false};
 
   /** Random Generator service  */
-  ServiceHandle<IAtRndmGenSvc> m_rndGenSvc;
+  ServiceHandle<IAtRndmGenSvc> m_rndGenSvc{this, "RandomNumberService", "AtDSFMTGenSvc", "Random number generator"};
   /** Random engine  */
-  CLHEP::HepRandomEngine* m_randomEngine;
-  std::string m_randomEngineName; //!< Name of the random number stream
+  CLHEP::HepRandomEngine* m_randomEngine{nullptr};
+  StringProperty m_randomEngineName{this, "RandomStreamName", "FatrasRnd", "Name of the random number stream"}; //!< Name of the random number stream
 
   /** for statistics output */
-  mutable std::atomic<unsigned int> m_recordedBremPhotons;
+  mutable std::atomic<unsigned int> m_recordedBremPhotons{0};
 
   /** for the calo energy recording */
-  int m_currentSample;                       //!< the currentSample
-  bool m_recordEnergyDeposition;             //!< for deposition methods
-  std::string m_layerIndexCaloSampleMapName; //!< name to record it
+  int m_currentSample{-1};                   //!< the currentSample
+  BooleanProperty m_recordEnergyDeposition{this, "RecordEnergyDeposition", false}; //!< for deposition methods
+  StringProperty m_layerIndexCaloSampleMapName{this, "LayerIndexCaloSampleMap", "LayerIndexCaloSampleMap"}; //!< name to record it
   mutable const Trk::LayerIndexSampleMap*
-    m_layerIndexCaloSampleMap; //!< the map for the calo-layer index map
+    m_layerIndexCaloSampleMap{nullptr}; //!< the map for the calo-layer index map
 
   // ---------------------------- Tracking Geometry ---------------------------
   bool m_useConditions{};
@@ -299,88 +303,88 @@ private:
   // --------------------------------------------------------------------------
 
   /** projection factor for the non-parametric scattering */
-  double m_projectionFactor;
+  double m_projectionFactor{std::sqrt(2.)};
 
 
   // ------------------------ Validation section
   // ------------------------------------
-  bool m_validationMode;
-  ToolHandle<IPhysicsValidationTool> m_validationTool;
-  std::string m_validationTreeName; //!< validation tree name - to be acessed by
+  BooleanProperty m_validationMode{this, "ValidationMode", false};
+  PublicToolHandle<IPhysicsValidationTool> m_validationTool{this, "PhysicsValidationTool", ""};
+  std::string m_validationTreeName{"FatrasMaterialEffects"}; //!< validation tree name - to be acessed by
                                     //!< this from root
-  std::string m_validationTreeDescription; //!< validation tree description -
+  std::string m_validationTreeDescription{"Validation output from the McMaterialEffectsUpdator"}; //!< validation tree description -
                                            //!< second argument in TTree
-  std::string m_validationTreeFolder; //!< stream/folder to for the TTree to be
+  std::string m_validationTreeFolder{"/val/FatrasSimulationMaterial"}; //!< stream/folder to for the TTree to be
                                       //!< written out
 
-  TTree* m_validationTree; //!< Root Validation Tree
+  TTree* m_validationTree{nullptr}; //!< Root Validation Tree
 
   // ----------- ntuple branches
   mutable int
-    m_layerIndex; //!< ntuple variable : layer index of material effects update
-  mutable float m_tInX0;        //!< nutple variable : t/X0
-  mutable float m_thetaMSproj;  //!< ntuple variable : projected ms
-  mutable float m_thetaMSphi;   //!< ntuple variable : ms in phi
-  mutable float m_thetaMStheta; //!< ntuple variable : ms in theta
-  mutable float m_deltaP;       //!< nutple variable : energy loss
-  mutable float m_deltaPsigma;  //!< ntuple variable : stragling on energy loss
+    m_layerIndex{}; //!< ntuple variable : layer index of material effects update
+  mutable float m_tInX0{};        //!< nutple variable : t/X0
+  mutable float m_thetaMSproj{};  //!< ntuple variable : projected ms
+  mutable float m_thetaMSphi{};   //!< ntuple variable : ms in phi
+  mutable float m_thetaMStheta{}; //!< ntuple variable : ms in theta
+  mutable float m_deltaP{};       //!< nutple variable : energy loss
+  mutable float m_deltaPsigma{};  //!< ntuple variable : stragling on energy loss
 
-  bool m_bremValidation;
-  std::string m_bremValidationTreeName;        //!< validation tree name - to be
+  BooleanProperty m_bremValidation{this, "BremPhotonValidation", false};
+  std::string m_bremValidationTreeName{"FatrasBremPhotons"}; //!< validation tree name - to be
                                                //!< acessed by this from root
-  std::string m_bremValidationTreeDescription; //!< validation tree description
+  std::string m_bremValidationTreeDescription{"Validation output from the McMaterialEffectsUpdator"}; //!< validation tree description
                                                //!< - second argument in TTree
-  std::string m_bremValidationTreeFolder; //!< stream/folder to for the TTree to
+  std::string m_bremValidationTreeFolder{"/val/FatrasBremPhotons"}; //!< stream/folder to for the TTree to
                                           //!< be written out
 
-  TTree* m_bremValidationTree; //!< Root Validation Tree
+  TTree* m_bremValidationTree{nullptr}; //!< Root Validation Tree
 
   // ------ ntuple branches
-  mutable float m_bremPointX; //!< ntuple variable : brem point x coordinate
-  mutable float m_bremPointY; //!< ntuple variable : brem point y coordinate
-  mutable float m_bremPointR; //!< ntuple variable : brem point r distance
-  mutable float m_bremPointZ; //!< ntuple variable : brem point z coordinate
-  mutable float m_bremMotherEnergy; //!< ntuple variable : brem mother energy
-  mutable float m_bremPhotonEnergy; //!< ntuple variable : brem photon energy
-  mutable float m_bremPhotonAngle;  //!< ntuple variable : brem photon angle
+  mutable float m_bremPointX{}; //!< ntuple variable : brem point x coordinate
+  mutable float m_bremPointY{}; //!< ntuple variable : brem point y coordinate
+  mutable float m_bremPointR{}; //!< ntuple variable : brem point r distance
+  mutable float m_bremPointZ{}; //!< ntuple variable : brem point z coordinate
+  mutable float m_bremMotherEnergy{}; //!< ntuple variable : brem mother energy
+  mutable float m_bremPhotonEnergy{}; //!< ntuple variable : brem photon energy
+  mutable float m_bremPhotonAngle{};  //!< ntuple variable : brem photon angle
 
   // --------------------------------------------------------------------------------
 
-  bool m_edValidation;
-  std::string m_edValidationTreeName; //!< validation tree name - to be acessed
+  BooleanProperty m_edValidation{this, "EnergyDepositValidation", false};
+  std::string m_edValidationTreeName{"FatrasEnergyInCaloDeposit"}; //!< validation tree name - to be acessed
                                       //!< by this from root
-  std::string m_edValidationTreeDescription; //!< validation tree description -
+  std::string m_edValidationTreeDescription{"Validation output from the McMaterialEffectUpdator"}; //!< validation tree description -
                                              //!< second argument in TTree
-  std::string m_edValidationTreeFolder; //!< stream/folder to for the TTree to
+  std::string m_edValidationTreeFolder{"/val/FatrasEnergyInCaloDeposit"}; //!< stream/folder to for the TTree to
                                         //!< be written out
 
-  TTree* m_edValidationTree; //!< Root Validation Tree
+  TTree* m_edValidationTree{nullptr}; //!< Root Validation Tree
 
   // ------ ntuple branches
   mutable float
-    m_edLayerIntersectX; //!< ntuple variable : energy deposit x coordinate
+    m_edLayerIntersectX{}; //!< ntuple variable : energy deposit x coordinate
   mutable float
-    m_edLayerIntersectY; //!< ntuple variable : energy deposit y coordinate
+    m_edLayerIntersectY{}; //!< ntuple variable : energy deposit y coordinate
   mutable float
-    m_edLayerIntersectZ; //!< ntuple variable : energy deposit z coordinate
+    m_edLayerIntersectZ{}; //!< ntuple variable : energy deposit z coordinate
   mutable float
-    m_edLayerIntersectR; //!< ntuple variable : energy deposit r coordinate
+    m_edLayerIntersectR{}; //!< ntuple variable : energy deposit r coordinate
   mutable float
-    m_edLayerEnergyDeposit;      //!< ntuple variable : energy despoit - value
-  mutable float m_edLayerSample; //!< ntuple variable : layer sample
+    m_edLayerEnergyDeposit{};      //!< ntuple variable : energy despoit - value
+  mutable float m_edLayerSample{}; //!< ntuple variable : layer sample
 
   /** useful for the angle calculation of the brem photon */
-  double m_oneOverThree;
+  double m_oneOverThree{1./3.};
 
-  ServiceHandle<ISF::IParticleBroker> m_particleBroker;
-  ServiceHandle<ISF::ITruthSvc> m_truthRecordSvc;
+  ServiceHandle<ISF::IParticleBroker> m_particleBroker{this, "ParticleBroker", "ISF_ParticleParticleBroker", "ISF Particle Broker Svc"};
+  ServiceHandle<ISF::ITruthSvc> m_truthRecordSvc{this, "TruthRecordSvc", "ISF_TruthRecordSvc", "ISF Particle Truth Svc"};
 
   /** cache incoming particle */
-  mutable const ISF::ISFParticle* m_isp;
+  mutable const ISF::ISFParticle* m_isp{nullptr};
 
   /** cache layer properties */
-  mutable const Trk::Layer* m_layer;
-  mutable const Trk::MaterialProperties* m_matProp;
+  mutable const Trk::Layer* m_layer{nullptr};
+  mutable const Trk::MaterialProperties* m_matProp{nullptr};
   Trk::PdgToParticleHypothesis m_pdgToParticleHypothesis;
 };
 

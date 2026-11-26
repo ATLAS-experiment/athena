@@ -15,12 +15,9 @@
 #include "ISF_Event/ISFParticleContainer.h"
 #include "ISF_Event/ParticleClipboard.h"
 #include "ISF_Event/ParticleUserInformation.h"
-#include "ISF_Interfaces/IParticleBroker.h"
-#include "ISF_Interfaces/ITruthSvc.h"
 #include "ISF_Event/ISFTruthIncident.h"
 #include "TruthUtils/MagicNumbers.h"
 // iFatras
-#include "ISF_FatrasInterfaces/IPhysicsValidationTool.h"
 // Trk inlcude
 #include "TrkEventPrimitives/PdgToParticleHypothesis.h"
 #include "TrkExInterfaces/IEnergyLossUpdator.h"
@@ -56,53 +53,6 @@ namespace {
 
 const Trk::PdgToParticleHypothesis  iFatras::PhotonConversionTool::s_pdgToHypo;
 
-// constructor
-iFatras::PhotonConversionTool::PhotonConversionTool(const std::string& t, const std::string& n, const IInterface* p) :
-  base_class(t,n,p),
-  m_particleBroker("ISF_ParticleParticleBroker", n),
-  m_truthRecordSvc("ISF_TruthRecordSvc", n),
-  m_processCode(14),
-  m_referenceMaterial(true),
-  m_minChildEnergy(50.*CLHEP::MeV),
-  m_childEnergyScaleFactor(1.),
-  m_conversionProbScaleFactor(0.98),
-  m_rndGenSvc("AtDSFMTGenSvc", n),
-  m_randomEngine(nullptr),
-  m_randomEngineName("FatrasRnd"),
-  m_recordedConversions(0),
-  m_droppedConversions(0),
-  m_validationMode(false),
-  m_validationTreeName("FatrasPhotonConversions"),
-  m_validationTreeDescription("Validation output from the PhotonConversionTool"),
-  m_validationTreeFolder("/val/FatrasPhotonConversions"),
-  m_validationTree(nullptr),
-  m_validationTool(""),
-  m_conversionPointX(0.),
-  m_conversionPointY(0.),
-  m_conversionPointR(0.),
-  m_conversionPointZ(0.),
-  m_conversionPhotonEnergy(0.),
-  m_conversionChildEnergy(0.),
-  m_conversionChildAngle(0.)
-{
-      // ISF Services and Tools
-      declareProperty("ParticleBroker"                      , m_particleBroker        , "ISF ParticleBroker Svc"  );
-      declareProperty("TruthRecordSvc"                      , m_truthRecordSvc        , "ISF Particle Truth Svc"  );      
-      // MC Truth Properties
-      declareProperty("PhysicsProcessCode"                  , m_processCode           , "MCTruth Physics Process Code");
-      // the steering - general things
-      declareProperty("ReferenceMaterial"                   , m_referenceMaterial);
-      declareProperty("MinimumChildEnergy"                  , m_minChildEnergy);
-      // NB: ChildEnergyScaling=1 corresponds to energy sharing formulas of GEANT4
-      declareProperty("ChildEnergyScaling"                  , m_childEnergyScaleFactor);
-      declareProperty("ConversionProbScaling"               , m_conversionProbScaleFactor);
-      declareProperty("RandomNumberService"                 , m_rndGenSvc               , "Random number generator");
-      declareProperty("RandomStreamName"                    , m_randomEngineName        , "Name of the random number stream");
-      // validation   --------------------------------------------------------------
-      declareProperty("ValidationMode"                      , m_validationMode);      
-      declareProperty("PhysicsValidationTool"               , m_validationTool);
-}
-
 // destructor
 iFatras::PhotonConversionTool::~PhotonConversionTool()
 = default;
@@ -131,7 +81,7 @@ StatusCode iFatras::PhotonConversionTool::initialize()
     //Get own engine with own seeds:
     m_randomEngine = m_rndGenSvc->GetEngine(m_randomEngineName);
     if (!m_randomEngine) {
-        ATH_MSG_FATAL( "Could not get random engine '" << m_randomEngineName << "'" );
+        ATH_MSG_FATAL( "Could not get random engine '" << m_randomEngineName.value() << "'" );
         return StatusCode::FAILURE;
     }
      
@@ -174,7 +124,7 @@ StatusCode iFatras::PhotonConversionTool::finalize()
 {
 
     ATH_MSG_INFO( " ---------- Statistics output -------------------------- " );
-    ATH_MSG_INFO( "                     Minimum energy cut of conversions into e+e-  : " <<   m_minChildEnergy << " [MeV] " );
+    ATH_MSG_INFO( "                     Minimum energy cut of conversions into e+e-  : " << m_minChildEnergy.value() << " [MeV] " );
     ATH_MSG_INFO( "                     Conversions into e+e-  (above cut, recorded) : " <<   m_recordedConversions );
     ATH_MSG_INFO( "                     Conversions into e+e-  (below cut, dropped)  : " <<   m_droppedConversions );
     ATH_MSG_DEBUG( "finalize() successful" );

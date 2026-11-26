@@ -1,18 +1,15 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Class Header
-#include "ISF_FatrasToolsG4/G4HadIntProcessor.h"
+#include "G4HadIntProcessor.h"
 
 // ISF
 #include "ISF_Event/ISFParticle.h"
 #include "ISF_Event/ISFParticleContainer.h"
 #include "ISF_Event/ParticleClipboard.h"
 #include "ISF_Event/ParticleUserInformation.h"
-#include "ISF_Interfaces/IParticleBroker.h"
-#include "ISF_Geant4Tools/IG4RunManagerHelper.h"
-#include "ISF_Interfaces/ITruthSvc.h"
 #include "ISF_Event/ISFTruthIncident.h"
 
 #include <G4HadronElasticProcess.hh>
@@ -33,7 +30,6 @@
 #include "G4UImanager.hh"
 #include "G4NistManager.hh"
 #include "G4VEnergyLossProcess.hh"
-#include <G4MaterialCutsCouple.hh>
 #include <G4HadronInelasticProcess.hh>
 
 #include "globals.hh"
@@ -62,34 +58,6 @@ namespace {
   /** projection factor for the non-parametric scattering */
   const double s_projectionFactor = sqrt(2.);
 }
-
-// constructor
-iFatras::G4HadIntProcessor::G4HadIntProcessor(const std::string& t, const std::string& n, const IInterface* p) :
-  base_class(t,n,p),
-  m_rndGenSvc("AtDSFMTGenSvc", n),
-  m_g4RunManagerHelper("iGeant4::G4RunManagerHelper/G4RunManagerHelper"),
-  m_doElastic(false),
-  m_hadIntProbScale(1.0),
-  m_minMomentum(50.0),
-  m_particleBroker("ISF_ParticleBrokerSvc", n),
-  m_truthRecordSvc("ISF_ValidationTruthService", n),
-  m_randomEngine(0),
-  m_randomEngineName("FatrasRnd")
-{
-  // steering
-  declareProperty("MomentumCut"                     , m_minMomentum                                                       );
-  declareProperty("DoElasticInteractions"            , m_doElastic                                                       );
-  declareProperty("HadronicInteractionScaleFactor"   , m_hadIntProbScale=1.0  , "Scale probability of HadrInteractions"  );
-  // ISF Services and Tools
-  declareProperty("ParticleBroker"                   , m_particleBroker       , "ISF Particle Broker"                    );
-  declareProperty("TruthRecordSvc"                   , m_truthRecordSvc       , "ISF Particle Truth Svc"                 );
-  // random number generator
-  declareProperty("RandomNumberService"                 , m_rndGenSvc          , "Random number generator");
-  declareProperty("RandomStreamName"                    , m_randomEngineName   , "Name of the random number stream");
-  declareProperty("G4RunManagerHelper"                  , m_g4RunManagerHelper);
-}
-
-
 
 // destructor
 iFatras::G4HadIntProcessor::~G4HadIntProcessor()
@@ -121,7 +89,7 @@ StatusCode iFatras::G4HadIntProcessor::initialize()
   //Get own engine with own seeds:
   m_randomEngine = m_rndGenSvc->GetEngine(m_randomEngineName);
   if (!m_randomEngine) {
-    ATH_MSG_FATAL( "Could not get random engine '" << m_randomEngineName << "'" );
+    ATH_MSG_FATAL( "Could not get random engine '" << m_randomEngineName.value() << "'" );
     return StatusCode::FAILURE;
   }
 

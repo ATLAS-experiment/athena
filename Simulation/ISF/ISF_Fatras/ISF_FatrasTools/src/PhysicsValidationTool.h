@@ -15,6 +15,7 @@
 
 // Tracking
 #include "TrkParameters/TrackParameters.h"
+#include "TTree.h"
 #include <memory>
 #include <string>
 
@@ -23,7 +24,6 @@
 #endif
 
 // ROOT forward declarations
-class TTree;
 
 namespace ISF {
     class ISFParticle;
@@ -42,7 +42,7 @@ namespace iFatras
   {
   public:
     /** Constructor */
-    PhysicsValidationTool(const std::string&,const std::string&,const IInterface*);
+    using base_class::base_class;
     
     /** Destructor */
     virtual ~PhysicsValidationTool ();
@@ -89,8 +89,8 @@ namespace iFatras
      *  Private members
      *---------------------------------------------------------------------*/
 
-    ServiceHandle<ITHistSvc>                                     m_thistSvc;         //!< the histogram service
-    std::string                                                  m_validationStream{"ISFFatras"}; //!< validation THist stream name
+    ServiceHandle<ITHistSvc>                                     m_thistSvc{this, "THistService", "THistSvc", "The THistSvc"};         //!< the histogram service
+    StringProperty                                               m_validationStream{this, "ValidationStreamName", "ISFFatras", "Name of the output stream"}; //!< validation THist stream name
     /** Validation output TTree (+variables) */
 
     // FIXME mutable variables are not thread-safe.

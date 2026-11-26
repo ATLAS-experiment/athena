@@ -9,13 +9,10 @@
 #include "GaudiKernel/IRndmGenSvc.h"
 #include "GaudiKernel/RndmGenerators.h"
 // ISF
-#include "ISF_Interfaces/IParticleBroker.h"
-#include "ISF_Interfaces/ITruthSvc.h"
 #include "ISF_Event/ISFParticle.h"
 #include "ISF_Event/ISFTruthIncident.h"
 #include "ISF_Event/ParticleClipboard.h"
 // Fatras
-#include "ISF_FatrasInterfaces/IPhysicsValidationTool.h"
 // AtlasHepMC
 #include "TruthUtils/MagicNumbers.h"
 // CLHEP
@@ -34,63 +31,6 @@
 #include "TrkGeometry/MaterialProperties.h"
 #include "TrkEventPrimitives/ParticleHypothesis.h"
 
-
-
-// constructor
-iFatras::HadIntProcessorParametric::HadIntProcessorParametric(const std::string& t, const std::string& n, const IInterface* p) :
-  base_class(t,n,p),
-  m_minimumHadOutEnergy(200.*CLHEP::MeV),
-  m_childMomParam(5.),
-  m_cutChain(false),
-  m_hadIntFromX0(false),
-  m_hadIntProbScale(1.0),
-  m_minimumHadInitialEnergy(1000.*CLHEP::MeV),
-  m_particleBroker("ISF_ParticleBroker", n),
-  m_truthRecordSvc("ISF_TruthRecordSvc", n),
-  m_rndGenSvc("AtDSFMTGenSvc", n),
-  m_processCode(121),
-  m_randomEngine(nullptr),
-  m_randomEngineName("FatrasRnd"),
-  m_validationMode(false),
-  m_validationTool(""),
-  m_hadIntValidation(false),
-  m_hadIntValidationTreeName("FatrasHadronicInteractions"),
-  m_hadIntValidationTreeDescription("Validation output from the HadIntProcessorParametric"),
-  m_hadIntValidationTreeFolder("/val/FatrasHadronicInteractions"),
-  m_hadIntValidationTree(nullptr),
-  m_hadIntPointX(0.),
-  m_hadIntPointY(0.),
-  m_hadIntPointR(0.),
-  m_hadIntPointZ(0.),
-  m_hadIntMotherPdg(0),
-  m_hadIntMotherBarcode(0),
-  m_hadIntMotherP(0.),
-  m_hadIntMotherPt(0.),
-  m_hadIntMotherPhi(0.),
-  m_hadIntMotherEta(0.),
-  m_hadIntChildren(0),
-  m_hadIntChildE(0.)
-{
-      // property setting
-      declareProperty("MinimumHadronicOutEnergy"            , m_minimumHadOutEnergy);
-      declareProperty("HadronicChildMomParam"               , m_childMomParam);
-      declareProperty("HadronicInteractionFromX0"           , m_hadIntFromX0);
-      declareProperty("HadronicInteractionScaleFactor"      , m_hadIntProbScale);
-      declareProperty("MinimumHadronicInitialEnergy"        , m_minimumHadInitialEnergy);
-      // the steering --------------------------------------------------------------
-      declareProperty("ShortenHadIntChain"                  , m_cutChain);
-      declareProperty("ValidationMode"                      , m_validationMode);
-      declareProperty("PhysicsValidationTool"               , m_validationTool);
-      declareProperty("HadronicInteractionValidation"       , m_hadIntValidation);
-      // validation mode
-      declareProperty("RandomNumberService"                 , m_rndGenSvc          , "Random number generator");
-      declareProperty("RandomStreamName"                    , m_randomEngineName   , "Name of the random number stream");
-      // MC Truth Properties
-      declareProperty("PhysicsProcessCode"                  , m_processCode        , "MCTruth Physics Process Code" );
-      // ISF Services and Tools
-      declareProperty("ParticleBroker"                      , m_particleBroker     , "ISF ParticleBroker Svc"       );
-      declareProperty("TruthRecordSvc"                      , m_truthRecordSvc     , "ISF Particle Truth Svc"       );
-}
 
 // destructor
 iFatras::HadIntProcessorParametric::~HadIntProcessorParametric()
@@ -113,7 +53,7 @@ StatusCode iFatras::HadIntProcessorParametric::initialize()
     //Get own engine with own seeds:
     m_randomEngine = m_rndGenSvc->GetEngine(m_randomEngineName);
     if (!m_randomEngine) {
-        ATH_MSG_FATAL( "Could not get random engine '" << m_randomEngineName << "'" );
+        ATH_MSG_FATAL( "Could not get random engine '" << m_randomEngineName.value() << "'" );
         return StatusCode::FAILURE;
     }
 

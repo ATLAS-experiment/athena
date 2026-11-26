@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FATRASTOOLS_HadIntProcessorParametric_H
@@ -14,12 +14,18 @@
 
 // Fatras
 #include "ISF_FatrasInterfaces/IHadronicInteractionProcessor.h"
+#include "ISF_FatrasInterfaces/IPhysicsValidationTool.h"
+
+// CLHEP
+#include "CLHEP/Units/SystemOfUnits.h"
 
 // Trk
 #include "TrkEventPrimitives/PropDirection.h"
 
 // ISF
 #include "ISF_Event/ISFParticleContainer.h"
+#include "ISF_Interfaces/IParticleBroker.h"
+#include "ISF_Interfaces/ITruthSvc.h"
 
 #ifndef MAXHADINTCHILDREN
 #define MAXHADINTCHILDREN 20
@@ -34,14 +40,8 @@ namespace Trk {
   class MaterialProperties;
 }
 
-namespace ISF {
-  class IParticleBroker;
-  class ITruthSvc;    
-}
 namespace iFatras {
 
-  class IPhysicsValidationTool;
-      
   /** @class HadIntProcessorParametric
   
       Parametric implementation of nuclear interactions to be used
@@ -54,7 +54,7 @@ namespace iFatras {
   class ATLAS_NOT_THREAD_SAFE HadIntProcessorParametric : public extends<AthAlgTool, iFatras::IHadronicInteractionProcessor> {  // deprecated: ATLASSIM-6020
     public:      
       /**AlgTool constructor for HadIntProcessorParametric*/
-      HadIntProcessorParametric(const std::string&,const std::string&,const IInterface*);
+      using base_class::base_class;
       /**Destructor*/
       virtual ~HadIntProcessorParametric();
        
@@ -98,52 +98,52 @@ namespace iFatras {
 					 Trk::ParticleHypothesis particle ) const;
                            
        /** hadronic interaction setting */
-       double                       m_minimumHadOutEnergy;
-       double                       m_childMomParam;
-       bool                         m_cutChain;
-       bool                         m_hadIntFromX0;
-       double                       m_hadIntProbScale;
-       double                       m_minimumHadInitialEnergy;
+       DoubleProperty               m_minimumHadOutEnergy{this, "MinimumHadronicOutEnergy", 200.*CLHEP::MeV};
+       DoubleProperty               m_childMomParam{this, "HadronicChildMomParam", 5.};
+       BooleanProperty              m_cutChain{this, "ShortenHadIntChain", false};
+       BooleanProperty              m_hadIntFromX0{this, "HadronicInteractionFromX0", false};
+       DoubleProperty               m_hadIntProbScale{this, "HadronicInteractionScaleFactor", 1.0};
+       DoubleProperty               m_minimumHadInitialEnergy{this, "MinimumHadronicInitialEnergy", 1000.*CLHEP::MeV};
 
 
        /** ISF services & Tools */
-       ServiceHandle<ISF::IParticleBroker>  m_particleBroker;
-       ServiceHandle<ISF::ITruthSvc>        m_truthRecordSvc;
+       ServiceHandle<ISF::IParticleBroker>  m_particleBroker{this, "ParticleBroker", "ISF_ParticleBroker", "ISF ParticleBroker Svc"};
+       ServiceHandle<ISF::ITruthSvc>        m_truthRecordSvc{this, "TruthRecordSvc", "ISF_TruthRecordSvc", "ISF Particle Truth Svc"};
                   
        /** Random Generator service */
-       ServiceHandle<IAtRndmGenSvc>         m_rndGenSvc;
+       ServiceHandle<IAtRndmGenSvc>         m_rndGenSvc{this, "RandomNumberService", "AtDSFMTGenSvc", "Random number generator"};
        /** MCTruth process code for TruthIncidents created by this tool */
-       int          m_processCode;
+       IntegerProperty                      m_processCode{this, "PhysicsProcessCode", 121, "MCTruth Physics Process Code"};
 
        /** Random engine  */        
-       CLHEP::HepRandomEngine*                     m_randomEngine;
-       std::string                          m_randomEngineName; //!< Name of the random number stream
+       CLHEP::HepRandomEngine*              m_randomEngine{nullptr};
+       StringProperty                       m_randomEngineName{this, "RandomStreamName", "FatrasRnd", "Name of the random number stream"}; //!< Name of the random number stream
 
                     
-       bool                          m_validationMode;
-       ToolHandle<IPhysicsValidationTool>  m_validationTool;
+       BooleanProperty                     m_validationMode{this, "ValidationMode", false};
+       PublicToolHandle<IPhysicsValidationTool>  m_validationTool{this, "PhysicsValidationTool", ""};
 
-       bool                          m_hadIntValidation;
-       std::string                   m_hadIntValidationTreeName;        //!< validation tree name - to be acessed by this from root
-       std::string                   m_hadIntValidationTreeDescription; //!< validation tree description - second argument in TTree
-       std::string                   m_hadIntValidationTreeFolder;      //!< stream/folder to for the TTree to be written out
+       BooleanProperty               m_hadIntValidation{this, "HadronicInteractionValidation", false};
+       std::string                   m_hadIntValidationTreeName{"FatrasHadronicInteractions"};        //!< validation tree name - to be acessed by this from root
+       std::string                   m_hadIntValidationTreeDescription{"Validation output from the HadIntProcessorParametric"}; //!< validation tree description - second argument in TTree
+       std::string                   m_hadIntValidationTreeFolder{"/val/FatrasHadronicInteractions"};      //!< stream/folder to for the TTree to be written out
                                        
-       TTree*                        m_hadIntValidationTree;            //!< Root Validation Tree
+       TTree*                        m_hadIntValidationTree{nullptr};            //!< Root Validation Tree
                                        
        // ------ ntuple branches       
-       mutable float                 m_hadIntPointX;               //!< ntuple variable : hadronic interaction point x coordinate
-       mutable float                 m_hadIntPointY;               //!< ntuple variable : hadronic interaction point y coordinate
-       mutable float                 m_hadIntPointR;               //!< ntuple variable : hadronic interaction point r distance
-       mutable float                 m_hadIntPointZ;               //!< ntuple variable : hadronic interaction point z coordinate
-       mutable int                   m_hadIntMotherPdg;            //!< ntuple variable : hadronic interaction mother Pdg
-       mutable int                   m_hadIntMotherBarcode;         //!< ntuple variable : hadronic interaction mother barcode
-       mutable float                 m_hadIntMotherP;         //!< ntuple variable : hadronic interaction mother momentum
-       mutable float                 m_hadIntMotherPt;         //!< ntuple variable : hadronic interaction mother momentum
-       mutable float                 m_hadIntMotherPhi;            //!< ntuple variable : hadronic interaction mother phi
-       mutable float                 m_hadIntMotherEta;            //!< ntuple variable : hadronic interaction photon eta
+       mutable float                 m_hadIntPointX{};               //!< ntuple variable : hadronic interaction point x coordinate
+       mutable float                 m_hadIntPointY{};               //!< ntuple variable : hadronic interaction point y coordinate
+       mutable float                 m_hadIntPointR{};               //!< ntuple variable : hadronic interaction point r distance
+       mutable float                 m_hadIntPointZ{};               //!< ntuple variable : hadronic interaction point z coordinate
+       mutable int                   m_hadIntMotherPdg{};            //!< ntuple variable : hadronic interaction mother Pdg
+       mutable int                   m_hadIntMotherBarcode{};         //!< ntuple variable : hadronic interaction mother barcode
+       mutable float                 m_hadIntMotherP{};         //!< ntuple variable : hadronic interaction mother momentum
+       mutable float                 m_hadIntMotherPt{};         //!< ntuple variable : hadronic interaction mother momentum
+       mutable float                 m_hadIntMotherPhi{};            //!< ntuple variable : hadronic interaction mother phi
+       mutable float                 m_hadIntMotherEta{};            //!< ntuple variable : hadronic interaction photon eta
 
-       mutable int                   m_hadIntChildren;             				//!< nutple variable : hadronic interaction children numbers
-       mutable float                 m_hadIntChildE;             				//!< nutple variable : hadronic interaction children total energy
+       mutable int                   m_hadIntChildren{};             				//!< nutple variable : hadronic interaction children numbers
+       mutable float                 m_hadIntChildE{};             				//!< nutple variable : hadronic interaction children total energy
        mutable float                 m_hadIntChildP[MAXHADINTCHILDREN]{};     //!< nutple variable : hadronic interaction child Energy
        mutable float                 m_hadIntChildPcms[MAXHADINTCHILDREN]{};     //!< nutple variable : hadronic interaction child Energy
        mutable int                   m_hadIntChildPdg[MAXHADINTCHILDREN]{};        //!< nutple variable : hadronic interaction child Pdg

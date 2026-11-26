@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -18,7 +18,6 @@
 #include "CLHEP/Units/PhysicalConstants.h"
 //
 // ROOT includes
-#include "TTree.h"
  
 #include <cmath>
 
@@ -28,19 +27,6 @@
  *  DESCRIPTION OF FUNCTION:
  *  ==> see headerfile
  *=======================================================================*/
-iFatras::PhysicsValidationTool::PhysicsValidationTool( const std::string& t,
-                                      const std::string& n,
-                                      const IInterface*  p )
- : base_class(t,n,p),
-   m_thistSvc("THistSvc",n)
-{
-  // validation output section
-  declareProperty("ValidationStreamName", m_validationStream = "ISFFatras",
-                  "Name of the output stream" );
-  declareProperty("THistService", m_thistSvc, "The THistSvc" );
-}
-
-
 iFatras::PhysicsValidationTool::~PhysicsValidationTool() =  default;
 
 

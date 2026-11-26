@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FATRASTOOLSG4_G4PARTICLEDECAYHELPER_H
@@ -15,6 +15,11 @@
 #include "ISF_Event/ISFParticleContainer.h"
 // iFatras
 #include "ISF_FatrasInterfaces/IParticleDecayHelper.h"
+#include "ISF_Interfaces/IParticleBroker.h"
+#include "ISF_Interfaces/ITruthSvc.h"
+#include "ISF_FatrasInterfaces/IPhysicsValidationTool.h"
+#include "PDGToG4Particle.h"
+#include "ISF_Geant4Tools/IG4RunManagerHelper.h"
 // STD
 #include <vector>
 #include <math.h>
@@ -23,16 +28,11 @@ class StoreGateSvc;
 
 namespace ISF {
     class ISFParticle;
-    class IParticleBroker;
-    class ITruthSvc;
-    class IG4RunManagerHelper;
 }
 
 namespace iFatras {
 
    class ITrackCreator;
-   class PDGToG4Particle;
-   class IPhysicsValidationTool;
 
  /** @class G4ParticleDecayHelper
 
@@ -45,7 +45,7 @@ namespace iFatras {
   class ATLAS_NOT_THREAD_SAFE G4ParticleDecayHelper : public extends<AthAlgTool, IParticleDecayHelper> {  // deprecated: ATLASSIM-6020
     public:
       /**AlgTool constructor for ParticleDecayHelper*/
-      G4ParticleDecayHelper(const std::string&,const std::string&,const IInterface*);
+      using base_class::base_class;
       /**Destructor*/
       ~G4ParticleDecayHelper();
        
@@ -81,24 +81,24 @@ namespace iFatras {
       /*------------------------------------------------------------
        *  ServiceHandles
        *------------------------------------------------------------*/
-      ServiceHandle<ISF::IParticleBroker> m_particleBroker;        //!< Broker Svc for ISF particles
-      ServiceHandle<ISF::ITruthSvc>       m_truthRecordSvc;        //!< Truth Svc for truth tree
+      ServiceHandle<ISF::IParticleBroker> m_particleBroker{this, "ParticleBroker", "ISF_ParticleBroker", "ISF Particle Broker Svc"};        //!< Broker Svc for ISF particles
+      ServiceHandle<ISF::ITruthSvc>       m_truthRecordSvc{this, "ParticleTruthSvc", "ISF_TruthRecordSvc", "ISF Particle Truth Svc"};        //!< Truth Svc for truth tree
 
 
-      ServiceHandle<IAtRndmGenSvc>        m_rndmSvc;               //!< Random Svc
-      CLHEP::HepRandomEngine*             m_randomEngine;          //!< Random engine (updated to streams)
-      std::string                         m_randomEngineName;      //!< Name of the random number stream
-      std::string                         m_G4RandomEngineName;    //!< Name of the random number stream for G4 tools
+      ServiceHandle<IAtRndmGenSvc>        m_rndmSvc{this, "RandomNumberService", "AtDSFMTGenSvc", "Random number generator"};               //!< Random Svc
+      CLHEP::HepRandomEngine*             m_randomEngine{nullptr};          //!< Random engine (updated to streams)
+      StringProperty                      m_randomEngineName{this, "RandomStreamName", "FatrasRnd", "Name of the random number stream"};      //!< Name of the random number stream
+      StringProperty                      m_G4RandomEngineName{this, "G4RandomStreamName", "FatrasG4", "Name of the random number stream for G4 tools"};    //!< Name of the random number stream for G4 tools
 
       /*------------------------------------------------------------
        *  ToolHandles
        *------------------------------------------------------------*/
-      ToolHandle<ISF::IG4RunManagerHelper> m_g4RunManagerHelper;   //!< G4RunManager needs to be initialized before G4 tables are accessed
-      ToolHandle<PDGToG4Particle>         m_pdgToG4Conv;           //!< Handle for the  PDGToG4Particle converter tool
+      PublicToolHandle<ISF::IG4RunManagerHelper> m_g4RunManagerHelper{this, "G4RunManagerHelper", "iGeant4::G4RunManagerHelper/G4RunManagerHelper"};   //!< G4RunManager needs to be initialized before G4 tables are accessed
+      PublicToolHandle<PDGToG4Particle>   m_pdgToG4Conv{this, "PDGToG4ParticleConverter", "iFatras::PDGToG4Particle/PDGToG4ParticleConverter"};           //!< Handle for the  PDGToG4Particle converter tool
 
       /** Validation output with histogram service */
-      bool                                                         m_validationMode; //!< turn validation mode on/off
-      ToolHandle<IPhysicsValidationTool>                           m_validationTool;   //!< the ntuple
+      BooleanProperty                                              m_validationMode{this, "ValidationMode", false}; //!< turn validation mode on/off
+      PublicToolHandle<IPhysicsValidationTool>                     m_validationTool{this, "PhysicsValidationTool", ""};   //!< the ntuple
       
    };
                     

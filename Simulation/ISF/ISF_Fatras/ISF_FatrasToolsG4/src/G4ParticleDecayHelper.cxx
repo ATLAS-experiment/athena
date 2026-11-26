@@ -4,14 +4,9 @@
 
 // class header
 // iFatras
-#include "ISF_FatrasToolsG4/G4ParticleDecayHelper.h"
-#include "ISF_FatrasToolsG4/PDGToG4Particle.h"
-#include "ISF_FatrasInterfaces/IPhysicsValidationTool.h"
-#include "ISF_Geant4Tools/IG4RunManagerHelper.h"
+#include "G4ParticleDecayHelper.h"
 // ISF
 #include "ISF_Event/ISFParticle.h"
-#include "ISF_Interfaces/IParticleBroker.h"
-#include "ISF_Interfaces/ITruthSvc.h"
 #include "ISF_Event/ISFTruthIncident.h"
 
 // Gaudi & StoreGate
@@ -36,40 +31,6 @@
 namespace {
   /** the speed of light in SI units */
   constexpr double s_speedOfLightSI =  CLHEP::c_light*CLHEP::s/CLHEP::mm;
-}
-
-/*=========================================================================
- *  DESCRIPTION OF FUNCTION:
- *  ==> see headerfile
- *=======================================================================*/
-iFatras::G4ParticleDecayHelper::G4ParticleDecayHelper(const std::string& t, const std::string& n, const IInterface* p):    
-   base_class(t,n,p),
-   m_particleBroker("ISF_ParticleBroker", n),
-   m_truthRecordSvc("ISF_TruthRecordSvc", n),
-   m_rndmSvc("AtDSFMTGenSvc", n),
-   m_randomEngine(0),
-   m_randomEngineName("FatrasRnd"),
-   m_G4RandomEngineName("FatrasG4"),
-   m_g4RunManagerHelper("iGeant4::G4RunManagerHelper/G4RunManagerHelper"),
-   m_pdgToG4Conv("iFatras::PDGToG4Particle/PDGToG4ParticleConverter"),
-   m_validationMode(false),
-   m_validationTool("")
-{
-  // ISF: truth and broker service
-  declareProperty("ParticleBroker",           m_particleBroker,       "ISF Particle Broker Svc");
-  declareProperty("ParticleTruthSvc",         m_truthRecordSvc,       "ISF Particle Truth Svc");
-  // random number initializations 
-  declareProperty("RandomNumberService",      m_rndmSvc,              "Random number generator");
-  declareProperty("RandomStreamName",         m_randomEngineName,     "Name of the random number stream");
-  declareProperty("G4RandomStreamName",       m_G4RandomEngineName,   "Name of the random number stream for G4 tools");
-  
-  // tool declarations -------------------------------------------------
-  declareProperty("G4RunManagerHelper"      , m_g4RunManagerHelper);
-  declareProperty("PDGToG4ParticleConverter", m_pdgToG4Conv);
-  // validation output section
-  declareProperty( "ValidationMode",  m_validationMode );
-  declareProperty( "PhysicsValidationTool",     m_validationTool  );
-
 }
 
 /*=========================================================================
@@ -108,7 +69,7 @@ iFatras::G4ParticleDecayHelper::initialize()
   //Get own engine with own seeds:
   m_randomEngine = m_rndmSvc->GetEngine(m_randomEngineName);
   if (!m_randomEngine) {
-    ATH_MSG_FATAL(  "Could not get random engine '" << m_randomEngineName << "'" );
+    ATH_MSG_FATAL(  "Could not get random engine '" << m_randomEngineName.value() << "'" );
     return StatusCode::FAILURE;
   }
   // G4ParticleDecayCreator uses functions from G4 (G4VDecayChannel::DecayIt() and G4DecayTable::SelectADecayChannel())
@@ -117,7 +78,7 @@ iFatras::G4ParticleDecayHelper::initialize()
   // Set the random number generator to AtRndmGen
   CLHEP::HepRandomEngine* engine = m_rndmSvc->GetEngine(m_G4RandomEngineName);
   if (!engine) {
-    ATH_MSG_FATAL(  "Could not get random engine '" << m_G4RandomEngineName << "'" );
+    ATH_MSG_FATAL(  "Could not get random engine '" << m_G4RandomEngineName.value() << "'" );
     return StatusCode::FAILURE;
   }
   CLHEP::HepRandom::setTheEngine(engine);

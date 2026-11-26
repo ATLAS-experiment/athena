@@ -1,6 +1,6 @@
-#include "ISF_FatrasToolsG4/G4ParticleDecayHelper.h"
-#include "ISF_FatrasToolsG4/G4HadIntProcessor.h"
-#include "ISF_FatrasToolsG4/PDGToG4Particle.h"
+#include "../G4ParticleDecayHelper.h"
+#include "../G4HadIntProcessor.h"
+#include "../PDGToG4Particle.h"
 
 DECLARE_COMPONENT( iFatras::G4ParticleDecayHelper )
 DECLARE_COMPONENT( iFatras::G4HadIntProcessor )

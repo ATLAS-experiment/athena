@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -10,16 +10,10 @@
 #include "TrkParameters/TrackParameters.h"
 #include "TrkExInterfaces/ITimedExtrapolator.h"
 // iFatras includes
-#include "ISF_FatrasInterfaces/ISimHitCreator.h"
-#include "ISF_FatrasInterfaces/IParticleDecayHelper.h"
-#include "ISF_FatrasInterfaces/IPhysicsValidationTool.h"
-#include "ISF_FatrasInterfaces/IProcessSamplingTool.h"
 // ISF includes
 #include "ISF_Event/ISFParticle.h"
 #include "ISF_Event/ParticleClipboard.h"
 #include "ISF_Event/ParticleUserInformation.h"
-#include "ISF_Interfaces/IParticleFilter.h"
-#include "ISF_Interfaces/IParticleHelper.h"
 // CLHEP
 #include "CLHEP/Units/SystemOfUnits.h"
 #include "CLHEP/Units/PhysicalConstants.h"
@@ -37,54 +31,6 @@
 #include <iostream>
 
 //#include "AtlasDetDescr/AtlasDetectorID.h"
-/*=========================================================================
- *  DESCRIPTION OF FUNCTION:
- *  ==> see headerfile
- *=======================================================================*/
-iFatras::TransportTool::TransportTool( const std::string& t,
-                                      const std::string& n,
-                                      const IInterface*  p )
- : base_class(t,n,p),
-   m_rndGenSvc("AtDSFMTGenSvc", n),
-   m_randomEngine(nullptr),
-   m_randomEngineName("FatrasRnd"),
-   m_validationOutput(false),
-   m_validationTool(""),
-   m_particleDecayHelper(""),
-   m_simHitCreatorID(""),
-   m_simHitCreatorMS(""),
-   m_extrapolator(""),
-   m_trackFilter(""),
-   m_neutralHadronFilter(""),
-   m_photonFilter(""),
-   m_iparticleHelper(""),
-   m_samplingTool(""),
-   m_errorPropagation(false),
-   m_hitsOff(false)
-{
-  // validation output section
-  declareProperty( "ValidationOutput",  m_validationOutput );
-  declareProperty( "PhysicsValidationTool",     m_validationTool  );
-  // tool handle for the particle decayer
-  declareProperty( "ParticleDecayHelper",       m_particleDecayHelper      );
-  // tool handle for the track creator
-  declareProperty( "SimHitCreatorID",           m_simHitCreatorID          );
-  declareProperty( "SimHitCreatorMS",           m_simHitCreatorMS          );
-  // tool handles for extrapolator(s)
-  declareProperty( "Extrapolator",              m_extrapolator        );
-  // tool handles for the filtering setup
-  declareProperty( "TrackFilter",               m_trackFilter              );
-  declareProperty( "NeutralFilter",             m_neutralHadronFilter      );
-  declareProperty( "PhotonFilter",              m_photonFilter             );
-  // tool handles ISF Framework
-  declareProperty( "ParticleHelper",            m_iparticleHelper          );
-  declareProperty( "TurnOffHitCreation",        m_hitsOff                  );
-  declareProperty( "ProcessSamplingTool",       m_samplingTool             );
-  declareProperty("DoErrorPropagation",         m_errorPropagation         );
-  // service handles
-  declareProperty( "RandomNumberService",       m_rndGenSvc                );
-}
-
 /*=========================================================================
  *  DESCRIPTION OF FUNCTION:
  *  ==> see headerfile

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FATRASTOOLSMS_SIMHITCREATORMS_H
@@ -65,7 +65,7 @@ namespace iFatras
   class ATLAS_NOT_THREAD_SAFE SimHitCreatorMS : public extends<AthAlgTool, ISimHitCreator, IIncidentListener>  // deprecated: ATLASSIM-6020
     {
     public:
-      SimHitCreatorMS(const std::string&,const std::string&,const IInterface*);
+      using base_class::base_class;
 
        /** default destructor */
       virtual ~SimHitCreatorMS ()=default;
@@ -89,46 +89,46 @@ namespace iFatras
       int  offIdToSimId(Identifier id) const;
 
       /** Incident Service */  
-      ServiceHandle<IIncidentSvc>          m_incidentSvc;
+      ServiceHandle<IIncidentSvc>          m_incidentSvc{"IncidentSvc", name()};
 
       /** Tool using the track creator per event */
-      ToolHandle<Trk::ITimedExtrapolator>       m_extrapolator;
+      PublicToolHandle<Trk::ITimedExtrapolator> m_extrapolator{this, "Extrapolator", ""};
       
       /** Muon TrackingGeometry Measurement Tool */
-      ToolHandle<Muon::IMuonTGMeasTool>    m_measTool;
+      PublicToolHandle<Muon::IMuonTGMeasTool> m_measTool{this, "MeasurementTool", "Muon::MuonTGMeasurementTool/MuonTGMeasurementTool"};
 
       /* Hit collections and collection helpers */
-      MDTSimHitCollection                  *m_mdtSimHitCollection;
-      RPCSimHitCollection                  *m_rpcSimHitCollection;
-      TGCSimHitCollection                  *m_tgcSimHitCollection;
-      CSCSimHitCollection                  *m_cscSimHitCollection;
-      MMSimHitCollection          	   *m_mmSimHitCollection;
-      sTGCSimHitCollection          	   *m_stgcSimHitCollection;
-      std::string                          m_mdtCollectionName;
-      std::string                          m_rpcCollectionName;
-      std::string                          m_tgcCollectionName;
-      std::string                          m_cscCollectionName;
-      std::string                          m_mmCollectionName;
-      std::string                          m_stgcCollectionName;
+      MDTSimHitCollection                  *m_mdtSimHitCollection{nullptr};
+      RPCSimHitCollection                  *m_rpcSimHitCollection{nullptr};
+      TGCSimHitCollection                  *m_tgcSimHitCollection{nullptr};
+      CSCSimHitCollection                  *m_cscSimHitCollection{nullptr};
+      MMSimHitCollection          	   *m_mmSimHitCollection{nullptr};
+      sTGCSimHitCollection          	   *m_stgcSimHitCollection{nullptr};
+      StringProperty                       m_mdtCollectionName{this, "MDTCollectionName", "MDT_Hits"};
+      StringProperty                       m_rpcCollectionName{this, "RPCCollectionName", "RPC_Hits"};
+      StringProperty                       m_tgcCollectionName{this, "TGCCollectionName", "TGC_Hits"};
+      StringProperty                       m_cscCollectionName{this, "CSCCollectionName", "CSC_Hits"};
+      StringProperty                       m_mmCollectionName{this, "MMCollectionName", "MM_Hits"};
+      StringProperty                       m_stgcCollectionName{this, "sTGCCollectionName", "sTGC_Hits"};
       
       /** Pointer to the random number generator service */
-      ServiceHandle<IAtRndmGenSvc>         m_randomSvc;                //!< Random Svc  
-      std::string                          m_randomEngineName;         //!< Name of the random number stream
-      CLHEP::HepRandomEngine*              m_randomEngine;             //!< Random Engine 
-      const MdtHitIdHelper*                m_mdtHitIdHelper;
-      const RpcHitIdHelper*                m_rpcHitIdHelper;
-      const CscHitIdHelper*                m_cscHitIdHelper;
-      const TgcHitIdHelper*                m_tgcHitIdHelper;
+      ServiceHandle<IAtRndmGenSvc>         m_randomSvc{this, "RandomNumberService", "AtDSFMTGenSvc", "Random number generator"}; //!< Random Svc  
+      StringProperty                       m_randomEngineName{this, "RandomStreamName", "FatrasRnd", "Name of the random number stream"}; //!< Name of the random number stream
+      CLHEP::HepRandomEngine*              m_randomEngine{nullptr};    //!< Random Engine 
+      const MdtHitIdHelper*                m_mdtHitIdHelper{nullptr};
+      const RpcHitIdHelper*                m_rpcHitIdHelper{nullptr};
+      const CscHitIdHelper*                m_cscHitIdHelper{nullptr};
+      const TgcHitIdHelper*                m_tgcHitIdHelper{nullptr};
       ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
-      MM_SimIdToOfflineId*                 m_mmOffToSimId;
-      sTgcSimIdToOfflineId*                m_stgcOffToSimId;
+      MM_SimIdToOfflineId*                 m_mmOffToSimId{nullptr};
+      sTgcSimIdToOfflineId*                m_stgcOffToSimId{nullptr};
  
-      const MuonGM::MuonDetectorManager*   m_muonMgr;
+      const MuonGM::MuonDetectorManager*   m_muonMgr{nullptr};
       
-      double                               m_mdtSigmaDriftRadius;
+      DoubleProperty                       m_mdtSigmaDriftRadius{this, "MdtSigmaDriftRadius", 0.08};
       
-      int   				   m_BMGid; //added to protect against dead sensors
-      bool                                 m_createAllMdtHits;      
+      int   				   m_BMGid{-1}; //added to protect against dead sensors
+      BooleanProperty                      m_createAllMdtHits{this, "CreateAllMdtHits", true};      
       bool   				   m_BMGpresent = false;//added to protect against dead sensors
       std::map<Identifier, std::vector<Identifier> > m_DeadChannels;
     }; 

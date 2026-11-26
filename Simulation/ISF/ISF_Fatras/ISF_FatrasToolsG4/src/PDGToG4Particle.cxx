@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
-#include "ISF_FatrasToolsG4/PDGToG4Particle.h"
+#include "PDGToG4Particle.h"
 
 // Geant4
 #include "G4ParticleDefinition.hh"
