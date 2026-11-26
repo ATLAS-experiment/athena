@@ -19,6 +19,8 @@
 #include "TrkTrack/Track.h"
 #include "TrkSurfaces/PlaneSurface.h"
 #include "TrkParameters/TrackParameters.h"
+#include <iostream>
+#include <sstream>
 #include <stdexcept>
 #include "VP1TrackSystems/VP1TrackSanity.h"
 #include "TrkEventPrimitives/CurvilinearUVT.h"
@@ -295,36 +297,52 @@ bool TrackPropagationHelper::makePointsCharged( std::vector<Amg::Vector3D >& poi
   if (problems)
     messageDebug("WARNING: Problems encountered adding point(s) between track parameters");
 
-// restrict to ID tracks for now.
-  if (volume && trackParam && !m_d->outsideIDVolume(trackParam->position())) {
+  // Only tracks ending inside the inner detector are eligible for extension.
+  if (volume && prevpar && !m_d->outsideIDVolume(prevpar->position())) {
     messageVerbose("Extending to Volume");
-    //get individual surfaces
+    const auto surfaces = const_cast<Trk::VolumeBounds&>(volume->volumeBounds())
+      .decomposeToSurfaces(volume->transform());
+    std::size_t intersections = 0;
+    bool extended = false;
+    QStringList surfaceErrors;
+    for (std::size_t i = 0; i < surfaces.size(); ++i) {
+      try {
+        const auto target = extrapolator->extrapolate(ctx, *prevpar, *surfaces[i],
+                                                     Trk::alongMomentum, true, hypo);
+        if (!target)
+          continue;
 
-    // TODO - optimise this!
-    const std::vector<std::unique_ptr<Trk::Surface>> bsurfs =
-      const_cast<Trk::VolumeBounds&>(volume->volumeBounds())
-        .decomposeToSurfaces(volume->transform());
-
-    if (!bsurfs.empty()){
-      messageVerbose("Has this many surfaces:"+str(bsurfs.size()));
-
-      auto bSurfsIt = bsurfs.begin();
-      for (;bSurfsIt!= bsurfs.end(); ++bSurfsIt){
-
-        messageVerbose("Extrap value:"+str((extrapolator)));
-        messageVerbose("trackParam:"+str((trackParam)));
-        const auto  trackPar = extrapolator->extrapolate(ctx, *trackParam, **bSurfsIt,
-           Trk::alongMomentum,true,hypo); // change this to extrapolate current param to surface.
-
-        if (trackPar){
-          messageVerbose("Extrapolation succeeded");
-
-          if (!m_d->addPointsBetweenParameters_Charged(points,track,trackParam,trackPar.get(),extrapolator,hypo))
-            messageDebug("WARNING: Problems encountered adding point(s) between track parameters in extending to Volume");
-        }
+        ++intersections;
+        messageVerbose("Extrapolation succeeded");
+        const auto pointCount = points.size();
+        const bool sampled = m_d->addPointsBetweenParameters_Charged(
+          points, track, prevpar, target.get(), extrapolator, hypo);
+        if (sampled && points.size() > pointCount)
+          extended = true;
+      } catch (const std::runtime_error& error) {
+        surfaceErrors << QStringLiteral("surface %1: %2").arg(i + 1).arg(error.what());
       }
-    } else {
-      messageDebug("WARNING: Problems encountered getting boundary surfaces from Volume");
+    }
+
+    if (!extended) {
+      const QString warning = QStringLiteral("WARNING: The extrapolator could not extend a track to the selected destination.");
+      message(warning + QStringLiteral(" See the terminal for details."));
+
+      std::ostringstream details;
+      details << VP1Msg::prefix_msg() << " [TrackPropagationHelper]: " << warning.toStdString()
+              << " Target bounds: " << volume->volumeBounds()
+              << " | Start (x, y, z) [mm]: " << prevpar->position().transpose()
+              << " | Particle hypothesis: " << hypo
+              << " | Target intersections: " << intersections << '/' << surfaces.size() << ". ";
+      if (surfaces.empty())
+        details << "The target volume has no boundary surfaces.";
+      else if (intersections == 0)
+        details << "No boundary surface could be reached along the track momentum.";
+      else
+        details << "An intersection was found, but no extension segment was sampled successfully.";
+      if (!surfaceErrors.empty())
+        details << " Extrapolator exceptions: " << surfaceErrors.join(QStringLiteral("; ")).toStdString();
+      std::cerr << details.str() << std::endl;
     }
   }
   if (VP1Msg::verbose())
@@ -465,12 +483,16 @@ bool TrackPropagationHelper::Imp::addPointsBetweenParameters_Charged( std::vecto
     // theclass->messageVerbose("distadded: "+str(distadded)+", distance left="+str(sqrt((prevpars->position()-p2).mag2()))+", jump="+str(maxPointDistSq(prevpars->position())));
     const Trk::TrackParameters * newpars = extrapolateToNewPar( extrapolator, trk, prevpars, hypo, maxPointDistSq(prevpars->position()) );
     if (!newpars){
+      if (prevpars!=par1)
+        delete prevpars;
       if (VP1Msg::verbose())
         theclass->messageVerbose("TrackPropagationHelper::Imp::addPointsBetweenParameters_Charged: Extrapolation failed.");
       return false;
     }
     const double distsq = (par2->position()-newpars->position()).mag2();
     if (distsq>olddistsq) {
+      if (prevpars!=par1)
+        delete prevpars;
       delete newpars;
       if (VP1Msg::verbose())
         theclass->messageVerbose("TrackPropagationHelper::Imp::addPointsBetweenParameters_Charged: distq("+str(distsq)+")>olddistsq ("+str(olddistsq)+") so overshot?");

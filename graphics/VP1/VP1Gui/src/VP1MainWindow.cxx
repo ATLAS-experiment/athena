@@ -479,22 +479,19 @@ VP1MainWindow::VP1MainWindow(VP1ExecutionScheduler*sched,VP1AvailEvents * ae,QWi
             QTimer::singleShot(0, this, [this, coinPolicy]() {
                 auto *notice = new QMessageBox(QMessageBox::Information, tr("VP1 remote mode"),
                     tr("VP1 has launched in remote mode.\n\nReason: %1.\n\n"
-                       "In particular, a workaround to fix remote snapshot creation " 
-                       "is applied if needed, and 3D view rotation is limited to mouse movements " 
-                       "to prevent the creation of extra frames and slow response.\n\n"
-                       "If auto-detection of remote running is incorrect, restart VP1 with '--no-remote' "
-                       "to force full behavior.\n\n"
-                       "==== Details: ====\n"
-                       "To improve responsiveness, Continue rotating after mouse release is OFF by default. "
-                       "Your saved remote preference takes precedence. Normal mouse dragging still works.\n\n"
-                       "You can change this setting in the 3D viewer's right-click menu.\n\n"
-                       "Snapshot compatibility: %2\n\n"
-                       "Coin OpenGL policy: %3\n\n"
-                       "If detection is incorrect, restart VP1 with --no-remote.")
-                        .arg(QString::fromLocal8Bit(qgetenv("VP1_REMOTE_REASON")),
-                             VP1SnapshotStatus::description(), coinPolicy),
+                       "Remote mode improves your experience when running VP1 remotely. "
+                       "It helps protect screenshot creation and makes mouse interaction more responsive.")
+                        .arg(QString::fromLocal8Bit(qgetenv("VP1_REMOTE_REASON"))),
                     QMessageBox::Ok, this);
                 notice->setTextFormat(Qt::PlainText);
+                notice->setDetailedText(
+                    tr("To improve responsiveness, Continue rotating after mouse release is OFF by default. "
+                       "Your saved remote preference takes precedence. Normal mouse dragging still works.\n\n"
+                       "You can change this setting in the 3D viewer's right-click menu.\n\n"
+                       "Snapshot compatibility: %1\n\n"
+                       "Coin OpenGL policy: %2\n\n"
+                       "If detection is incorrect, restart VP1 with --no-remote.")
+                        .arg(VP1SnapshotStatus::description(), coinPolicy));
                 notice->setAttribute(Qt::WA_DeleteOnClose);
                 notice->open();
             });

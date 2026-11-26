@@ -75,7 +75,7 @@ class VP1Alg: public AthAlgorithm,
       "Flag to turn OFF the GUI. Default: FALSE (i.e., GUI is ON)"};
 
 
-  ToolHandle<Trk::IExtrapolator> m_extrapolator{this, "ExtrapolatorTool", "Trk::Extrapolator/AtlasExtrapolator"};
+  PublicToolHandle<Trk::IExtrapolator> m_extrapolator{this, "ExtrapolatorTool", "Trk::Extrapolator/AtlasExtrapolator"};
    //ToolHandle<Trk::IExtrapolationEngine> m_extrapolator{this, "Extrapolator", "Trk::ExtrapolationEngine/AtlasExtrapolation"};
 
   VP1Gui * m_vp1gui;

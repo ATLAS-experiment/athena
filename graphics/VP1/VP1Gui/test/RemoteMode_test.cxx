@@ -72,10 +72,11 @@ void testNotice(bool remote, bool batch, const char* reason = "forwarded X11 dis
   if (!notices.isEmpty()) {
     const auto* notice = notices.front();
     check(notice->text().contains(reason), "Notice lacks detection reason");
-    check(notice->text().contains(snapshots), "Notice lacks snapshot compatibility status");
-    check(notice->text().contains(coin), "Notice lacks effective Coin OpenGL policy");
-    check(notice->text().contains("--no-remote"), "Notice lacks override flag");
-    check(notice->text().contains("OFF by default"), "Notice lacks changed default");
+    check(!notice->text().contains(snapshots), "Technical details must be collapsed initially");
+    check(notice->detailedText().contains(snapshots), "Notice lacks snapshot compatibility status");
+    check(notice->detailedText().contains(coin), "Notice lacks effective Coin OpenGL policy");
+    check(notice->detailedText().contains("--no-remote"), "Notice lacks override flag");
+    check(notice->detailedText().contains("OFF by default"), "Notice lacks changed default");
     check(notice->textFormat() == Qt::PlainText, "Environment must be displayed as plain text");
     check(notice->isVisible(), "Remote notice was not opened");
   }

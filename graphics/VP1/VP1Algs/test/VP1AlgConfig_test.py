@@ -11,6 +11,8 @@ from unittest.mock import patch
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from VP1Algs.VP1AlgConfig import SetupVP1, VP1AlgCfg, VP1EventInfoCfg
+from VP1Algs.VP1AlgsConf import VP1Alg
+from GaudiKernel.GaudiHandles import PublicToolHandle
 
 
 class VP1AlgConfigTest(unittest.TestCase):
@@ -27,6 +29,9 @@ class VP1AlgConfigTest(unittest.TestCase):
         alg = self.algorithm(EmptyInput=True)
         self.assertTrue(alg.EmptyInput)
         self.assertEqual(alg.ExtrapolatorTool.getName(), "")
+
+    def test_extrapolator_property_is_public(self):
+        self.assertIsInstance(VP1Alg.getDefaultProperty("ExtrapolatorTool"), PublicToolHandle)
 
     def test_event_input_retains_default_extrapolator(self):
         alg = self.algorithm(EmptyInput=False)
