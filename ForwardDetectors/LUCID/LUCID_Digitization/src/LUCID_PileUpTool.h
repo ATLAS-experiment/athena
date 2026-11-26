@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LUCID_DIGITIZATION_TOOL_H
@@ -32,9 +32,7 @@ class LUCID_PileUpTool: public PileUpToolBase, public LUCID_DigitizationToolBox 
 
 public:
 
-  LUCID_PileUpTool(const std::string& type,
-                   const std::string& name,
-                   const IInterface* parent);
+  using PileUpToolBase::PileUpToolBase;
 
   virtual StatusCode initialize() override final;
   virtual StatusCode finalize() override final;
@@ -63,9 +61,30 @@ private:
   Gaudi::Property<std::string> m_randomStreamName{this, "RandomStreamName", "LUCIDRndEng", ""};
 
   std::string m_dataObjectName;
-  std::string m_SimHitCollectionName;
-  std::string m_digitsContainerName;
-  std::string m_key_digitCnt;
+  Gaudi::Property<std::string> m_SimHitCollectionName{this, "SimHitCollection", "LucidSimHitsVector", "Name of the input Collection of simulated hits"};
+  Gaudi::Property<std::string> m_digitsContainerName{this, "LucidDigitsContainer", "LucidDigitsCnt", "Name of the Container to hold the output from the digitization"};
+  std::string m_key_digitCnt{"Lucid_Digits"};
+
+  // Digitization parameters, passed to LUCID_DigitizationToolBox in initialize()
+  IntegerProperty m_numTubesProp{this, "numTubes", 40};
+  DoubleProperty m_qdcChannelsPerPEProp{this, "qdcChannelsPerPE", 15.0};
+  DoubleProperty m_qdcPedestalProp{this, "qdcPedestal", 150.0};
+  DoubleProperty m_qdcFedNoiseFactorProp{this, "qdcFedNoiseFactor", 3.0};
+  DoubleProperty m_tdcPmtNoiseFactorProp{this, "tdcPmtNoiseFactor", 2.8};
+  DoubleProperty m_tdcFedNoiseFactorProp{this, "tdcFedNoiseFactor", 0.8};
+  DoubleProperty m_TotalPMTgainProp{this, "TotalPMTgain", 1.25e6};
+  DoubleProperty m_AmpFactorProp{this, "AmpFactor", 7.5};
+  DoubleProperty m_Q1binProp{this, "Q1bin", 0.1e-12};
+  IntegerProperty m_NoiseChargeProp{this, "NoiseCharge", 541666};
+  IntegerProperty m_numDyinodesProp{this, "numDyinodes", 10};
+  DoubleProperty m_dynodeGammaFactorProp{this, "dynodeGammaFactor", 1.356};
+  DoubleArrayProperty m_pmtSmearingProp{this, "pmtSmearing", {0.000001}};
+  DoubleArrayProperty m_pmtScalingProp{this, "pmtScaling", {0.000001}};
+  DoubleArrayProperty m_gasScalingProp{this, "gasScaling", {0.000001}};
+  DoubleArrayProperty m_npeThresholdProp{this, "npeThreshold", {0.000001,0.000001,0.000001,0.000001,0.000001,
+                                                                 0.000001,0.000001,0.000001,0.000001,0.000001,
+                                                                 0.000001,0.000001,0.000001,0.000001,0.000001}};
+  BooleanProperty m_fillRootTreeProp{this, "fillRootTree", false};
 
   LUCID_SimHitCollection* m_mergedhitList{};
 };

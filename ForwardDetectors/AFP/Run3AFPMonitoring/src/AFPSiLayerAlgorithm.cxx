@@ -7,7 +7,7 @@
 *
 */
 
-#include "Run3AFPMonitoring/AFPSiLayerAlgorithm.h"
+#include "AFPSiLayerAlgorithm.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "xAODForward/AFPStationID.h"
 
@@ -18,14 +18,6 @@ namespace {
 		bool reverse = station == 0 || station == 1;
 		return station * 4 + (reverse ? 3 - layer : layer);
 	}
-}
-
-
-AFPSiLayerAlgorithm::AFPSiLayerAlgorithm( const std::string& name, ISvcLocator* pSvcLocator )
-:AthMonitorAlgorithm(name,pSvcLocator)
-, m_afpHitContainerKey("AFPSiHitContainer")
-{
-	declareProperty("AFPSiHitContainer", m_afpHitContainerKey);
 }
 
 

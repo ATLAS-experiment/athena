@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LUCID_PileUpTool.h"
@@ -14,65 +14,28 @@
 #include <algorithm>
 
 /// ----------------------------------------------------------------------------------------------------
-LUCID_PileUpTool::LUCID_PileUpTool(const std::string& type,
-                                   const std::string& name,
-                                   const IInterface* parent) :
-  PileUpToolBase     (type, name, parent),
-  LUCID_DigitizationToolBox(
-  40,//m_numTubes
-  15.0,//m_qdcChannelsPerPE
-  150.0,//m_qdcPedestal
-  3.0,//m_qdcFedNoiseFactor
-  2.8,//m_tdcPmtNoiseFactor
-  0.8,//m_tdcFedNoiseFactor
-  1.25e6,//m_TotalPMTgain
-  7.5,//m_AmpFactor
-  0.1e-12,//m_Q1bin
-  541666,//m_NoiseCharge
-  10,//m_numDyinodes
-  1.356,//m_dynodeGammaFactor
-  {0.000001}, //m_pmtSmearing
-  {0.000001}, //m_pmtScaling
-  {0.000001}, //m_gasScaling
-  {0.000001,0.000001,0.000001,0.000001,0.000001,
-   0.000001,0.000001,0.000001,0.000001,0.000001,
-   0.000001,0.000001,0.000001,0.000001,0.000001},//15 values m_npeThreshold
-  false), //m_fillRootTree
-  m_key_digitCnt ("Lucid_Digits")
-{
-  declareProperty("SimHitCollection"    ,
-                  m_SimHitCollectionName = "LucidSimHitsVector",
-                  "Name of the input Collection of simulated hits");
-  declareProperty("LucidDigitsContainer",
-                  m_digitsContainerName = "LucidDigitsCnt",
-                  "Name of the Container to hold the output from the digitization");
-
-  declareProperty("numTubes"            , m_numTubes);
-  declareProperty("qdcChannelsPerPE"    , m_qdcChannelsPerPE);
-  declareProperty("qdcPedestal"         , m_qdcPedestal);
-  declareProperty("qdcFedNoiseFactor"   , m_qdcFedNoiseFactor);
-  declareProperty("tdcPmtNoiseFactor"   , m_tdcPmtNoiseFactor);
-  declareProperty("tdcFedNoiseFactor"   , m_tdcFedNoiseFactor);
-
-  declareProperty("TotalPMTgain"        , m_TotalPMTgain);
-  declareProperty("AmpFactor"           , m_AmpFactor);
-  declareProperty("Q1bin"               , m_Q1bin);
-  declareProperty("NoiseCharge"         , m_NoiseCharge);
-  declareProperty("numDyinodes"         , m_numDyinodes);
-  declareProperty("dynodeGammaFactor"   , m_dynodeGammaFactor);
-
-  declareProperty("pmtSmearing"         , m_pmtSmearing);
-  declareProperty("pmtScaling"          , m_pmtScaling);
-  declareProperty("gasScaling"          , m_gasScaling);
-  declareProperty("npeThreshold"        , m_npeThreshold);
-
-  declareProperty("fillRootTree"        , m_fillRootTree);
-}
-
 StatusCode LUCID_PileUpTool::initialize()
 {
 
   ATH_MSG_DEBUG ( "LUCID_PileUpTool::initialize() called " );
+
+  setParameters(m_numTubesProp,
+                m_qdcChannelsPerPEProp,
+                m_qdcPedestalProp,
+                m_qdcFedNoiseFactorProp,
+                m_tdcPmtNoiseFactorProp,
+                m_tdcFedNoiseFactorProp,
+                m_TotalPMTgainProp,
+                m_AmpFactorProp,
+                m_Q1binProp,
+                m_NoiseChargeProp,
+                m_numDyinodesProp,
+                m_dynodeGammaFactorProp,
+                m_pmtSmearingProp,
+                m_pmtScalingProp,
+                m_gasScalingProp,
+                m_npeThresholdProp,
+                m_fillRootTreeProp);
 
   ATH_MSG_DEBUG ( " numTubes         : " << m_numTubes          << endmsg
                   << " qdcChannelsPerPE : " << m_qdcChannelsPerPE  << endmsg
@@ -133,7 +96,7 @@ StatusCode LUCID_PileUpTool::processBunchXing(int bunchXing,
                         );
       const LUCID_SimHitCollection* tmpColl = nullptr;
 
-      if (!seStore.retrieve(tmpColl,m_SimHitCollectionName).isSuccess())
+      if (!seStore.retrieve(tmpColl,m_SimHitCollectionName.value()).isSuccess())
         {
 
           ATH_MSG_ERROR ( "SubEvent BCM SiHitCollection not found in StoreGate " << seStore.name() );
@@ -177,7 +140,7 @@ StatusCode LUCID_PileUpTool::processAllSubEvents(const EventContext& ctx)
   ATH_CHECK(m_mergeSvc->retrieveSubEvtsData(m_SimHitCollectionName, hitCollList));
   ATH_MSG_DEBUG ( "Retrieved TimedHitCollList" );
 
-  ATH_MSG_DEBUG ( " PileUp: Merge " << hitCollList.size() << " LUCID_SimHitCollection with key " << m_SimHitCollectionName );
+  ATH_MSG_DEBUG ( " PileUp: Merge " << hitCollList.size() << " LUCID_SimHitCollection with key " << m_SimHitCollectionName.value() );
 
   TimedHitCollection<LUCID_SimHit> thpclucid;
 

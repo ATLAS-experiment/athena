@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LUCID_DIGITIZATION_TOOLBOX_H
@@ -20,7 +20,7 @@ class LUCID_DigitizationToolBox {
  public:
   
   LUCID_DigitizationToolBox();
-  LUCID_DigitizationToolBox(int    numTubes,
+  void setParameters(int    numTubes,
 			    double qdcChannelsPerPE,
 			    double qdcPedestal,
 			    double qdcFedNoiseFactor,

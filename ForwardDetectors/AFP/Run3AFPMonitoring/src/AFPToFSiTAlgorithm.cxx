@@ -7,7 +7,7 @@
 *
 */
 
-#include "Run3AFPMonitoring/AFPToFSiTAlgorithm.h"
+#include "AFPToFSiTAlgorithm.h"
 #include "xAODForward/AFPSiHit.h"
 #include "xAODForward/AFPStationID.h"
 #include "xAODForward/AFPToFHit.h"
@@ -19,14 +19,6 @@
 
 namespace{
   const std::string afpToFsiToolStr{"AFPToFSiTTool"};
-}
-
-AFPToFSiTAlgorithm::AFPToFSiTAlgorithm( const std::string& name, ISvcLocator* pSvcLocator )
-  : AthMonitorAlgorithm( name, pSvcLocator ), m_afpSiHitContainerKey( "AFPSiHitContainer" ), m_afpToFHitContainerKey( "AFPToFHitContainer" ), m_afpTrackContainerKey( "AFPTrackContainer" ) {
-    declareProperty( "AFPSiHitContainer", m_afpSiHitContainerKey );
-    declareProperty( "AFPToFHitContainer", m_afpToFHitContainerKey );
-    declareProperty( "AFPTrackContainer", m_afpTrackContainerKey );
-    
 }
 
 AFPToFSiTAlgorithm::~AFPToFSiTAlgorithm() {}

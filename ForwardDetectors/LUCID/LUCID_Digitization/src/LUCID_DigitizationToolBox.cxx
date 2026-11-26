@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -48,7 +48,7 @@ LUCID_DigitizationToolBox::LUCID_DigitizationToolBox():
 }
 
 //--------------------------------------------------------------------------
-LUCID_DigitizationToolBox::LUCID_DigitizationToolBox(int    numTubes,
+void LUCID_DigitizationToolBox::setParameters(int    numTubes,
 						     double qdcChannelsPerPE,
 						     double qdcPedestal,
 						     double qdcFedNoiseFactor,
@@ -64,37 +64,28 @@ LUCID_DigitizationToolBox::LUCID_DigitizationToolBox(int    numTubes,
 						     std::vector<double> pmtScaling,
 						     std::vector<double> gasScaling,
 						     std::vector<double> npeThreshold,
- 						     bool   fillRootTree): 
-  m_numTubes            (numTubes),
-  m_qdcChannelsPerPE    (qdcChannelsPerPE),
-  m_qdcPedestal         (qdcPedestal),
-  m_qdcFedNoiseFactor   (qdcFedNoiseFactor),
-  m_tdcPmtNoiseFactor   (tdcPmtNoiseFactor),
-  m_tdcFedNoiseFactor   (tdcFedNoiseFactor),
-  m_TotalPMTgain        (TotalPMTgain),
-  m_AmpFactor           (AmpFactor),
-  m_Q1bin               (Q1bin),
-  m_NoiseCharge         (NoiseCharge),
-  m_numDyinodes         (numDyinodes),
-  m_dynodeGammaFactor   (dynodeGammaFactor),
-  m_pmtSmearing         (std::move(pmtSmearing)),
-  m_pmtScaling          (std::move(pmtScaling)),
-  m_gasScaling          (std::move(gasScaling)),
-  m_npeThreshold        (std::move(npeThreshold)),
-  m_fillRootTree        (fillRootTree),    
-  m_tubeID              (0),
-  m_npe                 (0),
-  m_npeGas              (0), 
-  m_npePmt              (0),
-  m_qdc                 (0),
-  m_tdcTot              (0),
-  m_tdc                 (0)
+ 						     bool   fillRootTree)
 {
+  m_numTubes          = numTubes;
+  m_qdcChannelsPerPE  = qdcChannelsPerPE;
+  m_qdcPedestal       = qdcPedestal;
+  m_qdcFedNoiseFactor = qdcFedNoiseFactor;
+  m_tdcPmtNoiseFactor = tdcPmtNoiseFactor;
+  m_tdcFedNoiseFactor = tdcFedNoiseFactor;
+  m_TotalPMTgain      = TotalPMTgain;
+  m_AmpFactor         = AmpFactor;
+  m_Q1bin             = Q1bin;
+  m_NoiseCharge       = NoiseCharge;
+  m_numDyinodes       = numDyinodes;
+  m_dynodeGammaFactor = dynodeGammaFactor;
+  m_pmtSmearing       = std::move(pmtSmearing);
+  m_pmtScaling        = std::move(pmtScaling);
+  m_gasScaling        = std::move(gasScaling);
+  m_npeThreshold      = std::move(npeThreshold);
+  m_fillRootTree      = fillRootTree;
+
   m_gainPerDynode     = std::pow(m_TotalPMTgain/m_dynodeGammaFactor, 1.0/static_cast<double>(m_numDyinodes)); 
   m_ChargeToQdcFactor = (double)1.6e-19 * m_AmpFactor/m_Q1bin;
-
-  m_digitContainer = nullptr;
-  m_tubeInfo       = nullptr;
 }
 
 //--------------------------------------------------------------------------

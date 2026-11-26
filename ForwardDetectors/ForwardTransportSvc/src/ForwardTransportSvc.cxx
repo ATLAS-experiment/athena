@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/ITHistSvc.h"
@@ -14,21 +14,18 @@
 #include <fstream>
 #include "TTree.h"
 
-ForwardTransportSvc::ForwardTransportSvc(const std::string& name, ISvcLocator* svc) :
-  base_class(name,svc)
-{
-  declareProperty("TwissFile1",    m_cData.twissFile1);
-  declareProperty("TwissFile2",    m_cData.twissFile2);
-  declareProperty("PositionC1",    m_cData.positionC1);
-  declareProperty("PositionC2",    m_cData.positionC2);
-  declareProperty("ApertureC1",    m_cData.apertureC1);
-  declareProperty("ApertureC2",    m_cData.apertureC2);
-  declareProperty("EndMarker",     m_cData.endMarker);
-}
-
 StatusCode ForwardTransportSvc::initialize() {
 
   ATH_MSG_INFO("ForwardTransportSvc::initialize");
+
+  m_cData.twissFile1 = m_twissFile1;
+  m_cData.twissFile2 = m_twissFile2;
+  m_cData.positionC1 = m_positionC1;
+  m_cData.positionC2 = m_positionC2;
+  m_cData.apertureC1 = m_apertureC1;
+  m_cData.apertureC2 = m_apertureC2;
+  m_cData.endMarker  = m_endMarker;
+
   return StatusCode::SUCCESS;
 }
 
