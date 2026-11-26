@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FORWARDTRANSPORT_FORWARD_TRANSPORT_MODEL_TOOL_H
@@ -13,8 +13,7 @@ class ForwardTransportModelTool: public FastSimulationBase {
 
  public:
 
-  ForwardTransportModelTool(const std::string& type, const std::string& name, const IInterface *parent);
-  ~ForwardTransportModelTool() {}
+  using FastSimulationBase::FastSimulationBase;
 
 protected:
   /** Method to make the actual fast simulation model itself, which
@@ -23,7 +22,7 @@ protected:
   virtual G4VFastSimulationModel* makeFastSimModel() override final;
 
 private:
-  std::string m_FwdTrSvcName;
+  Gaudi::Property<std::string> m_FwdTrSvcName{this, "ForwardTransportSvcName", "ForwardTransportSvc", ""};
 
 };
 

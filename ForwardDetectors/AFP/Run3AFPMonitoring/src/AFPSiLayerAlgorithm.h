@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AFPSILAYERALGORITHM_H
@@ -11,7 +11,7 @@
 #include "xAODForward/AFPSiHitContainer.h"
 #include "xAODForward/AFPSiHit.h"
 #include "LumiBlockData/BunchCrossingCondData.h"
-#include <Run3AFPMonitoring/AFPFastReco.h>
+#include "AFPFastReco.h"
 
 #include "TRandom3.h"
 
@@ -19,7 +19,7 @@ class BunchCrossingCondData;
 
 class AFPSiLayerAlgorithm : public AthMonitorAlgorithm {
 public:
-	AFPSiLayerAlgorithm( const std::string& name, ISvcLocator* pSvcLocator );
+	using AthMonitorAlgorithm::AthMonitorAlgorithm;
 	virtual ~AFPSiLayerAlgorithm();
 	virtual StatusCode initialize() override;
 	virtual StatusCode fillHistograms( const EventContext& ctx ) const override;
@@ -28,7 +28,7 @@ public:
 private:
 	std::map<std::string,std::map<std::string,int>> m_StationPlaneGroup;
 	std::map<std::string,int> m_StationGroup; 
-	SG::ReadHandleKey<xAOD::AFPSiHitContainer> m_afpHitContainerKey;
+	SG::ReadHandleKey<xAOD::AFPSiHitContainer> m_afpHitContainerKey{this, "AFPSiHitContainer", "AFPSiHitContainer"};
 	SG::ReadCondHandleKey<BunchCrossingCondData> m_bunchCrossingKey{this, "BunchCrossingKey", "BunchCrossingData", "Key BunchCrossing CDO" };
 	
 

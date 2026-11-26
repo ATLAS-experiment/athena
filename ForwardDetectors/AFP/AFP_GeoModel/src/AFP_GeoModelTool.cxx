@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoModelUtilities/GeoModelExperiment.h"
@@ -9,56 +9,6 @@
 #include "AFP_GeoModelTool.h"
 #include "AFP_GeoModelFactory.h"
 #include "AFP_GeoModelManager.h"
-#include "AFP_Geometry/AFP_constants.h"
-
-/**
- ** Constructor(s)
- **/
-AFP_GeoModelTool::AFP_GeoModelTool( const std::string& type, const std::string& name, const IInterface* parent )
-    : GeoModelTool( type, name, parent )
-{
-    m_CfgParams.clear();
-    m_pGeometry=nullptr;
-
-	m_defsidcfg.clear();
-
-	m_vecAFP00XStaggering.assign(AFP_CONSTANTS::SiT_Plate_amount,AFP_CONSTANTS::SiT_FarDistanceToFloor);
-	m_vecAFP00YStaggering.assign(AFP_CONSTANTS::SiT_Plate_amount,0.0*CLHEP::mm);
-	m_vecAFP01XStaggering.assign(AFP_CONSTANTS::SiT_Plate_amount,AFP_CONSTANTS::SiT_NearDistanceToFloor);
-	m_vecAFP01YStaggering.assign(AFP_CONSTANTS::SiT_Plate_amount,0.0*CLHEP::mm);
-	m_vecAFP02XStaggering.assign(AFP_CONSTANTS::SiT_Plate_amount,AFP_CONSTANTS::SiT_NearDistanceToFloor);
-	m_vecAFP02YStaggering.assign(AFP_CONSTANTS::SiT_Plate_amount,0.0*CLHEP::mm);
-	m_vecAFP03XStaggering.assign(AFP_CONSTANTS::SiT_Plate_amount,AFP_CONSTANTS::SiT_FarDistanceToFloor);
-	m_vecAFP03YStaggering.assign(AFP_CONSTANTS::SiT_Plate_amount,0.0*CLHEP::mm);
-
-    //Properties of SID
-	declareProperty("SID_AddVacuumSensors",m_defsidcfg.bAddVacuumSensors=false);
-
-
-    //Properties of TD
-
-
-    //Properties of stations
-	declareProperty("AFP00_RPotFloorDistance",m_CfgParams.vecRPotFloorDistance[0]=AFP_CONSTANTS::Stat_RPotFloorDistance);
-	declareProperty("AFP01_RPotFloorDistance",m_CfgParams.vecRPotFloorDistance[1]=AFP_CONSTANTS::Stat_RPotFloorDistance);
-	declareProperty("AFP02_RPotFloorDistance",m_CfgParams.vecRPotFloorDistance[2]=AFP_CONSTANTS::Stat_RPotFloorDistance);
-	declareProperty("AFP03_RPotFloorDistance",m_CfgParams.vecRPotFloorDistance[3]=AFP_CONSTANTS::Stat_RPotFloorDistance);
-
-	declareProperty("AFP00_RPotYPos",m_CfgParams.vecRPotYPos[0]=AFP_CONSTANTS::Stat_ShiftInYAxis);
-	declareProperty("AFP01_RPotYPos",m_CfgParams.vecRPotYPos[1]=AFP_CONSTANTS::Stat_ShiftInYAxis);
-	declareProperty("AFP02_RPotYPos",m_CfgParams.vecRPotYPos[2]=AFP_CONSTANTS::Stat_ShiftInYAxis);
-	declareProperty("AFP03_RPotYPos",m_CfgParams.vecRPotYPos[3]=AFP_CONSTANTS::Stat_ShiftInYAxis);
-
-	declareProperty("AFP00_ZPos",m_CfgParams.vecStatNominalZPos[0]=AFP_CONSTANTS::Stat_OuterZDistance);
-	declareProperty("AFP01_ZPos",m_CfgParams.vecStatNominalZPos[1]=AFP_CONSTANTS::Stat_InnerZDistance);
-	declareProperty("AFP02_ZPos",m_CfgParams.vecStatNominalZPos[2]=-AFP_CONSTANTS::Stat_InnerZDistance);
-	declareProperty("AFP03_ZPos",m_CfgParams.vecStatNominalZPos[3]=-AFP_CONSTANTS::Stat_OuterZDistance);
-
-	m_CfgParams.sidcfg[EAS_AFP00]=m_defsidcfg;
-	m_CfgParams.sidcfg[EAS_AFP01]=m_defsidcfg;
-	m_CfgParams.sidcfg[EAS_AFP02]=m_defsidcfg;
-	m_CfgParams.sidcfg[EAS_AFP03]=m_defsidcfg;
-}
 
 /**
  ** Destructor
@@ -81,6 +31,16 @@ AFP_GeoModelTool::~AFP_GeoModelTool()
 StatusCode AFP_GeoModelTool::checkPropertiesSettings()
 {
 	bool bRes=true;
+
+	m_CfgParams.clear();
+	for(int i=0; i<4; ++i){
+		m_CfgParams.vecRPotFloorDistance[i]=m_rpotFloorDistance[i];
+		m_CfgParams.vecRPotYPos[i]=m_rpotYPos[i];
+		m_CfgParams.vecStatNominalZPos[i]=m_statNominalZPos[i];
+	}
+	for(eAFPStation eStation : {EAS_AFP00, EAS_AFP01, EAS_AFP02, EAS_AFP03}){
+		m_CfgParams.sidcfg[eStation].bAddVacuumSensors=m_addVacuumSensors;
+	}
 
 	if(!m_vecAFP00XStaggering.empty()){
 		if(m_vecAFP00XStaggering.size()==m_CfgParams.sidcfg[EAS_AFP00].fLayerCount){

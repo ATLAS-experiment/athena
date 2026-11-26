@@ -18,7 +18,7 @@
 
 class AFPToFAlgorithm : public AthMonitorAlgorithm {
 public:
-	AFPToFAlgorithm( const std::string& name, ISvcLocator* pSvcLocator );
+	using AthMonitorAlgorithm::AthMonitorAlgorithm;
 	virtual ~AFPToFAlgorithm();
 	virtual StatusCode initialize() override;
 	virtual StatusCode fillHistograms( const EventContext& ctx ) const override;
@@ -30,8 +30,8 @@ private:
 	std::map<std::string,int> m_GroupChanCombDeltaT;
 	std::map<std::string,std::map<std::string,int>> m_SideTrainGroup;
 	std::map<std::string,int> m_SideGroup;
-	SG::ReadHandleKey<xAOD::AFPToFHitContainer> m_afpToFHitContainerKey;
-	SG::ReadHandleKey<xAOD::AFPTrackContainer> m_afpTrackContainerKey;
+	SG::ReadHandleKey<xAOD::AFPToFHitContainer> m_afpToFHitContainerKey{this, "AFPToFHitContainer", "AFPToFHitContainer"};
+	SG::ReadHandleKey<xAOD::AFPTrackContainer> m_afpTrackContainerKey{this, "AFPTrackContainer", "AFPTrackContainer"};
 	SG::ReadCondHandleKey<BunchCrossingCondData> m_bunchCrossingKeyToF{this, "BunchCrossingKey", "BunchCrossingData", "Key BunchCrossing CDO" };
 
 protected:

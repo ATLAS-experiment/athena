@@ -7,19 +7,9 @@
 *
 */
 
-#include "Run3AFPMonitoring/AFPToFAlgorithm.h"
+#include "AFPToFAlgorithm.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "xAODForward/AFPStationID.h"
-
-
-AFPToFAlgorithm::AFPToFAlgorithm( const std::string& name, ISvcLocator* pSvcLocator )
-:AthMonitorAlgorithm(name,pSvcLocator)
-, m_afpToFHitContainerKey("AFPToFHitContainer"), m_afpTrackContainerKey( "AFPTrackContainer" )
-
-{
-	declareProperty( "AFPToFHitContainer", m_afpToFHitContainerKey );
-	declareProperty( "AFPTrackContainer", m_afpTrackContainerKey );
-}
 
 
 AFPToFAlgorithm::~AFPToFAlgorithm() {}
