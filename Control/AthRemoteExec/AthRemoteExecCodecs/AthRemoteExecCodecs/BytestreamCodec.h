@@ -7,8 +7,11 @@
 #include <AthRemoteExecCodecs/RawEventCache.h>
 #include <AthRemoteExecCore/PayloadCodecBase.h>
 #include <ByteStreamCnvSvcBase/IROBDataProviderSvc.h>
+#include <Gaudi/Property.h>
 #include <StoreGate/WriteHandleKey.h>
+#include <eformat/SourceIdentifier.h>
 
+#include <set>
 #include <string>
 #include <vector>
 
@@ -39,6 +42,13 @@ private:
 
   /// Read RawEvent directly on the sending side or set the next event on the receiving side
   ServiceHandle<IROBDataProviderSvc> m_robsSvc{this, "ROBDataProvider", "ROBDataProviderSvc/ROBDataProviderSvc"};
+
+  /// Sub-detectors whose ROBs are encoded; empty means the entire event
+  Gaudi::Property<std::vector<std::string>> m_keepDetectors{
+      this, "KeepDetectors", {}, "Sub-detectors whose ROBs are encoded; empty -> the entire event"};
+
+  /// The decoded KeepDetectors
+  std::set<eformat::SubDetectorGroup> m_keep;
 
   static const std::string s_encoding;
 };

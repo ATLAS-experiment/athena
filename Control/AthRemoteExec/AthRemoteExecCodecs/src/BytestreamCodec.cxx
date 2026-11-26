@@ -19,6 +19,16 @@ StatusCode BytestreamCodec::initializeBoundary() {
 
   ATH_CHECK(m_robsSvc.retrieve());
 
+  // Transform detector names into eformat::SubDetectorGroup
+  for (const std::string& name : m_keepDetectors) {
+    const eformat::SubDetectorGroup group = eformat::helper::SubDetectorGroupDictionary.enumeration(name);
+    if (eformat::helper::SubDetectorGroupDictionary.string(group) != name) {
+      ATH_MSG_ERROR("Unknown sub-detector group '{}'", name);
+      return StatusCode::FAILURE;
+    }
+    m_keep.insert(group);
+  }
+
   return StatusCode::SUCCESS;
 }
 
@@ -42,7 +52,7 @@ StatusCode BytestreamCodec::doDecode(const EventContext& ctx, IProxyDict& /*stor
 StatusCode BytestreamCodec::doEncode(const EventContext& ctx, IProxyDict& /*store*/, Payload& payload,
                                      const std::vector<const IPayloadCodec*>& /*alsoCrossing*/,
                                      std::vector<std::string>& /*dangling*/) const {
-  auto bytes = Bytestream::toBytes(m_robsSvc->getEvent(ctx));
+  auto bytes = Bytestream::toBytes(m_robsSvc->getEvent(ctx), m_keep);
   if (!bytes) {
     ATH_MSG_ERROR("{}: {}", key(), bytes.error().diagnostics);
     return StatusCode::FAILURE;

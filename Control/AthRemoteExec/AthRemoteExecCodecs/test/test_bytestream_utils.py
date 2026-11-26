@@ -20,6 +20,9 @@ from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
 
 TEST_INTS = "test_ints"
 
+# Sub-detector groups the selection test keeps; all present in the RAW_RUN3 sample
+SELECTION_GROUPS = ["PIXEL", "TILECAL", "MUON"]
+
 
 class test_NamedIntsCodec(Codec):
     """Python helper for test_NamedIntsCodec"""
@@ -45,13 +48,15 @@ class test_NamedIntsCodec(Codec):
         return f"test_NamedIntsCodec({self.values!r})"
 
 
-def test_RawEventDigestCfg(flags) -> ComponentAccumulator:
+def test_RawEventDigestCfg(
+    flags, name: str = "RemoteExecSeqByteStreamDigest"
+) -> ComponentAccumulator:
     """Server side: digest the decoded RawEvent into two ints"""
 
     cfg = ComponentAccumulator()
     cfg.addEventAlgo(
         CompFactory.AthRemoteExec.test_RawEventDigestAlg(
-            "RemoteExecSeqByteStreamDigest",
+            name,
             Cache="bs_in",
             Size="bsSize",
             Hash="bsHash",
@@ -74,6 +79,16 @@ def CodecsTopCfg(flags) -> RemoteExecTop:
         outputs=["bsCheck"],
         boundaries={
             "bs_in": ByteStream(),
+            "bsCheck": test_NamedIntsCodec(["bsSize", "bsHash"]),
+        },
+    )
+
+    remote.add(
+        "RemoteExecSeqByteStreamSelection",
+        test_RawEventDigestCfg(flags, name="RemoteExecSeqByteStreamSelectionDigest"),
+        outputs=["bsCheck"],
+        boundaries={
+            "bs_in": ByteStream(KeepDetectors=SELECTION_GROUPS),
             "bsCheck": test_NamedIntsCodec(["bsSize", "bsHash"]),
         },
     )
@@ -137,6 +152,37 @@ def ByteStreamClientCfg(flags, target, **kwargs) -> ComponentAccumulator:
     cfg.addEventAlgo(
         CompFactory.AthRemoteExec.test_RawEventVerifyAlg(
             "RemoteExecByteStreamVerify", Size="bsSize", Hash="bsHash"
+        )
+    )
+
+    return cfg
+
+
+def ByteStreamSelectionClientCfg(flags, target, **kwargs) -> ComponentAccumulator:
+    """Configure the bytestream selection client job: only the ROBs of the kept
+    sub-detector groups travel to the server"""
+
+    cfg = MainServicesCfg(flags)
+    cfg.merge(ByteStreamReadCfg(flags))
+
+    # Take the remote server configuration, declare that it's viewed by the
+    # client and ask for the remote sequence
+    fragment = (
+        CodecsTopCfg(flags).onClient().fragment("RemoteExecSeqByteStreamSelection")
+    )
+    cfg.addEventAlgo(
+        RequestAlg(
+            "RemoteExecByteStreamSelectionRequest", fragment, target=target, **kwargs
+        )
+    )
+
+    # Algorithm that compares the digests of the filtered original and the returned event
+    cfg.addEventAlgo(
+        CompFactory.AthRemoteExec.test_RawEventVerifyAlg(
+            "RemoteExecByteStreamSelectionVerify",
+            Size="bsSize",
+            Hash="bsHash",
+            KeepDetectors=SELECTION_GROUPS,
         )
     )
 
