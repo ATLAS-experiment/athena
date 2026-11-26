@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -20,6 +20,7 @@
 #include "xAODTracking/VertexContainer.h"
 #include "StoreGate/ThinningHandleKey.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/ReadHandleKeyArray.h"
 
 #include "ExpressionEvaluation/ExpressionParserUser.h"
 
@@ -49,6 +50,9 @@ namespace DerivationFramework {
 
       StringArrayProperty m_augVerStrings
         { this, "AugVerStrings", {""}, "List of augVerStrings to consider" };
+
+      SG::ReadHandleKeyArray<xAOD::VertexContainer> m_vertexKeys
+        { this, "VertexContainerKeys", {}, "Vertex containers of the vertexing algorithms" };
 
   }; 
 }

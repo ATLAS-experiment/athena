@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -36,6 +36,7 @@ StatusCode DerivationFramework::VSITrackParticleThinning::initialize()
     // Decide which collections need to be checked for ID TrackParticles
     ATH_MSG_VERBOSE("initialize() ...");
     ATH_CHECK( m_inDetSGKey.initialize (m_streamName) );
+    ATH_CHECK( m_vertexKeys.initialize() );
 
     // Set up the text-parsing machinery for selectiong the dv directly according to user cuts
     if (!m_trackSelectionString.empty()) {

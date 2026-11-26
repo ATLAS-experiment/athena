@@ -778,12 +778,15 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
             SelectionString      = tau_lrt_thinning_expression))
 
     # ID Tracks associated with secondary vertices
+    LLP1VSIVertexContainers = (["VrtSecInclusive_SecondaryVertices" + s for s in LLP1VrtSecInclusiveSuffixes]
+                               + ["NewVrtSecInclusive_SecondaryVertices" + s for s in LLP1NewVSISuffixes])
     from DerivationFrameworkLLP.LLPToolsConfig import VSITrackParticleThinningCfg
     LLP1VSITPThinningTool = acc.getPrimaryAndMerge(VSITrackParticleThinningCfg(flags,
                                                                                name                    = "LLP1VSITPThinningTool",
                                                                                StreamName              = kwargs['StreamName'],
                                                                                InDetTrackParticlesKey  = "InDetTrackParticles",
-                                                                               AugVerStrings = LLP1VrtSecInclusiveSuffixes + LLP1NewVSISuffixes))
+                                                                               AugVerStrings = LLP1VrtSecInclusiveSuffixes + LLP1NewVSISuffixes,
+                                                                               VertexContainerKeys     = LLP1VSIVertexContainers))
 
     if flags.Tracking.doLargeD0:
         LLP1LRTVSITPThinningTool = acc.getPrimaryAndMerge(
@@ -791,13 +794,15 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                 flags, name = "LLP1LRTVSITPThinningTool",
                 StreamName              = kwargs['StreamName'],
                 InDetTrackParticlesKey  = "InDetLargeD0TrackParticles",
-                AugVerStrings = LLP1VrtSecInclusiveSuffixes + LLP1NewVSISuffixes))
+                AugVerStrings = LLP1VrtSecInclusiveSuffixes + LLP1NewVSISuffixes,
+                VertexContainerKeys     = LLP1VSIVertexContainers))
 
     LLP1GSFVSITPThinningTool = acc.getPrimaryAndMerge(VSITrackParticleThinningCfg(flags,
                                                                                name                    = "LLP1GSFVSITPThinningTool",
                                                                                StreamName              = kwargs['StreamName'],
                                                                                InDetTrackParticlesKey  = "GSFTrackParticles",
-                                                                               AugVerStrings = [IDAndGSFSuffix]))
+                                                                               AugVerStrings = [IDAndGSFSuffix],
+                                                                               VertexContainerKeys     = ["NewVrtSecInclusive_SecondaryVertices" + IDAndGSFSuffix]))
 
     # ID Tracks associated with jets
     from DerivationFrameworkLLP.LLPToolsConfig import JetTrackParticleThinningCfg, JetLargeD0TrackParticleThinningCfg
