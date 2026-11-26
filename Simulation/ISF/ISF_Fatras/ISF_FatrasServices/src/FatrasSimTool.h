@@ -1,7 +1,7 @@
 // -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FATRASSIMTOOL_h
@@ -21,9 +21,7 @@ namespace ISF {
 
   class ATLAS_NOT_THREAD_SAFE FatrasSimTool : public BaseSimulatorTool  {  // deprecated: ATLASSIM-6020
   public:
-    FatrasSimTool( const std::string& type, const std::string& name,  const IInterface* parent);
-
-    ~FatrasSimTool();
+    using BaseSimulatorTool::BaseSimulatorTool;
 
     virtual StatusCode initialize() override;
 
@@ -39,7 +37,7 @@ namespace ISF {
 
     /** Track Creation & transport */
     PublicToolHandle<ISF::IParticleProcessor>  m_IDsimulationTool{this, "IDSimulationTool", "", ""};   //!< Pointer to the transport AlgTool
-    bool                                 m_useExtrapolator{true};  //!< Boolean used to run with the old extrapolator setup
+    BooleanProperty                      m_useExtrapolator{this, "UseSimulationTool", true};  //!< Boolean used to run with the old extrapolator setup
     PublicToolHandle<ISF::IParticleProcessor>  m_simulationTool{this, "SimulationTool", "", ""};   //!< Pointer to the transport AlgTool
     PublicToolHandle<ISF::IParticleFilter>     m_particleFilter{this, "ParticleFilter", "", ""};   //!< the particle filter concerning kinematic cuts, etc.
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SimHitCreatorMS.h"
@@ -38,58 +38,6 @@ namespace {
   constexpr unsigned int maxNTubesPerLayer = MdtIdHelper::maxNTubesPerLayer;
 }
 
-//================ Constructor =================================================
-
-iFatras::SimHitCreatorMS::SimHitCreatorMS(const std::string& t,
-                                          const std::string& n,
-                                          const IInterface*  p ) :
-  base_class(t,n,p),
-  m_incidentSvc("IncidentSvc", n),
-  m_extrapolator(""),
-  m_measTool("Muon::MuonTGMeasurementTool/MuonTGMeasurementTool"),
-  m_mdtSimHitCollection(nullptr),
-  m_rpcSimHitCollection(nullptr),
-  m_tgcSimHitCollection(nullptr),
-  m_cscSimHitCollection(nullptr),
-  m_mmSimHitCollection(nullptr),
-  m_stgcSimHitCollection(nullptr),
-  m_mdtCollectionName("MDT_Hits"),
-  m_rpcCollectionName("RPC_Hits"),
-  m_tgcCollectionName("TGC_Hits"),
-  m_cscCollectionName("CSC_Hits"),
-  m_mmCollectionName("MM_Hits"),
-  m_stgcCollectionName("sTGC_Hits"),
-  m_randomSvc("AtDSFMTGenSvc", n),
-  m_randomEngineName("FatrasRnd"),
-  m_randomEngine(nullptr),
-  m_mdtHitIdHelper(nullptr),
-  m_rpcHitIdHelper(nullptr),
-  m_cscHitIdHelper(nullptr),
-  m_tgcHitIdHelper(nullptr),
-  m_mmOffToSimId(nullptr),
-  m_stgcOffToSimId(nullptr),
-  m_muonMgr(nullptr),
-  m_mdtSigmaDriftRadius(0.08),
-  m_BMGid(-1),
-  m_createAllMdtHits(true)
-{
-  //  template for property decalration
-  declareProperty("MeasurementTool",              m_measTool);
-  declareProperty("MdtSigmaDriftRadius",          m_mdtSigmaDriftRadius);
-  // Random number svc
-  declareProperty("RandomNumberService",          m_randomSvc,        "Random number generator");
-  declareProperty("RandomStreamName",             m_randomEngineName, "Name of the random number stream");
-  // extrapolator
-  declareProperty("Extrapolator",                 m_extrapolator);
-  declareProperty("MDTCollectionName",            m_mdtCollectionName);
-  declareProperty("RPCCollectionName",            m_rpcCollectionName);
-  declareProperty("TGCCollectionName",            m_tgcCollectionName);
-  declareProperty("CSCCollectionName",            m_cscCollectionName);
-  declareProperty("MMCollectionName",             m_mmCollectionName);
-  declareProperty("sTGCCollectionName",           m_stgcCollectionName);
-  declareProperty("CreateAllMdtHits",             m_createAllMdtHits);
-}
-
 //================ Initialisation =================================================
 
 StatusCode iFatras::SimHitCreatorMS::initialize()
@@ -118,7 +66,7 @@ StatusCode iFatras::SimHitCreatorMS::initialize()
   //Get own engine with own seeds:
   m_randomEngine = m_randomSvc->GetEngine(m_randomEngineName);
   if (!m_randomEngine) {
-    ATH_MSG_ERROR( "[ --- ] Could not get random engine '" << m_randomEngineName << "'" );
+    ATH_MSG_ERROR( "[ --- ] Could not get random engine '" << m_randomEngineName.value() << "'" );
     return StatusCode::FAILURE;
   }
 
@@ -162,67 +110,67 @@ void iFatras::SimHitCreatorMS::handle( const Incident& inc ) {
     // (a)     if yes ... try to retrieve it
     if ( evtStore()->contains<MDTSimHitCollection>(m_mdtCollectionName) ){
       if ( (evtStore()->retrieve(m_mdtSimHitCollection , m_mdtCollectionName)).isFailure() )
-        ATH_MSG_ERROR( "[ --- ] Unable to retrieve MDTSimHitCollection " << m_mdtCollectionName);
+        ATH_MSG_ERROR( "[ --- ] Unable to retrieve MDTSimHitCollection " << m_mdtCollectionName.value());
       // (b)     if no ... try to create it
     } else {
       m_mdtSimHitCollection = new MDTSimHitCollection( m_mdtCollectionName);
       if ( (evtStore()->record(m_mdtSimHitCollection, m_mdtCollectionName, true)).isFailure() ) {
-        ATH_MSG_ERROR( "[ --- ] Unable to record MDTSimHitCollection " << m_mdtCollectionName);
+        ATH_MSG_ERROR( "[ --- ] Unable to record MDTSimHitCollection " << m_mdtCollectionName.value());
         delete m_mdtSimHitCollection; m_mdtSimHitCollection=nullptr;
       }
     }
     if ( evtStore()->contains<RPCSimHitCollection>(m_rpcCollectionName) ){
       if ( (evtStore()->retrieve(m_rpcSimHitCollection , m_rpcCollectionName)).isFailure() )
-        ATH_MSG_ERROR( "[ --- ] Unable to retrieve RPCSimHitCollection " << m_rpcCollectionName);
+        ATH_MSG_ERROR( "[ --- ] Unable to retrieve RPCSimHitCollection " << m_rpcCollectionName.value());
       // (b)     if no ... try to create it
     } else {
       m_rpcSimHitCollection = new RPCSimHitCollection( m_rpcCollectionName);
       if ( (evtStore()->record(m_rpcSimHitCollection, m_rpcCollectionName, true)).isFailure() ) {
-        ATH_MSG_ERROR( "[ --- ] Unable to record RPCSimHitCollection " << m_rpcCollectionName);
+        ATH_MSG_ERROR( "[ --- ] Unable to record RPCSimHitCollection " << m_rpcCollectionName.value());
         delete m_rpcSimHitCollection; m_rpcSimHitCollection=nullptr;
       }
     }
     if ( evtStore()->contains<TGCSimHitCollection>(m_tgcCollectionName) ){
       if ( (evtStore()->retrieve(m_tgcSimHitCollection , m_tgcCollectionName)).isFailure() )
-        ATH_MSG_ERROR( "[ --- ] Unable to retrieve TGCSimHitCollection " << m_tgcCollectionName);
+        ATH_MSG_ERROR( "[ --- ] Unable to retrieve TGCSimHitCollection " << m_tgcCollectionName.value());
       // (b)     if no ... try to create it
     } else {
       m_tgcSimHitCollection = new TGCSimHitCollection( m_tgcCollectionName);
       if ( (evtStore()->record(m_tgcSimHitCollection, m_tgcCollectionName, true)).isFailure() ) {
-        ATH_MSG_ERROR( "[ --- ] Unable to record TGCSimHitCollection " << m_tgcCollectionName);
+        ATH_MSG_ERROR( "[ --- ] Unable to record TGCSimHitCollection " << m_tgcCollectionName.value());
         delete m_tgcSimHitCollection; m_tgcSimHitCollection=nullptr;
       }
     }
     if ( evtStore()->contains<CSCSimHitCollection>(m_cscCollectionName) ){
       if ( (evtStore()->retrieve(m_cscSimHitCollection , m_cscCollectionName)).isFailure() )
-        ATH_MSG_ERROR( "[ --- ] Unable to retrieve CSCSimHitCollection " << m_cscCollectionName);
+        ATH_MSG_ERROR( "[ --- ] Unable to retrieve CSCSimHitCollection " << m_cscCollectionName.value());
       // (b)     if no ... try to create it
     } else {
       m_cscSimHitCollection = new CSCSimHitCollection( m_cscCollectionName);
       if ( (evtStore()->record(m_cscSimHitCollection, m_cscCollectionName, true)).isFailure() ) {
-        ATH_MSG_ERROR( "[ --- ] Unable to record CSCSimHitCollection " << m_cscCollectionName);
+        ATH_MSG_ERROR( "[ --- ] Unable to record CSCSimHitCollection " << m_cscCollectionName.value());
         delete m_cscSimHitCollection; m_cscSimHitCollection=nullptr;
       }
     }
     if ( evtStore()->contains<MMSimHitCollection>(m_mmCollectionName) ){
       if ( (evtStore()->retrieve(m_mmSimHitCollection , m_mmCollectionName)).isFailure() )
-        ATH_MSG_ERROR( "[ --- ] Unable to retrieve MMSimHitCollection " << m_mmCollectionName);
+        ATH_MSG_ERROR( "[ --- ] Unable to retrieve MMSimHitCollection " << m_mmCollectionName.value());
       // (b)     if no ... try to create it
     } else {
       m_mmSimHitCollection = new MMSimHitCollection( m_mmCollectionName);
       if ( (evtStore()->record(m_mmSimHitCollection, m_mmCollectionName, true)).isFailure() ) {
-        ATH_MSG_ERROR( "[ --- ] Unable to record MMSimHitCollection " << m_mmCollectionName);
+        ATH_MSG_ERROR( "[ --- ] Unable to record MMSimHitCollection " << m_mmCollectionName.value());
         delete m_mmSimHitCollection; m_mmSimHitCollection=nullptr;
       }
     }
     if ( evtStore()->contains<sTGCSimHitCollection>(m_stgcCollectionName) ){
       if ( (evtStore()->retrieve(m_stgcSimHitCollection , m_stgcCollectionName)).isFailure() )
-        ATH_MSG_ERROR( "[ --- ] Unable to retrieve sTGCSimHitCollection " << m_stgcCollectionName);
+        ATH_MSG_ERROR( "[ --- ] Unable to retrieve sTGCSimHitCollection " << m_stgcCollectionName.value());
       // (b)     if no ... try to create it
     } else {
       m_stgcSimHitCollection = new sTGCSimHitCollection( m_stgcCollectionName);
       if ( (evtStore()->record(m_stgcSimHitCollection, m_stgcCollectionName, true)).isFailure() ) {
-        ATH_MSG_ERROR( "[ --- ] Unable to record sTGCSimHitCollection " << m_stgcCollectionName);
+        ATH_MSG_ERROR( "[ --- ] Unable to record sTGCSimHitCollection " << m_stgcCollectionName.value());
         delete m_stgcSimHitCollection; m_stgcSimHitCollection=nullptr;
       }
     }

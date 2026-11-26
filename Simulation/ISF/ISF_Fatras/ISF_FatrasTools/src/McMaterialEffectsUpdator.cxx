@@ -11,22 +11,13 @@
 #include "GaudiKernel/DataSvc.h"
 #include "GaudiKernel/SmartDataPtr.h"
 // ISF includes
-#include "ISF_Interfaces/IParticleBroker.h"
-#include "ISF_Interfaces/ITruthSvc.h"
 #include "ISF_Event/ISFParticle.h"
 #include "ISF_Event/ISFTruthIncident.h"
 #include "ISF_Event/ParticleClipboard.h"
 #include "ISF_Event/ParticleUserInformation.h"
-#include "ISF_FatrasInterfaces/IParticleDecayHelper.h"
 #include "TruthUtils/HepMCHelpers.h"
 // iFatras
-#include "ISF_FatrasInterfaces/IHadronicInteractionProcessor.h"
-#include "ISF_FatrasInterfaces/IProcessSamplingTool.h"
-#include "ISF_FatrasInterfaces/IPhysicsValidationTool.h"
-#include "ISF_FatrasInterfaces/IPhotonConversionTool.h"
 // Trk inlcude
-#include "TrkExInterfaces/IEnergyLossUpdator.h"
-#include "TrkExInterfaces/IMultipleScatteringUpdator.h"
 #include "TrkParameters/TrackParameters.h"
 #include "TrkEventPrimitives/ParamDefs.h"
 #include "TrkSurfaces/Surface.h"
@@ -48,116 +39,6 @@
 #include "GaudiKernel/ITHistSvc.h"
 // STD
 #include <cmath>
-
-// constructor
-iFatras::McMaterialEffectsUpdator::McMaterialEffectsUpdator(const std::string& t, const std::string& n, const IInterface* p) :
-  base_class(t,n,p),
-  m_eLoss(true),
-  m_eLossUpdator("iFatras::McEnergyLossUpdator/FatrasEnergyLossUpdator"),
-  m_ms(true),
-  m_msUpdator("Trk::MultipleScatteringUpdator/AtlasMultipleScatteringUpdator"),
-  m_conversionTool("iFatras::McConversionCreator/FatrasConversionCreator"),
-  m_processCode(3),
-  m_hadInt(true),
-  //m_hadIntProcessor("iFatras::HadIntProcessorParametric/FatrasHadIntProcessorParametric"),
-  m_hadIntProcessor("iFatras::G4HadIntProcessor/FatrasG4HadIntProcessor"),
-  m_particleDecayer(),
-  m_minimumMomentum(50.*CLHEP::MeV),
-  m_minimumBremPhotonMomentum(50.*CLHEP::MeV),
-  m_parametricScattering(false),
-  m_use_msUpdator(false),
-  m_uniformHertzDipoleAngle(false),
-  m_referenceMaterial(true),
-  m_bendingCorrection(false),
-  m_rndGenSvc("AtDSFMTGenSvc", n),
-  m_randomEngine(nullptr),
-  m_randomEngineName("FatrasRnd"),
-  m_recordedBremPhotons(0),
-  m_currentSample(-1),
-  m_recordEnergyDeposition(false),
-  m_layerIndexCaloSampleMapName("LayerIndexCaloSampleMap"),
-  m_layerIndexCaloSampleMap(nullptr),
-  m_projectionFactor(sqrt(2.)),
-  m_validationMode(false),
-  m_validationTool(""),
-  m_validationTreeName("FatrasMaterialEffects"),
-  m_validationTreeDescription("Validation output from the McMaterialEffectsUpdator"),
-  m_validationTreeFolder("/val/FatrasSimulationMaterial"),
-  m_validationTree(nullptr),
-  m_layerIndex(0),
-  m_tInX0(0.),
-  m_thetaMSproj(0.),
-  m_thetaMSphi(0.),
-  m_thetaMStheta(0.),
-  m_deltaP(0.),
-  m_deltaPsigma(0.),
-  m_bremValidation(false),
-  m_bremValidationTreeName("FatrasBremPhotons"),
-  m_bremValidationTreeDescription("Validation output from the McMaterialEffectsUpdator"),
-  m_bremValidationTreeFolder("/val/FatrasBremPhotons"),
-  m_bremValidationTree(nullptr),
-  m_bremPointX(0.),
-  m_bremPointY(0.),
-  m_bremPointR(0.),
-  m_bremPointZ(0.),
-  m_bremMotherEnergy(0.),
-  m_bremPhotonEnergy(0.),
-  m_bremPhotonAngle(0.),
-  m_edValidation(false),
-  m_edValidationTreeName("FatrasEnergyInCaloDeposit"),
-  m_edValidationTreeDescription("Validation output from the McMaterialEffectUpdator"),
-  m_edValidationTreeFolder("/val/FatrasEnergyInCaloDeposit"),
-  m_edValidationTree(nullptr),
-  m_edLayerIntersectX(0.),
-  m_edLayerIntersectY(0.),
-  m_edLayerIntersectZ(0.),
-  m_edLayerIntersectR(0.),
-  m_edLayerEnergyDeposit(0.),
-  m_edLayerSample(0.),
-  m_oneOverThree(1./3.),
-  m_particleBroker("ISF_ParticleParticleBroker", n),
-  m_truthRecordSvc("ISF_TruthRecordSvc", n),
-  m_isp(nullptr),
-  m_layer(nullptr),
-  m_matProp(nullptr)
-{
-      // the tool parameters -----------------------------------------------------
-      declareProperty("EnergyLoss"                          , m_eLoss);
-      declareProperty("EnergyLossUpdator"                   , m_eLossUpdator);
-      declareProperty("MultipleScattering"                  , m_ms);
-      declareProperty("MultipleScatteringUpdator"           , m_msUpdator);
-      declareProperty("ProcessSamplingTool"                 , m_samplingTool);
-      declareProperty("PhotonConversionTool"                , m_conversionTool);
-      // tool handle for the particle decayer
-      declareProperty( "ParticleDecayHelper"                , m_particleDecayer      );
-      // MC Truth Properties
-      declareProperty("BremProcessCode"                     , m_processCode, "MCTruth Physics Process Code");
-      // the steering --------------------------------------------------------------
-      declareProperty("HadronicInteraction"                 , m_hadInt);
-      declareProperty("HadronicInteractionProcessor"        , m_hadIntProcessor);
-      // the steering --------------------------------------------------------------
-      declareProperty("ParametericScattering"               , m_parametricScattering);
-      declareProperty("UseMultipleScatteringUpdator"        , m_use_msUpdator);
-      declareProperty("MomentumCut"                         , m_minimumMomentum);
-      declareProperty("MinimumBremPhotonMomentum"           , m_minimumBremPhotonMomentum);
-      // the steering --------------------------------------------------------------
-      declareProperty("ReferenceMaterial"                   , m_referenceMaterial);
-      declareProperty("BendingCorrection"                   , m_bendingCorrection);
-      // validation mode ------------------------------------------------------------
-      declareProperty("RecordEnergyDeposition"              , m_recordEnergyDeposition);
-      declareProperty("LayerIndexCaloSampleMap"             , m_layerIndexCaloSampleMapName);
-      // validation mode ------------------------------------------------------------
-      declareProperty("ValidationMode"                      , m_validationMode);
-      declareProperty("PhysicsValidationTool"               , m_validationTool);
-      declareProperty("BremPhotonValidation"                , m_bremValidation);
-      declareProperty("EnergyDepositValidation"             , m_edValidation);
-      declareProperty("RandomNumberService"                 , m_rndGenSvc               , "Random number generator");
-      declareProperty("RandomStreamName"                    , m_randomEngineName        , "Name of the random number stream");
-
-      // ISF Services and Tools
-      declareProperty("ParticleBroker"                      , m_particleBroker        , "ISF Particle Broker Svc");
-      declareProperty("TruthRecordSvc"                      , m_truthRecordSvc        , "ISF Particle Truth Svc");
-}
 
 // destructor
 iFatras::McMaterialEffectsUpdator::~McMaterialEffectsUpdator()
@@ -227,7 +108,7 @@ StatusCode iFatras::McMaterialEffectsUpdator::initialize()
     //Get own engine with own seeds:
     m_randomEngine = m_rndGenSvc->GetEngine(m_randomEngineName);
     if (!m_randomEngine) {
-        ATH_MSG_FATAL( "Could not get random engine '" << m_randomEngineName << "'" );
+        ATH_MSG_FATAL( "Could not get random engine '" << m_randomEngineName.value() << "'" );
         return StatusCode::FAILURE;
     }
 
@@ -361,7 +242,7 @@ StatusCode iFatras::McMaterialEffectsUpdator::finalize()
 {
 
     ATH_MSG_INFO( " ---------- Statistics output -------------------------- " );
-    ATH_MSG_INFO( "                     Minimum energy cut for brem photons : " <<   m_minimumBremPhotonMomentum  );
+    ATH_MSG_INFO( "                     Minimum energy cut for brem photons : " << m_minimumBremPhotonMomentum.value()  );
     ATH_MSG_INFO( "                     Brem photons (above cut, recorded)  : " <<   m_recordedBremPhotons        );
 
     ATH_MSG_DEBUG( "finalize() successful" );
@@ -1563,12 +1444,12 @@ const Trk::LayerIndexSampleMap*  iFatras::McMaterialEffectsUpdator::layerIndexSa
   if (!m_layerIndexCaloSampleMap){
       // try to retrieve it from detector store
       if ((detStore()->retrieve(m_layerIndexCaloSampleMap, m_layerIndexCaloSampleMapName).isFailure())){
-            ATH_MSG_WARNING( "Could not retrieve '" << m_layerIndexCaloSampleMapName << "' from DetectorStore." );
+            ATH_MSG_WARNING( "Could not retrieve '" << m_layerIndexCaloSampleMapName.value() << "' from DetectorStore." );
             ATH_MSG_WARNING( " -> switching recording of energy deposit off." );
       }
 
   if (m_layerIndexCaloSampleMap)
-        ATH_MSG_VERBOSE( "Successfully retrieved '" << m_layerIndexCaloSampleMapName << "' with entries:"
+        ATH_MSG_VERBOSE( "Successfully retrieved '" << m_layerIndexCaloSampleMapName.value() << "' with entries:"
               << m_layerIndexCaloSampleMap->size() );
   }
   return m_layerIndexCaloSampleMap;

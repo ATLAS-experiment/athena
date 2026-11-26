@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FATRASTOOLSG4_G4HADINTPROCESSOR_H
@@ -14,15 +14,19 @@
 
 // Fatras
 #include "ISF_FatrasInterfaces/IHadronicInteractionProcessor.h"
+#include "ISF_Geant4Tools/IG4RunManagerHelper.h"
 
 // Geant4
 #include "G4ThreeVector.hh"
+#include "G4MaterialCutsCouple.hh"
 
 // Trk
 #include "TrkEventPrimitives/ParticleHypothesis.h"
 
 // ISF
 #include "ISF_Event/ISFParticleContainer.h"
+#include "ISF_Interfaces/IParticleBroker.h"
+#include "ISF_Interfaces/ITruthSvc.h"
 
 // Forward Declarations
 class G4DynamicParticle;
@@ -36,17 +40,10 @@ class G4Step;
 class G4StepPoint;
 class G4AtlasRunManager;
 class G4Material;
-class G4MaterialCutsCouple;
 
 namespace Trk {
   class Material;
   class MaterialProperties;       // TODO: get rid of MatProp dependence
-}
-
-namespace ISF {
-  class IParticleBroker;
-  class ITruthSvc;
-  class IG4RunManagerHelper;
 }
 
 namespace iFatras {
@@ -62,7 +59,7 @@ namespace iFatras {
   class ATLAS_NOT_THREAD_SAFE G4HadIntProcessor : public extends<AthAlgTool, iFatras::IHadronicInteractionProcessor> {  // deprecated: ATLASSIM-6020
     public:      
       /** AlgTool constructor for G4HadIntProcessor*/
-      G4HadIntProcessor(const std::string&,const std::string&,const IInterface*);
+      using base_class::base_class;
       /**Destructor*/
       virtual ~G4HadIntProcessor();
 
@@ -104,18 +101,18 @@ namespace iFatras {
       unsigned int retrieveG4MaterialIndex(const Trk::Material* ematprop) const;
 
       //!< random number service
-      ServiceHandle<IAtRndmGenSvc>         m_rndGenSvc;
+      ServiceHandle<IAtRndmGenSvc>         m_rndGenSvc{this, "RandomNumberService", "AtDSFMTGenSvc", "Random number generator"};
 
-      ToolHandle<ISF::IG4RunManagerHelper> m_g4RunManagerHelper;
+      PublicToolHandle<ISF::IG4RunManagerHelper> m_g4RunManagerHelper{this, "G4RunManagerHelper", "iGeant4::G4RunManagerHelper/G4RunManagerHelper"};
 
       //!< steering: enable elastic interactions?
-      bool                                 m_doElastic;
+      BooleanProperty                      m_doElastic{this, "DoElasticInteractions", false};
 
       /* scale factors for hadronic/electromagnetic interactions */
-      double                               m_hadIntProbScale;
+      DoubleProperty                       m_hadIntProbScale{this, "HadronicInteractionScaleFactor", 1.0, "Scale probability of HadrInteractions"};
 
       // internal steering : clone type
-      double                               m_minMomentum;
+      DoubleProperty                       m_minMomentum{this, "MomentumCut", 50.0};
 
       //!< Geant4 processes <PDGcode, process>  TODO : fission, capture
       std::map<int, G4VProcess*>   m_g4HadrInelasticProcesses;
@@ -124,12 +121,12 @@ namespace iFatras {
       std::vector<std::pair<float,std::pair< G4Material*, G4MaterialCutsCouple> > > m_g4Material;
 
       /** ISF services & Tools */
-      ServiceHandle<ISF::IParticleBroker>  m_particleBroker;
-      ServiceHandle<ISF::ITruthSvc>        m_truthRecordSvc;
+      ServiceHandle<ISF::IParticleBroker>  m_particleBroker{this, "ParticleBroker", "ISF_ParticleBrokerSvc", "ISF Particle Broker"};
+      ServiceHandle<ISF::ITruthSvc>        m_truthRecordSvc{this, "TruthRecordSvc", "ISF_ValidationTruthService", "ISF Particle Truth Svc"};
 
       /** Random engine  */
-      CLHEP::HepRandomEngine*              m_randomEngine;
-      std::string                          m_randomEngineName;       //!< Name of the random number stream
+      CLHEP::HepRandomEngine*              m_randomEngine{nullptr};
+      StringProperty                       m_randomEngineName{this, "RandomStreamName", "FatrasRnd", "Name of the random number stream"};       //!< Name of the random number stream
 
   };
 
