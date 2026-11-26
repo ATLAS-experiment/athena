@@ -80,7 +80,7 @@ StatusCode CondProxyProvider::preLoadAddresses(StoreID::type storeID,
       std::unique_ptr<Collection> poolCollection;
       try {
          auto fileDescr = m_poolSvc->getInputFileDescriptor(m_contextId, inputCollection);
-         poolCollection = std::make_unique<Collection>(fileDescr);
+         poolCollection = std::make_unique<Collection>(fileDescr, Collection::Content::TokenOnly);
       } catch (const std::exception& e) {
          ATH_MSG_DEBUG("Failed to open collection '" << inputCollection << "': " << e.what());
       }
