@@ -140,7 +140,12 @@ StatusCode JetCMX::execute(const EventContext& ctx) const
 		 
 	  // Now check against trigger thresholds
     auto l1Menu = SG::makeHandle( m_L1MenuKey, ctx );
-    float jepScale = l1Menu->thrExtraInfo().JET().jetScale();
+    float jepScale = 2; // default scale
+    try {
+      jepScale = l1Menu->thrExtraInfo().JET().jetScale();
+    } catch(const std::out_of_range&) {
+      // legacy JET not present in menu removed, so use default
+    }
 
     std::vector<std::shared_ptr<TrigConf::L1Threshold>> allThresholds = l1Menu->thresholds();
 	    // Right type?

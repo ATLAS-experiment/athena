@@ -10,7 +10,6 @@ def defineMenu():
     l1items = L1MenuFlags.items()
     l1items += [
         #Topo
-        'L1_LAR-ZEE', 
     ]
 
     # To replace thresholds in the physics menu

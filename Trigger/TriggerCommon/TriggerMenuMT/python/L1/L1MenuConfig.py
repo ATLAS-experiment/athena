@@ -3,7 +3,6 @@
 import re
 from importlib import import_module
 from collections import defaultdict as ddict
-from itertools import chain
 
 from AthenaCommon.Logging import logging
 
@@ -53,8 +52,8 @@ class L1MenuConfig(object):
         
         # all registered thresholds
         self._registeredThresholds = {}
-        self._registeredThresholdsStats = { "muon": 0, "calo": 0, "nim": 0, "legacy": 0, 
-                                         AlgCategory.TOPO : 0, AlgCategory.MUCTPI : 0, AlgCategory.LEGACY : 0 }
+        self._registeredThresholdsStats = { "muon": 0, "calo": 0, "nim": 0,
+                                         AlgCategory.TOPO : 0, AlgCategory.MUCTPI : 0 }
 
         # all registered topo algos
         self._registeredTopoAlgos = {}
@@ -99,9 +98,7 @@ class L1MenuConfig(object):
         try:
             return self._registeredThresholds[name]
         except KeyError as ex:
-            if name.startswith("R2TOPO"):
-                log.error("No legacy topo output %s is registered. Make sure it is defined in L1/Config/TopoAlgoDefLegacy.py", name)
-            elif name.startswith("TOPO"):
+            if name.startswith("TOPO"):
                 log.error("No topo output %s is registered. Make sure it is defined in L1/Config/TopoAlgoDef.py", name)
             else:
                 isLegacy = any(filter(lambda x: name.startswith(x), ["EM", "TAU", "J", "XE", "TE", "XS"]))
@@ -156,9 +153,7 @@ class L1MenuConfig(object):
             return
 
         isNIM = thr.ttype in ['NIM','CALREQ','MBTSSI', 'MBTS', 'LUCID', 'BCM', 'BCMCMB', 'ZDC', 'BPTX', 'ZB']
-        if thr.isLegacy():
-            self._registeredThresholdsStats["legacy"] += 1
-        elif isNIM:
+        if isNIM:
             self._registeredThresholdsStats["nim"] += 1
         elif thr.ttype == 'MU':
             self._registeredThresholdsStats["muon"] += 1
@@ -186,7 +181,7 @@ class L1MenuConfig(object):
 
 
         multibitPattern = re.compile(r"(?P<line>.*)\[(?P<bit>\d+)\]")
-        for cat in [AlgCategory.TOPO, AlgCategory.MUCTPI, AlgCategory.LEGACY]:
+        for cat in [AlgCategory.TOPO, AlgCategory.MUCTPI]:
             multibitTopoTriggers = set()
             for topoLineName in _topoTriggers[cat]:
                 m = multibitPattern.match(topoLineName) # tries to match "trigger[bit]"
@@ -242,7 +237,7 @@ class L1MenuConfig(object):
             if not silent:
                 log.info("Menu %s was requested, but will load %s as specified in TriggerMenuMT.L1.Menu.menuMap", menuToLoadReq, menuToLoad[0])
         else:
-            menuToLoad = [menuToLoadReq,str(menuToLoadReq)+"_inputs",str(menuToLoadReq)+"_inputs_legacy"]
+            menuToLoad = [menuToLoadReq,str(menuToLoadReq)+"_inputs"]
         return menuToLoad
 
     def _checkMenuExistence(self):
@@ -288,17 +283,6 @@ class L1MenuConfig(object):
         log.info("... L1Topo menu '%s' contains %i boards (%s)", self.menuFilesToLoad[0], len(L1MenuFlags.boards()), ', '.join(L1MenuFlags.boards().keys()))
         log.info("    with %i connectors and %i input signals", connectorCount, algoCount)
 
-        try:
-            log.info("Reading TriggerMenuMT.Menu.Menu_%s", self.menuFilesToLoad[2])
-            legacymenumodule = __import__('TriggerMenuMT.L1.Menu.Menu_%s' % self.menuFilesToLoad[2], globals(), locals(), ['defineMenu'], 0)
-            legacymenumodule.defineLegacyInputsMenu()
-            log.info("... L1 legacy menu %s contains %i legacy boards (%s)", self.menuFilesToLoad[2], len(L1MenuFlags.legacyBoards()), ', '.join(L1MenuFlags.legacyBoards().keys()))
-        except ImportError as ie:
-            if ie.name == 'TriggerMenuMT.L1.Menu.Menu_%s' % self.menuFilesToLoad[2]:
-                log.info("==> No menu defining the legacy inputs was found, will assume this intended. %s %s %s",
-                         ie.msg, ie.name, ie.path)
-            else:
-                raise
 
     def _registerDefinedConfigurationObjects(self):
         """
@@ -311,7 +295,7 @@ class L1MenuConfig(object):
         Threshold.setMenuConfig(self) # from now on all newly created Thresholds definitions are automatically registered here
 
         # register Topo algorithms
-        for algCat in [AlgCategory.TOPO, AlgCategory.MUCTPI, AlgCategory.MULTI, AlgCategory.LEGACY]:
+        for algCat in [AlgCategory.TOPO, AlgCategory.MUCTPI, AlgCategory.MULTI]:
             self.currentAlgoDef = algCat
             defFile = "TriggerMenuMT.L1.Config.%s" % self.currentAlgoDef.defFile
             log.info("Reading %s", defFile)
@@ -325,16 +309,10 @@ class L1MenuConfig(object):
         log.info("... registered %i muon thresholds", self._registeredThresholdsStats["muon"])
         log.info("... registered %i nim thresholds", self._registeredThresholdsStats["nim"])
 
-        log.info("Reading TriggerMenuMT.Config.ThreholdDefLegacy")
-        from .Config.ThresholdDefLegacy import ThresholdDefLegacy
-        ThresholdDefLegacy.registerThresholds(self, self.menuFullName)
-        log.info("... registered %i legacy calo thresholds", self._registeredThresholdsStats["legacy"])
-
         log.info("Turning topo algo outputs into thresholds (except multiplicity counters)")
         self._registerTopoOutputsAsThresholds()
         log.info("... registered %i topo thresholds", self._registeredThresholdsStats[AlgCategory.TOPO])
         log.info("... registered %i muctpi topo thresholds", self._registeredThresholdsStats[AlgCategory.MUCTPI])
-        log.info("... registered %i legacy topo thresholds", self._registeredThresholdsStats[AlgCategory.LEGACY])
 
         log.info("Reading TriggerMenuMT.Config.ItemDef")
         ItemDef.registerItems(self, self.menuFullName)
@@ -380,7 +358,7 @@ class L1MenuConfig(object):
         this function is called first after the menu definition is imported
         it can be used to update some of the information or to perform initial checks
         """
-        allBoards = (list(L1MenuFlags.boards().items()) + list(L1MenuFlags.legacyBoards().items()))
+        allBoards = (list(L1MenuFlags.boards().items()))
         # set boardName in each connector
         for (boardName, boardDef) in allBoards:
             boardDef["name"] = boardName
@@ -396,7 +374,7 @@ class L1MenuConfig(object):
 
         allBoardsWithTopo = list( filter (
             lambda b : BoardType.fromBoardName(b[0]) in [BoardType.TOPO, BoardType.MUCTPI], 
-            chain(L1MenuFlags.boards().items(), L1MenuFlags.legacyBoards().items())
+            list(L1MenuFlags.boards().items())
         ))
                 
         #
@@ -440,7 +418,6 @@ class L1MenuConfig(object):
         allRequiredSortedInputs = {
             AlgCategory.TOPO : set(),
             AlgCategory.MUCTPI : set(), # TODO: think about MUCTP sorting input 
-            AlgCategory.LEGACY : set()
         }
 
         # loop over all topo boards and their connectors
@@ -520,19 +497,13 @@ class L1MenuConfig(object):
         # Thresholds
         # ------------------
 
-        allBoards = (list(L1MenuFlags.boards().items()) + list(L1MenuFlags.legacyBoards().items()))
+        allBoards = (list(L1MenuFlags.boards().items()))
         
         if 'AllCTPIn' in self.menuName:
             # Only after we know all boards are defined, in the special case
             # that we are running the dummy L1 menu for CTP input configuration
             # we need to register more items that access every input
             ItemDef.registerItems_AllCTPIn(self)
-
-        for (boardName, boardDef) in L1MenuFlags.legacyBoards().items():
-            for connDef in boardDef["connectors"]:
-                # Verify number and ordering of thresholds on L1Calo boards
-                if connDef["type"] == "ctpin" and connDef["format"] == "multiplicity":
-                    self.l1menu.checkL1CaloThresholds(connDef["thresholds"], boardName, connDef["name"])
 
         list_of_undefined_thresholds = []
         # new thresholds
@@ -640,9 +611,7 @@ class L1MenuConfig(object):
 
             for thrName in registeredItem.thresholdNames():
                 if thrName not in self.l1menu.thresholds:
-                    isLegacyThr = any(filter(lambda x: thrName.startswith(x), ["R2TOPO_", "EM", "HA", "J", "XE", "TE", "XS"]))
-
-                    msg = "L1 item {item} has been added to the menu L1/Menu/Menu_{menu}.py, but the required threshold {thr} is not listed as input in L1/Menu/Menu_{menu_inputs}.py".format(item=itemName, thr=thrName, menu=self.menuFilesToLoad[0], menu_inputs=self.menuFilesToLoad[2] if isLegacyThr else self.menuFilesToLoad[1])
+                    msg = "L1 item {item} has been added to the menu L1/Menu/Menu_{menu}.py, but the required threshold {thr} is not listed as input in L1/Menu/Menu_{menu_inputs}.py".format(item=itemName, thr=thrName, menu=self.menuFilesToLoad[0], menu_inputs=self.menuFilesToLoad[1])
                     log.error(msg)
                     raise RuntimeError(msg)
 
@@ -682,18 +651,6 @@ class L1MenuConfig(object):
         for (boardName, boardDef) in allBoards:
             self.l1menu.addBoard(boardDef)
             
-        # ------------------
-        # Mark items legacy
-        # ------------------
-        legacyThresholdsSet = set() # determine from connectors
-        for conn in self.l1menu.connectors:
-            if not conn.isLegacy():
-                continue
-            legacyThresholdsSet.update(conn.triggerThresholds())
-        for item in self.l1menu.items:
-            item.markLegacy(legacyThresholdsSet)
-            
-
         # assign mapping to thresholds according to their use in the menu
         self.mapThresholds()
 
@@ -714,10 +671,6 @@ class L1MenuConfig(object):
 
         # check that no L1 items are defined with BGRP0 only
         self.l1menu.checkBGRP()
-
-        # check that only the minimal set of legacy and detector thresholds is used
-        if 'pp' in self.l1menu.menuName:
-            self.l1menu.checkLegacyThresholds()   
 
         # check for the topo multiplicity algorithms and CTP inputs
         # TOPO1

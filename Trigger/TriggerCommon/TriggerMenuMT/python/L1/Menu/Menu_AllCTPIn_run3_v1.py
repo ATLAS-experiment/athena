@@ -31,20 +31,6 @@ def defineMenu():
         'L1_CTPCAL_Thresholds',
         'L1_NIM1_Thresholds',
         'L1_NIM2_Thresholds',
-
-        # Legacy connectors
-        'L1_EM1_Thresholds',
-        'L1_EM2_Thresholds',
-        #
-        'L1_TAU1_Thresholds',
-        'L1_TAU2_Thresholds',
-        #
-        'L1_JET1_Thresholds',
-        'L1_JET2_Thresholds',
-        #
-        'L1_EN1_Thresholds',
-        'L1_EN2_Thresholds',
-
     ]
 
 

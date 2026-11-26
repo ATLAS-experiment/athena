@@ -130,15 +130,7 @@ def getTypeWideThresholdConfig(ttype, do_HI_tob_thresholds=False, do_eFex_BDT_Ta
     if ttype == ThrType.gTE:
         return getConfig_gTE()
     if ttype == ThrType.cXE:
-        return getConfig_cXE()
-    if ttype == ThrType.EM:
-        return getConfig_EM(do_HI_tob_thresholds)
-    if ttype == ThrType.TAU:
-        return getConfig_TAU(do_HI_tob_thresholds)
-    if ttype == ThrType.JET:
-        return getConfig_JET()
-    if ttype == ThrType.XS:
-        return getConfig_XS()    
+        return getConfig_cXE()  
     return {}
 
 
@@ -756,70 +748,4 @@ def getConfig_cXE():
         if value < 0 or value > 3.99 :
             raise RuntimeError("xCE parameter %s = %.4f is out of range (min: 0.0, max: 3.99)", param, value)
             
-    return confObj
-    
-# LEGACY
-
-def getConfig_EM(do_HI_tob_thresholds):
-    confObj: dict[str, Any] = {
-        "isolation": {
-            "HAIsoForEMthr": {
-                "thrtype": "HAIsoForEMthr",
-                "Parametrization": [
-                    {"etamax": 49, "etamin": -49, "isobit": 1, "mincut": 10, "offset": -2, "priority": 0, "slope": 230, "upperlimit": 50},
-                    {"etamax": 49, "etamin": -49, "isobit": 2, "mincut": 0, "offset": 0, "priority": 0, "slope": 0, "upperlimit": 0},
-                    {"etamax": 49, "etamin": -49, "isobit": 3, "mincut": 10, "offset": -2, "priority": 0, "slope": 230, "upperlimit": 50},
-                    {"etamax": 49, "etamin": -49, "isobit": 4, "mincut": 10, "offset": -2, "priority": 0, "slope": 230, "upperlimit": 50},
-                    {"etamax": 49, "etamin": -49, "isobit": 5, "mincut": 10, "offset": -2, "priority": 0, "slope": 230, "upperlimit": 50},
-                ],
-            }
-        }
-    }
-    confObj["isolation"]["EMIsoForEMthr"] = {"thrtype": "EMIsoForEMthr", "Parametrization": []}
-    confObj["isolation"]["EMIsoForEMthr"]["Parametrization"] += [
-        {"etamax": 49, "etamin": -49, "isobit": 1, "mincut": 0, "offset": 0, "priority": 0, "slope": 0, "upperlimit": 0},
-        {"etamax": 49, "etamin": -49, "isobit": 2, "mincut": 20, "offset": -18, "priority": 0, "slope": 80, "upperlimit": 50},
-        {"etamax": 49, "etamin": -49, "isobit": 3, "mincut": 20, "offset": -18, "priority": 0, "slope": 80, "upperlimit": 50},
-        {"etamax": 49, "etamin": -49, "isobit": 4, "mincut": 10, "offset": -20, "priority": 0, "slope": 80, "upperlimit": 50},
-        {"etamax": 49, "etamin": -49, "isobit": 5, "mincut": 20, "offset": -18, "priority": 0, "slope": 80, "upperlimit": 50},
-    ]
-    confObj["ptMinToTopo"] = 8 if do_HI_tob_thresholds else 3
-    confObj["resolutionMeV"] = 500
-    return confObj
-
-
-def getConfig_TAU(do_HI_tob_thresholds):
-    confObj = {}
-    confObj["isolation"] = {}
-    confObj["isolation"]["EMIsoForTAUthr"] = {"thrtype": "EMIsoForTAUthr", "Parametrization": []}
-    confObj["isolation"]["EMIsoForTAUthr"]["Parametrization"] += [
-        {"etamax": 49, "etamin": -49, "isobit": 1, "mincut": 0, "offset": 30, "priority": 0, "slope": 100, "upperlimit": 60},
-        {"etamax": 49, "etamin": -49, "isobit": 2, "mincut": 0, "offset": 20, "priority": 0, "slope": 100, "upperlimit": 60},
-        {"etamax": 49, "etamin": -49, "isobit": 3, "mincut": 0, "offset": 15, "priority": 0, "slope": 100, "upperlimit": 60},
-        {"etamax": 49, "etamin": -49, "isobit": 4, "mincut": 0, "offset": 40, "priority": 0, "slope": 0, "upperlimit": 124},
-        {"etamax": 49, "etamin": -49, "isobit": 5, "mincut": 0, "offset": 30, "priority": 0, "slope": 100, "upperlimit": 60}
-    ]
-    confObj["ptMinToTopo"] = 1 if do_HI_tob_thresholds else 8
-    confObj["resolutionMeV"] = 500
-    return confObj
-
-
-def getConfig_JET():
-    confObj = {}
-    confObj["ptMinToTopoLargeWindow"] = 12
-    confObj["ptMinToTopoSmallWindow"] = 12
-    return confObj
-
-
-def getConfig_XS():
-    confObj = {
-        "significance": {
-            "xeMin": 11,
-            "xeMax": 63,
-            "teSqrtMin": 4,
-            "teSqrtMax": 63,
-            "xsSigmaScale": 1150,
-            "xsSigmaOffset": 1640
-        }
-    }
     return confObj

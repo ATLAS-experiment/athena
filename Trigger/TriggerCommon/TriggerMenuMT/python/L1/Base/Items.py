@@ -96,9 +96,9 @@ class MenuItem:
     # New items will be assigned to this partition
     currentPartition = 0
     
-    __slots__ = ['name', 'group', 'ctpid', 'psCut', 'trigger_type', 'partition', 'logic', 'bunchGroups', 'legacy', 'monitorsLF', 'monitorsHF', 'verbose']
-    def __init__(self, name: str, ctpid=-1, group='1', prescale=1, psCut=None, verbose=False):
-        self.name: str = name
+    __slots__ = ['name', 'group', 'ctpid', 'psCut', 'trigger_type', 'partition', 'logic', 'bunchGroups', 'monitorsLF', 'monitorsHF', 'verbose']
+    def __init__(self, name, ctpid=-1, group='1', prescale=1, psCut=None, verbose=False):
+        self.name             = name
         self.group            = group
         self.ctpid: int = int(ctpid)
         self.psCut            = psCut if psCut is not None else getCutFromPrescale(prescale)
@@ -107,9 +107,8 @@ class MenuItem:
         self.logic            = None
         self.monitorsLF       = 0
         self.monitorsHF       = 0
-        self.verbose: bool          = verbose
-        self.bunchGroups: list[str] = []
-        self.legacy: bool           = False
+        self.verbose          = verbose
+        self.bunchGroups      = None
 
         if MenuItem.l1configForRegistration:
             MenuItem.l1configForRegistration.registerItem(self.name, self)
@@ -160,9 +159,6 @@ class MenuItem:
         self.trigger_type = int(ttype) & 0xff
         return self
 
-    def markLegacy(self,legacyThresholdsSet):
-        self.legacy = bool ( legacyThresholdsSet.intersection(self.thresholdNames()) )
-
     def binary_trigger_type(self, width=8):
         """Turns integer triggertype in a binary string of given width"""
         return binstr(self.trigger_type, width=width)
@@ -170,8 +166,6 @@ class MenuItem:
     def json(self):
         confObj = {}
         confObj["name"] = self.name
-        if self.legacy:
-            confObj["legacy"] = self.legacy
         confObj["ctpid"] = self.ctpid
         confObj["definition"] = str(self.logic)
         if self.bunchGroups:
@@ -201,24 +195,18 @@ class PrescaleHandler(object):
 class meta_d(type):
     def __getattr__(cls, attr):
         import traceback
-        isTopo = any(filter(lambda x: attr.startswith(x), ["R2TOPO_", "TOPO_", "MUTOPO_", "MULTTOPO_"]))
+        isTopo = any(filter(lambda x: attr.startswith(x), ["TOPO_", "MUTOPO_", "MULTTOPO_"]))
         fs = traceback.extract_stack()[-2]
         expProdFile = "L1/Config/"
         if isTopo:
-            if attr.startswith("R2TOPO_"):
-                expProdFile += "TopoAlgoDefLegacy.py"
-            elif attr.startswith("TOPO_"):
+            if attr.startswith("TOPO_"):
                 expProdFile += "TopoAlgoDef.py"
             elif attr.startswith("MUTOPO_"):
                 expProdFile += "TopoAlgoDefMuctpi.py"
             elif attr.startswith("MULTTOPO_"):
                 expProdFile += "TopoMultiplicityAlgoDef.py"
         else:
-            isLegacyThr = any(filter(lambda x: attr.startswith(x), ["EM", "TAU", "J", "XE", "TE", "XS"]))
-            if isLegacyThr:
-                expProdFile += "ThresholdDefLegacy.py"
-            else:
-                expProdFile += "ThresholdDef.py"
+            expProdFile += "ThresholdDef.py"
 
         msg = "Item definition issue in file %s, line %i. Threshold %s has not been defined in %s" % ('/'.join(fs.filename.rsplit('/',4)[1:]),fs.lineno, attr, expProdFile)
         log.error(msg)

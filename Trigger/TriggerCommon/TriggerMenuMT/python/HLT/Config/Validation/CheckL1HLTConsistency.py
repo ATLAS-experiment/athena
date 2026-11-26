@@ -9,7 +9,7 @@ def getL1TopoAlgMaps(lvl1access):
     """
     Returns tuple of L1Topo algorithm to board and item map: (alg_to_board, alg_to_item)
 
-    alg_to_board: Map between L1 algorithm name and board (Topo2, Topo3 or LegacyTopo,
+    alg_to_board: Map between L1 algorithm name and board (Topo2, Topo3
                   items coming from other boards will not be listed in the map)
     alg_to_item:  Map between L1 item name and topo algorithm
     """
@@ -19,7 +19,7 @@ def getL1TopoAlgMaps(lvl1access):
 
     l1topo_alg_to_board = {}
     l1topo_alg_to_item = {}
-    connectors = ['Topo2El','Topo3El','LegacyTopoMerged']
+    connectors = ['Topo2El','Topo3El']
 
     for l1item in lvl1items:
         # Split string of AND/OR-ed items

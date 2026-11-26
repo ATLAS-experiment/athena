@@ -11,10 +11,10 @@ Prescale sets will be stripped from the menu name
 
 menuMap = {
     # pp
-    "Physics_pp_run3_v1"                        : ["Physics_pp_run3_v1","Physics_pp_run3_v1_inputs","Physics_pp_run3_v1_inputs_legacy"],
-    "PhysicsP1_pp_run3_v1"                      : ["Physics_pp_run3_v1","Physics_pp_run3_v1_inputs","Physics_pp_run3_v1_inputs_legacy"],
-    "MC_pp_run3_v1"                             : ["MC_pp_run3_v1",     "MC_pp_run3_v1_inputs",     "Physics_pp_run3_v1_inputs_legacy"],
-    "Dev_pp_run3_v1"                            : ["MC_pp_run3_v1",     "MC_pp_run3_v1_inputs",     "Physics_pp_run3_v1_inputs_legacy"],
+    "Physics_pp_run3_v1"                        : ["Physics_pp_run3_v1","Physics_pp_run3_v1_inputs"],
+    "PhysicsP1_pp_run3_v1"                      : ["Physics_pp_run3_v1","Physics_pp_run3_v1_inputs"],
+    "MC_pp_run3_v1"                             : ["MC_pp_run3_v1",     "MC_pp_run3_v1_inputs"],
+    "Dev_pp_run3_v1"                            : ["MC_pp_run3_v1",     "MC_pp_run3_v1_inputs"],
 
     # pp for run 4
     "Physics_pp_run4"                           : ["Physics_pp_run4_legacy", "Physics_pp_run4_legacy_inputs", "Physics_pp_run4_legacy_inputs_legacy"],
@@ -23,18 +23,18 @@ menuMap = {
     "Dev_pp_run4"                               : ["MC_pp_run4_legacy",      "MC_pp_run4_legacy_inputs",      "Physics_pp_run4_legacy_inputs_legacy"],
 
     # low mu
-    "PhysicsP1_pp_lowMu_run3_v1"                : ["Physics_HI_run3_v1", "Physics_HI_run3_v1_inputs", "Physics_HI_run3_v1_inputs_legacy"],
-    "Dev_pp_lowMu_run3_v1"                      : ["Physics_HI_run3_v1", "Physics_HI_run3_v1_inputs", "Physics_HI_run3_v1_inputs_legacy"],
+    "PhysicsP1_pp_lowMu_run3_v1"                : ["Physics_HI_run3_v1", "Physics_HI_run3_v1_inputs"],
+    "Dev_pp_lowMu_run3_v1"                      : ["Physics_HI_run3_v1", "Physics_HI_run3_v1_inputs"],
 
     # cosmics
-    "Cosmic_run3_v1"                            : ["Physics_pp_run3_v1","Physics_pp_run3_v1_inputs","Physics_pp_run3_v1_inputs_legacy"],
+    "Cosmic_run3_v1"                            : ["Physics_pp_run3_v1","Physics_pp_run3_v1_inputs"],
 
     # HI
-    "PhysicsP1_HI_run3_v1"                      : ["Physics_HI_run3_v1", "Physics_HI_run3_v1_inputs", "Physics_HI_run3_v1_inputs_legacy"],
-    "MC_HI_run3_v1"                             : ["MC_HI_run3_v1",      "Physics_HI_run3_v1_inputs", "Physics_HI_run3_v1_inputs_legacy"],
-    "Dev_HI_run3_v1"                            : ["MC_HI_run3_v1",      "Physics_HI_run3_v1_inputs", "Physics_HI_run3_v1_inputs_legacy"],
+    "PhysicsP1_HI_run3_v1"                      : ["Physics_HI_run3_v1", "Physics_HI_run3_v1_inputs"],
+    "MC_HI_run3_v1"                             : ["MC_HI_run3_v1",      "Physics_HI_run3_v1_inputs"],
+    "Dev_HI_run3_v1"                            : ["MC_HI_run3_v1",      "Physics_HI_run3_v1_inputs"],
 
     # Special dummy menus needed for compiling CTPIN switch matrix
-    "AllCTPIn_pp_run3_v1"                       : ["AllCTPIn_run3_v1",  "Physics_pp_run3_v1_inputs", "Physics_pp_run3_v1_inputs_legacy"],
-    "AllCTPIn_HI_run3_v1"                       : ["AllCTPIn_run3_v1",  "Physics_HI_run3_v1_inputs", "Physics_HI_run3_v1_inputs_legacy"],
+    "AllCTPIn_pp_run3_v1"                       : ["AllCTPIn_run3_v1",  "Physics_pp_run3_v1_inputs"],
+    "AllCTPIn_HI_run3_v1"                       : ["AllCTPIn_run3_v1",  "Physics_HI_run3_v1_inputs"],
 }

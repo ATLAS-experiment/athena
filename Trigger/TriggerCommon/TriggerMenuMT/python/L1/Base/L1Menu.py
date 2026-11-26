@@ -114,21 +114,6 @@ class L1Menu(object):
             log.debug("cTAU: %s", ", ".join([thr for thr in unusedThresholds if thr.startswith("cTAU")]))
             log.debug("gFEX: %s", ", ".join([thr for thr in unusedThresholds if thr.startswith("g")]))
 
-    def checkLegacyThresholds(self):
-        from collections import defaultdict as dd 
-        from ..Menu.LegacyMenuThresholds import legacyThresholds
-        extraThresholds = dd(list)
-        for item in self.items:
-            for thrName in item.thresholdNames():
-                if thrName[:3]=='ZB_':
-                    thrName = thrName[3:]
-                if thrName[0] not in ('e','j','g', 'c') and thrName[:2] not in ["MU"] and "TOPO" not in thrName[:4]:
-                    if thrName not in legacyThresholds:
-                        extraThresholds[thrName].append(item.name)
-
-        for thrName in sorted(extraThresholds.keys()):
-            log.warning("Threshold %s (used by %s) should not be used!", thrName,",".join(extraThresholds[thrName]))
-
     def checkPerfThresholds(self):
         if 'MC' not in self.menuName:
             from collections import defaultdict as dd
@@ -141,7 +126,7 @@ class L1Menu(object):
                 raise RuntimeError("Threshold %s (used by %s) should not be used!", thrName,",".join(perfThresholds[thrName]))
 
     def checkBoardInputs(self, algo, connDefName, fpgaName ):
-        if 'MuCTPi' in connDefName or 'Legacy' in connDefName:
+        if 'MuCTPi' in connDefName:
             return
 
         boardName = connDefName+fpgaName
@@ -231,8 +216,6 @@ class L1Menu(object):
         for item in self.items:
             ctpOutputs.append(item.name)
             for thrName in item.thresholdNames():
-                if thrName[:3]=='ZB_':
-                    thrName = thrName[3:]
                 if thrName not in thrNames:
                     thrNames.append(thrName)
         thrNames_notFound = []
@@ -258,8 +241,6 @@ class L1Menu(object):
             if conn.ctype != CType.ELEC:
                 for tl in conn.triggerLines:
                     thrName = tl.name
-                    if thrName[:3]=='ZB_':
-                        thrName = thrName[3:]
                     usedInput = False
                     for ctpIn in ctpInputs:
                         if thrName == ctpIn.name:
@@ -288,16 +269,10 @@ class L1Menu(object):
         for ctpIn in ctpInputs:
             thrset = None
             thrName = ctpIn.name
-            if thrName[:2] in ['EM','HA','XE','TE','XS']:
-                thrset = 'legacyCalo'
-            elif thrName[:1]=='J':
-                thrset = 'legacyCalo'
-            elif thrName[:2]=='MU':
+            if thrName[:2]=='MU':
                 thrset = 'muon'
             elif thrName[:3] in ['MBT','AFP','BCM','CAL','NIM','ZDC','BPT','LUC','BMA']:
                 thrset = 'detector'
-            elif thrName[:6]=='R2TOPO':
-                thrset = 'legacyTopo'
             elif thrName[:1] in ['e','j','c','g']:
                 thrset = 'topo1'
             elif thrName[:4]=='TOPO':
@@ -316,11 +291,7 @@ class L1Menu(object):
         for ctpIn in ctpUnusedInputs:
             thrset = None
             thrName = ctpIn.name
-            if thrName[:2] in ['EM','HA','XE','TE','XS']:
-                thrset = 'legacyCalo'
-            elif thrName[:1]=='J':
-                thrset = 'legacyCalo'
-            elif thrName[:2]=='MU':
+            if thrName[:2]=='MU':
                 thrset = 'muon'
             elif thrName[:3] in ['MBT','AFP','BCM','CAL','NIM','ZDC','BPT','LUC']:
                 thrset = 'detector'
@@ -546,6 +517,9 @@ class L1Menu(object):
                 if layout=='ctpin':
                     # Ignore empty
                     connected_boards += [board for board in contents.values() if board]
+                elif layout=='electrical':
+                    if bool(contents): # Ignore empty
+                        connected_boards.append(contents)
                 else:
                     connected_boards.append(contents)
 
@@ -554,22 +528,16 @@ class L1Menu(object):
             if conn.ctype != CType.ELEC:
                 for tl in conn.triggerLines:
                     thrName = tl.name
-                    if thrName[:3]=='ZB_':
-                        thrName = thrName[3:]
                     all_ctpin.append(thrName)
             else:
                 for fpga in conn.triggerLines:
                     for clock in conn.triggerLines[fpga]:
                         for tl in conn.triggerLines[fpga][clock]:
                             thrName = tl.name
-                            if thrName[:3]=='ZB_':
-                                thrName = thrName[3:]
                             all_ctpin.append(thrName)
 
         for item in self.items:
             for thrName in item.thresholdNames():
-                if thrName[:3]=='ZB_':
-                    thrName = thrName[3:]
                 if thrName not in all_ctpin:
                     raise RuntimeError(
                         f'checkItemsHaveInputs: Threshold {thrName} used by {item.name} is not on a board connected to CTP')

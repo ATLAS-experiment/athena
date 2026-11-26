@@ -358,13 +358,20 @@ void SystemEnergy::metSigTrigger()
     return;
 
   /// Obtain parameters from configuration service
-  auto& params = m_L1Menu->thrExtraInfo().XS();
-  unsigned int Scale = params.xsSigmaScale();
-  unsigned int Offset = params.xsSigmaOffset();
-  unsigned int XEmin = params.xeMin();
-  unsigned int XEmax = params.xeMax();
-  int sqrtTEmin = params.teSqrtMin();
-  int sqrtTEmax = params.teSqrtMax();
+  unsigned int Scale = 1150; // default XS scale
+  unsigned int Offset = 1640, XEmin = 11, XEmax = 63;
+  int sqrtTEmin = 4, sqrtTEmax = 63;
+  try {
+    auto& params = m_L1Menu->thrExtraInfo().XS();
+    Scale = params.xsSigmaScale();
+    Offset = params.xsSigmaOffset();
+    XEmin = params.xeMin();
+    XEmax = params.xeMax();
+    sqrtTEmin = params.teSqrtMin();
+    sqrtTEmax = params.teSqrtMax();
+  } catch(const std::out_of_range&) {
+    // legacy XS not present in menu removed, so use default
+  }
 
   /// Start with overflow and range checks
   if ((m_overflowX > 0) || (m_overflowY > 0) || (m_etMissQ > XEmax * XEmax))

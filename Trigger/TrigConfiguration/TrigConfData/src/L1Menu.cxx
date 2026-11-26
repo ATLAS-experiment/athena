@@ -107,12 +107,14 @@ TrigConf::L1Menu::load()
                   v.emplace_back( alg.first, L1TopoAlgorithm::AlgorithmType::MULTIPLICITY, algoCategory, alg.second );
                }
             } else {
-               for( L1TopoAlgorithm::AlgorithmType algoType : { L1TopoAlgorithm::AlgorithmType::DECISION, L1TopoAlgorithm::AlgorithmType::SORTING } ) {
-                  std::string subpath = "topoAlgorithms." + algoCategory + (algoType==L1TopoAlgorithm::AlgorithmType::DECISION ? ".decisionAlgorithms" : ".sortingAlgorithms" );  
-                  for( auto & algorithm : data().get_child( subpath ) ) {
-                     v.emplace_back( algorithm.first, algoType, algoCategory, algorithm.second );
-                  }
-               }
+                if(algoCategory != "R2TOPO" || hasChild("topoAlgorithms.R2TOPO")){
+                    for( L1TopoAlgorithm::AlgorithmType algoType : { L1TopoAlgorithm::AlgorithmType::DECISION, L1TopoAlgorithm::AlgorithmType::SORTING } ) {
+                        std::string subpath = "topoAlgorithms." + algoCategory + (algoType==L1TopoAlgorithm::AlgorithmType::DECISION ? ".decisionAlgorithms" : ".sortingAlgorithms" );  
+                        for( auto & algorithm : data().get_child( subpath ) ) {
+                            v.emplace_back( algorithm.first, algoType, algoCategory, algorithm.second );
+                        }
+                    }
+                }
             }
             for( auto & algo : v ) {
                if( m_algorithmsByName[algoCategory].count(algo.name()) > 0 ) {
@@ -482,13 +484,18 @@ TrigConf::L1Menu::printMenu(bool full) const
          }
       }
    }
-   if(m_run>1) {
-      cout << "Topo algorithms: " << endl;
-      cout << "    new   : " << data().get_child("topoAlgorithms.TOPO.decisionAlgorithms").size() << endl;
-      cout << "    muon  : " << data().get_child("topoAlgorithms.MUTOPO.decisionAlgorithms").size() << endl;
-      cout << "    mult  : " << data().get_child("topoAlgorithms.MULTTOPO.multiplicityAlgorithms").size() << endl;
-      cout << "    legacy: " << data().get_child("topoAlgorithms.R2TOPO.decisionAlgorithms").size() << endl;
-   }
+    if(m_run==2) {
+         cout << "Topo algorithms: " << endl;
+         cout << "    sorting : " << data().get_child("topoAlgorithms.R2TOPO.sortingAlgorithms").size() << endl;
+         cout << "    decision: " << data().get_child("topoAlgorithms.R2TOPO.decisionAlgorithms").size() << endl;
+    }
+    else if(m_run==3) {
+         cout << "Topo algorithms: " << endl;
+         cout << "    new   : " << data().get_child("topoAlgorithms.TOPO.decisionAlgorithms").size() << endl;
+         cout << "    muon  : " << data().get_child("topoAlgorithms.MUTOPO.decisionAlgorithms").size() << endl;
+         cout << "    mult  : " << data().get_child("topoAlgorithms.MULTTOPO.multiplicityAlgorithms").size() << endl;
+         cout << "    legacy: " << data().get_child("topoAlgorithms.R2TOPO.decisionAlgorithms").size() << endl;
+    }
    cout << "Boards: " << data().get_child("boards").size() << endl;
    cout << "Connectors: " << data().get_child("connectors").size() << endl;
    unsigned int ctpinputs = data().get_child("ctp.inputs.optical").size();

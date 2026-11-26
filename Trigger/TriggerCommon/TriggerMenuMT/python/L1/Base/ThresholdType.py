@@ -19,9 +19,6 @@ class ThrType( Enum ):
     # NIM thresholds
     BCM = 21; BCMCMB = 22; LUCID = 23; ZDC = 24; BPTX = 25; CALREQ = 26; MBTS = 27; MBTSSI = 28; NIM = 29 # noqa: E702
 
-    # legacy calo thresholds
-    EM = 41; TAU = 42; JET = 43; JE = 44; XE = 45; TE = 46; XS = 47 # noqa: E702
-
     # additional Phase-1 thresholds
     cXE = 48 # noqa: E702
 
@@ -36,10 +33,6 @@ class ThrType( Enum ):
     GLOBAL = 70
 
     @staticmethod
-    def LegacyTypes():
-        return [ ThrType.EM, ThrType.TAU, ThrType.JET, ThrType.XE, ThrType.TE, ThrType.XS, ThrType.ZB ]
-    
-    @staticmethod
     def Run3Types():
         return [ ThrType.MU, ThrType.eEM, ThrType.jEM, ThrType.eTAU, ThrType.jTAU, ThrType.cTAU, ThrType.jJ, ThrType.jLJ, ThrType.gJ, ThrType.gLJ, ThrType.gXE, ThrType.gTE, ThrType.jXE, ThrType.jTE, ThrType.cXE, ThrType.LArSat, ThrType.ZBTopo ]
     
@@ -49,7 +42,7 @@ class ThrType( Enum ):
 
     @staticmethod
     def CaloTypes():
-        return [tt for tt in ThrType.LegacyTypes()+ThrType.Run3Types() if tt != ThrType.MU]
+        return [tt for tt in ThrType.Run3Types() if tt != ThrType.MU]
 
     def __lt__(self,other):
         return self.name < other

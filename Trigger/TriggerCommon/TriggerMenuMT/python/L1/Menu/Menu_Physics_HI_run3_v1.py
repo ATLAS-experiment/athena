@@ -331,7 +331,6 @@ def defineMenu():
         'L1_LHCF', 'L1_LHCF_UNPAIRED_ISO', 'L1_LHCF_EMPTY',
 
         # AFP
-        #'L1_EM7_AFP_A_OR_C', 'L1_EM7_AFP_A_AND_C',
         'L1_MU5VF_AFP_A_OR_C', 'L1_MU5VF_AFP_A_AND_C',
         'L1_eEM9_AFP_A_OR_C','L1_eEM9_AFP_A_AND_C',
 

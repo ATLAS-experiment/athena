@@ -83,12 +83,6 @@ def getL1TauSeed(l1items):
     tau_seeds = [ x for x in l1items if "TAU" in x and "-" not in x and  "EMPTY" not in x  and "ISO" not in x]
     return tau_seeds
 
-##############################
-def getL1BSSeed():
-    return ['L1_J15','L1_3J15','L1_3J10','L1_4J10']
-
-def getL1JetBS():
-    return ['L1_J15','L1_3J15','L1_3J10','L1_4J10']
 
 ##############################
 def getL1MuonSeed(l1seed, l1object):
@@ -337,9 +331,7 @@ def getL1BKeePrescaledLegacy():
 #####################################
 
 L1_multiseed_simple_getters = {
-    'L1_J': getL1JetBS,
     'L1_Bkg': getL1BackgroundSeed,
-    'L1_BS': getL1BSSeed,
     'L1_LowLumi': getL1LowLumi,
     'L1_BKeeLowMu': getL1BKeeLowMu,
     'L1_BKeePrimary': getL1BKeePrimary,
