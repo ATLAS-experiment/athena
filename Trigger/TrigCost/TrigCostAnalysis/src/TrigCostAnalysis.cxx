@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #define BOOST_BIND_GLOBAL_PLACEHOLDERS // silence Boost pragma message (fixed in Boost 1.76)
@@ -199,11 +199,12 @@ StatusCode TrigCostAnalysis::execute(const EventContext& ctx) {
 
   if (!m_metadataDataKey.empty()){
     SG::ReadHandle<xAOD::TrigCompositeContainer> metadataDataHandle(m_metadataDataKey, context);
+    static constexpr std::string hName{"hostname"};
     if (metadataDataHandle.isValid()){
       for (const xAOD::TrigComposite* tc : *metadataDataHandle) {
         try {
           std::lock_guard<std::mutex> lock(m_addHostnameMutex);
-          m_hostnames.insert(tc->getDetail<std::string>("hostname"));
+          m_hostnames.insert(tc->getDetail<std::string>(hName));
         } catch ( const std::exception& ) {
           ATH_MSG_WARNING("Missing HLT_RuntimeMetadata EDM hostname for event " << context.eventID().event_number());
         }
@@ -423,14 +424,17 @@ StatusCode TrigCostAnalysis::dumpEvent(const EventContext& context) const {
 
   std::stringstream ss;
   size_t algID = 0;
-
+  static constexpr std::string startStr{"start"};
+  static constexpr std::string stopStr{"stop"};
+  static constexpr std::string slotStr{"slot"};
+  static constexpr std::string threadStr{"thread"};
   for ( const xAOD::TrigComposite* tc : *costDataHandle ) {
-    const uint64_t start = tc->getDetail<uint64_t>("start"); // in mus
-    const uint64_t stop  = tc->getDetail<uint64_t>("stop"); // in mus
-    const uint32_t slot  = tc->getDetail<uint32_t>("slot");
+    const uint64_t start = tc->getDetail<uint64_t>(startStr); // in mus
+    const uint64_t stop  = tc->getDetail<uint64_t>(stopStr); // in mus
+    const uint32_t slot  = tc->getDetail<uint32_t>(slotStr);
     const uint64_t start_ms_round = std::llround( start * 1e-3 ); // in ms
     const uint64_t stop_ms_round  = std::llround( stop  * 1e-3 ); // in ms
-    const uint32_t threadID = tc->getDetail<uint32_t>("thread");
+    const uint32_t threadID = tc->getDetail<uint32_t>(threadStr);
 
     ss << "{id:" << algID++;
     ss << ", group:" << threadID;
