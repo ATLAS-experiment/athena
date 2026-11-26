@@ -20,7 +20,7 @@ echo $fileList
 
 
 cp -rL /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/geantcheck .
-R_FILE="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/geantcheck_25.0.70_muons.root"
+R_FILE="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/geantcheck_25.0.79_muons.root"
 
 
 run () {
