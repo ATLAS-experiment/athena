@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArHVMapTool.h"
@@ -52,7 +52,10 @@ StatusCode LArHVMapTool::initialize(){
 
   IdentifierHash h=0;
   Identifier offId;
-  m_larem_id->get_id(h,offId);
+  int rc = m_larem_id->get_id(h,offId);
+  if (rc != 0)[[unlikely]]{
+    ATH_MSG_INFO("get_id failed for hash "<<h);
+  }
   std::vector<int> hvlineVec;
   GetHVLines(offId, calodetdescrmgr, hvlineVec);
 

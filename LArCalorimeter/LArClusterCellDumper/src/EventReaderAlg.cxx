@@ -856,7 +856,7 @@ StatusCode EventReaderAlg::dumpClusterCells(const xAOD::CaloCluster *cl, int clu
             int slot = m_onlineLArID->slot(channelID);
             int chn = m_onlineLArID->channel(channelID);      
             std::vector<int> chInfo {barrelEc, posNeg, feedThr, slot, chn } ; //unite info
-            m_c_channelChInfo->push_back(chInfo); //add to the list of cell info (both calo)
+            m_c_channelChInfo->push_back(std::move(chInfo)); //add to the list of cell info (both calo)
 
             // important indexes
             m_c_clusterChannelIndex->push_back(channelIndexMap[k]);//each LAr cell is an individual read out.
