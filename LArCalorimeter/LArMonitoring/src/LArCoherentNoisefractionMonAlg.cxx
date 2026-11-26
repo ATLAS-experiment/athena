@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /*
 */
@@ -140,7 +140,7 @@ LArCoherentNoisefractionMonAlg::fillHistograms(const EventContext& ctx) const
        // BCIDs of the abort gap
        const int ABORT_GAP_START = 3446;
        const int ABORT_GAP_END   = 3563;
-       for(auto trig_chain : m_vTrigChainNames) {
+       for(const auto & trig_chain : m_vTrigChainNames) {
 	passBCID = ((trig_chain == "HLT_noalg_cosmiccalo_L1RD1_EMPTY")?(ctx.eventID().bunch_crossing_id() >= ABORT_GAP_START && ctx.eventID().bunch_crossing_id() <= ABORT_GAP_END):true);
 	passTrig=(passTrig || (passBCID && trigTool->isPassed(trig_chain)));
        }

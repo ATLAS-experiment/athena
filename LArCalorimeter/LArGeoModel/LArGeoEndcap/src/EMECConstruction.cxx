@@ -608,7 +608,6 @@ void LArGeo::EMECConstruction::place_custom_solids(
     const GeoMaterial *Glue, const GeoMaterial *Lead
 )
 {
-
   for(const auto& name: absorbers){
     GeoLogVol* log_volume = new GeoLogVol(name, new GeoUnidentifiedShape("LArCustomShape", name) , Absorber);
     GeoIntrusivePtr<GeoPhysVol> phys_volume = new GeoPhysVol(log_volume);
@@ -637,9 +636,9 @@ void LArGeo::EMECConstruction::place_custom_solids(
       glue_phys->add(lead_phys);
     }
   }
-    const std::string customStr{"LArCustomShape"};
+  
     for(const auto& name: electrodes){
-      GeoLogVol* log_volume = new GeoLogVol(name, new GeoUnidentifiedShape(customStr,name), Electrode);
+      GeoLogVol* log_volume = new GeoLogVol(name, new GeoUnidentifiedShape("LArCustomShape",name), Electrode);
       GeoIntrusivePtr<GeoPhysVol> phys_volume = new GeoPhysVol(log_volume);
       fullPV->add(new GeoIdentifierTag(1));
       fullPV->add(new GeoTransform(GeoTrf::Transform3D::Identity()));

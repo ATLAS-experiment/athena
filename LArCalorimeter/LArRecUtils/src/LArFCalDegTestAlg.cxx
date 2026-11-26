@@ -32,7 +32,7 @@ StatusCode LArFCalDegTestAlg::execute(const EventContext& ctx) const
      return StatusCode::FAILURE;
   } else ATH_MSG_DEBUG("successfully got FcalDegFactors");
 
-  const auto factors = fcalHdl->get();
+  const auto & factors = fcalHdl->get();
 
   if(factors.size() != LArFcalDegFactors::nBins) {
      ATH_MSG_ERROR("Wrong size of FcalDegMap: " << factors.size());
