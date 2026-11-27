@@ -13,6 +13,7 @@ usage () {
     -i  |  --inputRDO       STRING      full path to input RDO file (mandatory)
     -o  |  --outputAOD      STRING      name of the output AOD file (mandatory)
     -n  |  --nEvents        INT         Number of events to run on (default = -1 aka All)
+         --preExec       STRING      additional Athena flag settings
     -s  |  --skipCheck                  skip checks on output AOD file
     -h  |  --help                       this help
     "
@@ -33,6 +34,7 @@ nEvents="-1"
 skipCheck=0
 storeTrackSeeds=True
 numThreads=1
+extraPreExec=""
 
 ## parsing flags
 while [ $# -ge 1 ];do
@@ -41,11 +43,12 @@ while [ $# -ge 1 ];do
         -i  | --inputRDO )      if [ $# -lt 2 ] ; then usage ; fi ; inputRDO="$2"  ; shift ;;
         -o  | --outputAOD )     if [ $# -lt 2 ] ; then usage ; fi ; outputAOD="$2" ; shift ;;
         -n  | --nEvents )       if [ $# -lt 2 ] ; then usage ; fi ; nEvents="$2"   ; shift ;;
+        --preExec )            if [ $# -lt 2 ]; then usage 1 "Missing --preExec value"; fi; extraPreExec="$2"; shift ;;
         -s  | --skipCheck )     if [ $# -lt 1 ] ; then usage ; fi ; skipCheck=1    ;;
         -t  | --noStoreSeeds )  if [ $# -lt 1 ] ; then usage ; fi ; storeTrackSeeds=False ;;
         -T  | --numThreads )    if [ $# -lt 2 ] ; then usage ; fi ; numThreads="$2" ; shift ;;
         -h  | --help )          usage 0 ;;
-        *) shift ;;
+        *) usage 1 "Unknown option: $1" ;;
     esac
     shift
 done
@@ -74,7 +77,7 @@ run Reco_tf.py \
                flags.Concurrency.NumThreads=${numThreads}; \
                flags.Concurrency.NumConcurrentEvents=${numThreads}; \
                flags.Acts.TrackingGeometry.UseBlueprint=True; \
-               flags.Acts.TrackingGeometry.BuildDetrayGeometry=True;" \
+               flags.Acts.TrackingGeometry.BuildDetrayGeometry=True; ${extraPreExec}" \
     --inputRDOFile "${inputRDO}" \
     --outputAODFile "${outputAOD}" \
     --perfmon fullmonmt
