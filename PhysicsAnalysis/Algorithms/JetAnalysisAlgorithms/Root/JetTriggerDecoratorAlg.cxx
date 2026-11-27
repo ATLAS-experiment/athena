@@ -239,6 +239,13 @@ namespace CP
       isTrigPassed = false;
     }
 
+    // Efficiency measurements need the online jets also where the trigger
+    // did not fire. Then nothing may depend on the chain decision: the L1
+    // RoIs are matched in every event and the HLT jets are taken from the
+    // container (Run 3) or the emulation (Run 2), not from the navigation.
+    const bool matchAll = m_matchAllEvents && hltChain != nullptr;
+    const bool hltFromContainer = matchAll && !m_useEmulationTool;
+
     // HLT candidates of each "j" leg (aligned with m_jetLegs): they depend
     // only on the event, so are collected once before the jet loops. The
     // first nNavCandidates[i] of them come from the trigger navigation (or
@@ -246,7 +253,8 @@ namespace CP
     std::vector<std::vector<const xAOD::IParticle*>> hltCandidates(
         m_jetLegs.size());
     std::vector<std::size_t> nNavCandidates(m_jetLegs.size(), 0);
-    if (m_doHLTMatching && isTrigPassed) {
+    if (m_doHLTMatching && !hltFromContainer &&
+        (isTrigPassed || matchAll)) {
       for (std::size_t i = 0; i < m_jetLegs.size(); ++i) {
         const JetLeg& leg = m_jetLegs[i];
         std::vector<const xAOD::IParticle*>& candidates = hltCandidates[i];
@@ -326,7 +334,7 @@ namespace CP
           float minDRL1 = m_l1dR.value();
           std::vector<int> l1ThresholdsVec;
 
-          if (isTrigPassed) {
+          if (isTrigPassed || matchAll) {
             if (m_usePhaseIL1) {
               const JfexThresholdTable& jfexTable = m_jfexThresholdTable;
               std::tie(l1Et, l1Eta, l1Phi, minDRL1, l1ThresholdsVec) =
@@ -364,6 +372,25 @@ namespace CP
           const xAOD::IParticle* bestHLT = nullptr;
           float minDRHLT = m_hltDR.value();
           std::set<int> HLTThresholds = {};
+
+          if (hltFromContainer) {
+            // closest jet of the HLT container, whatever the chain did;
+            // a leg threshold counts as passed if the HLT pT is above it
+            // (pT only: no online JVT or eta requirement of the leg)
+            for (const xAOD::Jet* hlt_jet : *hltJetsFromCont) {
+              const float dR = jetP4.DeltaR(hlt_jet->p4());
+              if (dR < minDRHLT) {
+                minDRHLT = dR;
+                bestHLT = hlt_jet;
+              }
+            }
+            if (bestHLT) {
+              for (const JetLeg& leg : m_jetLegs) {
+                if (bestHLT->pt() >= 1000. * leg.threshold)
+                  HLTThresholds.insert(leg.threshold);
+              }
+            }
+          }
 
           for (std::size_t i = 0; i < m_jetLegs.size(); ++i) {
             const int legThreshold = m_jetLegs[i].threshold;

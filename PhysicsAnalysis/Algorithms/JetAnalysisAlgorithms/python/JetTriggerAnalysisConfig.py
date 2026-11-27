@@ -65,6 +65,10 @@ class JetTriggerMatchingBlock (ConfigBlock):
                         info="Add L1 matching decorations")
         self.addOption ('runHLTMatching', True, type=bool,
                         info="Add HLT matching decorations")
+        self.addOption ('matchAllEvents', False, type=bool,
+                        info="match also in events where the trigger did not fire, "
+                        "using only the L1 RoI and HLT jet containers and not the "
+                        "trigger navigation (for efficiency measurements).")
         self.addOption ('runRun2HLTEmulation', True, type=bool,
                         info="Run HLT jet trigger emulation for Run 2")
         self.addOption ('l1dR', 0.4, type=float,
@@ -122,6 +126,7 @@ class JetTriggerMatchingBlock (ConfigBlock):
 
             alg.TrigDecisionTool = f"{decisionTool.getType()}/{decisionTool.getName()}"
 
+            alg.matchAllEvents = self.matchAllEvents
             alg.doL1Matching = self.runL1Matching
             alg.doHLTMatching = self.runHLTMatching
             alg.jets = config.readName (self.containerName)
