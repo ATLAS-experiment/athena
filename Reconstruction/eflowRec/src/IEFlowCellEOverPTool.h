@@ -37,7 +37,7 @@ class IEFlowCellEOverPTool : public AthAlgTool {
 
   static const InterfaceID& interfaceID();
 
-  virtual StatusCode intialize() {return StatusCode::SUCCESS;};
+ 
   virtual StatusCode fillBinnedParameters(eflowEEtaBinnedParameters *binnedParameters) const = 0;
   virtual StatusCode finalize() {return StatusCode::SUCCESS;};
 

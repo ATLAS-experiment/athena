@@ -59,17 +59,16 @@ class eflowTrackCaloPoints {
   double getEM1eta() const {return getEtaPhiPos(getEM1Layer()).getEta(); }
   double getFCAL0eta() const {return getEtaPhiPos(eflowCalo::FCAL0).getEta(); }
   
-  Amg::Vector3D getPosition(eflowCalo::LAYER layer);
 
   static double defaultEta();
   static double defaultPhi();
 
   inline bool haveLayer(eflowCalo::LAYER layer) const { return getEta(layer) != m_defaultEtaPhiPair.first;  }
 
-  void setEtaPhi(eflowCaloENUM secondLayer, double eta, double phi);
+
   void setEtaPhiTile(CaloCell_ID::CaloSample secondLayer, const Amg::Vector3D& vec);
   void setEtaPhi(eflowCalo::LAYER lay, const Amg::Vector3D& vec);
-  void copyEtaPhi(eflowCalo::LAYER fromLay, eflowCalo::LAYER toLay);
+
 
   static Amg::Vector3D parToPosition(const Trk::TrackParameters* extrapolatedParameters);
   static Amg::Vector3D parToPosition(const Acts::BoundTrackParameters* extrapolatedParameters, const Acts::GeometryContext& gctx);
@@ -94,13 +93,6 @@ class eflowTrackCaloPoints {
   /** Eta-Phi positions per tile layer in the 3 tile calorimeters - only used for experimental DNN based e/p */
   std::map<CaloCell_ID::CaloSample,eflowEtaPhiPosition> m_tileEtaPhiPositions;
 };
-
-inline void eflowTrackCaloPoints::copyEtaPhi(eflowCalo::LAYER fromLay, eflowCalo::LAYER toLay) {
-  std::map<eflowCalo::LAYER, eflowEtaPhiPosition>::const_iterator it = m_etaPhiPositions.find(fromLay);
-  if (it != m_etaPhiPositions.end()) {
-    m_etaPhiPositions[toLay] = it->second;
-  }
-}
 
 
 #endif

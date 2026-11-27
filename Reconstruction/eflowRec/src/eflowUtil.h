@@ -109,16 +109,16 @@ public:
   eflowRangeBase() = default;
   eflowRangeBase(const T& min, const T& max): m_min(min), m_max(max) { }
 
-  inline void setCenterAndWidth(T center, double width) { m_min = center - width/2; m_max = m_min + width; }
+
   inline void shift(double shift) { m_min += shift; m_max += shift; }
 
-  inline T getMax() const { return m_max; }
+
   inline T getMin() const { return m_min; }
 
   inline T getCenter() const { return (m_max + m_min)/2; }
   inline T getWidth() const { return (m_max - m_min); }
 
-  bool contains(const T& x) { return ( (m_min < x) && (m_max > x) ); }
+ 
 
   std::string print() const {
     std::string result = "[";

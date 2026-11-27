@@ -36,10 +36,6 @@ public:
   MatchDistance match(ITrack* track, ICluster* cluster) const;
 
   template<class ClusterType>
-  MatchDistance bestMatchDRparametrized(
-    ITrack* track,
-    const std::vector<ClusterType*>& clusters) const;
-  template<class ClusterType>
   std::vector<MatchDistance> bestMatches(ITrack* track,
                                          std::vector<ClusterType*>& clusters,
                                          int nMatches,
@@ -56,28 +52,6 @@ private:
 
 
 };
-
-template<class ClusterType>
-   MatchDistance TrackClusterMatcher::bestMatchDRparametrized(ITrack* track, const std::vector<ClusterType*>& clusters) const {
-   ClusterType* bestCluster = nullptr;
-   double bestDistance(m_matchCut);
-   unsigned int nClusters(clusters.size());
-   for (unsigned int iCluster = 0; iCluster < nClusters; ++iCluster){
-
-     ClusterType* thisCluster = clusters[iCluster];
-     double thisDistance(m_distanceProvider->distanceBetween(track, clusters[iCluster]));
-     double  mybestdistance = getDRCutSquared(thisCluster);
-
-     if (thisDistance < mybestdistance){
-       if (thisDistance < bestDistance) {
-	 bestDistance = thisDistance;
-	 bestCluster  = thisCluster;
-       }
-     }
-   }
-
-   return MatchDistance(bestCluster, bestDistance);
- }
 
 template<class ClusterType>
 std::vector<MatchDistance> TrackClusterMatcher::bestMatches(ITrack* track, std::vector<ClusterType*>& clusters, int nMatches, double energyThreshold) const {

@@ -83,10 +83,6 @@ void eflowTrackCaloPoints::setEtaPhiTile(CaloCell_ID::CaloSample lay, const Amg:
                                                  : m_defaultEtaPhiPosition;
 }
 
-//only used in eflowTrackExtrapolatorTool
-void eflowTrackCaloPoints::setEtaPhi(eflowCaloENUM layer, double eta, double phi) {
-  m_etaPhiPositions[layer] = eflowEtaPhiPosition(eta, phi);
-}
 
 const pair<float, float> eflowTrackCaloPoints::operator[] (eflowCaloENUM layer) const {
   eflowEtaPhiPosition thisPosition = getEtaPhiPos(layer);
@@ -100,11 +96,6 @@ const eflowEtaPhiPosition& eflowTrackCaloPoints::getEtaPhiPos(eflowCalo::LAYER l
 const eflowEtaPhiPosition& eflowTrackCaloPoints::getTileEtaPhiPos(CaloCell_ID::CaloSample  layer) const {
   std::map< CaloCell_ID::CaloSample , eflowEtaPhiPosition>::const_iterator it = m_tileEtaPhiPositions.find(layer);
   return (it == m_tileEtaPhiPositions.end()) ? m_defaultEtaPhiPosition : it->second;
-}
-
-Amg::Vector3D eflowTrackCaloPoints::getPosition(eflowCalo::LAYER layer) {
-  std::map<eflowCalo::LAYER, Amg::Vector3D>::const_iterator it = m_positions.find(layer);
-  return (it == m_positions.end()) ? m_nullVector : it->second;
 }
 
 Amg::Vector3D eflowTrackCaloPoints::parToPosition(const Trk::TrackParameters* trackPars) {

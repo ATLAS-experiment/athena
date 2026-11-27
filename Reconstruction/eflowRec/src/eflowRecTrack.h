@@ -66,7 +66,7 @@ public:
 
   eflowRingSubtractionManager& getCellSubtractionManager() { return m_ringSubtractionManager; }
 
-  int getType() const { return m_type; }
+
 
   const std::vector<eflowTrackClusterLink*>& getClusterMatches() const { return m_clusterMatches; }
   const std::vector<float>& getDRPrimes() const { return m_deltaRPrimes;}
