@@ -49,16 +49,11 @@ StatusCode LArHVMapTool::initialize(){
   } else {
      ATH_MSG_DEBUG("Got HV mapping !");
   }
-
-  IdentifierHash h=0;
+  
   Identifier offId;
-  int rc = m_larem_id->get_id(h,offId);
-  if (rc != 0)[[unlikely]]{
-    ATH_MSG_INFO("get_id failed for hash "<<h);
-  }
   std::vector<int> hvlineVec;
   GetHVLines(offId, calodetdescrmgr, hvlineVec);
-
+  
   return StatusCode::SUCCESS;
 }
 
