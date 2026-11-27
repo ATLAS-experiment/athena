@@ -16,13 +16,14 @@ if( NOT SIMULATIONBASE )
 endif()
 
 # External dependencies:
-find_package( GeoModel COMPONENTS GeoModelKernel GeoModelHelpers )
+find_package( GeoModelCore )
 
 atlas_add_library( MuonReadoutGeometryR4
                    src/*.cxx
                    PUBLIC_HEADERS MuonReadoutGeometryR4
-                   INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaBaseComps AthenaKernel GeoPrimitives Identifier  
+
+                   LINK_LIBRARIES GeoModelCore::GeoModelKernel GeoModelCore::GeoModelHelpers 
+                                  AthenaBaseComps AthenaKernel GeoPrimitives Identifier  
                                   ActsGeometryInterfacesLib ActsGeoUtils MuonIdHelpersLib GaudiKernel 
                                   StoreGateLib GeoModelUtilities CxxUtils ${extra_libs})
 

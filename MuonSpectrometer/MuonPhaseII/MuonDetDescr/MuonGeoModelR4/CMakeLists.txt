@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 ################################################################################
 # Package: MuonGeoModelR4
@@ -8,7 +8,8 @@
 atlas_subdir( MuonGeoModelR4 )
 
 # External dependencies:
-find_package( GeoModel COMPONENTS GeoModelKernel GeoModelDBManager GeoModelRead GeoModelHelpers GeoModelValidation)
+find_package( GeoModelCore )
+find_package( GeoModelIO )
 
 set( extra_libs )
 if( NOT SIMULATIONBASE )
@@ -21,15 +22,17 @@ atlas_add_library( MuonGeoModelR4Lib
                    MuonGeoModelR4/*.h
                    INTERFACE
                    PUBLIC_HEADERS MuonGeoModelR4
-                   INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaBaseComps AthenaKernel)
+                   LINK_LIBRARIES GeoModelCore::GeoModelKernel GeoModelCore::GeoModelHelpers 
+                                  GeoModelIO::GeoModelDBManager GeoModelIO::GeoModelRead 
+                                  AthenaBaseComps AthenaKernel)
 
 atlas_add_component( MuonGeoModelR4
                      src/*.cxx src/components/*.cxx
-                     INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaBaseComps AthenaKernel StoreGateLib GeoModelUtilities 
-                                    GaudiKernel MuonReadoutGeometryR4 MuonGeoModelR4Lib AthenaPoolUtilities MuonDetDescrUtils
-                                    GeoModelUtilities GaudiKernel MuonReadoutGeometryR4 StoreGateLib ${extra_libs} CxxUtils)
+                     LINK_LIBRARIES GeoModelCore::GeoModelKernel GeoModelCore::GeoModelHelpers 
+                                    GeoModelIO::GeoModelDBManager GeoModelIO::GeoModelRead 
+                                    AthenaBaseComps AthenaKernel StoreGateLib GeoModelUtilities ${extra_libs}
+                                    MuonGeoModelR4Lib AthenaPoolUtilities MuonDetDescrUtils GaudiKernel 
+                                    MuonReadoutGeometryR4 CxxUtils)
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

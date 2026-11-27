@@ -8,14 +8,13 @@
 atlas_subdir( MuonReadoutGeometry )
 
 # External dependencies:
-find_package( GeoModel COMPONENTS GeoModelKernel )
+find_package( GeoModelCore )
 
 # Component(s) in the package:
 atlas_add_library( MuonReadoutGeometry
                    src/*.c*
                    PUBLIC_HEADERS MuonReadoutGeometry
-                   INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaBaseComps AthenaKernel GeoPrimitives Identifier GaudiKernel 
+                   LINK_LIBRARIES GeoModelCore::GeoModelKernel AthenaBaseComps AthenaKernel GeoPrimitives Identifier GaudiKernel 
                    MuonAlignmentData TrkDetElementBase TrkSurfaces MuonIdHelpersLib StoreGateLib GeoModelUtilities CxxUtils 
                    PRIVATE_LINK_LIBRARIES AGDDModel MuonAGDDDescription)
 
