@@ -307,15 +307,21 @@ void VP1Prioritiser::visibleChannelsChanged(const QSet<IVP1ChannelWidget*>&newvi
 //___________________________________________________________________
 void VP1Prioritiser::channelCreated(IVP1ChannelWidget* cw)
 {
+  for (IVP1System* system : cw->systems())
+    systemAdded(system);
+}
+
+//___________________________________________________________________
+void VP1Prioritiser::systemAdded(IVP1System* system)
+{
+  IVP1ChannelWidget* cw = system->channel();
   bool visible = m_d->visiblechannels.contains(cw);
   bool soonvisible = m_d->soonvisiblechannels.contains(cw);
   assert(!(visible&&soonvisible));
-  for (setupSysItr(cw);m_d->itsys!=m_d->itsysE;++m_d->itsys) {
-    assert(!m_d->sys2info.contains(*(m_d->itsys)));
-    Imp::SystemInfo* info = new Imp::SystemInfo(*(m_d->itsys),m_d,cw,
-						(visible?Imp::SystemInfo::VISIBLE:(soonvisible?Imp::SystemInfo::SOONVISIBLE:Imp::SystemInfo::NOTVISIBLE)));
-    m_d->sys2info.insert(*(m_d->itsys),info);
-  }
+  assert(!m_d->sys2info.contains(system));
+  const auto visibility = visible ? Imp::SystemInfo::VISIBLE
+    : (soonvisible ? Imp::SystemInfo::SOONVISIBLE : Imp::SystemInfo::NOTVISIBLE);
+  m_d->sys2info.insert(system, new Imp::SystemInfo(system, m_d, cw, visibility));
 }
 
 //___________________________________________________________________

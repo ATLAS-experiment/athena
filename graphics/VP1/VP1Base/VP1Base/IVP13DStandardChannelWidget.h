@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -16,6 +16,8 @@
 #define IVP13DSTANDARDCHANNELWIDGET_H
 
 #include "VP1Base/IVP13DChannelWidget.h"
+#include <QStringList>
+#include <functional>
 class IVP13DSystem;
 class IVP13DSystemSimple;
 class QResizeEvent;
@@ -42,8 +44,13 @@ public:  //public instead of protected due to compilation problems on SLC3
   Q_DECLARE_FLAGS(SystemOptions, SystemOption)
 protected:
 
-  //Call the following in constructor of a derived class. Do not delete the systems in the derived class.
+  // Add a system during init() or from a ready channel's controller.
   void addSystem(IVP13DSystem*, const SystemOptions& options = AllowAll );
+  // Group General-tab checkboxes by their system names.
+  void addSystemGroup(const QString& title, const QStringList& systemNames);
+  // Register an optional General-tab action during init().
+  void addExtraSystemFactory(const QString& prefix, const QString& groupTitle, const QString& buttonText,
+                             std::function<IVP13DSystemSimple*(const QString&)> factory);
 
   //////////////////// The following is for internal use ///////////////////////
 

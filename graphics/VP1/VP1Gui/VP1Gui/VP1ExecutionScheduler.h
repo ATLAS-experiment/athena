@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -113,6 +113,9 @@ signals:
 
 
 private:
+  void createSystem(IVP1System*);
+  void connectSystem(IVP1System*);
+  void systemAdded(IVP1System*);
   class Imp;
   Imp * m_d;
   void refreshSystem(IVP1System*);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -220,11 +220,12 @@ void IVP1ChannelWidget::registerController(QWidget*w)
 //_______________________________________________________
 void IVP1ChannelWidget::registerSystem(IVP1System*s)
 {
-	assert(m_d->canregistersystem&&"Please only register systems during the channel constructor");
-	assert(m_d->state==CONSTRUCTED);
+	assert((m_d->state==CONSTRUCTED&&m_d->canregistersystem)||m_d->state==READY);
 	assert(m_d->systems.find(s)==m_d->systems.end()&&"IVP1ChannelWidget::registerSystem(...) called twice on the same system!!");
 	m_d->systems.insert(s);
 	s->setChannel(this);
+	if (m_d->state==READY)
+		emit systemAdded(s);
 }
 
 //_______________________________________________________

@@ -766,22 +766,35 @@ void VP1ExecutionScheduler::processSystemForRefresh()
 //___________________________________________________________________
 void VP1ExecutionScheduler::channelCreated(IVP1ChannelWidget* cw)
 {
-	std::set<IVP1System*>::const_iterator it, itE = cw->systems().end();
-	for (it=cw->systems().begin();it!=itE;++it) {
-		qInfo() << "System name:" << (*it)->name();
-		connect(*it,SIGNAL(inactiveSystemTurnedActive()),this,SLOT(startRefreshQueueIfAppropriate()));
-		connect(*it,SIGNAL(needErase()),this,SLOT(systemNeedErase()));
-		#ifdef BUILDVP1LIGHT
-			connect(*it,SIGNAL(signalLoadEvent(IVP1System*)),this,SLOT(passEvent(IVP1System*)));
-		#endif // BUILDVP1LIGHT
-	}
+	connect(cw, &IVP1ChannelWidget::systemAdded, this, &VP1ExecutionScheduler::systemAdded);
+	for (IVP1System* system : cw->systems())
+		connectSystem(system);
 	startRefreshQueueIfAppropriate();
+}
 
+void VP1ExecutionScheduler::connectSystem(IVP1System* system)
+{
+	qInfo() << "System name:" << system->name();
+	connect(system,SIGNAL(inactiveSystemTurnedActive()),this,SLOT(startRefreshQueueIfAppropriate()));
+	connect(system,SIGNAL(needErase()),this,SLOT(systemNeedErase()));
+#ifdef BUILDVP1LIGHT
+	connect(system,SIGNAL(signalLoadEvent(IVP1System*)),this,SLOT(passEvent(IVP1System*)));
+#endif
+}
+
+void VP1ExecutionScheduler::systemAdded(IVP1System* system)
+{
+	m_d->prioritiser->systemAdded(system);
+	connect(system,SIGNAL(sysmessage(const QString&)),m_d->mainwindow,SLOT(systemAddToMessageBox(const QString&)));
+	connectSystem(system);
+	createSystem(system);
+	startRefreshQueueIfAppropriate();
 }
 
 //___________________________________________________________________
 void VP1ExecutionScheduler::channelUncreated(IVP1ChannelWidget* cw)
 {
+	disconnect(cw, &IVP1ChannelWidget::systemAdded, this, &VP1ExecutionScheduler::systemAdded);
 	std::set<IVP1System*>::const_iterator it, itE = cw->systems().end();
 	for (it=cw->systems().begin();it!=itE;++it)
 		disconnect(*it,SIGNAL(inactiveSystemTurnedActive()),this,SLOT(startRefreshQueueIfAppropriate()));
@@ -1079,13 +1092,8 @@ void VP1ExecutionScheduler::bringFromConstructedToReady(IVP1ChannelWidget*cw)
 		assert((*itsys)->state()==IVP1System::CONSTRUCTED);
 		connect((*itsys),SIGNAL(sysmessage(const QString&)),m_d->mainwindow,SLOT(systemAddToMessageBox(const QString&)));
 	}
-	itsysE = cw->systems().end();
-	for (itsys = cw->systems().begin();itsys!=itsysE;++itsys) {
-		(*itsys)->setCanRegisterController(true);
-		(*itsys)->create(VP1AthenaPtrs::detectorStore());
-		(*itsys)->setCanRegisterController(false);
-		(*itsys)->setState(IVP1System::ERASED);
-	}
+	for (IVP1System* system : cw->systems())
+		createSystem(system);
 	assert(cw->state()==IVP1ChannelWidget::CONSTRUCTED);
 	cw->setCanRegister(true,false);//Ok to register controllers during create.
 	cw->create();
@@ -1094,6 +1102,15 @@ void VP1ExecutionScheduler::bringFromConstructedToReady(IVP1ChannelWidget*cw)
 
 	assert(cw->state()==IVP1ChannelWidget::READY);
 	//Fixme: statusbar!!!!!
+}
+
+void VP1ExecutionScheduler::createSystem(IVP1System* system)
+{
+	assert(system->state()==IVP1System::CONSTRUCTED);
+	system->setCanRegisterController(true);
+	system->create(VP1AthenaPtrs::detectorStore());
+	system->setCanRegisterController(false);
+	system->setState(IVP1System::ERASED);
 }
 
 //___________________________________________________________________

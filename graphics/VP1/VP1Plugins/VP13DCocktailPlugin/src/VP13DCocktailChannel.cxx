@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -51,6 +51,12 @@ VP13DCocktailChannel::VP13DCocktailChannel()
 
 void VP13DCocktailChannel::init()
 {
+  addSystemGroup(tr("General"), {"Guides"});
+  addSystemGroup(tr("Geometry"), {"Geo", "TrkGeo"});
+  addSystemGroup(tr("Physics Objects"), {"Tracks", "Analysis", "BPhys"});
+  addSystemGroup(tr("Measurements"), {"Hits", "Sim Hits", "Cells", "RawHits", "CaloReadout"});
+  addSystemGroup(tr("Utilities"), {"ExtraInput", "PartSpectrum"});
+
   VP1GuideLineSystem * guidelinesystem = new VP1GuideLineSystem;
   addSystem(guidelinesystem);
 
@@ -98,6 +104,12 @@ void VP13DCocktailChannel::init()
 
   QObject::connect(geosys,SIGNAL(plotSpectrum(QStack<QString>&,int)),partspectsys,SLOT(plotSpectrum(QStack<QString>&,int)));
 
+  addExtraSystemFactory("AltGeo", tr("Alt Geo"), tr("Add geometry system"), [](const QString& name) {
+    return new VP1GeometrySystem(VP1GeoFlags::None, name);
+  });
+  addExtraSystemFactory("AltTrk", tr("Alt Tracks"), tr("Add track system"), [](const QString& name) {
+    return new VP1TrackSystem(name);
+  });
   for (const QString& n : VP1SysConf::extraGeometrySystems())
     addSystem(new VP1GeometrySystem(VP1GeoFlags::None,n),IVP13DStandardChannelWidget::StartDisabled);
   for (const QString& n : VP1SysConf::extraTrackSystems())

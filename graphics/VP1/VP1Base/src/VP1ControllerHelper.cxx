@@ -24,6 +24,16 @@
 #include <QVBoxLayout>
 #include <QVariant>
 
+QCheckBox* VP1ControllerHelper::systemCheckBox(IVP1System* system, QWidget* parent)
+{
+  auto* checkBox = new QCheckBox(parent);
+  // The display label can differ from the persistent system name.
+  const QString label = system->property("vp1SystemLabel").toString();
+  checkBox->setText(label.isEmpty() ? system->name() : label);
+  checkBox->setToolTip(system->information());
+  checkBox->setChecked(true);
+  return checkBox;
+}
 
 //_____________________________________________________________________________________________________________
 QWidget * VP1ControllerHelper::compositionController( const QList<IVP1System*>& systemsWithControllersAllowed,
@@ -66,6 +76,7 @@ QWidget * VP1ControllerHelper::compositionController( const QList<IVP1System*>& 
   QSpacerItem * spacerItem1 = new QSpacerItem(25, 2, QSizePolicy::Fixed, QSizePolicy::Fixed);
   hboxLayout1->addItem(spacerItem1);
   QVBoxLayout *vboxLayout_checkboxes = new QVBoxLayout();
+  vboxLayout_checkboxes->setObjectName("vp1SystemCheckBoxes");
   vboxLayout_checkboxes->setSpacing(6);
   vboxLayout_checkboxes->setMargin(0);
   hboxLayout1->addLayout(vboxLayout_checkboxes);
@@ -75,14 +86,7 @@ QWidget * VP1ControllerHelper::compositionController( const QList<IVP1System*>& 
 
   //Add checkboxes for switching systems on/off
   for (int i = 0; i < system2switchable.count(); ++i) {
-    QCheckBox * checkBox = new QCheckBox(tab_general);
-    // A General-tab label may differ from the persistent system name.
-    const QString label = system2switchable.at(i).first->property("vp1SystemLabel").toString();
-    checkBox->setText(label.isEmpty() ? system2switchable.at(i).first->name() : label);
-    QString info(system2switchable.at(i).first->information());
-    if (!info.isEmpty())
-      checkBox->setToolTip(info);
-    checkBox->setChecked(true);
+    QCheckBox * checkBox = systemCheckBox(system2switchable.at(i).first, tab_general);
     vboxLayout_checkboxes->addWidget(checkBox);
     if (system2switchable.at(i).second) {
       tab_general_label->setText("Select active systems:");

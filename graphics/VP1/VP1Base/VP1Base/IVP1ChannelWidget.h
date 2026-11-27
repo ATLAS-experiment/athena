@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -75,7 +75,7 @@ protected:
   //control how it presents itself, call the follwing method in create() (and at most once):
   void registerController(QWidget*);
 
-  //Call once for each system in constructor of derived classes:
+  // Call once per system during initialization or after the channel is ready.
   void registerSystem(IVP1System*);
 
 public:
@@ -110,6 +110,7 @@ private:
 signals:
   void uniqueNameChanged(const QString&);//Do NOT call this method in derived classes!!!
   void systemRefreshInfoChanged(QString sysrefreshing, int nsysOn, int nsysOnRefreshed);//Do NOT call this method in derived classes!!!
+  void systemAdded(IVP1System*);
 private:
   void emitRefreshInfoChanged();
   bool hasRefreshingSystem();
