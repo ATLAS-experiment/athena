@@ -19,6 +19,7 @@
 #include <limits>
 
 // For debugging only
+//#define TRIGLARCELLDEBUG
 #ifdef TRIGLARCELLDEBUG
 #include <iostream>
 #define LOG_DEBUG(msg) do { std::cout << "LArCellCont DEBUG " << msg << std::endl; } while(0)
@@ -49,31 +50,12 @@ LArCellCont::initialize( const LArRoIMap& roiMap,
   CHECK_WITH_CONTEXT( m_conv.initialize(febrod), "LArCellCont" );
   m_hash.initialize(0, febrod.getLArRoModIDvec() );
 
-  const HWIdentifier larrodid(0);
-  for(size_t i=0;i<m_hash.max();i++){
-    LOG_DEBUG(i << " " << std::hex << m_hash.identifier(i) << std::dec);
-
-    // A collection per ROD/ROB/HashId
-    LArCellCollection* mycoll = new LArCellCollection(larrodid);
-    mycoll->reserve(256);
-    this->push_back(mycoll);
-    m_second.emplace_back(0);
-    m_eventNumber.push_back(std::numeric_limits<unsigned int>::max());
-  } // end of for id
-
-  std::vector<const CaloCellCorrection*> LArCellCorrTools;
-     
-  MakeLArCellFromRaw makeCell;
-  makeCell.setThreshold(-100);
-  makeCell.initialize( roiMap, onOffMap, man, &LArCellCorrTools, 0 );
-
   const bool toolAvailable = toolSvc->retrieveTool("LArBadFebMasker", m_badFebMasker).isSuccess();
-
   if(!toolAvailable) //not a critical error. LArCellCont can proceed as usual, without masking.
     REPORT_MESSAGE_WITH_CONTEXT(MSG::INFO, "LArCellCont") <<
       "Failed to retrieve LArBadFebMasker - no masking will be done." << endmsg;
-
   std::vector<uint32_t> RobsFromMissingFeb;
+  RobsFromMissingFeb.reserve(10);
 
   size_t count = 0;
   for( const HWIdentifier& id : onlineId->channel_range() ){
@@ -82,15 +64,39 @@ LArCellCont::initialize( const LArRoIMap& roiMap,
       ++count;
     }
   } // end of loop over online IDs
-
   const size_t indexsetmax = m_indexset.size();
   // the extra indexsetmax is used for invalid cells
   m_corrBCID.resize(indexsetmax+1,0.0);
 
-  m_hashSym.clear();
-  m_hashSym.resize(onlineId->febHashMax());
+  const HWIdentifier larrodid(0);
+  this->reserve(m_hash.max());
+  m_second.resize(m_hash.max(),HWIdentifier(0));
+  m_eventNumber.resize(m_hash.max(),std::numeric_limits<unsigned int>::max());
+  for(size_t i=0;i<m_hash.max();i++){
+    LOG_DEBUG(i << " " << std::hex << m_hash.identifier(i) << std::dec);
 
-  for (size_t iFeb=0; iFeb<onlineId->febHashMax(); ++iFeb) {
+    // A collection per ROD/ROB/HashId
+    LArCellCollection* mycoll = new LArCellCollection(larrodid);
+    mycoll->reserve(256);
+    for(int ch=0;ch<256;ch++) mycoll->push_back(new LArCell());
+    this->push_back(mycoll);
+  } // end of for id
+
+  uint32_t febHashMax = onlineId->febHashMax();
+  m_hashSym.clear();
+  m_hashSym.resize(m_hash.max());
+  for(uint32_t i=0;i<m_hash.max();i++) m_hashSym[i].reserve(256);
+  // vectors to organize quantities
+  std::vector<const CaloDetDescrElement*> ddes;
+  std::vector<LArRoIMap::TT_ID> ttids;
+  std::vector<bool> cell_ok;
+  std::vector<bool> pushone;
+  ddes.resize(128,nullptr);
+  ttids.resize(128);
+  cell_ok.resize(128);
+  pushone.resize(m_hash.max(),false);
+
+  for (size_t iFeb=0; iFeb<febHashMax; ++iFeb) {
     const HWIdentifier& febid=onlineId->feb_Id(IdentifierHash(iFeb));
     if( (toolAvailable && (m_badFebMasker->febMissing(febid)) ) || !toolAvailable ){
       RobsFromMissingFeb.push_back( m_conv.getRobID( m_conv.getRodID( febrod, febid ) ) );
@@ -99,27 +105,26 @@ LArCellCont::initialize( const LArRoIMap& roiMap,
       // get RodID associated with the collection
       const HWIdentifier& rodId = febrod.getReadoutModuleID(febid);
       const unsigned int rodId32 = m_conv.getRodIDFromROM(rodId);
+      cell_ok.assign(128,false);
       // index in the collection vector
       const size_t idx = m_hash(rodId32);
 	
       LOG_DEBUG(idx << " " << std::hex << m_hash.identifier(idx) << std::dec);
 
       // get all channels for a FEB
-      std::map<LArRoIMap::TT_ID,std::vector<LArCell* > > collMap;
-      if ( (*this)[idx]->size() != 0 ) { // This is the second FEB
+      if ( pushone[idx] ) { // This is the second FEB
 		m_second[idx] = febid;
       }
       std::vector<int>& hashTab = m_hashSym[idx];
-      hashTab.reserve(256);
-      unsigned int febidcomp = febid.get_identifier32().get_compact();
       for(int ch=0; ch<128; ch++){
-        LArRoIMap::TT_ID ttId;
-        LArCell* larcell = makeCell.getLArCell(febidcomp,ch,0,0,0,ttId);
-        if ( larcell ) { // if it is a good cell
-          // Fixes default value
-          larcell->setGain(CaloGain::LARHIGHGAIN);
-          (*this)[idx]->push_back(larcell);
-          LArBadChannel bc = badchannel.offlineStatus(larcell->ID());
+        HWIdentifier onlId = onlineId->channel_Id(febid,ch);
+        HWIdentifier hwsym = mcsym.ZPhiSymOnl(onlId);
+        ddes[ch] = man.get_element(onOffMap.oflHashFromOnlHash(onlineId->channel_Hash(onlId)));
+        const CaloDetDescrElement* dde = ddes[ch];
+        if ( dde ) { // if it is a good cell
+          LArRoIMap::TT_ID ttId = roiMap.trigTowerID(onlId);
+          ttids[ch]=ttId;
+          LArBadChannel bc = badchannel.offlineStatus(dde->identify());
 
           const bool bad = !bc.good() &&
             // cell has some specific problems
@@ -130,28 +135,57 @@ LArCellCont::initialize( const LArRoIMap& roiMap,
               bc.highNoiseLG() ||
               bc.problematicForUnknownReason() );
 
-          if ( !bad ) collMap[ttId].push_back(larcell); // cell masked if not know to be good
-
-          HWIdentifier hwsym = mcsym.ZPhiSymOnl(onlineId->channel_Id(febid,ch));
-
+          if ( !bad ) cell_ok[ch]=true; // cell masked if not know to be good
           auto itr = m_indexset.find( hwsym );
           if ( itr != m_indexset.end() ){
             const int index = itr->second;
             hashTab.push_back( index );
           } else hashTab.push_back(indexsetmax);
-
-          LOG_DEBUG("Cell registered at Collection "
-                    << std::hex << febid.get_identifier32().get_compact() << std::dec <<
-                    " Channel " << ch << " TTId " << (unsigned int)ttId);
-        }
-        else {// add a dummy cell
-          LOG_DEBUG("Cell not existing");
-
-          LArCell* larcell = new LArCell();
-          (*this)[idx]->push_back(larcell);
+        } else {// add a dummy cell
+          ddes[ch]=nullptr;
+          cell_ok[ch]=false;
+          ttids[ch]=0xffffffff;
           hashTab.push_back( indexsetmax);
         } // end of if bad cell
       } // end of for ch loop
+      LArCell* larcell;
+      int add=0;
+      LArCellCollection* collection = (*this)[idx];
+      if (pushone[idx]) add=128;
+      for(int ch=0;ch<128;ch++){
+        larcell = collection->at(ch+add);
+	larcell ->setCaloDDE(ddes[ch]);
+        larcell->setGain(CaloGain::LARHIGHGAIN);
+      }
+      std::map<LArRoIMap::TT_ID,std::vector<LArCell* > > collMap;
+      for(int ch=0;ch<128;ch++){
+        if ( !cell_ok[ch] ) continue;
+        larcell = collection->at(ch+add);
+        if ( (ddes[ch]!=nullptr) && larcell) {
+          collMap[ttids[ch]].push_back(larcell);
+        }
+      }
+#ifdef TRIGLARCELLDEBUG
+      bool first=true;
+      LArCell* p1=nullptr;
+      larcell=nullptr;
+      int max_dist=0;
+      for(int ch=0;ch<128;ch++){
+        larcell = collection->at(ch+add);
+        if ( larcell ) { // if it is a good cell
+          if(first) {
+              p1=larcell;
+              first=false;
+          } else {
+              int dist=larcell-p1;
+              if (dist < 0 ) dist=-dist;
+              if ( dist > max_dist ) max_dist=dist;
+          }
+	} //end of if larcell
+      }
+      LOG_DEBUG("For FEB : 0x" << std::hex << febid.get_identifier32().get_compact() << " max_dist : " << std::dec << max_dist );
+#endif
+      pushone[idx]=true;
 
       for (const auto& [ttid, cells] : collMap) {
 		// Ones needs to dump the mapped vector to an allocated vector
@@ -160,7 +194,7 @@ LArCellCont::initialize( const LArRoIMap& roiMap,
 		for(LArCell* c : cells) {
           vec->push_back(c);
         }
-		(*this)[idx]->setTT(ttid,vec->begin(),vec->end());
+		collection->setTT(ttid,vec->begin(),vec->end());
 		m_vecs.push_back(vec);
       }
 
