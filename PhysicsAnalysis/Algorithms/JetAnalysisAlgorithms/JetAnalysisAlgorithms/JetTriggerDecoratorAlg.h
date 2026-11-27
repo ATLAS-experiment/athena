@@ -109,6 +109,10 @@ namespace CP
     bool m_warnedMissingChain {false};
 
 
+    Gaudi::Property<bool> m_matchAllEvents{this, "matchAllEvents", false,
+	"match also in events where the trigger did not fire, using only the "
+	"L1 RoI and HLT jet containers (for efficiency measurements)" };
+
     Gaudi::Property<bool> m_doL1Matching{this, "doL1Matching", false,
 	"do trigger L1 matching?" };
     CP::SysWriteDecorHandle<float> m_L1Et_decor {this, "L1Et", "", "L1-matched Et"};
