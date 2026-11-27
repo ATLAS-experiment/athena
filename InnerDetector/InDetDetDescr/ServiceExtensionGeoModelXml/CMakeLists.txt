@@ -3,14 +3,14 @@
 # Declare the package name:
 atlas_subdir( ServiceExtensionGeoModelXml )
 
-find_package( GeoModel COMPONENTS GeoModelKernel GeoModelXml ExpressionEvaluator )
+find_package( GeoModelCore )
+find_package( GeoModelTools )
 
 # Component(s) in the package:
 atlas_add_component( ServiceExtensionGeoModelXml
                      src/*.cxx
                      src/components/*.cxx
-                     PRIVATE_INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
-                     PRIVATE_LINK_LIBRARIES ${GEOMODEL_LIBRARIES}
+                     PRIVATE_LINK_LIBRARIES GeoModelCore::GeoModelKernel GeoModelTools::GeoModelXml
                      GaudiKernel InDetGeoModelUtils )
 
 # Install files from the package:

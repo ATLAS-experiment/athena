@@ -3,14 +3,13 @@
 # Declare the package name:
 atlas_subdir( StripGeoModelXml )
 
-find_package( GeoModel COMPONENTS GeoModelKernel GeoModelXml ExpressionEvaluator )
-
+find_package( GeoModelTools )
+find_package( GeoModelCore )
 # Component(s) in the package:
 atlas_add_component( StripGeoModelXml
                      src/*.cxx
                      src/components/*.cxx
-                     PRIVATE_INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
-                     PRIVATE_LINK_LIBRARIES ${GEOMODEL_LIBRARIES} CxxUtils
+                     PRIVATE_LINK_LIBRARIES GeoModelCore::GeoModelKernel GeoModelTools::ExpressionEvaluator GeoModelTools::GeoModelXml CxxUtils
                      GaudiKernel DetDescrConditions InDetGeoModelUtils InDetSimEvent SCT_ReadoutGeometry )
 
 # Install files from the package:

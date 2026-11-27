@@ -4,15 +4,19 @@
 atlas_subdir( PixelGeoModel )
 
 # External dependencies:
-find_package( GeoModel COMPONENTS GeoModelKernel GeoModelDBManager GeoModelRead)
+find_package( GeoModelCore )
+find_package( GeoModelIO )
 
 # Component(s) in the package:
 atlas_add_library( PixelGeoModelLib
    PixelGeoModel/*.h src/*.cxx
    PUBLIC_HEADERS PixelGeoModel
-   INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
    LINK_LIBRARIES AthenaBaseComps GaudiKernel GeoModelUtilities InDetGeoModelUtils
-   PRIVATE_LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaKernel CxxUtils DetDescrConditions GeoModelInterfaces GeoPrimitives Identifier InDetIdentifier InDetReadoutGeometry PixelReadoutGeometryLib ReadoutGeometryBase RDBAccessSvcLib SGTools StoreGateLib
+   PRIVATE_LINK_LIBRARIES AthenaKernel CxxUtils DetDescrConditions GeoModelInterfaces 
+                          GeoPrimitives Identifier InDetIdentifier InDetReadoutGeometry 
+                          PixelReadoutGeometryLib ReadoutGeometryBase RDBAccessSvcLib 
+                          SGTools StoreGateLib GeoModelCore::GeoModelKernel GeoModelIO::GeoModelRead
+                          GeoModelIO::GeoModelDBManager
    PRIVATE_DEFINITIONS "-DGEOTORUS=1" )
 
 atlas_add_component( PixelGeoModel

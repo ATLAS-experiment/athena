@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( SCT_G4_SD )
@@ -8,15 +8,20 @@ find_package( AtlasGeant4Utilities )
 find_package( CLHEP )
 find_package( Geant4 )
 find_package( GTest )
-find_package( GeoModel COMPONENTS GeoModelKernel GeoModelRead GeoModelDBManager )
+
+find_package( GeoModelCore )
+find_package( GeoModelIO )
+
 
 # Component(s) in the package:
 atlas_add_library( SCT_G4_SDLib
                    src/*.cxx
                    OBJECT
                    NO_PUBLIC_HEADERS
-                   INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS} ${GEANT4_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}  ${GTEST_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${CLHEP_LIBRARIES} ${GEANT4_LIBRARIES} ${GTEST_LIBRARIES} ${GEOMODEL_LIBRARIES} G4AtlasToolsLib InDetSimEvent MCTruth StoreGateLib GeoModelInterfaces GeoPrimitives )
+                   INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}  ${GTEST_INCLUDE_DIRS}
+                   LINK_LIBRARIES ${CLHEP_LIBRARIES} ${GEANT4_LIBRARIES} ${GTEST_LIBRARIES} 
+                                  GeoModelCore::GeoModelKernel GeoModelIO::GeoModelRead GeoModelIO::GeoModelDBManager
+                                  G4AtlasToolsLib InDetSimEvent MCTruth StoreGateLib GeoModelInterfaces GeoPrimitives )
 
 atlas_add_library( SCT_G4_SD
                    src/components/*.cxx
