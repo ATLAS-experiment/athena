@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Set the name of the package:
 atlas_subdir( VP1Base )
@@ -18,7 +18,7 @@ message ( STATUS "  > Compiling on ${_os}" )
 find_package( Qt5 COMPONENTS Core OpenGL Gui PrintSupport Widgets )
 find_package( SoQt )
 find_package( Coin3D )
-find_package( GeoModel COMPONENTS GeoModelKernel )
+find_package( GeoModelCore )
 
 # Generate UI files automatically:
 # Note: add the "Widgets" component to "find_package( Qt5 ...)" if you have UI files, otherwise UIC, even if CMAKE_AUTOUIC is set to ON, is not run
@@ -33,9 +33,9 @@ set( CMAKE_AUTORCC TRUE )
 # declaration of PRIVATE_INCLUDE_DIRS.
 atlas_add_library( VP1Base VP1Base/*.h src/*.cxx src/*.qrc
    PUBLIC_HEADERS VP1Base
-   INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS} ${QT5_INCLUDE_DIRS} ${SOQT_INCLUDE_DIRS} ${COIN3D_INCLUDE_DIRS}
+   INCLUDE_DIRS  ${QT5_INCLUDE_DIRS} ${SOQT_INCLUDE_DIRS} ${COIN3D_INCLUDE_DIRS}
    PRIVATE_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR}
-   LINK_LIBRARIES ${QT5_LIBRARIES} ${SOQT_LIBRARIES} ${COIN3D_LIBRARIES} ${GEOMODEL_LIBRARIES} GeoPrimitives xAODBase
+   LINK_LIBRARIES ${QT5_LIBRARIES} ${SOQT_LIBRARIES} ${COIN3D_LIBRARIES} GeoModelCore::GeoModelKernel GeoPrimitives xAODBase
    PRIVATE_LINK_LIBRARIES VP1HEPVis )
 
 # Enable Qt support for cppcheck:
