@@ -90,6 +90,12 @@ def MsTrackSeedingToolCfg(flags, name="MsTrackSeedingTool", **kwargs):
     from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
     result.merge(ActsTrackingGeometrySvcCfg(flags))
 
+    # beam spot of the momentum estimate (empty key: not used)
+    kwargs.setdefault("qpBeamSpotKey", "BeamSpotMeasurements")
+    if kwargs["qpBeamSpotKey"] != "":
+        from MuonCombinedAlgsR4.MuonCombinedAlgsConfigR4 import BeamSpotPreparatorAlgCfg
+        result.merge(BeamSpotPreparatorAlgCfg(flags, WriteKey=kwargs["qpBeamSpotKey"]))
+
     kwargs.setdefault("SegmentSelectionTool", result.popToolsAndMerge(SegmentSelectorCfg(flags)))
     the_tool = CompFactory.MuonR4.MsTrackSeederTool(name, **kwargs)
     result.setPrivateTools(the_tool)

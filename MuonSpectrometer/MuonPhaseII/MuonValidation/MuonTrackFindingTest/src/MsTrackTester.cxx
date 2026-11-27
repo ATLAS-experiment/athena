@@ -252,9 +252,6 @@ namespace MuonValR4 {
                     
                     const EventContext& ctx{Gaudi::Hive::currentContext()};
                     const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
-                    const Acts::MagneticFieldContext mfContext = m_ctxProvider.getMagneticFieldContext(ctx);
-                    MagField::AtlasFieldCache magField{};
-                    mfContext.get<const AtlasFieldCacheCondObj*>()->getInitializedCache(magField);
                     auto truthSeed = makeSeedFromTruth(tgContext, p);
                     if (!truthSeed) {
                         cone->push_back(-1);
@@ -263,7 +260,7 @@ namespace MuonValR4 {
                     }
                     auto [length, theta] = calcSeedLength(tgContext, *truthSeed);
                     cone->push_back(theta);
-                    qTimesP->push_back(m_seedingTool->estimateQtimesP(tgContext, *truthSeed, magField) / Gaudi::Units::GeV);
+                    qTimesP->push_back(1. / m_seedingTool->estimateQoverP(ctx, *truthSeed) / Gaudi::Units::GeV);
                     return length;
                 }));
 
@@ -785,9 +782,6 @@ namespace MuonValR4 {
         const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
         const Acts::MagneticFieldContext mfContext = m_ctxProvider.getMagneticFieldContext(ctx);
 
-        MagField::AtlasFieldCache magField{};
-        mfContext.get<const AtlasFieldCacheCondObj*>()->getInitializedCache(magField);
-
         std::unordered_map<const xAOD::TruthParticle*, 
                            std::vector<unsigned>> truthToSeedMatchCounter{};
 
@@ -824,7 +818,7 @@ namespace MuonValR4 {
             const auto[seedLength, theta] = calcSeedLength(tgContext, seed);
             m_seedLength+= seedLength;
             m_seedThetaCone+=theta;
-            m_seedQP += m_seedingTool->estimateQtimesP(tgContext, seed, magField) / Gaudi::Units::GeV; 
+            m_seedQP += 1. / m_seedingTool->estimateQoverP(ctx, seed) / Gaudi::Units::GeV; 
             m_seedGood += startPars.ok();
         }
         /** Link the truth muons to the seeds */

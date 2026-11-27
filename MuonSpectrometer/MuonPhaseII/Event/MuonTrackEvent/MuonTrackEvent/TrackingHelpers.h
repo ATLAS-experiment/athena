@@ -8,6 +8,8 @@
 #include "xAODMuon/MuonSegment.h"
 #include "xAODTracking/TrackParticle.h"
 
+#include <ranges> 
+
 namespace MuonR4{
     /** @brief Helper function to navigate from the xAOD::MuonSegment to the MuonR4::Segment.
      *         The segment should be decorated with 'parentSegment' decoration.
@@ -88,6 +90,22 @@ namespace MuonR4{
         bool operator()(const xAOD::MuonSegment* a,
                         const xAOD::MuonSegment* b) const;
     };
+
+    /** @brief Mean of proj(x) over the elements x of a non-empty range. The projection must 
+     *         return a value type (double, Acts::Vector2, ...).
+     *  @param range: The range of interest (at least one element)
+     *  @param proj: Callable returning the quantity to average from an element of the range */
+    template <std::ranges::sized_range Range_t, typename Proj_t>
+    auto mean(const Range_t& range, Proj_t proj) {
+        auto it = std::ranges::begin(range);
+        auto sum {proj(*it)};
+        for (++it; it != std::ranges::end(range); ++it) {
+            sum += proj(*it);
+        }
+        sum /= static_cast<double>(std::ranges::size(range));
+        return sum;
+    }
+
 
 }
 

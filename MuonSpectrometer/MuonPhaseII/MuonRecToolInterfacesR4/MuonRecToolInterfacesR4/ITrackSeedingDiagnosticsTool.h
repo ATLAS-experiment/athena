@@ -45,17 +45,15 @@ namespace MuonR4 {
                                                     const xAOD::MuonSegment& segment,
                                                     const Location loc,
                                                     const ExpandedSector sector) const = 0;
-            /** @brief Estimate the charge times momentum of a muon track candidate from the 
+            /** @brief Estimate the charge over momentum of a muon track candidate from the 
               *        contained segments. The position and direction of the segments are projected onto a 
               *        given phi plane, defined by the segments with phi information or the sector plane.  
               *        The muon trajectory is approximated as 2D trajectory within this plane to avoid side 
               *        effects from (non)-present phi measurements.
-              *  @param tgContext: The geometry context to align the segment w.r.t sector
-              *  @param seed: Reference to the seed of interest.
-              *  @param fieldCache: The initialized magnetic field map*/
-            virtual double estimateQtimesP(const Acts::GeometryContext& tgContext,
-                                           const MsTrackSeed& seed,
-                                           MagField::AtlasFieldCache& fieldCache) const = 0;
+              *  @param ctx: The event context
+              *  @param seed: Reference to the seed of interest. */
+            virtual double estimateQoverP(const EventContext& ctx,
+                                          const MsTrackSeed& seed) const = 0;
     };
 }
 
