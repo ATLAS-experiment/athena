@@ -7,7 +7,7 @@ atlas_subdir( VP1RawDataSystems )
 find_package( Coin3D )
 find_package( Eigen )
 find_package( Qt5 COMPONENTS Core Gui Widgets )
-find_package( GeoModel COMPONENTS GeoModelKernel )
+find_package( GeoModelCore )
 
 # Generate UI files automatically:
 set( CMAKE_AUTOUIC TRUE )
@@ -21,11 +21,14 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Component(s) in the package:
 atlas_add_library( VP1RawDataSystems VP1RawDataSystems/*.h src/*.h src/*.cxx src/*.qrc  
                    PUBLIC_HEADERS VP1RawDataSystems
-                   INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIRS}
                    PRIVATE_INCLUDE_DIRS ${COIN3D_INCLUDE_DIRS}
                    FILES LUCID_RawEvent/LUCID_Digit.h
-                   LINK_LIBRARIES ${EIGEN_LIBRARIES} GeoPrimitives VP1Base GL
-                   PRIVATE_LINK_LIBRARIES ${COIN3D_LIBRARIES} ${GEOMODEL_LIBRARIES} EventPrimitives LUCID_RawEvent GaudiKernel InDetIdentifier InDetReadoutGeometry PixelReadoutGeometryLib SCT_ReadoutGeometry TRT_ReadoutGeometry InDetBCM_RawData InDetRawData MuonReadoutGeometry MuonDigitContainer MuonRDO VP1HEPVis VP1Utils )
+                   LINK_LIBRARIES GeoPrimitives VP1Base GL
+                   PRIVATE_LINK_LIBRARIES ${COIN3D_LIBRARIES} GeoModelCore::GeoModelKernel EventPrimitives 
+                                          LUCID_RawEvent GaudiKernel InDetIdentifier InDetReadoutGeometry 
+                                          PixelReadoutGeometryLib SCT_ReadoutGeometry TRT_ReadoutGeometry 
+                                          InDetBCM_RawData InDetRawData MuonReadoutGeometry MuonDigitContainer 
+                                          MuonRDO VP1HEPVis VP1Utils )
 
 # Enable Qt support for cppcheck:
 if( CMAKE_CXX_CPPCHECK )

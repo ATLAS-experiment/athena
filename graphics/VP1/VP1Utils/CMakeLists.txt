@@ -8,7 +8,7 @@ find_package( CLHEP ) # TODO: to be removed when fully migrated to Eigen-based G
 find_package( Coin3D )
 find_package( Eigen )
 find_package( Qt5 COMPONENTS Core )
-find_package( GeoModel COMPONENTS GeoModelKernel )
+find_package( GeoModelCore )
 
 # Generate MOC files automatically:
 set( CMAKE_AUTOMOC TRUE )
@@ -18,11 +18,10 @@ if (NOT BUILDVP1LIGHT)
 atlas_add_library( VP1Utils VP1Utils/*.h src/*.cxx src/*.cpp
    PUBLIC_HEADERS VP1Utils
    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
-   INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
    PRIVATE_INCLUDE_DIRS ${COIN3D_INCLUDE_DIRS}
    ${EIGEN_INCLUDE_DIRS}
    DEFINITIONS ${CLHEP_DEFINITIONS}
-   LINK_LIBRARIES ${CLHEP_LIBRARIES} ${GEOMODEL_LIBRARIES} EventPrimitives
+   LINK_LIBRARIES ${CLHEP_LIBRARIES} GeoModelCore::GeoModelKernel EventPrimitives
    GaudiKernel VP1Base StoreGateLib AthDSoCallBacks MuonIdHelpersLib
    GeoPrimitives Qt5::Core GeneratorModulesLib TruthUtils
    PRIVATE_LINK_LIBRARIES ${COIN3D_LIBRARIES}
@@ -62,7 +61,7 @@ atlas_add_library( VP1Utils ${SOURCES} ${HEADERS}
    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
    PRIVATE_INCLUDE_DIRS ${COIN3D_INCLUDE_DIRS}
    ${EIGEN_INCLUDE_DIRS}
-   LINK_LIBRARIES ${CLHEP_LIBRARIES} EventPrimitives ${GEOMODEL_LIBRARIES}
+   LINK_LIBRARIES ${CLHEP_LIBRARIES} EventPrimitives GeoModelCore::GeoModelKernel
    VP1Base GeneratorModulesLib TruthUtils
    GeoPrimitives Qt5::Core
    PRIVATE_LINK_LIBRARIES ${COIN3D_LIBRARIES}
