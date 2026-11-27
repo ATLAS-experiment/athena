@@ -23,7 +23,7 @@ LArNoise2Ntuple::~LArNoise2Ntuple()
 StatusCode LArNoise2Ntuple::stop() {
   const ILArNoise* larNoise = nullptr;
   StatusCode sc;
-  sc=m_detStore->retrieve(larNoise,m_contKey);
+  sc=detStore()->retrieve(larNoise,m_contKey);
   if (sc!=StatusCode::SUCCESS) {
      ATH_MSG_ERROR( "Unable to retrieve ILArNoise with key " 
                << m_contKey << " from DetectorStore" );

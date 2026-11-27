@@ -61,7 +61,7 @@ StatusCode LArPhysWaves2Ntuple::stop()
     LArPhysWaveContainer* physWaveContainer_nc = nullptr;
     StatusCode sc;
     if (m_applyCorr) {
-      sc = m_detStore->retrieve(physWaveContainer_nc,key);	    
+      sc = detStore()->retrieve(physWaveContainer_nc,key);	    
       if (sc.isFailure()) {
 	ATH_MSG_ERROR( "Cannot read non-const LArPhysWaveContainer from StoreGate! key=" << key );
 	ATH_MSG_ERROR( "The ApplyCorrection option works only for non-const containers!" );
@@ -79,7 +79,7 @@ StatusCode LArPhysWaves2Ntuple::stop()
       physWaveContainer=physWaveContainer_nc;
     }
     else {
-      sc = m_detStore->retrieve(physWaveContainer,key);	    
+      sc = detStore()->retrieve(physWaveContainer,key);	    
       if (sc.isFailure()) {
 	ATH_MSG_ERROR( "Cannot read LArPhysWaveContainer from StoreGate! key=" << key );
 	return StatusCode::FAILURE;

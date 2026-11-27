@@ -75,7 +75,7 @@ StatusCode LArRamps2Ntuple::stop() {
    //Retrieve Raw Ramp Container
    for (const std::string& key : m_contKey) {
        LArRawRampContainer* rawRampContainer=nullptr;
-       sc=m_detStore->retrieve(rawRampContainer,key);
+       sc=detStore()->retrieve(rawRampContainer,key);
        if (sc!=StatusCode::SUCCESS || !rawRampContainer) {
          ATH_MSG_WARNING( "Unable to retrieve LArRawRampContainer with key " << key );
        } 
@@ -307,7 +307,7 @@ StatusCode LArRamps2Ntuple::stop() {
    //Retrieve Raw Ramp Container
    for (const std::string& key : m_contKey) {
        LArRawRampContainer* rawRampContainer=nullptr;
-       sc=m_detStore->retrieve(rawRampContainer,key);
+       sc=detStore()->retrieve(rawRampContainer,key);
        if (sc!=StatusCode::SUCCESS || !rawRampContainer) {
          ATH_MSG_WARNING( "Unable to retrieve LArRawRampContainer with key " << key );
          continue;

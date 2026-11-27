@@ -21,7 +21,7 @@ StatusCode LArRinj2Ntuple::initialize() {
 StatusCode LArRinj2Ntuple::stop() {
   const ILArRinj* LArRinj = nullptr;
   StatusCode sc;
-  sc=m_detStore->retrieve(LArRinj,m_contKey.key());
+  sc=detStore()->retrieve(LArRinj,m_contKey.key());
   if (sc!=StatusCode::SUCCESS) {
      ATH_MSG_ERROR( "Unable to retrieve ILArRinj with key " 
                << m_contKey << " from DetectorStore try ConditionsStore" );

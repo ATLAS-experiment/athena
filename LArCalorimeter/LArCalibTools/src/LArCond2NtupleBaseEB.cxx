@@ -16,7 +16,6 @@ LArCond2NtupleBaseEB::LArCond2NtupleBaseEB(const std::string& name, ISvcLocator*
   : AthAlgorithm(name, pSvcLocator)
   , m_initialized(false)
   , m_nt(nullptr)
-  , m_detStore(nullptr)
   , m_emId(nullptr)
   , m_hecId(nullptr)
   , m_fcalId(nullptr)
@@ -57,8 +56,6 @@ StatusCode LArCond2NtupleBaseEB::initialize() {
   }
 
   m_nt=nt;
-
-  m_detStore= &(*detStore()); //for backward compatiblity
 
   const CaloIdManager* calo_id_manager;
   ATH_CHECK(detStore()->retrieve(calo_id_manager,"CaloIdManager"));

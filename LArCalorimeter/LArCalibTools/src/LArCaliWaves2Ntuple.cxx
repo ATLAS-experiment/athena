@@ -148,7 +148,7 @@ StatusCode LArCaliWaves2Ntuple::stop ATLAS_NOT_THREAD_SAFE ()
 
     ATH_MSG_INFO( "Processing WaveContainer from StoreGate! key=" << m_keylist[k] ); 
     const LArCaliWaveContainer* caliWaveContainer = nullptr;
-    StatusCode sc = m_detStore->retrieve(caliWaveContainer,key);	    
+    StatusCode sc = detStore()->retrieve(caliWaveContainer,key);	    
     if (sc.isFailure()) {
       ATH_MSG_ERROR( "Cannot read LArCaliWaveContainer from StoreGate! key=" << key );
       return StatusCode::FAILURE;

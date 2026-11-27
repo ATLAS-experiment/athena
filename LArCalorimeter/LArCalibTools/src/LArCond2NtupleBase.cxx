@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArCond2NtupleBase.h"
@@ -12,19 +12,6 @@
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "CaloDetDescr/CaloDetDescrElement.h"
 
-LArCond2NtupleBase::LArCond2NtupleBase(const std::string& name, ISvcLocator* pSvcLocator)
-  : AthAlgorithm(name, pSvcLocator)
-  , m_initialized(false)
-  , m_nt(nullptr)
-  , m_detStore(nullptr)
-  , m_emId(nullptr)
-  , m_hecId(nullptr)
-  , m_fcalId(nullptr)
-  , m_onlineId(nullptr)
-  , m_caloId(nullptr)
-  , m_FEBTempTool("LArFEBTempTool")
-{
-}
 
 LArCond2NtupleBase::~LArCond2NtupleBase() {
   ;
@@ -64,8 +51,6 @@ StatusCode LArCond2NtupleBase::initialize() {
 
   m_nt=nt;
   //std::cout << "Ntuple ptr:" << m_nt << std::endl;
-
-  m_detStore= &(*detStore()); //for backward compatiblity 
 
   const CaloIdManager* calo_id_manager;
   ATH_CHECK(detStore()->retrieve(calo_id_manager,"CaloIdManager"));
@@ -122,6 +107,9 @@ StatusCode LArCond2NtupleBase::initialize() {
       ATH_MSG_ERROR( " Can't get FEBTempTool." );
       return sc;
     }
+  }
+  else {
+    m_FEBTempTool.disable();
   }
 
   if (m_BCKey.key().empty()) m_addBC=false;

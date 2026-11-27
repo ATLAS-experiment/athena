@@ -7,6 +7,7 @@
 #define LARCALIBTOOLS_LARCOND2NTUPLEBASE_H
 
 //#include "GaudiKernel/Algorithm.h"
+#include <cstddef>
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/NTuple.h"
 #include "GaudiKernel/ToolHandle.h"
@@ -34,7 +35,7 @@ class CaloDetDescrManager_Base;
 class LArCond2NtupleBase : public AthAlgorithm {
 
  public:
-  LArCond2NtupleBase(const std::string & name, ISvcLocator * pSvcLocator);
+   using AthAlgorithm::AthAlgorithm;
   ~LArCond2NtupleBase();
 
   //Standard algo methods
@@ -49,7 +50,7 @@ class LArCond2NtupleBase : public AthAlgorithm {
   const SG::ReadCondHandleKey<LArOnOffIdMapping>& cablingKey() const;
 
  private:
-  bool m_initialized;
+  bool m_initialized=false;
 
  protected:   
   Gaudi::Property< bool > m_addBC{this, "AddBadChannelInfo", true, "dump BadChan info ?"};
@@ -68,7 +69,7 @@ class LArCond2NtupleBase : public AthAlgorithm {
   std::string m_ntpath, m_ntTitle;
 
   //Ntuple pointer
-  NTuple::Tuple* m_nt;
+  NTuple::Tuple* m_nt=nullptr;
 
   //Ntuple variables:
   NTuple::Item<long> m_detector, m_region, m_layer, m_eta, m_phi, m_onlChanId, m_oflChanId;
@@ -81,13 +82,12 @@ class LArCond2NtupleBase : public AthAlgorithm {
   NTuple::Item<float> m_FEBTemp1, m_FEBTemp2;
 
 
-  StoreGateSvc* m_detStore; 
-  const LArEM_Base_ID* m_emId;
-  const LArHEC_Base_ID* m_hecId;
-  const LArFCAL_Base_ID* m_fcalId;
-  const LArOnlineID_Base* m_onlineId;
-  const CaloCell_Base_ID* m_caloId;
-  ToolHandle<ILArFEBTempTool> m_FEBTempTool;
+  const LArEM_Base_ID* m_emId=nullptr;
+  const LArHEC_Base_ID* m_hecId=nullptr;
+  const LArFCAL_Base_ID* m_fcalId=nullptr;
+  const LArOnlineID_Base* m_onlineId=nullptr;
+  const CaloCell_Base_ID* m_caloId=nullptr;
+  ToolHandle<ILArFEBTempTool> m_FEBTempTool{this,"LArFEBTempTool","LArFEBTempTool"};
 
   SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this,"CablingKey","LArOnOffIdMap","SG Key of LArOnOffIdMapping object"};
   SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingSCKey{this,"CablingSCKey","LArOnOffIdMapSC","SG Key of LArOnOffIdMapping object"};

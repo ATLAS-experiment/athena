@@ -37,7 +37,7 @@ StatusCode LArOFC2Ntuple::stop() {
   NTuple::Item<float> timeOffset, phasetime;
   NTuple::Array<float> OFCa, OFCb;
   
-  ATH_CHECK( m_nt->addItem("Gain",gain,-1,2) );
+  ATH_CHECK( m_nt->addItem("gain",gain,-1,2) );
   ATH_CHECK( m_nt->addItem("TimeOffset",timeOffset,0,100) );
   ATH_CHECK( m_nt->addItem("Phase",phase,0,49) );
   ATH_CHECK( m_nt->addItem("PhaseTime",phasetime,0,800) );
