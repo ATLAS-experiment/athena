@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -36,6 +36,7 @@ public:
   QList<IVP1System*> getSystemsToEraseByPriority();//Returns all systems in REFRESHED state - in prioritised order.
 
   double estimateRemainingCalcTime() const;
+  void systemAdded(IVP1System*);
 
 public Q_SLOTS:
   void visibleChannelsChanged(const QSet<IVP1ChannelWidget*>&vis,const QSet<IVP1ChannelWidget*>&soonvis,const double& soonvisbonus);

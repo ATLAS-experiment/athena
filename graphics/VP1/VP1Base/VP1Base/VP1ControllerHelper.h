@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -26,6 +26,7 @@ class VP1TabWidget;
 
 class VP1ControllerHelper {
 public:
+  static QCheckBox* systemCheckBox(IVP1System*, QWidget* parent);
 
   static QWidget * compositionController( const QList<IVP1System*>& systemsWithControllersAllowed,
 					  QMap<IVP1System*,QWidget*>& sys2tabpage,

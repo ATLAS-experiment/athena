@@ -32,6 +32,9 @@
 #include <Inventor/SoOffscreenRenderer.h>
 
 #include <QSplitter>
+#include <QCheckBox>
+#include <QGroupBox>
+#include <QPushButton>
 #include <QVBoxLayout>
 #include <QMap>
 #include <QTimer>
@@ -59,6 +62,19 @@ public:
   QMap<IVP1System*,bool> system2startdisabled;
   QList<IVP13DSystem*> systemsAllowedCameraList;
   void updateSystemState(QCheckBox*);
+  QVBoxLayout* systemCheckBoxes{};
+  QList<QPair<QString, QStringList>> systemGroups;
+  QMap<QString, QVBoxLayout*> groupedCheckBoxes;
+  struct ExtraSystemFactory {
+    QString prefix;
+    QString groupTitle;
+    QString buttonText;
+    std::function<IVP13DSystemSimple*(const QString&)> create;
+  };
+  QList<ExtraSystemFactory> extraSystemFactories;
+  bool hasSystemNamed(const QString& name) const;
+  QVBoxLayout* checkBoxLayout(const QString& name) const;
+  void restoreExtraSystems(const QMap<QString,bool>& savedSystems);
 
   //Snapshots:
   Ui::VP13DStandardChannelSnapShotGroupBox uisnapshot;
@@ -127,8 +143,76 @@ IVP13DStandardChannelWidget::IVP13DStandardChannelWidget(const QString & name, c
 //___________________________________________________________________________
 IVP13DStandardChannelWidget::~IVP13DStandardChannelWidget()
 {
+  // Disabled systems retain a scene-root reference while outside the channel graph.
+  for (SoSeparator* sysroot : m_d->system2rootNodes) {
+    if (m_d->root->findChild(sysroot) == -1)
+      sysroot->unref();
+  }
   m_d->root->unref();
   delete m_d;
+}
+
+void IVP13DStandardChannelWidget::addSystemGroup(const QString& title, const QStringList& systemNames)
+{
+  m_d->systemGroups.append({title, systemNames});
+}
+
+void IVP13DStandardChannelWidget::addExtraSystemFactory(
+  const QString& prefix, const QString& groupTitle, const QString& buttonText,
+  std::function<IVP13DSystemSimple*(const QString&)> factory)
+{
+  m_d->extraSystemFactories.append({prefix, groupTitle, buttonText, std::move(factory)});
+}
+
+namespace {
+unsigned int extraSystemNumber(const QString& name, const QString& prefix)
+{
+  if (name == prefix)
+    return 1;
+  if (!name.startsWith(prefix))
+    return 0;
+  const QString suffix = name.mid(prefix.size());
+  const unsigned int number = suffix.toUInt();
+  return number > 1 && suffix == QString::number(number) ? number : 0;
+}
+}
+
+QVBoxLayout* IVP13DStandardChannelWidget::Imp::checkBoxLayout(const QString& name) const
+{
+  for (const auto& group : systemGroups) {
+    if (group.second.contains(name))
+      return groupedCheckBoxes.value(group.first, systemCheckBoxes);
+  }
+  for (const auto& factory : extraSystemFactories) {
+    if (extraSystemNumber(name, factory.prefix))
+      return groupedCheckBoxes.value(factory.groupTitle, systemCheckBoxes);
+  }
+  return systemCheckBoxes;
+}
+
+bool IVP13DStandardChannelWidget::Imp::hasSystemNamed(const QString& name) const
+{
+  for (auto it = system2rootNodes.cbegin(); it != system2rootNodes.cend(); ++it) {
+    if (it.key()->name() == name)
+      return true;
+  }
+  return false;
+}
+
+void IVP13DStandardChannelWidget::Imp::restoreExtraSystems(const QMap<QString,bool>& savedSystems)
+{
+  for (const auto& factory : extraSystemFactories) {
+    QMap<unsigned int, QString> extraNames;
+    for (auto it = savedSystems.cbegin(); it != savedSystems.cend(); ++it) {
+      const QString& name = it.key();
+      if (const unsigned int number = extraSystemNumber(name, factory.prefix))
+        extraNames.insert(number, name);
+    }
+    for (const QString& name : extraNames) {
+      if (!hasSystemNamed(name))
+        channel->addSystem(factory.create(name), StartDisabled | DisallowExtraDisplayWidget);
+    }
+  }
 }
 
 //___________________________________________________________________________
@@ -141,24 +225,49 @@ void IVP13DStandardChannelWidget::addSystem( IVP13DSystem*system, const SystemOp
   bool startDisabled = (options & StartDisabled);
 
   registerSystem(system);
-  if (!( options & DisallowCameraAccess ))
+  const bool runtime = m_d->viewer != nullptr;
+  if (!(options & DisallowCameraAccess)) {
     m_d->systemsAllowedCameraList << system;
+    if (runtime)
+      system->registerViewer(m_d->viewer);
+  }
 
   SoSeparator * sysroot = system->getSceneGraph();
   assert(!m_d->system2rootNodes.contains(system));
   m_d->system2rootNodes.insert(system,sysroot);
   m_d->root->addChild(sysroot);
 
-  m_d->system2switchable << QPair<IVP1System*,bool>(system,switchable);
-
-  assert(!m_d->system2startdisabled.contains(system));
-  m_d->system2startdisabled.insert(system,startDisabled);
-  assert(m_d->system2startdisabled.contains(system));
-
   if (allowController) {
     m_d->systemsAllowedControllers << system;
     connect(system,SIGNAL(itemFromSystemSelected()),this,SLOT(showControlsForSystem()));
   }
+
+  if (runtime) {
+    if (allowController) {
+      if (QWidget* controller = system->controllerWidget()) {
+        controller->setParent(m_d->tabwidget);
+        m_d->sys2tabpage.insert(system, controller);
+        if (!startDisabled)
+          m_d->tabwidget->addTab(controller, system->name());
+      }
+    }
+    QVBoxLayout* layout = m_d->checkBoxLayout(system->name());
+    auto* checkBox = VP1ControllerHelper::systemCheckBox(system, layout->parentWidget());
+    layout->addWidget(checkBox);
+    checkBox->setEnabled(switchable);
+    if (switchable) {
+      m_d->checkbox2system.insert(checkBox, system);
+      if (startDisabled) {
+        checkBox->setChecked(false);
+        m_d->updateSystemState(checkBox);
+      }
+      connect(checkBox, &QCheckBox::toggled, this, &IVP13DStandardChannelWidget::toggleSystemActive);
+    }
+    return;
+  }
+
+  m_d->system2switchable << QPair<IVP1System*,bool>(system,switchable);
+  m_d->system2startdisabled.insert(system,startDisabled);
 
   if (allowExtraDisplayWidget)
     m_d->systemsAllowedExtraDisplayWidgets << system;
@@ -172,12 +281,47 @@ void IVP13DStandardChannelWidget::create() {
   m_d->uisnapshot.setupUi(snapshotgroupbox);
 
   VP1ColorSelectButton * colorselectbutton_dummy;
-  registerController(VP1ControllerHelper::compositionController( m_d->systemsAllowedControllers,
+  QWidget* controller = VP1ControllerHelper::compositionController( m_d->systemsAllowedControllers,
 								 m_d->sys2tabpage,m_d->tabwidget,
 								 m_d->system2switchable,
 								 m_d->checkbox2system,
 								 colorselectbutton_dummy,
-								 snapshotgroupbox,true ));
+								 snapshotgroupbox,true );
+  registerController(controller);
+  QWidget* general = snapshotgroupbox->parentWidget();
+  m_d->systemCheckBoxes = general->findChild<QVBoxLayout*>("vp1SystemCheckBoxes");
+  if (!m_d->systemGroups.isEmpty() || !m_d->extraSystemFactories.isEmpty()) {
+    const auto addGroup = [this, general](const QString& title) {
+      auto* group = new QGroupBox(title, general);
+      auto* layout = new QVBoxLayout(group);
+      m_d->systemCheckBoxes->addWidget(group);
+      m_d->groupedCheckBoxes.insert(title, layout);
+      return layout;
+    };
+    for (const auto& group : m_d->systemGroups)
+      addGroup(group.first);
+    for (const auto& factory : m_d->extraSystemFactories) {
+      auto* layout = addGroup(factory.groupTitle);
+      auto* button = new QPushButton(factory.buttonText, layout->parentWidget());
+      layout->addWidget(button);
+      connect(button, &QPushButton::clicked, this, [this, factory] {
+        QString name = factory.prefix;
+        for (unsigned int number = 2; m_d->hasSystemNamed(name); ++number)
+          name = factory.prefix + QString::number(number);
+        addSystem(factory.create(name), DisallowExtraDisplayWidget);
+      });
+    }
+    for (const auto& [system, switchable] : m_d->system2switchable) {
+      if (!switchable)
+        continue;
+      QVBoxLayout* layout = m_d->checkBoxLayout(system->name());
+      if (layout != m_d->systemCheckBoxes) {
+        QCheckBox* checkBox = m_d->checkbox2system.key(system);
+        m_d->systemCheckBoxes->removeWidget(checkBox);
+        layout->addWidget(checkBox);
+      }
+    }
+  }
   short x,y;
   SoOffscreenRenderer::getMaximumResolution().getValue(x,y);
 
@@ -794,8 +938,10 @@ void IVP13DStandardChannelWidget::restoreFromState(QByteArray ba)
 
 	// ===> Decode the state info:
 
-	if (version == 7)
+	if (version == 7) {
 		m_d->restoreFromState_v7(state);
+		return;
+	}
 
 	if (version<=3) {
 		QColor bgdcol_dummy;
@@ -805,6 +951,7 @@ void IVP13DStandardChannelWidget::restoreFromState(QByteArray ba)
 	//Switch systems on/off:
 	QMap<QString, bool> sysname2turnedon;
 	state >> sysname2turnedon;
+	m_d->restoreExtraSystems(sysname2turnedon);
 	QMap<QCheckBox*,IVP1System*>::const_iterator it = m_d->checkbox2system.constBegin();
 	while (it != m_d->checkbox2system.constEnd()) {
 		if (sysname2turnedon.contains(it.key()->text())) {
@@ -960,6 +1107,7 @@ void IVP13DStandardChannelWidget::Imp::restoreFromState_v7(QDataStream& state) {
 	 */
 
 	//Switch systems on/off:
+	restoreExtraSystems(sysname2turnedon);
 	QMap<QCheckBox*,IVP1System*>::const_iterator it = checkbox2system.constBegin();
 	while (it != checkbox2system.constEnd()) {
 		if (sysname2turnedon.contains(it.key()->text())) {
