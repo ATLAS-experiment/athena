@@ -117,7 +117,7 @@ namespace CP
   {
 
     // the trigger decision and the HLT jets do not depend on the offline jets;
-    // no jet is matched if the chain did not fire
+    // no jet is matched if the chain did not fire, unless Run 2 jets are matched in all events
     const bool isTrigPassed = m_trigDecTool->isPassed(m_trigger.value());
 
     // Run 3: HLT jets of each leg from the trigger navigation
@@ -139,7 +139,7 @@ namespace CP
     // Run 2: the trigger navigation is not available, the b-tagged legs are emulated
     const xAOD::JetContainer* hltJetsRun2 = nullptr;
     std::vector<const xAOD::Jet*> hltBTaggedJets;
-    if (!m_useRun3TriggerEDM && isTrigPassed) {
+    if (!m_useRun3TriggerEDM && (isTrigPassed || m_matchAllEvents)) {
       SG::ReadHandle<xAOD::JetContainer> hltJets(m_bjetInput, ctx);
       if (!hltJets.isValid()) {
         ANA_MSG_ERROR ("Failed to retrieve HLT jet container " << m_bjetInput.key());

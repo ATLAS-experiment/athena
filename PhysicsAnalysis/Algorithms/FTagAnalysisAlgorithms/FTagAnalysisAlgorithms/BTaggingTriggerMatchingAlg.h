@@ -47,6 +47,9 @@ namespace CP
         "the trigger path to consider"};
         Gaudi::Property<bool> m_useRun3TriggerEDM {this, "useRun3TriggerEDM", true,
         "is the Run-3 trigger EDM available" };
+        Gaudi::Property<bool> m_matchAllEvents {this, "matchAllEvents", false,
+        "Run 2 only: match also in events where the trigger did not fire, the b-tagged "
+        "legs being emulated from the HLT jet containers (for efficiency measurements)" };
         Gaudi::Property<float> m_btagThreshold {this, "btagThreshold", -1.,
         "b-tag trigger cut, only used with Run 2 trigger EDM"};
         Gaudi::Property<float> m_etamax {this, "etaMax", 2.4, 

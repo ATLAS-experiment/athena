@@ -31,6 +31,9 @@ class FTagJetTrigMatchingBlock(ConfigBlock):
         self.addOption ('removeHLTPrefix', True, type=bool,
             info="remove the HLT prefix from trigger chain names, "
             "The default is True.")
+        self.addOption ('matchAllEvents', False, type=bool,
+            info="Run 2 only: match also in events where the chain did not fire, for the chains of "
+            "the years of the input (for efficiency measurements). The default is False.")
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -50,6 +53,9 @@ class FTagJetTrigMatchingBlock(ConfigBlock):
             triggers = trigger_set(config, self.triggerChainsPerYear,
                                    self.includeAllYearsPerRun)
             decisionTool = TriggerAnalysisBlock.makeTriggerDecisionTool(config)
+            # the HLT jet containers of a chain are only in the files of its own years
+            triggersAllEvents = (trigger_set(config, self.triggerChainsPerYear, False)
+                                 if self.matchAllEvents else set())
 
             for chain in triggers:
                 chain_noHLT = chain.replace("HLT_", "")
@@ -73,6 +79,7 @@ class FTagJetTrigMatchingBlock(ConfigBlock):
                     # HLT jets on which the online b-tagging ran
                     alg.HLT_BJets = ('HLT_xAOD__JetContainer_GSCJet' if '_gsc' in chain
                                      else 'HLT_xAOD__JetContainer_SplitJet')
+                    alg.matchAllEvents = chain in triggersAllEvents
 
 
                 alg.matchingDecoration = 'ftag_jetTrigMatching_' + chain_out + '_%SYS%'
