@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( Geo2G4 )
@@ -7,17 +7,18 @@ atlas_subdir( Geo2G4 )
 find_package( CLHEP )
 find_package( Geant4 )
 find_package( ROOT COMPONENTS MathCore RIO Core Tree Hist )
-find_package( GeoModel COMPONENTS GeoModelKernel )
+find_package( GeoModelCore )
 
 # Component(s) in the package:
 atlas_add_library( Geo2G4Lib
                    src/*.cxx
                    OBJECT
                    NO_PUBLIC_HEADERS
-                   INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS} ${GEANT4_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
+                   INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
                    PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
                    PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
-                   LINK_LIBRARIES ${GEANT4_LIBRARIES} ${GEOMODEL_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps GaudiKernel G4AtlasInterfaces G4AtlasToolsLib GeoModelUtilities GeoPrimitives
+                   LINK_LIBRARIES ${GEANT4_LIBRARIES} ${ROOT_LIBRARIES} GeoModelCore::GeoModelKernel AthenaBaseComps 
+                                  GaudiKernel G4AtlasInterfaces G4AtlasToolsLib GeoModelUtilities GeoPrimitives
                    PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} CxxUtils GeoSpecialShapes SimHelpers GeoMaterial2G4 AthenaKernel GeoModelInterfaces StoreGateLib )
 set_target_properties( Geo2G4Lib PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
