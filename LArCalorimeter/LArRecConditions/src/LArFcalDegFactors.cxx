@@ -30,12 +30,20 @@ LArFcalDegFactors::LArFcalDegFactors(const CondAttrListCollection* attrList,  Ms
    
    //Sanity checks:
    if (blobSize != nBins * nValues * sizeof(float) ) {
-     msg << MSG::ERROR << "Wrong blob size (" << blobSize << ")"  << endmsg;
+     msg << MSG::ERROR << "Wrong blob size (" << blobSize << "), expected "
+         << nBins * nValues * sizeof(float) << endmsg;
      return;
    }
    auto pBlob=static_cast<const float*>(Blob.startingAddress());
    for(unsigned short bin=0; bin < nBins; ++bin) {
       m_fcalDegradationMap[bin].assign(pBlob + nValues*bin, pBlob + nValues*(bin+1));
+   }
+
+   // the same numbers in the interpolation class shared with the tools
+   std::vector<double> table(pBlob, pBlob + nBins * nValues);
+   const std::string error = m_degradation.set(std::vector<double>(muGrid.begin(), muGrid.end()), table);
+   if (!error.empty()) {
+     msg << MSG::ERROR << "Bad FCal degradation table: " << error << endmsg;
    }
 
    return;

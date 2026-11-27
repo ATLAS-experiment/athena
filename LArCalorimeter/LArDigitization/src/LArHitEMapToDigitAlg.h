@@ -86,6 +86,7 @@ protected:
   StatusCode MakeDigit(const EventContext& ctx,
                        const Identifier& cellId,
                        const HWIdentifier& ch_id,
+                       const IFCalDigitModifierTool::EventData& fcalData,
                        LArDigit*& Digit,
                        DataPool<LArDigit>& dataItemsPool,
                        LArDigit*& Digit_DigiHSTruth,

@@ -23,7 +23,14 @@ def CaloCellMakerCfg(flags, addToOutputStream=True, doDigiHSTruth=False):
     tileCellBuilder = result.popToolsAndMerge(TileCellBuilderCfg(flags,doDigiHSTruth=doDigiHSTruth))
     cellFinalizer  = CompFactory.CaloCellContainerFinalizerTool()
 
-    cellMakerTools=[larCellBuilder,tileCellBuilder,cellFinalizer]+larCellCorrectors
+    cellMakerTools=[larCellBuilder,tileCellBuilder,cellFinalizer]
+
+    #FCal1 signal degradation correction (HL-LHC), must come before the pile-up offset correction
+    if flags.LAr.FCalDegradation.doCorrection:
+        from LArCellRec.FCalMuCorrToolConfig import FCalMuCorrToolCfg
+        cellMakerTools.append(result.popToolsAndMerge(FCalMuCorrToolCfg(flags)))
+
+    cellMakerTools+=larCellCorrectors
 
     #Add corrections tools that are not LAr or Tile specific:
     if flags.Calo.Cell.doPileupOffsetBCIDCorr or flags.Calo.Cell.doPedestalCorr:
