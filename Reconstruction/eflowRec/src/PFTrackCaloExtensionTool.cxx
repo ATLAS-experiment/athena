@@ -14,6 +14,8 @@
 
 #include "CaloGeoHelpers/CaloSampling.h"
 
+#include "PFlowUtils/ActsCaloParametersChecker.h"
+
 #include "StoreGate/ReadDecorHandle.h"
 
 #include "eflowTrackCaloPoints.h"
@@ -62,23 +64,7 @@ PFTrackCaloExtensionTool::execute(const EventContext& ctx, const xAOD::TrackPart
             THIS HAS NOT BEEN CHECKED FOR ACTS YET, BUT SHOULD BE THE SAME AS THE ABOVE CASE
         */
         parametersMap[eflowCalo::translateSampl(static_cast<CaloSampling::CaloSample>(i))] = &caloPars[0];
-        if (caloPars.size() > 1) {
-          //print eta, phi and details of naming etc
-          ATH_MSG_DEBUG("Multiple parameters for CaloSample: " << i << " with size: " << caloPars.size());
-          double etaNominal = caloPars[0].position(gctx).eta();
-          double phiNominal = caloPars[0].position(gctx).phi();
-          for (const Acts::BoundTrackParameters& pars : caloPars) {
-            double etaDiff = std::abs(pars.position(gctx).eta() - etaNominal);
-            double phiDiff = std::abs(pars.position(gctx).phi() - phiNominal);
-            //for now we print the difference if larger than smallest possible cell width/2 in the calorimeter, 
-            //which is 0.025 in both eta and phi
-            double cellWidthReference = 0.025/2.0;
-            if (etaDiff > cellWidthReference || phiDiff > cellWidthReference) {
-              ATH_MSG_WARNING("Eta, phi difference from nominal: " << etaDiff << ", " << phiDiff);
-            }
-          }
-          ATH_MSG_DEBUG("Using the first one for the eflowTrackCaloPoints object");
-        }
+        checkMultipleActsCaloParameters(caloPars, static_cast<CaloSampling::CaloSample>(i), gctx, msg());
       }
     }
 

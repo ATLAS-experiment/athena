@@ -1,4 +1,4 @@
-#   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaCommon import Logging
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -52,12 +52,20 @@ def setupTrackCaloAssoc(flags, caloClusterName="CaloCalTopoClusters",detectorEta
     TrackVertexAssoTool = components.popToolsAndMerge(
         TTVAToolCfg(flags, "tvaTool", WorkingPoint="Nonprompt_All_MaxWeight"))
 
+    if flags.UFO.useActsExtrapolation:
+        # requires the ACTS CaloExtensionAlg (ActsCaloExtensionBuilderCfg) to decorate the tracks
+        caloEntryTool = CompFactory.TrackCaloEntryExtrapolationActsTool(
+            ExtensionDecoration = trackParticleName+".caloExtensionLink")
+    else:
+        caloEntryTool = CompFactory.TrackCaloEntryExtrapolationTool(
+            CaloExtensionName = (caloExtAlg.getEventAlgos()[0]).ParticleCache) # ParticleCache is a defunct attribute
+
     trackParticleClusterAssociation = CompFactory.TrackParticleClusterAssociationAlg(
         "TrackParticleClusterAssociationAlg"+assocPostfix,
         #ParticleCaloClusterAssociationTool = particleCaloClusterAssociation,
         TrackParticleContainerName = trackParticleName,
         PtCut = 400.,
-        CaloExtensionName = (caloExtAlg.getEventAlgos()[0]).ParticleCache, # ParticleCache is a defunct attribute
+        CaloEntryExtrapolationTool = caloEntryTool,
         CaloClusterLocation = caloClusterName,
         DetectorEtaName = detectorEtaName if detectorEtaName.lower() != "default" else ("DetectorEta" if "Origin" in caloClusterName else ""),
         TrackVertexAssoTool=TrackVertexAssoTool, # will associate trks from PV0 only

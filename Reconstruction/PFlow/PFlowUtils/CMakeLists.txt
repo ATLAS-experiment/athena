@@ -1,13 +1,22 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( PFlowUtils )
 
+# The ACTS calo parameters checker needs Athena/ACTS, so it is only built in Athena (not AnalysisBase)
+file( GLOB pflowutils_srcs Root/*.cxx )
+set( pflowutils_extra_libs )
+if( XAOD_ANALYSIS )
+   list( REMOVE_ITEM pflowutils_srcs ${CMAKE_CURRENT_SOURCE_DIR}/Root/ActsCaloParametersChecker.cxx )
+else()
+   set( pflowutils_extra_libs GaudiKernel ActsGeometryInterfacesLib CaloGeoHelpers )
+endif()
+
 # Component(s) in the package:
 atlas_add_library( PFlowUtilsLib
-   PFlowUtils/*.h Root/*.cxx
+   PFlowUtils/*.h ${pflowutils_srcs}
    PUBLIC_HEADERS PFlowUtils
-   LINK_LIBRARIES AsgTools xAODEgamma xAODMuon xAODPFlow )
+   LINK_LIBRARIES AsgTools xAODEgamma xAODMuon xAODPFlow ${pflowutils_extra_libs} )
 
 atlas_add_dictionary( PFlowUtilsDict
    PFlowUtils/PFlowUtilsDict.h
