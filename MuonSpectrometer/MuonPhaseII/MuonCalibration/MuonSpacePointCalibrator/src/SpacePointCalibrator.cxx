@@ -649,16 +649,24 @@ namespace MuonR4{
             }
         }
     }
-    void SpacePointCalibrator::stampSignsOnMeasurements(const xAOD::MuonSegment& segment) const {
-        const auto [segPos, segLine] = makeLine(localSegmentPars(segment));
-        const Segment* detSeg = MuonR4::detailedSegment(segment);
-        for (const auto& meas : detSeg->measurements()) {
-            if (meas->type() == xAOD::UncalibMeasType::MdtDriftCircleType){
-                const int sign = SeedingAux::strawSign(segPos, segLine, *meas);
-                ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" Stamp: "<<sign<<" onto "
-                                <<m_idHelperSvc->toString(meas->spacePoint()->identify()));
-                dec_trackSign(*meas->spacePoint()->primaryMeasurement()) =sign;
+    void SpacePointCalibrator::stampSignsOnMeasurements(const Acts::GeometryContext& tgContext,
+                                                        const xAOD::MuonSegment& segment) const {
+        const Amg::Vector3D segPos = segment.position();
+        const Amg::Vector3D segDir = segment.direction();
+        
+        for (const xAOD::UncalibratedMeasurement* meas : collectMeasurements(segment)) {
+            if (meas->type() != xAOD::UncalibMeasType::MdtDriftCircleType) {
+                continue;
             }
+
+            const Acts::Surface& surface{static_cast<const xAOD::MuonMeasurement*>(meas)->surface()};
+            const Acts::Transform3& trf{surface.localToGlobalTransform(tgContext)};
+            using namespace Acts::detail::LineHelper;
+            const int sign = Acts::copySign(1, signedDistance(segPos, segDir,
+                                            trf.translation(), trf.linear().col(Amg::z)));
+            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" Stamp: "<<sign<<" onto "
+                            <<m_idHelperSvc->toString(xAOD::identify(meas)));
+            dec_trackSign(*meas) =sign;
         }
     }
 

@@ -32,60 +32,68 @@ namespace MuonR4{
         public:
             /** @brief Use the standard constructor */
             using base_class::base_class;
-
+            /** @copydoc AthAlgTool::initialize */
             StatusCode initialize() override final;
-
+            /** @copydoc ISpacePointCalibrator::calibrate */
             CalibSpacePointPtr calibrate(const EventContext& ctx,
                                          const SpacePoint* spacePoint,
                                          const Amg::Vector3D& seedPosInChamb,
                                          const Amg::Vector3D& seedDirInChamb,
                                          const double timeDelay) const override final;
-            
+            /** @copydoc ISpacePointCalibrator::calibrate */
             CalibSpacePointPtr calibrate(const EventContext& ctx,
                                          const CalibratedSpacePoint& spacePoint,
                                          const Amg::Vector3D& seedPosInChamb,
                                          const Amg::Vector3D& seedDirInChamb,
                                          const double timeDelay) const override final;
             
-            
+            /** @copydoc ISpacePointCalibrator::calibrate */
             CalibSpacePointVec calibrate(const EventContext& ctx,
                                          const std::vector<const SpacePoint*>& spacePoints,
                                          const Amg::Vector3D& seedPosInChamb,
                                          const Amg::Vector3D& seedDirInChamb,
                                          const double timeDelay) const override final;
-
+            /** @copydoc ISpacePointCalibrator::calibrate */
             CalibSpacePointVec calibrate(const Acts::CalibrationContext& ctx,
                                          const Amg::Vector3D& seedPosInChamb,
                                          const Amg::Vector3D& seedDirInChamb,
                                          const double timeDelay,
                                          const CalibSpacePointVec& spacePoints) const override final;
-
+            /** @copydoc ISpacePointCalibrator::updateSigns */
             void updateSigns(const Amg::Vector3D& trackPos,
                              const Amg::Vector3D& trackDir,
                              CalibSpacePointVec& hitsToCalib) const override final;
-
+            
+            /** @copydoc ISpacePointCalibrator::driftVelocity */
             double driftVelocity(const Acts::CalibrationContext& ctx,
                                  const CalibratedSpacePoint& spacePoint) const override final;
 
+            /** @copydoc ISpacePointCalibrator::driftAcceleration */
             double driftAcceleration(const Acts::CalibrationContext& ctx,
                                      const CalibratedSpacePoint& spacePoint) const override final;
 
-            void calibrateSourceLink(const Acts::GeometryContext& geoctx,
-                                     const Acts::CalibrationContext& cctx,
+            /** @copydoc ISpacePointCalibrator::calibrateSourceLink */
+            void calibrateSourceLink(const Acts::GeometryContext& tgContext,
+                                     const Acts::CalibrationContext& calContext,
                                      const Acts::SourceLink& link,
                                      ActsTrk::MutableTrackContainer::TrackStateProxy state) const override final;
 
-            void stampSignsOnMeasurements(const xAOD::MuonSegment& segment) const override final;
+            /** @copydoc ISpacePointCalibrator::stampSignsOnMeasurements */
+            void stampSignsOnMeasurements(const Acts::GeometryContext&tgContext,
+                                          const xAOD::MuonSegment& segment) const override final;
 
-            double driftRadius(const Acts::CalibrationContext& cctx,
+            /** @copydoc ISpacePointCalibrator::driftRadius */
+            double driftRadius(const Acts::CalibrationContext& calContext,
                                const CalibratedSpacePoint& spacePoint, 
                                const double timeDelay) const override final;
-            
-            double driftVelocity(const Acts::CalibrationContext& cctx,
+
+            /** @copydoc ISpacePointCalibrator::driftVelocity */            
+            double driftVelocity(const Acts::CalibrationContext& calContext,
                                  const CalibratedSpacePoint& spacePoint, 
                                  const double timeDelay) const override final;
 
-            double driftAcceleration(const Acts::CalibrationContext& cctx,
+            /** @copydoc ISpacePointCalibrator::driftAcceleration */            
+            double driftAcceleration(const Acts::CalibrationContext& calContext,
                                      const CalibratedSpacePoint& spacePoint, 
                                      const double timeDelay) const override final;
         private:
