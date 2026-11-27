@@ -84,8 +84,8 @@ namespace L1Muon {
         info->b = b;
         info->rpcZ = z_positions;
         info->rpcR = r_positions;
-        info->regSelChambers = regSelChambers;
-        info->stationChambers = stationChambers;
+        info->regSelChambers = std::move(regSelChambers);
+        info->stationChambers = std::move(stationChambers);
         info->heHalfWidth = m_heHalfWidth;
       }
 

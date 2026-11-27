@@ -94,7 +94,7 @@ StatusCode TracccStripSpacepointConverterAlg::execute(const EventContext& ctx) c
   std::unique_ptr<SG::ReadCondHandle<InDetDD::SiDetectorElementCollection>> elements;
   if (!m_useGPUShapes) {
     elements = std::make_unique<SG::ReadCondHandle<InDetDD::SiDetectorElementCollection>>(m_elements, ctx);
-    ATH_CHECK(elements->isValid());
+    ATH_CHECK(elements && elements->isValid());
   }
   const auto copy = m_copy->copy(ctx);
   struct StripGeometry {
@@ -109,6 +109,7 @@ StatusCode TracccStripSpacepointConverterAlg::execute(const EventContext& ctx) c
     auto& geometry = geometryCache[index];
     if (!geometry) {
       std::string error;
+      //coverity[NULL_RETURNS]
       const auto ends = stripEnds(*clusters->at(index), ***elements, error);
       if (!ends) {
         ATH_MSG_ERROR("Cannot reconstruct strip geometry for cluster " << index << ": " << error);
