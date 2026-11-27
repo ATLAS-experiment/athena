@@ -20,14 +20,11 @@ def PhysAugmentationsHION7Cfg(flags):
             AddHFAndDownstreamParticlesCfg,
             AddMiniTruthCollectionLinksCfg,
             AddPVCollectionCfg,
-            TruthClassificationAugmentationsCfg)
+            TruthClassificationAugmentationsCfg,
+            DFCommonTruthCharmAugmentationCfg,
+        )
         acc.merge(TruthClassificationAugmentationsCfg(flags))
-        from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import DFCommonTruthCharmToolCfg
-        PhysCommonTruthCharmTool = acc.getPrimaryAndMerge(DFCommonTruthCharmToolCfg(
-            flags,
-            name = "PhysCommonTruthCharmTool"))
-        CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-        acc.addEventAlgo(CommonAugmentation("PhysCommonTruthCharmKernel",AugmentationTools=[PhysCommonTruthCharmTool]))
+        acc.merge(DFCommonTruthCharmAugmentationCfg(flags))
         acc.merge(AddHFAndDownstreamParticlesCfg(flags))
         acc.merge(AddStandardTruthContentsCfg(
                   flags,

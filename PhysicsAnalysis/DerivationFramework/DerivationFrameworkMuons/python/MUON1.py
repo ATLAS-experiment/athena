@@ -126,15 +126,13 @@ def MUON1KernelCfg(flags, name='MUON1Kernel', **kwargs):
 
 
     ## MC truth classification and isolation
-    if flags.Input.isMC:        
+    if flags.Input.isMC:
         from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import MuonTruthClassifierFallbackCfg
-        MUON1MuonTruthClassifierFallback = acc.getPrimaryAndMerge(MuonTruthClassifierFallbackCfg(flags,
-                                                                                                 name         = "MUON1MuonTruthClassifierFallback",
-                                                                                                 ContainerKey = kwargs["MuonContainer"]))
-        acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("MuonTruthClassifierFallBack",
-                                                                          AugmentationTools=[MUON1MuonTruthClassifierFallback]))
+        acc.merge(MuonTruthClassifierFallbackCfg(flags,
+                                                 name="MUON1MuonTruthClassifierFallback",
+                                                 ContainerKey=kwargs["MuonContainer"]))
         from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import MuonTruthIsolationDecorAlgCfg
-        acc.merge(MuonTruthIsolationDecorAlgCfg(flags, 
+        acc.merge(MuonTruthIsolationDecorAlgCfg(flags,
                                                 name         = "MUON1MuonTruthIsolationAlg",
                                                 ContainerKey = kwargs["MuonContainer"]))
 

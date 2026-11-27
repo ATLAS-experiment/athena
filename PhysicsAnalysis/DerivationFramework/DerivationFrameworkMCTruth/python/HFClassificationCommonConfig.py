@@ -11,181 +11,180 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from DerivationFrameworkMCTruth.HFDSIDList import DSIDList
 
+
 def DFCommonMatchingToolCfg(flags, variation, **kwargs):
 
-  #################################
-  ####### Jet Matching Tool #######
-  #################################
+    #################################
+    ####### Jet Matching Tool #######
+    #################################
 
-  acc = ComponentAccumulator()
-  acc.flagPerfmonDomain('Truth')
-  # Configure the tool that matches each truth particle to the closest jet.
-  # Parameters:
-  #  -m_jetPtCut:  Cut on the pt of the jets.
-  #  -m_jetEtaCut: Cut on the eta of the jets.
-  #  -m_drCut:     Upper limit for the delta R between the particle and the jet to perform the matching.
-  kwargs.setdefault("jetPtCut", 15000.)
-  kwargs.setdefault("jetEtaCut", 2.5)
-  kwargs.setdefault("drCut", 0.3)
-  acc.setPrivateTools(CompFactory.DerivationFramework.JetMatchingTool(name='DFCommonJetMatchingTool'+variation, **kwargs))
-  return acc
+    acc = ComponentAccumulator()
+    acc.flagPerfmonDomain('Truth')
+    # Configure the tool that matches each truth particle to the closest jet.
+    # Parameters:
+    #  -m_jetPtCut:  Cut on the pt of the jets.
+    #  -m_jetEtaCut: Cut on the eta of the jets.
+    #  -m_drCut:     Upper limit for the delta R between the particle and the jet to perform the matching.
+    kwargs.setdefault("jetPtCut", 15000.)
+    kwargs.setdefault("jetEtaCut", 2.5)
+    kwargs.setdefault("drCut", 0.3)
+    acc.setPrivateTools(CompFactory.DerivationFramework.JetMatchingTool(name='DFCommonJetMatchingTool' + variation, **kwargs))
+    return acc
 
 
 def DFCommonMatchingToolJ20Cfg(flags, **kwargs):
-  kwargs.setdefault("jetPtCut", 20000.)
+    kwargs.setdefault("jetPtCut", 20000.)
 
-  return DFCommonMatchingToolCfg(flags, "J20", **kwargs)
+    return DFCommonMatchingToolCfg(flags, "J20", **kwargs)
 
 
 def DFCommonMatchingToolJ25Cfg(flags, **kwargs):
-  kwargs.setdefault("jetPtCut", 25000.)
+    kwargs.setdefault("jetPtCut", 25000.)
 
-  return DFCommonMatchingToolCfg(flags, "J25", **kwargs)
+    return DFCommonMatchingToolCfg(flags, "J25", **kwargs)
 
 
 def DFCommonHadronOriginClassifierCfg(flags, **kwargs):
-  acc = ComponentAccumulator()
-  acc.flagPerfmonDomain('Truth')
-  ##################################
-  ##### HF Hadrons Origin Tool #####
-  ##################################
+    acc = ComponentAccumulator()
+    acc.flagPerfmonDomain('Truth')
+    ##################################
+    ##### HF Hadrons Origin Tool #####
+    ##################################
 
-  # Configure the tool that determines the origin of the HF hadrons.
-  # Parameters:
-  #  -DSID: DSID of the sample that is being processed.
-  kwargs.setdefault("DSID", int(flags.Input.MCChannelNumber))
-  acc.setPrivateTools(CompFactory.DerivationFramework.HadronOriginClassifier(name='DFCommonHadronOriginClassifier', **kwargs))
-  return acc
+    # Configure the tool that determines the origin of the HF hadrons.
+    # Parameters:
+    #  -DSID: DSID of the sample that is being processed.
+    kwargs.setdefault("DSID", int(flags.Input.MCChannelNumber))
+    acc.setPrivateTools(CompFactory.DerivationFramework.HadronOriginClassifier(name='DFCommonHadronOriginClassifier', **kwargs))
+    return acc
 
 
 def DFCommonClassifyAndCalculateHFToolCfg(flags, variation, **kwargs):
-  acc = ComponentAccumulator()
-  acc.flagPerfmonDomain('Truth')
-  ##################################
-  ##### HF Classification Tool #####
-  ##################################
+    acc = ComponentAccumulator()
+    acc.flagPerfmonDomain('Truth')
+    ##################################
+    ##### HF Classification Tool #####
+    ##################################
 
-  # Configure the tool that computes the HF Classification.
-  # Parameters:
-  #  -m_jetPtCut:                Cut on the pt of the jets.
-  #  -m_jetEtaCut:               Cut on the eta of the jets.
-  #  -m_leadingBHadronPtCut:      Cut on the pt of the leading B-hadron.
-  #  -m_leadingCHadronPtCut:      Cut on the pt of the leading C-hadron.
-  #  -m_leadingHadronPtRatioCut: Cut on the ratio between the pt of the leading hadron and the pt of its associated jet.
-  kwargs.setdefault("jetPtCut", 15000.)
-  kwargs.setdefault("jetEtaCut", 2.5)
-  kwargs.setdefault("leadingBHadronPtCut", 5000.)
-  kwargs.setdefault("leadingCHadronPtCut", 5000.)
-  kwargs.setdefault("leadingHadronPtRatioCut", -1)
-  acc.setPrivateTools(CompFactory.DerivationFramework.ClassifyAndCalculateHFTool(name='DFCommonClassifyAndCalculateHFTool'+variation, **kwargs))
-  return acc
+    # Configure the tool that computes the HF Classification.
+    # Parameters:
+    #  -m_jetPtCut:                Cut on the pt of the jets.
+    #  -m_jetEtaCut:               Cut on the eta of the jets.
+    #  -m_leadingBHadronPtCut:      Cut on the pt of the leading B-hadron.
+    #  -m_leadingCHadronPtCut:      Cut on the pt of the leading C-hadron.
+    #  -m_leadingHadronPtRatioCut: Cut on the ratio between the pt of the leading hadron and the pt of its associated jet.
+    kwargs.setdefault("jetPtCut", 15000.)
+    kwargs.setdefault("jetEtaCut", 2.5)
+    kwargs.setdefault("leadingBHadronPtCut", 5000.)
+    kwargs.setdefault("leadingCHadronPtCut", 5000.)
+    kwargs.setdefault("leadingHadronPtRatioCut", -1)
+    acc.setPrivateTools(CompFactory.DerivationFramework.ClassifyAndCalculateHFTool(name='DFCommonClassifyAndCalculateHFTool' + variation, **kwargs))
+    return acc
 
 
 def DFCommonClassifyAndCalculateHFToolC5J20Cfg(flags, **kwargs):
-  kwargs.setdefault("jetPtCut", 20000.)
-  kwargs.setdefault("leadingCHadronPtCut", 5000.)
+    kwargs.setdefault("jetPtCut", 20000.)
+    kwargs.setdefault("leadingCHadronPtCut", 5000.)
 
-  return DFCommonClassifyAndCalculateHFToolCfg(flags, "C5J20", **kwargs)
+    return DFCommonClassifyAndCalculateHFToolCfg(flags, "C5J20", **kwargs)
 
 
 def DFCommonClassifyAndCalculateHFToolC5J25Cfg(flags, **kwargs):
-  kwargs.setdefault("jetPtCut", 25000.)
-  kwargs.setdefault("leadingCHadronPtCut", 5000.)
+    kwargs.setdefault("jetPtCut", 25000.)
+    kwargs.setdefault("leadingCHadronPtCut", 5000.)
 
-  return DFCommonClassifyAndCalculateHFToolCfg(flags, "C5J25", **kwargs)
+    return DFCommonClassifyAndCalculateHFToolCfg(flags, "C5J25", **kwargs)
 
 
 def DFCommonClassifyAndCalculateHFToolC15J20Cfg(flags, **kwargs):
-  kwargs.setdefault("jetPtCut", 20000.)
-  kwargs.setdefault("leadingCHadronPtCut", 15000.)
+    kwargs.setdefault("jetPtCut", 20000.)
+    kwargs.setdefault("leadingCHadronPtCut", 15000.)
 
-  return DFCommonClassifyAndCalculateHFToolCfg(flags, "C15J20", **kwargs)
+    return DFCommonClassifyAndCalculateHFToolCfg(flags, "C15J20", **kwargs)
 
 
 def DFCommonClassifyAndCalculateHFToolC15J25Cfg(flags, **kwargs):
-  kwargs.setdefault("jetPtCut", 25000.)
-  kwargs.setdefault("leadingCHadronPtCut", 15000.)
+    kwargs.setdefault("jetPtCut", 25000.)
+    kwargs.setdefault("leadingCHadronPtCut", 15000.)
 
-  return DFCommonClassifyAndCalculateHFToolCfg(flags, "C15J25", **kwargs)
+    return DFCommonClassifyAndCalculateHFToolCfg(flags, "C15J25", **kwargs)
 
 
 def ClassifyAndCalculateHFAugmentationCfg(flags, mc_channel_number, variation, **kwargs):
+    """Configure and add the tools to compute and add the HF classifier in the derivation"""
 
-  """Configure and add the tools to compute and add the HF classifier in the derivation"""
+    acc = ComponentAccumulator()
+    acc.flagPerfmonDomain('Truth')
+    ClassifyAndCalculateHFAugmentationTool = CompFactory.DerivationFramework.ClassifyAndCalculateHFAugmentation(name="DFCommonClassifyAndCalculateHFAugmentation" + variation)
 
-  acc = ComponentAccumulator()
-  acc.flagPerfmonDomain('Truth')
-  ClassifyAndCalculateHFAugmentationTool = CompFactory.DerivationFramework.ClassifyAndCalculateHFAugmentation(name = "DFCommonClassifyAndCalculateHFAugmentation"+variation)
+    #################################
+    ####### Augmentation Tool #######
+    #################################
 
-  #################################
-  ####### Augmentation Tool #######
-  #################################
+    # Configure the tool that adds the HF Classification in the derivation file.
+    # Parameters:
+    #  -ClassifyAndComputeHFtool:   It computes the HF classifier.
+    #  -HadronOriginClassifierTool: It determines the origin of the HF hadrons.
+    #  -ClassifyAndComputeHFtool:   It matches the hadrons with the jets.
+    # Tools:
+    #  -jetCollectionName:          It contains the name of the jets container.
+    #  -TruthParticleContainerName: It contains the name of the truth particles container.
+    #  -hfDecorationName:           It contains the name used to save the HF classifier.
+    #  -SimplehfDecorationName:     It contains the name used to save the simple HF classifier.
 
-  # Configure the tool that adds the HF Classification in the derivation file.
-  # Parameters:
-  #  -ClassifyAndComputeHFtool:   It computes the HF classifier.
-  #  -HadronOriginClassifierTool: It determines the origin of the HF hadrons.
-  #  -ClassifyAndComputeHFtool:   It matches the hadrons with the jets.
-  # Tools:
-  #  -jetCollectionName:          It contains the name of the jets container.
-  #  -TruthParticleContainerName: It contains the name of the truth particles container.
-  #  -hfDecorationName:           It contains the name used to save the HF classifier.
-  #  -SimplehfDecorationName:     It contains the name used to save the simple HF classifier.
+    ClassifyAndCalculateHFAugmentationTool.jetCollectionName = "AntiKt4TruthDressedWZJets"
+    ClassifyAndCalculateHFAugmentationTool.TruthParticleContainerName = "TruthParticles"
+    ClassifyAndCalculateHFAugmentationTool.hfDecorationName = "HF_Classification" + variation
+    ClassifyAndCalculateHFAugmentationTool.SimplehfDecorationName = "HF_SimpleClassification" + variation
+    ClassifyAndCalculateHFAugmentationTool.HadronOriginIDDecorationName = "HFHadronOriginID" + variation
+    ClassifyAndCalculateHFAugmentationTool.HadronOriginClassifierTool = acc.addPublicTool(acc.popToolsAndMerge(DFCommonHadronOriginClassifierCfg(flags)))
 
-  ClassifyAndCalculateHFAugmentationTool.jetCollectionName = "AntiKt4TruthDressedWZJets"
-  ClassifyAndCalculateHFAugmentationTool.TruthParticleContainerName = "TruthParticles"
-  ClassifyAndCalculateHFAugmentationTool.hfDecorationName = "HF_Classification"+variation
-  ClassifyAndCalculateHFAugmentationTool.SimplehfDecorationName = "HF_SimpleClassification"+variation
-  ClassifyAndCalculateHFAugmentationTool.HadronOriginIDDecorationName = "HFHadronOriginID"+variation
-  ClassifyAndCalculateHFAugmentationTool.HadronOriginClassifierTool = acc.addPublicTool(acc.popToolsAndMerge(DFCommonHadronOriginClassifierCfg(flags)))
-
-  acc.setPrivateTools(ClassifyAndCalculateHFAugmentationTool)
-  return acc
+    acc.setPrivateTools(ClassifyAndCalculateHFAugmentationTool)
+    return acc
 
 
-#Configuration of the tools to compute the HF Classification of the ttbar+jets events.
+# Configuration of the tools to compute the HF Classification of the ttbar+jets events.
 def HFClassificationCommonCfg(flags):
-
     """HF Classification configuration."""
 
     acc = ComponentAccumulator()
     acc.flagPerfmonDomain('Truth')
-    #Check the the DSID of the considered sample is in the list of ttbar samples.
+    # Check the the DSID of the considered sample is in the list of ttbar samples.
     mc_channel_number = int(flags.Input.MCChannelNumber)
     if mc_channel_number > 0:
         if mc_channel_number in DSIDList:
-          #In this case, the DSID is in the list so configure the tools.
-          #Configure the tool that adds the HF Classification in the derivation file.
-          CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
+            # In this case, the DSID is in the list so configure the tools.
+            # Configure the tool that adds the HF Classification in the derivation file.
+            CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
 
-          ClassifyAndCalculateHFAugmentationTool = acc.popToolsAndMerge(ClassifyAndCalculateHFAugmentationCfg(flags, mc_channel_number, ""))
-          ClassifyAndCalculateHFAugmentationTool.ClassifyAndComputeHFtool = acc.addPublicTool(acc.popToolsAndMerge(DFCommonClassifyAndCalculateHFToolCfg(flags, "")))
-          ClassifyAndCalculateHFAugmentationTool.JetMatchingTool = acc.addPublicTool(acc.popToolsAndMerge(DFCommonMatchingToolCfg(flags, "")))
-          acc.addEventAlgo(CommonAugmentation(name              = "HFClassificationCommonKernel",
-                                              AugmentationTools = [acc.addPublicTool(ClassifyAndCalculateHFAugmentationTool)]))
+            ClassifyAndCalculateHFAugmentationTool = acc.popToolsAndMerge(ClassifyAndCalculateHFAugmentationCfg(flags, mc_channel_number, ""))
+            ClassifyAndCalculateHFAugmentationTool.ClassifyAndComputeHFtool = acc.addPublicTool(acc.popToolsAndMerge(DFCommonClassifyAndCalculateHFToolCfg(flags, "")))
+            ClassifyAndCalculateHFAugmentationTool.JetMatchingTool = acc.addPublicTool(acc.popToolsAndMerge(DFCommonMatchingToolCfg(flags, "")))
+            acc.addEventAlgo(CommonAugmentation(name="HFClassificationCommonKernel",
+                                                AugmentationTools=[acc.addPublicTool(ClassifyAndCalculateHFAugmentationTool)]))
 
-          ClassifyAndCalculateHFAugmentationToolC5J20 = acc.popToolsAndMerge(ClassifyAndCalculateHFAugmentationCfg(flags, mc_channel_number, "C5J20"))
-          ClassifyAndCalculateHFAugmentationToolC5J20.ClassifyAndComputeHFtool = acc.addPublicTool(acc.popToolsAndMerge(DFCommonClassifyAndCalculateHFToolC5J20Cfg(flags)))
-          ClassifyAndCalculateHFAugmentationToolC5J20.JetMatchingTool = acc.addPublicTool(acc.popToolsAndMerge(DFCommonMatchingToolJ20Cfg(flags)))
-          acc.addEventAlgo(CommonAugmentation(name              = "HFClassificationCommonKernelC5J20",
-                                              AugmentationTools = [acc.addPublicTool(ClassifyAndCalculateHFAugmentationToolC5J20)]))
+            ClassifyAndCalculateHFAugmentationToolC5J20 = acc.popToolsAndMerge(ClassifyAndCalculateHFAugmentationCfg(flags, mc_channel_number, "C5J20"))
+            ClassifyAndCalculateHFAugmentationToolC5J20.ClassifyAndComputeHFtool = acc.addPublicTool(acc.popToolsAndMerge(DFCommonClassifyAndCalculateHFToolC5J20Cfg(flags)))
+            ClassifyAndCalculateHFAugmentationToolC5J20.JetMatchingTool = acc.addPublicTool(acc.popToolsAndMerge(DFCommonMatchingToolJ20Cfg(flags)))
+            acc.addEventAlgo(CommonAugmentation(name="HFClassificationCommonKernelC5J20",
+                                                AugmentationTools=[acc.addPublicTool(ClassifyAndCalculateHFAugmentationToolC5J20)]))
 
-          ClassifyAndCalculateHFAugmentationToolC5J25 = acc.popToolsAndMerge(ClassifyAndCalculateHFAugmentationCfg(flags, mc_channel_number, "C5J25"))
-          ClassifyAndCalculateHFAugmentationToolC5J25.ClassifyAndComputeHFtool = acc.addPublicTool(acc.popToolsAndMerge(DFCommonClassifyAndCalculateHFToolC5J25Cfg(flags)))
-          ClassifyAndCalculateHFAugmentationToolC5J25.JetMatchingTool = acc.addPublicTool(acc.popToolsAndMerge(DFCommonMatchingToolJ25Cfg(flags)))
-          acc.addEventAlgo(CommonAugmentation(name              = "HFClassificationCommonKernelC5J25",
-                                              AugmentationTools = [acc.addPublicTool(ClassifyAndCalculateHFAugmentationToolC5J25)]))
+            ClassifyAndCalculateHFAugmentationToolC5J25 = acc.popToolsAndMerge(ClassifyAndCalculateHFAugmentationCfg(flags, mc_channel_number, "C5J25"))
+            ClassifyAndCalculateHFAugmentationToolC5J25.ClassifyAndComputeHFtool = acc.addPublicTool(acc.popToolsAndMerge(DFCommonClassifyAndCalculateHFToolC5J25Cfg(flags)))
+            ClassifyAndCalculateHFAugmentationToolC5J25.JetMatchingTool = acc.addPublicTool(acc.popToolsAndMerge(DFCommonMatchingToolJ25Cfg(flags)))
+            acc.addEventAlgo(CommonAugmentation(name="HFClassificationCommonKernelC5J25",
+                                                AugmentationTools=[acc.addPublicTool(ClassifyAndCalculateHFAugmentationToolC5J25)]))
 
-          ClassifyAndCalculateHFAugmentationToolC15J20 = acc.popToolsAndMerge(ClassifyAndCalculateHFAugmentationCfg(flags, mc_channel_number, "C15J20"))
-          ClassifyAndCalculateHFAugmentationToolC15J20.ClassifyAndComputeHFtool = acc.addPublicTool(acc.popToolsAndMerge(DFCommonClassifyAndCalculateHFToolC15J20Cfg(flags)))
-          ClassifyAndCalculateHFAugmentationToolC15J20.JetMatchingTool = acc.addPublicTool(acc.popToolsAndMerge(DFCommonMatchingToolJ20Cfg(flags)))
-          acc.addEventAlgo(CommonAugmentation(name              = "HFClassificationCommonKernelC15J20",
-                                              AugmentationTools = [acc.addPublicTool(ClassifyAndCalculateHFAugmentationToolC15J20)]))
+            ClassifyAndCalculateHFAugmentationToolC15J20 = acc.popToolsAndMerge(ClassifyAndCalculateHFAugmentationCfg(flags, mc_channel_number, "C15J20"))
+            ClassifyAndCalculateHFAugmentationToolC15J20.ClassifyAndComputeHFtool = acc.addPublicTool(acc.popToolsAndMerge(DFCommonClassifyAndCalculateHFToolC15J20Cfg(flags)))
+            ClassifyAndCalculateHFAugmentationToolC15J20.JetMatchingTool = acc.addPublicTool(acc.popToolsAndMerge(DFCommonMatchingToolJ20Cfg(flags)))
+            acc.addEventAlgo(CommonAugmentation(name="HFClassificationCommonKernelC15J20",
+                                                AugmentationTools=[acc.addPublicTool(ClassifyAndCalculateHFAugmentationToolC15J20)]))
 
-          ClassifyAndCalculateHFAugmentationToolC15J25 = acc.popToolsAndMerge(ClassifyAndCalculateHFAugmentationCfg(flags, mc_channel_number, "C15J25"))
-          ClassifyAndCalculateHFAugmentationToolC15J25.ClassifyAndComputeHFtool = acc.addPublicTool(acc.popToolsAndMerge(DFCommonClassifyAndCalculateHFToolC15J25Cfg(flags)))
-          ClassifyAndCalculateHFAugmentationToolC15J25.JetMatchingTool = acc.addPublicTool(acc.popToolsAndMerge(DFCommonMatchingToolJ25Cfg(flags)))
-          acc.addEventAlgo(CommonAugmentation(name              = "HFClassificationCommonKernelC15J25",
-                                              AugmentationTools = [acc.addPublicTool(ClassifyAndCalculateHFAugmentationToolC15J25)]))
+            ClassifyAndCalculateHFAugmentationToolC15J25 = acc.popToolsAndMerge(ClassifyAndCalculateHFAugmentationCfg(flags, mc_channel_number, "C15J25"))
+            ClassifyAndCalculateHFAugmentationToolC15J25.ClassifyAndComputeHFtool = acc.addPublicTool(acc.popToolsAndMerge(DFCommonClassifyAndCalculateHFToolC15J25Cfg(flags)))
+            ClassifyAndCalculateHFAugmentationToolC15J25.JetMatchingTool = acc.addPublicTool(acc.popToolsAndMerge(DFCommonMatchingToolJ25Cfg(flags)))
+            acc.addEventAlgo(CommonAugmentation(name="HFClassificationCommonKernelC15J25",
+                                                AugmentationTools=[acc.addPublicTool(ClassifyAndCalculateHFAugmentationToolC15J25)]))
 
     return acc

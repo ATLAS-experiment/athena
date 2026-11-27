@@ -11,6 +11,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 # Jet related
 from DerivationFrameworkJetEtMiss.JetCommonConfig import AddBadBatmanCfg, AddDistanceInTrainCfg, AddNeutralEventShapeCfg, AddEventCleanFlagsCfg
 
+
 ## These jet related functions are a copy of the ones in the JetCommonConfig file
 ## but we remove the jet collections we don't need
 def TLAJetCommonCfg(ConfigFlags):
@@ -29,6 +30,7 @@ def TLAJetCommonCfg(ConfigFlags):
 
     return acc
 
+
 def StandardTLAJetsCfg(ConfigFlags):
     """Standard (offline) jets needed for TLA derivations"""
 
@@ -36,7 +38,7 @@ def StandardTLAJetsCfg(ConfigFlags):
     from JetRecConfig.JetRecConfig import JetRecCfg
 
     acc = ComponentAccumulator()
-    
+
     AntiKt4EMTopo_deriv = AntiKt4EMTopo.clone(
         modifiers = AntiKt4EMTopo.modifiers+("JetPtAssociation","QGTagging")
     )
@@ -50,7 +52,7 @@ def StandardTLAJetsCfg(ConfigFlags):
 
     for jd in jetList:
         acc.merge(JetRecCfg(ConfigFlags,jd))
-    
+
     return acc
 
 ## Custom functions for handling TLA truth jets (and related truth content) for MC
@@ -71,6 +73,7 @@ def AddTLATruthJetsCfg(flags):
 
     return acc
 
+
 def PostTLAJetMCTruthAugmentationsCfg(flags, **kwargs):
 
     acc = ComponentAccumulator()
@@ -79,29 +82,36 @@ def PostTLAJetMCTruthAugmentationsCfg(flags, **kwargs):
     # truth tau matching needs truth jets, truth electrons and truth muons
     from DerivationFrameworkTau.TauTruthCommonConfig import TauTruthToolsCfg
     acc.merge(TauTruthToolsCfg(flags))
-    from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import DFCommonTruthTauDressingToolCfg
-    augmentationToolsList = [ acc.getPrimaryAndMerge(DFCommonTruthTauDressingToolCfg(flags)) ]
+    augmentationTools = []
+    from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import (
+        DFCommonTruthTauDressingToolCfg,
+        DFCommonTruthDressedWZQGLabelToolCfg,
+    )
+    augmentationTools.append(acc.getPrimaryAndMerge(
+        DFCommonTruthTauDressingToolCfg(flags)
+    ))
 
-  
-    from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import DFCommonTruthDressedWZQGLabelToolCfg
-    augmentationToolsList += [ acc.getPrimaryAndMerge(DFCommonTruthDressedWZQGLabelToolCfg(flags))]
+    augmentationTools.append(acc.getPrimaryAndMerge(
+        DFCommonTruthDressedWZQGLabelToolCfg(flags)
+    ))
 
     # SUSY signal decorations
     from DerivationFrameworkSUSY.DecorateSUSYProcessConfig import IsSUSYSignalRun3
     if IsSUSYSignalRun3(flags):
         from DerivationFrameworkSUSY.DecorateSUSYProcessConfig import SUSYSignalTaggerCfg
-        augmentationToolsList += [acc.getPrimaryAndMerge(SUSYSignalTaggerCfg(flags, 'MCTruthCommon'))]
+        augmentationTools.append(acc.getPrimaryAndMerge(
+            SUSYSignalTaggerCfg(flags, 'MCTruthCommon')
+        ))
 
-    CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-    acc.addEventAlgo(CommonAugmentation(name              = "MCTruthCommonPostJetKernel", 
-                                        AugmentationTools = augmentationToolsList))
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(name="MCTruthCommonPostJetKernel", AugmentationTools = augmentationTools))
 
     # add SoW of individual SUSY final states, relies on augmentation from DecorateSUSYProcess()
     if IsSUSYSignalRun3(flags):
         from DerivationFrameworkSUSY.SUSYWeightMetadataConfig import AddSUSYWeightsCfg
         acc.merge(AddSUSYWeightsCfg(flags))
 
-    return(acc)
+    return acc
+
 
 # This adds the entirety of TRUTH3
 def AddStandardTLATruthContentsCfg(flags,
@@ -124,7 +134,7 @@ def AddStandardTLATruthContentsCfg(flags,
     # Jets and MET
     acc.merge(AddTLATruthJetsCfg(flags))
     # Tools that must come after jets
-    # configured for compatibility in case we want to 
+    # configured for compatibility in case we want to
     # revert to common MCTruth version
     if not useTLAPostJetAugmentations:
         acc.merge(PostJetMCTruthAugmentationsCfg(flags, decorationDressing = decorationDressing))
@@ -132,13 +142,16 @@ def AddStandardTLATruthContentsCfg(flags,
         acc.merge(PostTLAJetMCTruthAugmentationsCfg(flags, decorationDressing = decorationDressing))
     # Should photons that are dressed onto taus also be removed from truth jets?
     if includeTausInDressingPhotonRemoval:
+        # TODO It would be better to refactor the configuration so
+        # that this is done as part of the call to
+        # DFCommonTruthTauDressingToolCfg.
         acc.getPublicTool("DFCommonTruthTauDressingTool").decorationName=decorationDressing
 
     # Add back the navigation contect for the collections we want
     acc.merge(AddTruthCollectionNavigationDecorationsCfg(flags, ["TruthElectrons", "TruthMuons", "TruthPhotons", "TruthTaus", "TruthNeutrinos", "TruthBSM", "TruthBottom", "TruthTop", "TruthBoson"], prefix=prefix))
     # Some more additions for standard TRUTH3
     acc.merge(AddBosonsAndDownstreamParticlesCfg(flags))
-    
+
     # Special collection for BSM particles
     acc.merge(AddBSMAndDownstreamParticlesCfg(flags))
 
@@ -146,4 +159,3 @@ def AddStandardTLATruthContentsCfg(flags,
     if isEVNT: acc.merge(AddTruthEnergyDensityCfg(flags))
 
     return acc
-

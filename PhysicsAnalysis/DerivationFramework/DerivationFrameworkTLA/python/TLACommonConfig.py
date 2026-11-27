@@ -6,7 +6,6 @@
 # Actual configuration is subcontracted to other config files since some of them are very long
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import LHCPeriod
 
 def TLACommonAugmentationsCfg(flags,**kwargs):
@@ -21,15 +20,12 @@ def TLACommonAugmentationsCfg(flags,**kwargs):
             AddMiniTruthCollectionLinksCfg,
             AddPVCollectionCfg,
             AddTruthCollectionNavigationDecorationsCfg,
-            TruthClassificationAugmentationsCfg)
+            TruthClassificationAugmentationsCfg,
+            DFCommonTruthCharmAugmentationCfg,
+        )
         acc.merge(TruthClassificationAugmentationsCfg(flags))
-        from DerivationFrameworkTLA.TLACommonConfigFunctions import AddStandardTLATruthContentsCfg
-        from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import DFCommonTruthCharmToolCfg
-        TLACommonTruthCharmTool = acc.getPrimaryAndMerge(DFCommonTruthCharmToolCfg(
-            flags,
-            name = "TLACommonTruthCharmTool"))
-        CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-        acc.addEventAlgo(CommonAugmentation("TLACommonTruthCharmKernel",AugmentationTools=[TLACommonTruthCharmTool]))
+        from DerivationFrameworkTLA.TLAJetRecoAndDecorConfig import AddStandardTLATruthContentsCfg
+        acc.merge(DFCommonTruthCharmAugmentationCfg(flags))
         acc.merge(AddHFAndDownstreamParticlesCfg(flags))
         acc.merge(AddStandardTLATruthContentsCfg(flags, useTLAPostJetAugmentations=True))
         acc.merge(AddTruthCollectionNavigationDecorationsCfg(
@@ -70,7 +66,7 @@ def TLACommonAugmentationsCfg(flags,**kwargs):
     acc.merge(EGammaCommonCfg(flags))
 
     # Jets, flavour tagging
-    from DerivationFrameworkTLA.TLACommonConfigFunctions import TLAJetCommonCfg
+    from DerivationFrameworkTLA.TLAJetRecoAndDecorConfig import TLAJetCommonCfg
     from DerivationFrameworkFlavourTag.FtagDerivationConfig import HLTJetFTagDecorationCfg
     acc.merge(TLAJetCommonCfg(flags))
     if flags.Input.isMC and flags.Trigger.EDMVersion == 3:

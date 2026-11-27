@@ -159,22 +159,12 @@ def FTAG1LITEKernelCfg(flags, name='FTAG1LITEKernel', **kwargs):
         AddPVCollectionCfg,
         AddStandardTruthContentsCfg,
         TruthClassificationAugmentationsCfg,
-    )
-    from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import (
-        DFCommonTruthCharmToolCfg,
+        DFCommonTruthCharmAugmentationCfg,
     )
 
     if flags.Input.isMC:
         acc.merge(TruthClassificationAugmentationsCfg(flags))
-
-        CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-        charmTool = acc.getPrimaryAndMerge(
-            DFCommonTruthCharmToolCfg(flags, name="PhysCommonTruthCharmTool")
-        )
-        acc.addEventAlgo(CommonAugmentation(
-            "PhysCommonTruthCharmKernel", AugmentationTools=[charmTool]
-        ))
-
+        acc.merge(DFCommonTruthCharmAugmentationCfg(flags))
         acc.merge(AddHFAndDownstreamParticlesCfg(flags))
         acc.merge(AddStandardTruthContentsCfg(
             flags,

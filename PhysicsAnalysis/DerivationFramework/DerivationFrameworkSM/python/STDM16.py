@@ -47,15 +47,11 @@ def STDM16Kernel(flags, name='STDM16Kernel', **kwargs):
             AddMiniTruthCollectionLinksCfg,
             AddPVCollectionCfg,
             AddTruthCollectionNavigationDecorationsCfg,
-            TruthClassificationAugmentationsCfg)
+            TruthClassificationAugmentationsCfg,
+            DFCommonTruthCharmAugmentationCfg,
+        )
         acc.merge(TruthClassificationAugmentationsCfg(flags))
-        from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import DFCommonTruthCharmToolCfg
-        STDM16CommonTruthCharmTool = acc.getPrimaryAndMerge(DFCommonTruthCharmToolCfg(
-            flags,
-            name = "STDM16CommonTruthCharmTool"))
-        CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-        acc.addEventAlgo(CommonAugmentation("STDM16CommonTruthCharmKernel",AugmentationTools=[STDM16CommonTruthCharmTool]))
-
+        acc.merge(DFCommonTruthCharmAugmentationCfg(flags))
         acc.merge(AddStandardTruthContentsCfg(flags))
         acc.merge(AddTruthCollectionNavigationDecorationsCfg(
             flags,
