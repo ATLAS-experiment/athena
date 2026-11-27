@@ -4,15 +4,15 @@
 atlas_subdir( TrkDetDescrGeoModelCnv )
 
 # External dependencies:
-find_package( GeoModel COMPONENTS GeoModelKernel GeoModelHelpers)
+find_package( GeoModelCore )
 
 # Component(s) in the package:
 atlas_add_library( TrkDetDescrGeoModelCnv
                    src/*.cxx
                    PUBLIC_HEADERS TrkDetDescrGeoModelCnv
-                   PRIVATE_INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
                    LINK_LIBRARIES GeoModelUtilities GeoPrimitives TrkGeometry AthenaBaseComps
-                   PRIVATE_LINK_LIBRARIES ${GEOMODEL_LIBRARIES} GaudiKernel TrkVolumes CxxUtils )
+                   PRIVATE_LINK_LIBRARIES GeoModelCore::GeoModelKernel GeoModelCore::GeoModelHelpers 
+                                          GaudiKernel TrkVolumes CxxUtils )
 
 if ( "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
   set_source_files_properties(

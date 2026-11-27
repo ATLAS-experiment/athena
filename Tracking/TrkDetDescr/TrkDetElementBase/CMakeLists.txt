@@ -4,11 +4,10 @@
 atlas_subdir( TrkDetElementBase )
 
 # External dependencies:
-find_package( GeoModel COMPONENTS GeoModelKernel )
+find_package( GeoModelCore )
 
 # Component(s) in the package:
 atlas_add_library( TrkDetElementBase
                    src/*.cxx
                    PUBLIC_HEADERS TrkDetElementBase
-                   INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${GEOMODEL_LIBRARIES} GeoPrimitives Identifier EventPrimitives )
+                   LINK_LIBRARIES GeoModelCore::GeoModelKernel GeoPrimitives Identifier EventPrimitives )
