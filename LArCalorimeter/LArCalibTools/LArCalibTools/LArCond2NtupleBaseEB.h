@@ -80,7 +80,6 @@ class LArCond2NtupleBaseEB : public AthAlgorithm {
 
   const int m_SC= 34048;
 
-  StoreGateSvc* m_detStore;
   const LArEM_Base_ID* m_emId;
   const LArHEC_Base_ID* m_hecId;
   const LArFCAL_Base_ID* m_fcalId;

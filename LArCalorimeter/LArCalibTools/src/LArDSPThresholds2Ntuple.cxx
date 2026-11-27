@@ -77,7 +77,7 @@ StatusCode LArDSPThresholds2Ntuple::stop() {
       df=std::make_unique< LArDSPThresholdsFlat>(attrList);
 
    } else {
-      sc=m_detStore->retrieve(dc);
+      sc=detStore()->retrieve(dc);
       if(sc!=StatusCode::SUCCESS) {
            ATH_MSG_ERROR("Could not retrieve LArDSPThresholdsComplete....");
            return StatusCode::FAILURE;

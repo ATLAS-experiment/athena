@@ -31,14 +31,14 @@ StatusCode LArMinBias2Ntuple::stop() {
   const ILArMinBiasAverage* LArMinBiasAv = nullptr;
   
   if(!m_isPileup) {
-     LArMinBias=m_detStore->tryConstRetrieve<ILArMinBias>(m_contKey.key());
+     LArMinBias=detStore()->tryConstRetrieve<ILArMinBias>(m_contKey.key());
      if (!LArMinBias) {
         SG::ReadCondHandle<ILArMinBias> mbHandle{m_contKey};
         LArMinBias=*mbHandle;
      }
   }
 
-  LArMinBiasAv=m_detStore->tryConstRetrieve<ILArMinBiasAverage>(m_contKeyAv.key());
+  LArMinBiasAv=detStore()->tryConstRetrieve<ILArMinBiasAverage>(m_contKeyAv.key());
   if(!LArMinBiasAv) {
     SG::ReadCondHandle<ILArMinBiasAverage> mbaHandle{m_contKeyAv};
     LArMinBiasAv=*mbaHandle;

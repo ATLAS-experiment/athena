@@ -99,7 +99,7 @@ StatusCode LArDigits2Ntuple::initialize()
   }
 
   if(!m_isSC){
-    sc	   = m_nt->addItem("Gain",m_gain,-1,3);
+    sc	   = m_nt->addItem("gain",m_gain,-1,3);
     if (sc!=StatusCode::SUCCESS) {
       ATH_MSG_ERROR( "addItem 'Gain' failed" );
       return sc;

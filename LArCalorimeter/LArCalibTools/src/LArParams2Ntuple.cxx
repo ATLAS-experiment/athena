@@ -521,10 +521,10 @@ StatusCode LArParams2Ntuple::scanReadoutChannels( const DATA*& data_object ) {
 
   ATH_MSG_VERBOSE("Trying to retrieve " << dataName << " from detector store with key="<< detStoreKey << " ...");
 
-  StatusCode sc = m_detStore->retrieve(data_object,detStoreKey) ;
+  StatusCode sc = detStore()->retrieve(data_object,detStoreKey) ;
   if ( sc == StatusCode::FAILURE ) {
     ATH_MSG_VERBOSE("... failed! Trying without key ...");
-    sc = m_detStore->retrieve(data_object) ;
+    sc = detStore()->retrieve(data_object) ;
   }
 
   if ( sc == StatusCode::FAILURE ) {
@@ -585,10 +585,10 @@ StatusCode LArParams2Ntuple::scanCalibChannels( const DATA*& data_object ) {
 
   ATH_MSG_VERBOSE("Trying to retrieve " << dataName << " from detector store with key="<< detStoreKey << " ...");
 
-  StatusCode sc = m_detStore->retrieve(data_object,detStoreKey) ;
+  StatusCode sc = detStore()->retrieve(data_object,detStoreKey) ;
   if ( sc == StatusCode::FAILURE ) {
     ATH_MSG_VERBOSE("... failed! Trying without key ...");
-    sc = m_detStore->retrieve(data_object) ;
+    sc = detStore()->retrieve(data_object) ;
   }
 
   if ( sc == StatusCode::FAILURE ) {
@@ -662,10 +662,10 @@ StatusCode LArParams2Ntuple::retrieveFromDetStore( const DATA*& data_object ) {
   } else {
 
     ATH_MSG_VERBOSE("Trying to retrieve "<<dataName<<" from detector store with key="<<detStoreKey<<" ...");
-    StatusCode sc = m_detStore->retrieve(data_object,detStoreKey) ;
+    StatusCode sc = detStore()->retrieve(data_object,detStoreKey) ;
     if ( sc == StatusCode::FAILURE ) {
       ATH_MSG_VERBOSE("... failed! Trying without key ...");
-      sc = m_detStore->retrieve(data_object) ;
+      sc = detStore()->retrieve(data_object) ;
     }
     if ( sc == StatusCode::FAILURE ) {
       ATH_MSG_WARNING( "Could not retrieve " << dataName << " from detector store!" ) ;
@@ -680,79 +680,79 @@ StatusCode LArParams2Ntuple::retrieveFromDetStore( const DATA*& data_object ) {
 
 inline StatusCode LArParams2Ntuple::retrieveAbstractInterface(const LArCaliPulseParamsComplete*& data_object) {
   const ILArCaliPulseParams* abstract_object = nullptr;
-  StatusCode sc = m_detStore->retrieve(abstract_object) ;
+  StatusCode sc = detStore()->retrieve(abstract_object) ;
   data_object = dynamic_cast<const LArCaliPulseParamsComplete*>(abstract_object) ;
   return sc ;
 }
 //inline StatusCode LArParams2Ntuple::retrieveAbstractInterface(const LArCaliPulseParamsVsCalib*& data_object) {
 //  const ILArCaliPulseParams* abstract_object ;
-//  StatusCode sc = m_detStore->retrieve(abstract_object) ;
+//  StatusCode sc = detStore()->retrieve(abstract_object) ;
 //  data_object = dynamic_cast<const LArCaliPulseParamsVsCalib*>(abstract_object) ;
 //  return sc ;
 //}
 inline StatusCode LArParams2Ntuple::retrieveAbstractInterface(const LArDetCellParamsComplete*& data_object) {
   const ILArDetCellParams* abstract_object = nullptr;
-  StatusCode sc = m_detStore->retrieve(abstract_object) ;
+  StatusCode sc = detStore()->retrieve(abstract_object) ;
   data_object = dynamic_cast<const LArDetCellParamsComplete*>(abstract_object) ;
   return sc ;
 }
 inline StatusCode LArParams2Ntuple::retrieveAbstractInterface(const LArPhysCaliTdiffComplete*& data_object) {
   const ILArPhysCaliTdiff* abstract_object = nullptr;
-  StatusCode sc = m_detStore->retrieve(abstract_object) ;
+  StatusCode sc = detStore()->retrieve(abstract_object) ;
   data_object = dynamic_cast<const LArPhysCaliTdiffComplete*>(abstract_object) ;
   return sc ;
 }
 inline StatusCode LArParams2Ntuple::retrieveAbstractInterface(const LArTdriftComplete*& data_object) {
   const ILArTdrift* abstract_object = nullptr;
-  StatusCode sc = m_detStore->retrieve(abstract_object) ;
+  StatusCode sc = detStore()->retrieve(abstract_object) ;
   data_object = dynamic_cast<const LArTdriftComplete*>(abstract_object) ;
   return sc ;
 }
 inline StatusCode LArParams2Ntuple::retrieveAbstractInterface(const LArMphysOverMcalComplete*& data_object) {
   const ILArMphysOverMcal* abstract_object = nullptr;
-  StatusCode sc = m_detStore->retrieve(abstract_object) ;
+  StatusCode sc = detStore()->retrieve(abstract_object) ;
   data_object = dynamic_cast<const LArMphysOverMcalComplete*>(abstract_object) ;
   return sc ;
 }
 inline StatusCode LArParams2Ntuple::retrieveAbstractInterface(const LArRinjComplete*& data_object) {
   const ILArRinj* abstract_object = nullptr;
-  StatusCode sc = m_detStore->retrieve(abstract_object) ;
+  StatusCode sc = detStore()->retrieve(abstract_object) ;
   data_object = dynamic_cast<const LArRinjComplete*>(abstract_object) ;
   return sc ;
 }
 inline StatusCode LArParams2Ntuple::retrieveAbstractInterface(const LArTshaperComplete*& data_object) {
   const ILArTshaper* abstract_object = nullptr;
-  StatusCode sc = m_detStore->retrieve(abstract_object) ;
+  StatusCode sc = detStore()->retrieve(abstract_object) ;
   data_object = dynamic_cast<const LArTshaperComplete*>(abstract_object) ;
   return sc ;
 }
 inline StatusCode LArParams2Ntuple::retrieveAbstractInterface(const LArEMEC_CphiComplete*& data_object) {
   const ILArEMEC_Cphi* abstract_object = nullptr;
-  StatusCode sc = m_detStore->retrieve(abstract_object) ;
+  StatusCode sc = detStore()->retrieve(abstract_object) ;
   data_object = dynamic_cast<const LArEMEC_CphiComplete*>(abstract_object) ;
   return sc ;
 }
 inline StatusCode LArParams2Ntuple::retrieveAbstractInterface(const LArEMEC_HValphaComplete*& data_object) {
   const ILArEMEC_HValpha* abstract_object = nullptr;
-  StatusCode sc = m_detStore->retrieve(abstract_object) ;
+  StatusCode sc = detStore()->retrieve(abstract_object) ;
   data_object = dynamic_cast<const LArEMEC_HValphaComplete*>(abstract_object) ;
   return sc ;
 }
 inline StatusCode LArParams2Ntuple::retrieveAbstractInterface(const LArEMEC_HVbetaComplete*& data_object) {
   const ILArEMEC_HVbeta* abstract_object = nullptr;
-  StatusCode sc = m_detStore->retrieve(abstract_object) ;
+  StatusCode sc = detStore()->retrieve(abstract_object) ;
   data_object = dynamic_cast<const LArEMEC_HVbetaComplete*>(abstract_object) ;
   return sc ;
 }
 inline StatusCode LArParams2Ntuple::retrieveAbstractInterface(const LArCableLengthComplete*& data_object) {
   const ILArCableLength* abstract_object = nullptr;
-  StatusCode sc = m_detStore->retrieve(abstract_object) ;
+  StatusCode sc = detStore()->retrieve(abstract_object) ;
   data_object = dynamic_cast<const LArCableLengthComplete*>(abstract_object) ;
   return sc ;
 }
 inline StatusCode LArParams2Ntuple::retrieveAbstractInterface(const LArCableAttenuationComplete*& data_object) {
   const ILArCableAttenuation* abstract_object = nullptr;
-  StatusCode sc = m_detStore->retrieve(abstract_object) ;
+  StatusCode sc = detStore()->retrieve(abstract_object) ;
   data_object = dynamic_cast<const LArCableAttenuationComplete*>(abstract_object) ;
   return sc ;
 }

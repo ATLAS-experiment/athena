@@ -38,7 +38,7 @@ StatusCode LArShape2Ntuple::stop() {
   NTuple::Array<float> Shape, ShapeDer;
 
   
-  ATH_CHECK(m_nt->addItem("Gain",gain,-1,2));
+  ATH_CHECK(m_nt->addItem("gain",gain,-1,2));
 
   //Specific:
   if (m_isComplete) {

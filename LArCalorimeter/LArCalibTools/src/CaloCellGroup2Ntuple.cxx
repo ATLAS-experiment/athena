@@ -43,7 +43,7 @@ StatusCode CaloCellGroup2Ntuple::stop () {
 
 
   const CaloCell_ID* caloCellId;
-  sc = m_detStore->retrieve(caloCellId,"CaloCell_ID");
+  sc = detStore()->retrieve(caloCellId,"CaloCell_ID");
   if (sc.isFailure()) {
     ATH_MSG_ERROR( "Could not get CaloCellID helper !" );
     return StatusCode::FAILURE;
