@@ -126,6 +126,9 @@ StatusCode LArHitEMapToDigitAlg::execute(const EventContext& context) const {
    const LArBadFebCont* badFebs = pointerFromKey<LArBadFebCont>(context,m_badFebKey);
    SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey, context};
    const LArOnOffIdMapping* cabling=*cablingHdl;
+   // FCal signal degradation: per-event input of the tool, read once per event
+   IFCalDigitModifierTool::EventData fcalData;
+   if (!m_fcalModifierTool.empty()) ATH_CHECK(m_fcalModifierTool->prepareEvent(context, fcalData));
    if(!cabling) {
      ATH_MSG_ERROR("Failed to retrieve LAr Cabling map with key " << m_cablingKey.key() );
      return StatusCode::FAILURE;
@@ -217,7 +220,7 @@ StatusCode LArHitEMapToDigitAlg::execute(const EventContext& context) const {
              if ((!m_RndmEvtOverlay) || (m_RndmEvtOverlay && digit)) {
                LArDigit* Digit = nullptr;
                LArDigit* Digit_DigiHSTruth = nullptr;
-               auto sc = MakeDigit(context, cellID, ch_id, Digit,
+               auto sc = MakeDigit(context, cellID, ch_id, fcalData, Digit,
                                    dataItemsPool,
                                    Digit_DigiHSTruth, TimeE, digit, engine,
                                    TimeE_DigiHSTruth,
@@ -262,6 +265,7 @@ StatusCode LArHitEMapToDigitAlg::MakeDigit(
     const EventContext& ctx,
     const Identifier& cellId,
     const HWIdentifier& ch_id,
+    const IFCalDigitModifierTool::EventData& fcalData,
     LArDigit*& Digit,
     DataPool<LArDigit>& dataItemsPool,
     LArDigit*& Digit_DigiHSTruth,
@@ -449,15 +453,15 @@ StatusCode LArHitEMapToDigitAlg::MakeDigit(
 
   if (iCalo == FCAL && !m_fcalModifierTool.empty() && !m_RndmEvtOverlay) {
 
-    ATH_CHECK(m_fcalModifierTool->modifySamples(ctx, ch_id,
+    m_fcalModifierTool->modifySamples(fcalData, cellId,
 
-              std::span<double>(Samples.data(), Samples.size())));
+              std::span<double>(Samples.data(), Samples.size()));
 
     if (m_doDigiTruth) {
 
-      ATH_CHECK(m_fcalModifierTool->modifySamples(ctx, ch_id,
+      m_fcalModifierTool->modifySamples(fcalData, cellId,
 
-                std::span<double>(Samples_DigiHSTruth.data(), Samples_DigiHSTruth.size())));
+                std::span<double>(Samples_DigiHSTruth.data(), Samples_DigiHSTruth.size()));
 
     }
 

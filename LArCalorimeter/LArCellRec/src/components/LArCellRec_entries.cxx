@@ -12,6 +12,7 @@
 #include "../LArCollisionTimeAlg.h"
 #include "../LArTimeVetoAlg.h"
 #include "../LArCellContHVCorrTool.h"
+#include "../FCalMuCorrTool.h"
 #include "../LArHVFraction.h"
 #include "../LArRAWtoSuperCell.h"
 #include "../LArCelldeadOTXTool.h"
@@ -38,3 +39,4 @@ DECLARE_COMPONENT( LArCelldeadOTXTool )
 DECLARE_COMPONENT( LArCelldeadOTXAlg )
 DECLARE_COMPONENT( LArDeadOTXCondAlg )
 DECLARE_COMPONENT( EventInfoClearAlg )
+DECLARE_COMPONENT( FCalMuCorrTool )

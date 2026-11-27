@@ -36,11 +36,12 @@ StatusCode LArFcalDegCondAlg::execute(const EventContext& ctx) const {
 
   std::unique_ptr<LArFcalDegFactors> output=std::make_unique<LArFcalDegFactors>(*factorsHdl, msg());
 
-  if(output->get().empty()) {
-    ATH_MSG_ERROR("Empty degradation factors blob !!!!");
+  if(output->get().empty() || !output->isValid()) {
+    ATH_MSG_ERROR("Empty or unreadable degradation factors blob in " << m_factorsKey.key() << " !!!!");
     return StatusCode::FAILURE;
   }
-
+  ATH_MSG_INFO("FCal1 degradation table: " << output->nChannels() << " channels x "
+               << LArFcalDegFactors::muGrid.size() << " mu points");
 
   if(outputHdl.record(std::move(output)).isFailure()) {
     ATH_MSG_ERROR("Could not record LArFcalDegFactors object with " 

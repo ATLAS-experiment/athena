@@ -24,6 +24,10 @@ def createLArConfigFlags():
     lcf.addFlag("LAr.doBadFebMasking",lambda prevFlags : not prevFlags.Input.isMC)
     lcf.addFlag("LAr.doDeadOTxCorr",lambda prevFlags : not prevFlags.Input.isMC and prevFlags.GeoModel.Run >= LHCPeriod.Run3)
 
+    # FCal1 signal degradation (HL-LHC ion build-up): table D(channel, mu) for digitization and reconstruction
+    lcf.addFlag("LAr.FCalDegradation.MuOverride", -1.)
+    lcf.addFlag("LAr.FCalDegradation.doCorrection", False)
+
     # Include MC shape folder
     lcf.addFlag("LAr.UseMCShape", True)
     # Name of sqlite file containing Electronic Calibration values
