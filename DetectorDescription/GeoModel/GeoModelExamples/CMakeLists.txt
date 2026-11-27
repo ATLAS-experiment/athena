@@ -1,11 +1,11 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( GeoModelExamples )
 
 # External dependencies:
 find_package( Eigen ) # Needed by GeoModelKernel
-find_package( GeoModel COMPONENTS GeoGenericFunctions GeoModelKernel )
+find_package( GeoModelCore )
 
 # The list of linked libraries depends on what project is being built.
 if( NOT BUILDVP1LIGHT )
@@ -17,14 +17,14 @@ endif()
 atlas_add_library( GeoModelExamplesLib
    GeoModelExamples/*.h src/*.cxx
    PUBLIC_HEADERS GeoModelExamples
-   INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIRS}
-   LINK_LIBRARIES ${GEOMODEL_LIBRARIES} ${EIGEN_LIBRARIES}
+   INCLUDE_DIRS ${EIGEN_INCLUDE_DIRS}
+   LINK_LIBRARIES GeoModelCore::GeoModelKernel GeoModelCore::GeoGenericFunctions ${EIGEN_LIBRARIES}
    ${extra_libs} )
 
 if( NOT BUILDVP1LIGHT )
    atlas_add_component( GeoModelExamples
       src/components/*.cxx
-      INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIRS}
-      LINK_LIBRARIES ${GEOMODEL_LIBRARIES} GeoModelUtilities
-      GeoModelExamplesLib )
+      INCLUDE_DIRS ${EIGEN_INCLUDE_DIRS}
+      LINK_LIBRARIES GeoModelCore::GeoModelKernel GeoModelCore::GeoGenericFunctions GeoModelUtilities
+                     GeoModelExamplesLib )
 endif()

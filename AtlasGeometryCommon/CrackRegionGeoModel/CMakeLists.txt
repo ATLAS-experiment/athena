@@ -3,13 +3,14 @@
 # Declare the package name.
 atlas_subdir( CrackRegionGeoModel )
 
-find_package( GeoModel COMPONENTS GeoModelKernel GeoModelDBManager GeoModelRead)
+find_package( GeoModelCore )
+find_package( GeoModelIO )
+
 
 # Component(s) in the package.
 atlas_add_library( CrackRegionGeoModel
 		   src/*.cxx
 		   PUBLIC_HEADERS CrackRegionGeoModel
-		   INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
-		   LINK_LIBRARIES ${GEOMODEL_LIBRARIES}
+		   LINK_LIBRARIES GeoModelCore::GeoModelKernel GeoModelIO::GeoModelDBManager GeoModelIO::GeoModelRead
 		   PRIVATE_LINK_LIBRARIES GaudiKernel GeoModelUtilities StoreGateLib RDBAccessSvcLib )
 

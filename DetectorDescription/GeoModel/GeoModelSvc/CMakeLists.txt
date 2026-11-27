@@ -1,16 +1,17 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( GeoModelSvc )
 
 # External dependencies:
-find_package( GeoModel COMPONENTS GeoModelKernel GeoModelDBManager GeoModelRead)
+find_package( GeoModelCore )
+find_package( GeoModelIO )
 
 # Component(s) in the package:
 atlas_add_component( GeoModelSvc
    src/*.h src/*.cxx src/components/*.cxx
-   INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
-   LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaBaseComps AthenaKernel CxxUtils SGTools
+   LINK_LIBRARIES GeoModelCore::GeoModelKernel GeoModelIO::GeoModelDBManager GeoModelIO::GeoModelRead
+                  AthenaBaseComps AthenaKernel CxxUtils SGTools
                   StoreGateLib GeoModelInterfaces GeoModelUtilities GaudiKernel PathResolver
                   RDBAccessSvcLib EventInfoMgtLib )
 
