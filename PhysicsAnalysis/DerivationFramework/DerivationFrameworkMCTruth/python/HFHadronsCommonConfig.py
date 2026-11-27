@@ -15,9 +15,6 @@ def HFHadronsCommonCfg(flags):
     acc.flagPerfmonDomain('Truth')
     if flags.Input.MCChannelNumber > 0 and flags.Input.MCChannelNumber in DSIDList:
         from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import HadronOriginDecoratorCfg
-        DFCommonhadronorigindecorator = acc.getPrimaryAndMerge(HadronOriginDecoratorCfg(flags,
-                                                                                        name="DFCommonHadronOriginDecorator"))
-        CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-        acc.addEventAlgo(CommonAugmentation(name="HFHadronsCommonKernel",
-                                            AugmentationTools=[DFCommonhadronorigindecorator]))
+        tool = acc.getPrimaryAndMerge(HadronOriginDecoratorCfg(flags, name="DFCommonHadronOriginDecorator"))
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(name="HFHadronsCommonKernel", AugmentationTools=[tool]))
     return acc

@@ -4,6 +4,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import MetadataCategory
 
+
 def TRUTH1Cfg(flags):
     """Main config for TRUTH1"""
     acc = ComponentAccumulator()
@@ -13,67 +14,67 @@ def TRUTH1Cfg(flags):
     from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddTruthDerivationContentsCfg
     acc.merge(AddTruthDerivationContentsCfg(flags))
 
-    #==============================================================================
+    # ==============================================================================
     # HEAVY FLAVOR DECORATIONS (ttbar)
-    #==============================================================================
+    # ==============================================================================
     from DerivationFrameworkMCTruth.HFHadronsCommonConfig import HFHadronsCommonCfg
     acc.merge(HFHadronsCommonCfg(flags))
 
-    #==============================================================================
+    # ==============================================================================
     # Set up slimming content list
-    #==============================================================================
+    # ==============================================================================
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
-    TRUTH1SlimmingHelper = SlimmingHelper("TRUTH1SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
-    TRUTH1SlimmingHelper.AppendToDictionary = {'EventInfo':'xAOD::EventInfo','EventInfoAux':'xAOD::EventAuxInfo',
-                                               'TruthEvents':'xAOD::TruthEventContainer','TruthEventsAux':'xAOD::TruthEventAuxContainer',
-                                               'TruthVertices':'xAOD::TruthVertexContainer','TruthVerticesAux':'xAOD::TruthVertexAuxContainer',
-                                               'TruthParticles':'xAOD::TruthParticleContainer','TruthParticlesAux':'xAOD::TruthParticleAuxContainer', 
-                                               'TruthLHEParticles':'xAOD::TruthParticleContainer', 'TruthLHEParticlesAux':'xAOD::TruthParticleAuxContainer',
-                                               'MET_Truth':'xAOD::MissingETContainer','MET_TruthAux':'xAOD::MissingETAuxContainer',
-                                               'TruthElectrons':'xAOD::TruthParticleContainer','TruthElectronsAux':'xAOD::TruthParticleAuxContainer',
-                                               'TruthMuons':'xAOD::TruthParticleContainer','TruthMuonsAux':'xAOD::TruthParticleAuxContainer',
-                                               'TruthPhotons':'xAOD::TruthParticleContainer','TruthPhotonsAux':'xAOD::TruthParticleAuxContainer',
-                                               'TruthTaus':'xAOD::TruthParticleContainer','TruthTausAux':'xAOD::TruthParticleAuxContainer',
-                                               'TruthNeutrinos':'xAOD::TruthParticleContainer','TruthNeutrinosAux':'xAOD::TruthParticleAuxContainer',
-                                               'TruthBSM':'xAOD::TruthParticleContainer','TruthBSMAux':'xAOD::TruthParticleAuxContainer',
-                                               'TruthBoson':'xAOD::TruthParticleContainer','TruthBosonAux':'xAOD::TruthParticleAuxContainer',
-                                               'TruthBottom':'xAOD::TruthParticleContainer','TruthBottomAux':'xAOD::TruthParticleAuxContainer',
-                                               'TruthTop':'xAOD::TruthParticleContainer','TruthTopAux':'xAOD::TruthParticleAuxContainer',
-                                               'TruthForwardProtons':'xAOD::TruthParticleContainer','TruthForwardProtonsAux':'xAOD::TruthParticleAuxContainer',
-                                               'BornLeptons':'xAOD::TruthParticleContainer','BornLeptonsAux':'xAOD::TruthParticleAuxContainer',
-                                               'TruthBosonsWithDecayParticles':'xAOD::TruthParticleContainer','TruthBosonsWithDecayParticlesAux':'xAOD::TruthParticleAuxContainer',
-                                               'TruthBosonsWithDecayVertices':'xAOD::TruthVertexContainer','TruthBosonsWithDecayVerticesAux':'xAOD::TruthVertexAuxContainer',
-                                               'TruthBSMWithDecayParticles':'xAOD::TruthParticleContainer','TruthBSMWithDecayParticlesAux':'xAOD::TruthParticleAuxContainer',
-                                               'TruthBSMWithDecayVertices':'xAOD::TruthVertexContainer','TruthBSMWithDecayVerticesAux':'xAOD::TruthVertexAuxContainer',
-                                               'AntiKtVR30Rmax4Rmin02TruthChargedJets':'xAOD::JetContainer','AntiKtVR30Rmax4Rmin02TruthChargedJetsAux':'xAOD::JetAuxContainer',
-                                               'AntiKt4TruthDressedWZJets':'xAOD::JetContainer','AntiKt4TruthDressedWZJetsAux':'xAOD::JetAuxContainer',
-                                               'AntiKt10TruthJets':'xAOD::JetContainer','AntiKt10TruthJetsAux':'xAOD::JetAuxContainer',
-                                               'TruthLabelBHadronsFinal':'xAOD::TruthParticleContainer', 'TruthLabelBHadronsInitial':'xAOD::TruthParticleContainer',
-                                               'TruthLabelTQuarksFinal':'xAOD::TruthParticleContainer', 'TruthLabelBQuarksFinal':'xAOD::TruthParticleContainer', 'TruthLabelCQuarksFinal':'xAOD::TruthParticleContainer',                                               
-                                               'TruthLabelCHadronsFinal':'xAOD::TruthParticleContainer', 'TruthLabelCHadronsInitial':'xAOD::TruthParticleContainer',
-                                               'TruthLabelHBosons':'xAOD::TruthParticleContainer', 'TruthLabelWBosons':'xAOD::TruthParticleContainer', 'TruthLabelZBosons':'xAOD::TruthParticleContainer',
-                                               'TruthLabelPartons':'xAOD::TruthParticleContainer', 'TruthLabelTausFinal':'xAOD::TruthParticleContainer'  
-                                              }
+    TRUTH1SlimmingHelper = SlimmingHelper("TRUTH1SlimmingHelper", NamesAndTypes=flags.Input.TypedCollections, flags=flags)
+    TRUTH1SlimmingHelper.AppendToDictionary = {'EventInfo': 'xAOD::EventInfo', 'EventInfoAux': 'xAOD::EventAuxInfo',
+                                               'TruthEvents': 'xAOD::TruthEventContainer', 'TruthEventsAux': 'xAOD::TruthEventAuxContainer',
+                                               'TruthVertices': 'xAOD::TruthVertexContainer', 'TruthVerticesAux': 'xAOD::TruthVertexAuxContainer',
+                                               'TruthParticles': 'xAOD::TruthParticleContainer', 'TruthParticlesAux': 'xAOD::TruthParticleAuxContainer',
+                                               'TruthLHEParticles': 'xAOD::TruthParticleContainer', 'TruthLHEParticlesAux': 'xAOD::TruthParticleAuxContainer',
+                                               'MET_Truth': 'xAOD::MissingETContainer', 'MET_TruthAux': 'xAOD::MissingETAuxContainer',
+                                               'TruthElectrons': 'xAOD::TruthParticleContainer', 'TruthElectronsAux': 'xAOD::TruthParticleAuxContainer',
+                                               'TruthMuons': 'xAOD::TruthParticleContainer', 'TruthMuonsAux': 'xAOD::TruthParticleAuxContainer',
+                                               'TruthPhotons': 'xAOD::TruthParticleContainer', 'TruthPhotonsAux': 'xAOD::TruthParticleAuxContainer',
+                                               'TruthTaus': 'xAOD::TruthParticleContainer', 'TruthTausAux': 'xAOD::TruthParticleAuxContainer',
+                                               'TruthNeutrinos': 'xAOD::TruthParticleContainer', 'TruthNeutrinosAux': 'xAOD::TruthParticleAuxContainer',
+                                               'TruthBSM': 'xAOD::TruthParticleContainer', 'TruthBSMAux': 'xAOD::TruthParticleAuxContainer',
+                                               'TruthBoson': 'xAOD::TruthParticleContainer', 'TruthBosonAux': 'xAOD::TruthParticleAuxContainer',
+                                               'TruthBottom': 'xAOD::TruthParticleContainer', 'TruthBottomAux': 'xAOD::TruthParticleAuxContainer',
+                                               'TruthTop': 'xAOD::TruthParticleContainer', 'TruthTopAux': 'xAOD::TruthParticleAuxContainer',
+                                               'TruthForwardProtons': 'xAOD::TruthParticleContainer', 'TruthForwardProtonsAux': 'xAOD::TruthParticleAuxContainer',
+                                               'BornLeptons': 'xAOD::TruthParticleContainer', 'BornLeptonsAux': 'xAOD::TruthParticleAuxContainer',
+                                               'TruthBosonsWithDecayParticles': 'xAOD::TruthParticleContainer', 'TruthBosonsWithDecayParticlesAux': 'xAOD::TruthParticleAuxContainer',
+                                               'TruthBosonsWithDecayVertices': 'xAOD::TruthVertexContainer', 'TruthBosonsWithDecayVerticesAux': 'xAOD::TruthVertexAuxContainer',
+                                               'TruthBSMWithDecayParticles': 'xAOD::TruthParticleContainer', 'TruthBSMWithDecayParticlesAux': 'xAOD::TruthParticleAuxContainer',
+                                               'TruthBSMWithDecayVertices': 'xAOD::TruthVertexContainer', 'TruthBSMWithDecayVerticesAux': 'xAOD::TruthVertexAuxContainer',
+                                               'AntiKtVR30Rmax4Rmin02TruthChargedJets': 'xAOD::JetContainer', 'AntiKtVR30Rmax4Rmin02TruthChargedJetsAux': 'xAOD::JetAuxContainer',
+                                               'AntiKt4TruthDressedWZJets': 'xAOD::JetContainer', 'AntiKt4TruthDressedWZJetsAux': 'xAOD::JetAuxContainer',
+                                               'AntiKt10TruthJets': 'xAOD::JetContainer', 'AntiKt10TruthJetsAux': 'xAOD::JetAuxContainer',
+                                               'TruthLabelBHadronsFinal': 'xAOD::TruthParticleContainer', 'TruthLabelBHadronsInitial': 'xAOD::TruthParticleContainer',
+                                               'TruthLabelTQuarksFinal': 'xAOD::TruthParticleContainer', 'TruthLabelBQuarksFinal': 'xAOD::TruthParticleContainer', 'TruthLabelCQuarksFinal': 'xAOD::TruthParticleContainer',
+                                               'TruthLabelCHadronsFinal': 'xAOD::TruthParticleContainer', 'TruthLabelCHadronsInitial': 'xAOD::TruthParticleContainer',
+                                               'TruthLabelHBosons': 'xAOD::TruthParticleContainer', 'TruthLabelWBosons': 'xAOD::TruthParticleContainer', 'TruthLabelZBosons': 'xAOD::TruthParticleContainer',
+                                               'TruthLabelPartons': 'xAOD::TruthParticleContainer', 'TruthLabelTausFinal': 'xAOD::TruthParticleContainer'
+                                               }
     # Custom all variables -- won't be overridden by the call below, just added to. Full lists for completeness.
-    TRUTH1SlimmingHelper.AllVariables = [ 'EventInfo',
-                                          'TruthEvents', 
-                                          'TruthVertices',
-                                          'TruthParticles',
-                                          'TruthLHEParticles',
-                                          'TruthLabelBHadronsFinal',
-                                          'TruthLabelBHadronsInitial',
-                                          'TruthLabelBQuarksFinal',
-                                          'TruthLabelCHadronsFinal',
-                                          'TruthLabelCHadronsInitial',
-                                          'TruthLabelCQuarksFinal',
-                                          'TruthLabelHBosons',
-                                          'TruthLabelPartons',
-                                          'TruthLabelTQuarksFinal',
-                                          'TruthLabelTausFinal',
-                                          'TruthLabelWBosons',
-                                          'TruthLabelZBosons',
-                                          'TruthTausWithDecayParticles',
-                                          'TruthTausWithDecayVertices']
+    TRUTH1SlimmingHelper.AllVariables = ['EventInfo',
+                                         'TruthEvents',
+                                         'TruthVertices',
+                                         'TruthParticles',
+                                         'TruthLHEParticles',
+                                         'TruthLabelBHadronsFinal',
+                                         'TruthLabelBHadronsInitial',
+                                         'TruthLabelBQuarksFinal',
+                                         'TruthLabelCHadronsFinal',
+                                         'TruthLabelCHadronsInitial',
+                                         'TruthLabelCQuarksFinal',
+                                         'TruthLabelHBosons',
+                                         'TruthLabelPartons',
+                                         'TruthLabelTQuarksFinal',
+                                         'TruthLabelTausFinal',
+                                         'TruthLabelWBosons',
+                                         'TruthLabelZBosons',
+                                         'TruthTausWithDecayParticles',
+                                         'TruthTausWithDecayVertices']
     # Custom extra variables -- won't be overridden by the call below, just added to. Full lists for completeness.
     TRUTH1SlimmingHelper.ExtraVariables = ["AntiKtVR30Rmax4Rmin02TruthChargedJets.GhostHBosonsCount.GhostHBosonsPt.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.HadronConeExclTruthLabelID.PartonTruthLabelID.ConeExclBHadronsFinal.ConeExclCHadronsFinal.ConeExclTausFinal.constituentLinks",
                                            "AntiKt4TruthDressedWZJets.GhostCHadronsFinalCount.GhostBHadronsFinalCount.pt.HadronConeExclTruthLabelID.PartonTruthLabelID.ConeExclBHadronsFinal.ConeExclCHadronsFinal.ConeExclTausFinal.constituentLinks"]
@@ -81,8 +82,8 @@ def TRUTH1Cfg(flags):
     # Add standard content
     from DerivationFrameworkMCTruth.MCTruthCommonConfig import addPhysTruthContentToSlimmerTool
     addPhysTruthContentToSlimmerTool(TRUTH1SlimmingHelper)
-    
-    # Generate item list and create stream 
+
+    # Generate item list and create stream
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     TRUTH1ItemList = TRUTH1SlimmingHelper.GetItemList()

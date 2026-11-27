@@ -5,7 +5,6 @@
 # Actual configuration is subcontracted to other config files since some of them are very long
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaConfiguration.ComponentFactory import CompFactory
 
 
 def StandardJetsInDerivCfg(flags):
@@ -41,14 +40,11 @@ def NCBCommonAugmentationsCfg(flags,**kwargs):
             AddMiniTruthCollectionLinksCfg,
             AddPVCollectionCfg,
             AddTruthCollectionNavigationDecorationsCfg,
-            TruthClassificationAugmentationsCfg)
+            TruthClassificationAugmentationsCfg,
+            DFCommonTruthCharmAugmentationCfg,
+        )
         acc.merge(TruthClassificationAugmentationsCfg(flags))
-        from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import DFCommonTruthCharmToolCfg
-        NCBCommonTruthCharmTool = acc.getPrimaryAndMerge(DFCommonTruthCharmToolCfg(
-            flags,
-            name = "NCBCommonTruthCharmTool"))
-        CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-        acc.addEventAlgo(CommonAugmentation("NCBCommonTruthCharmKernel",AugmentationTools=[NCBCommonTruthCharmTool]))
+        acc.merge(DFCommonTruthCharmAugmentationCfg(flags))
         acc.merge(AddHFAndDownstreamParticlesCfg(flags))
         acc.merge(AddStandardTruthContentsCfg(flags))
         acc.merge(AddTruthCollectionNavigationDecorationsCfg(
