@@ -365,11 +365,12 @@ SpacePointMakerAlg::splitHitsPerGasGap(xAOD::ChamberViewer<ContType>& viewer) co
             continue;
         }
         /// Sort in the hit
-        auto& toPush = hitsPerGasGap[gapIdx][measPhi];
-        if (toPush.capacity() == toPush.size()) {
-            toPush.reserve(toPush.size() + m_capacityBucket);
-        }
-        toPush.push_back(prd);
+        
+        /* 
+          normal geometric vector capacity growth instead of incremental reserve
+          is likely more efficient.
+        */
+        hitsPerGasGap[gapIdx][measPhi].push_back(prd);
     }
     return hitsPerGasGap;
 }
@@ -394,7 +395,7 @@ template <typename ContType>
         const Acts::Transform3 sectorTrans = viewer.at(0)->readoutElement()->msSector()->globalToLocalTransform(*gctx);
         ATH_MSG_DEBUG("Fill space points for chamber "<<m_idHelperSvc->toStringDetEl(viewer.at(0)->identify()));
         if constexpr( std::is_same_v<ContType, xAOD::MdtDriftCircleContainer>) {
-            pointsInChamb.etaHits.reserve(pointsInChamb.etaHits.capacity() + viewer.size());       
+            //rely on normal vector geometric growth       
             for (const auto& prd : viewer) {
                 Acts::Transform3 toChamberTrans{toChamberTransform(*gctx, sectorTrans, *prd)};
                 SpacePoint& sp{pointsInChamb.etaHits.emplace_back(prd)};
@@ -535,6 +536,8 @@ StatusCode SpacePointMakerAlg::loadContainerAndSort(const EventContext& ctx,
                                  const std::function<bool(const xAOD::sTgcMeasurement*,
                                                           const xAOD::sTgcMeasurement*)>& combFunc) {
                 std::vector<char> combinedFlagsA{}, combinedFlagsB{};
+                combinedFlagsA.reserve(instanceCounts[collIdxA].size());
+                combinedFlagsB.reserve(instanceCounts[collIdxB].size());
                 std::ranges::transform(instanceCounts[collIdxA], std::back_inserter(combinedFlagsA),
                                        [](const std::shared_ptr<unsigned>& countPtr){
                                            return (*countPtr) == 0;
@@ -635,7 +638,7 @@ StatusCode SpacePointMakerAlg::loadContainerAndSort(const EventContext& ctx,
                                                 [](const Amg::Vector2D& a, const Amg::Vector2D& b){
                                                     return a.y() < b.y();
                                                 });
-                return (wire->localMeasurementPos().y() > min->y() || wire->localMeasurementPos().y() < max->y()); 
+                return (wire->localMeasurementPos().y() > min->y() and wire->localMeasurementPos().y() < max->y()); 
         
             });
 
