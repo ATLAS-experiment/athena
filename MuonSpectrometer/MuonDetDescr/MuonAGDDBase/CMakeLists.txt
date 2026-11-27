@@ -7,13 +7,12 @@
 # Declare the package name:
 atlas_subdir( MuonAGDDBase )
 
-find_package( GeoModel COMPONENTS GeoModelKernel )
+find_package( GeoModelCore )
 
 # Component(s) in the package:
 atlas_add_library( MuonAGDDBase
                    src/*.cxx
                    PUBLIC_HEADERS MuonAGDDBase
-		   INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
                    LINK_LIBRARIES AGDDControl AGDDKernel GaudiKernel MuonAGDDDescription StoreGateLib MuonGeoModelLib
-                   PRIVATE_LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AGDDModel )
+                   PRIVATE_LINK_LIBRARIES GeoModelCore::GeoModelKernel AGDDModel )
 

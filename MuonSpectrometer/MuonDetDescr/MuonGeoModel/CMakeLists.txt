@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 ################################################################################
 # Package: MuonGeoModel
@@ -8,22 +8,22 @@
 atlas_subdir( MuonGeoModel )
 
 # External dependencies:
-find_package( GeoModel COMPONENTS GeoModelKernel GeoModelDBManager GeoModelRead )
-
+find_package( GeoModelCore )
+find_package( GeoModelIO )
 # Component(s) in the package:
 atlas_add_library( MuonGeoModelLib
                    src/*.cxx
                    PUBLIC_HEADERS MuonGeoModel
-                   INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaBaseComps AthenaKernel GeoModelUtilities GaudiKernel 
-                                   MuonReadoutGeometry MuonGMdbObjects StoreGateLib MuonIdHelpersLib 
+                   LINK_LIBRARIES GeoModelCore::GeoModelKernel GeoModelIO::GeoModelDBManager 
+                                  GeoModelIO::GeoModelRead AthenaBaseComps AthenaKernel GeoModelUtilities 
+                                  GaudiKernel MuonReadoutGeometry MuonGMdbObjects StoreGateLib MuonIdHelpersLib 
                                   MuonAGDDDescription AGDDControl AGDDKernel CxxUtils
                    PRIVATE_LINK_LIBRARIES AthenaPoolUtilities IdDictDetDescr MuonDetDescrUtils )
 
 atlas_add_component( MuonGeoModel
                      src/components/*.cxx
-                     INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaKernel StoreGateLib GeoModelUtilities GaudiKernel  
+                     LINK_LIBRARIES GeoModelCore::GeoModelKernel GeoModelIO::GeoModelDBManager 
+                                    GeoModelIO::GeoModelRead AthenaKernel StoreGateLib GeoModelUtilities GaudiKernel  
                                     MuonReadoutGeometry MuonGMdbObjects AthenaPoolUtilities AGDDKernel IdDictDetDescr 
                                     MuonAGDDDescription MuonDetDescrUtils MuonIdHelpersLib MuonGeoModelLib)
 
