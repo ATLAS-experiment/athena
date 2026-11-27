@@ -8,7 +8,7 @@
 atlas_subdir( ActsGeoUtils )
 
 # External dependencies:
-find_package( GeoModel COMPONENTS GeoModelKernel )
+find_package( GeoModelCore )
 
 
 set( extra_libs )
@@ -22,8 +22,7 @@ endif()
 atlas_add_library( ActsGeoUtils
                    src/*.cxx
                    PUBLIC_HEADERS ActsGeoUtils
-                   INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${GEOMODEL_LIBRARIES} GeoPrimitives Identifier 
+                   LINK_LIBRARIES GeoModelCore::GeoModelKernel GeoPrimitives Identifier 
                                   ActsGeometryInterfacesLib GeoModelUtilities CxxUtils ${extra_libs})
 
 if( NOT SIMULATIONBASE )                                                            

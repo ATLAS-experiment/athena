@@ -7,7 +7,7 @@ atlas_subdir( ActsGeometry )
 find_package( Acts COMPONENTS Core PluginJson PluginGeoModel PluginDetray)
 find_package( Boost )
 find_package( CLHEP )
-find_package( GeoModel COMPONENTS GeoModelKernel )
+find_package( GeoModelCore )
 find_package( ROOT COMPONENTS Core Tree RIO )
 find_package( TBB )
 find_package( traccc )
@@ -68,9 +68,10 @@ atlas_add_component( ActsGeometry
                      src/TrackingGeoAlignVisitor.cxx
                      src/ActsVolumeIdToDetectorElementCollectionMappingAlg.cxx
                      src/components/*.cxx
-                     INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${Boost_LIBRARIES} ${CLHEP_LIBRARIES} ${GEOMODEL_LIBRARIES} ${ROOT_LIBRARIES}
+                     INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
+                     LINK_LIBRARIES ${Boost_LIBRARIES} ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES}
                      Acts::PluginDetray
+                     GeoModelCore::GeoModelKernel
                      traccc::core
                      AthDeviceInterfacesLib
                      ActsGeometryInterfacesLib
