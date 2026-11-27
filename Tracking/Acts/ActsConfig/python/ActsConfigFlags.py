@@ -318,6 +318,9 @@ def createActsConfigFlags():
     actscf.addFlag("Acts.Device.doCellSorting", True)
     actscf.addFlag("Acts.Device.doClusterization", False)
     actscf.addFlag("Acts.Device.doSpacePointFormation", False)
+    # Follow the LRT backend unless the Strip SP backend is explicitly selected.
+    actscf.addFlag("Acts.Device.doStripSpacePointFormation",
+                  lambda pcf: pcf.Acts.Device.doLargeRadiusPass, type=bool)
     actscf.addFlag("Acts.Device.doSeeding", False)
     actscf.addFlag("Acts.Device.seedingStrategy", SeedingStrategy.GridTriplet, type=SeedingStrategy)
     actscf.addFlag("Acts.Device.doTrackReconstruction", False)

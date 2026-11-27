@@ -14,6 +14,13 @@ def ITkActsDeviceTrackRecoCfg(flags, *, previousExtension=None):
     acc = ComponentAccumulator()
 
     tritonMode = flags.Acts.Device.tritonMode
+    if flags.Acts.Device.doStripSpacePointFormation:
+        if not flags.Acts.Device.doClusterization:
+            raise ValueError("GPU Strip SP formation requires device clustering "
+                             "(flags.Acts.Device.doClusterization=True)")
+        if tritonMode is not DeviceTritonMode.Off:
+            raise ValueError("GPU Strip SP pipeline configuration requires "
+                             "Acts.Device.tritonMode=DeviceTritonMode.Off")
     doDeviceSteps = (flags.Acts.Device.doClusterization,
                      flags.Acts.Device.doSeeding,
                      flags.Acts.Device.doTrackReconstruction)
@@ -103,6 +110,13 @@ def ITkActsDeviceTrackRecoCfg(flags, *, previousExtension=None):
         acc.merge(ITkActsDataPreparationCfg(flags, previousExtension=previousExtension))
         clustersLocation = DataLocation.HOST
 
+    if flags.Acts.Device.doStripSpacePointFormation:
+        from ActsGPUDataPreparation.ActsGPUDataPreparationConfig import DeviceStripSPFormationAlgCfg
+        acc.merge(DeviceStripSPFormationAlgCfg(flags,
+            InputTracccMeasurements="TracccMeasurementCollection",
+            OutputTracccStripSpacepoints="TracccStripSpacepointCollection",
+            OutputTracccStripOverlapSpacepoints="TracccStripOverlapSpacepointCollection"))
+
     # --- Seeding ---
     if flags.Acts.Device.doSeeding:
 
@@ -154,12 +168,22 @@ def ITkActsDeviceTrackRecoCfg(flags, *, previousExtension=None):
                 OutputStripClusters="ITkStripClusters"
             ))
 
-            from ActsConfig.ActsSpacePointFormationConfig import ActsStripSpacePointFormationAlgCfg
-            acc.merge(ActsStripSpacePointFormationAlgCfg(flags,
-                name=f"{flags.Tracking.ActiveConfig.extension}StripSpacePointFormationAlg",
-                StripClusters="ITkStripClusters",
-                StripSpacePoints="ITkStripSpacePoints",
-                StripOverlapSpacePoints="ITkStripOverlapSpacePoints"))
+            if flags.Acts.Device.doStripSpacePointFormation:
+                from ActsGPUEventCnv.ActsGPUEventCnvConfig import TracccStripSpacepointConverterAlgCfg
+                acc.merge(TracccStripSpacepointConverterAlgCfg(flags,
+                    InputStripSpacepoints="TracccStripSpacepointCollection",
+                    InputStripOverlapSpacepoints="TracccStripOverlapSpacepointCollection",
+                    StripClusters="ITkStripClusters",
+                    InputMeasToStripCl="ITkTracccMeasToStripCl",
+                    StripSpacePoints="ITkStripSpacePoints",
+                    StripOverlapSpacePoints="ITkStripOverlapSpacePoints"))
+            else:
+                from ActsConfig.ActsSpacePointFormationConfig import ActsStripSpacePointFormationAlgCfg
+                acc.merge(ActsStripSpacePointFormationAlgCfg(flags,
+                    name=f"{flags.Tracking.ActiveConfig.extension}StripSpacePointFormationAlg",
+                    StripClusters="ITkStripClusters",
+                    StripSpacePoints="ITkStripSpacePoints",
+                    StripOverlapSpacePoints="ITkStripOverlapSpacePoints"))
 
             clustersLocation = DataLocation.HOST
 
@@ -243,15 +267,27 @@ def ITkActsDeviceTrackRecoCfg(flags, *, previousExtension=None):
                     OutputStripClusters="ITkStripClusters"
             ))
 
-            # Strip clusters were just produced above, but nothing forms strip
-            # space points on the device path — mirror the host-side flow
-            if flags.Tracking.ActiveConfig.useITkStripSeeding or (flags.Acts.SpacePoints.doStrip and not flags.Tracking.ActiveConfig.isSecondaryPass):
-                from ActsConfig.ActsSpacePointFormationConfig import ActsStripSpacePointFormationAlgCfg
-                acc.merge(ActsStripSpacePointFormationAlgCfg(flags,
-                    name=f"{flags.Tracking.ActiveConfig.extension}StripSpacePointFormationAlg",
-                    StripClusters="ITkStripClusters",
-                    StripSpacePoints="ITkStripSpacePoints",
-                    StripOverlapSpacePoints="ITkStripOverlapSpacePoints"))
+            # Keep the host SP keys consumed by secondary tracking passes.
+            if (flags.Acts.Device.doStripSpacePointFormation
+                    or flags.Tracking.ActiveConfig.useITkStripSeeding
+                    or (flags.Acts.SpacePoints.doStrip
+                        and not flags.Tracking.ActiveConfig.isSecondaryPass)):
+                if flags.Acts.Device.doStripSpacePointFormation:
+                    from ActsGPUEventCnv.ActsGPUEventCnvConfig import TracccStripSpacepointConverterAlgCfg
+                    acc.merge(TracccStripSpacepointConverterAlgCfg(flags,
+                        InputStripSpacepoints="TracccStripSpacepointCollection",
+                        InputStripOverlapSpacepoints="TracccStripOverlapSpacepointCollection",
+                        StripClusters="ITkStripClusters",
+                        InputMeasToStripCl="ITkTracccMeasToStripCl",
+                        StripSpacePoints="ITkStripSpacePoints",
+                        StripOverlapSpacePoints="ITkStripOverlapSpacePoints"))
+                else:
+                    from ActsConfig.ActsSpacePointFormationConfig import ActsStripSpacePointFormationAlgCfg
+                    acc.merge(ActsStripSpacePointFormationAlgCfg(flags,
+                        name=f"{flags.Tracking.ActiveConfig.extension}StripSpacePointFormationAlg",
+                        StripClusters="ITkStripClusters",
+                        StripSpacePoints="ITkStripSpacePoints",
+                        StripOverlapSpacePoints="ITkStripOverlapSpacePoints"))
 
         acc.merge(TracccTrackConverterAlgCfg(flags,
             InputPixelClusters="ITkPixelClusters",
@@ -280,12 +316,22 @@ def ITkActsDeviceTrackRecoCfg(flags, *, previousExtension=None):
                 OutputMeasToStripCl="ITkTracccMeasToStripCl",
                 OutputStripClusters="ITkStripClusters"
             ))
-            from ActsConfig.ActsSpacePointFormationConfig import ActsStripSpacePointFormationAlgCfg
-            acc.merge(ActsStripSpacePointFormationAlgCfg(flags,
-                name=f"{flags.Tracking.ActiveConfig.extension}StripSpacePointFormationAlg",
-                StripClusters="ITkStripClusters",
-                StripSpacePoints="ITkStripSpacePoints",
-                StripOverlapSpacePoints="ITkStripOverlapSpacePoints"))
+            if flags.Acts.Device.doStripSpacePointFormation:
+                from ActsGPUEventCnv.ActsGPUEventCnvConfig import TracccStripSpacepointConverterAlgCfg
+                acc.merge(TracccStripSpacepointConverterAlgCfg(flags,
+                    InputStripSpacepoints="TracccStripSpacepointCollection",
+                    InputStripOverlapSpacepoints="TracccStripOverlapSpacepointCollection",
+                    StripClusters="ITkStripClusters",
+                    InputMeasToStripCl="ITkTracccMeasToStripCl",
+                    StripSpacePoints="ITkStripSpacePoints",
+                    StripOverlapSpacePoints="ITkStripOverlapSpacePoints"))
+            else:
+                from ActsConfig.ActsSpacePointFormationConfig import ActsStripSpacePointFormationAlgCfg
+                acc.merge(ActsStripSpacePointFormationAlgCfg(flags,
+                    name=f"{flags.Tracking.ActiveConfig.extension}StripSpacePointFormationAlg",
+                    StripClusters="ITkStripClusters",
+                    StripSpacePoints="ITkStripSpacePoints",
+                    StripOverlapSpacePoints="ITkStripOverlapSpacePoints"))
             clustersLocation = DataLocation.HOST
 
         ckfKwargs = {}
@@ -334,6 +380,11 @@ def ITkActsDeviceTrackRecoCfg(flags, *, previousExtension=None):
         if flags.Acts.doAmbiguityResolution:
             from ActsConfig.ActsTrackFindingConfig import ActsAmbiguityResolutionCfg
             acc.merge(ActsAmbiguityResolutionCfg(flags))
+
+    if flags.Acts.Device.doStripSpacePointFormation:
+        from ActsConfig.ActsPersistificationConfig import PersistifySpacePoints
+        acc.merge(PersistifySpacePoints(flags,
+            stripSpacePointCollections=["ITkStripSpacePoints", "ITkStripOverlapSpacePoints"]))
 
     acc.merge(ITkActsDeviceTrackRecoPostProcessingCfg(flags, previousExtension=previousExtension))
     return acc
