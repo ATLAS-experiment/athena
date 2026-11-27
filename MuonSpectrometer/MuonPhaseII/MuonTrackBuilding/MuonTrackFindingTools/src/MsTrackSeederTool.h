@@ -9,17 +9,18 @@
 #include "GaudiKernel/SystemOfUnits.h"
 #include "Acts/Utilities/KDTree.hpp"
 
-#include "ActsEvent/ContextUtility.h"
-
+#include "ActsGeometry/ContextUtility.h"
 
 #include "xAODMuon/MuonSegmentContainer.h"
 #include "MuonTrackEvent/MsTrackSeed.h"
+#include "MomentumEstimator.h"
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 #include "MuonRecToolInterfacesR4/ISegmentSelectionTool.h"
 #include "MuonRecToolInterfacesR4/ITrackSeedingDiagnosticsTool.h"
+#include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 #include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 
-#include <span>
+#include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
 
 namespace MuonR4{
     /** @brief Helper class to group muon sgements that may belong to a muon trajectory. 
@@ -76,84 +77,26 @@ namespace MuonR4{
                                                     const Location loc,
                                                     const ExpandedSector sector) const override final;
 
-            /** @brief Estimate the charge times momentum of a muon track candidate from the 
+            /** @brief Estimate the charge over momentum of a muon track candidate from the 
              *         contained segments. The position and direction of the segments are projected onto a 
              *         given phi plane, defined by the segments with phi information or the sector plane.  
              *         The muon trajectory is approximated as 2D trajectory within this plane to avoid side 
              *         effects from (non)-present phi measurements.
              *  @param tgContext: The geometry context to align the segment w.r.t sector
-             *  @param seed: Reference to the seed of interest.
-             *  @param fieldCache: The initialized magnetic field map*/
-            virtual double estimateQtimesP(const Acts::GeometryContext& tgContext,
-                                           const MsTrackSeed& seed,
-                                           MagField::AtlasFieldCache& fieldCache) const override final;
+             *  @param seed: Reference to the seed of interest. */
+            virtual double estimateQoverP(const EventContext& ctx,
+                                           const MsTrackSeed& seed) const override final;
  
         private:
-            
-            /** @brief Projects the segment position onto the plane with global phi = x
-             *         The local coordinate system is arranged such that the x-axis
-             *         is co-linear to the phi direction. The segment is moved along
-             *         the MDT's wire direction in that sector.
-             *  @param planeNorm: Normal of the phi plane onto which the segment is projected
-             *  @param sector: Sector of the segment to be projected, needed to find the wire direction 
-             *  @param posToProject: Position to project */
-             Amg::Vector3D segPosOntoPhiPlane(const Acts::GeometryContext& tgContext,
-                                              const Amg::Vector3D& planeNormal,
-                                              const xAOD::MuonSegment& segment) const;
+            /** @brief Wire direction of the segment: the x axis of the chamber volume of its first precision hit that
+             *         is not an outlier, else (truth segments without measurements) the x axis of the sector envelope */
+            Acts::Vector3 wireDirection(const Acts::GeometryContext& tgContext,
+                                        const xAOD::MuonSegment& segment) const;
 
             /** @brief Construct a complete search tree from a MuonSegment container
              *  @param segments: Reference to the segment container to construct. */
             SearchTree_t constructTree(const Acts::GeometryContext& tgContext,
                                        const xAOD::MuonSegmentContainer& segments) const;
-            
-            using PosMomPair_t = std::pair<Amg::Vector3D, Amg::Vector3D>;
-            /** @brief Estimate the charge times momentum of a muon candidate when three points 
-             *         are available. The given position and direction of each point need to be projected onto the given 
-             *         phi plane, and the muon trajectory is approximated as 2D trajectory within this plane.
-             *  @param planeNorm: Normal of the bending plane containing the muon trajectory in this simplified approach
-             *  @param p1: First segment
-             *  @param p2: Second segment
-             *  @param p3: Third segment
-             *  @param fieldCache: The initialized magnetic field map
-             *  @return: Estimated Q*P value */
-            double estimateQtimesP(const Amg::Vector3D& planeNorm,
-                                   const PosMomPair_t& p1, 
-                                   const PosMomPair_t& p2,
-                                   const PosMomPair_t& p3,
-                                   MagField::AtlasFieldCache& fieldCache) const;
-            /** @brief Estimate the charge times momentum of a muon candidate when two points are 
-             *         available. The position and direction of each point need to be projected onto the given phi plane,
-             *         and the muon trajectory is approximated as 2D trajectory within this plane.
-             *  @param planeNorm: Normal of the bending plane containing the muon trajectory in this simplified approach
-             *  @param seg1: First segment
-             *  @param seg2: Second segment
-             *  @param fieldCache: The initialized magnetic field map
-             *  @return: Estimated Q*P value */
-            double estimateQtimesP(const Amg::Vector3D& planeNorm,
-                                   const PosMomPair_t& p1, 
-                                   const PosMomPair_t& p2,
-                                   MagField::AtlasFieldCache& fieldCache) const;
-            /** @brief Compute the charge times momentum from the integral of lorentz force and the 
-             *         total change in direction
-             *  @param forceIntegral: Cumulative lorentz force
-             *  @param deltaDir: Change in direction
-             *  @return: Estimated Q*P value */
-            double getPtimesQ(const Amg::Vector3D& forceIntegral, 
-                              const Amg::Vector3D& deltaDir) const;
-            /** @brief Compute the integral of magnetic force (v x B ) dS along a trajectory, given the initial 
-             *         and final positions and directions of the trajectory. The trajectory is approximated as 
-             *         a straight line between the two positions, and the magnetic field is evaluated at several 
-             *         points along this line.
-             *  @param point1: Initial position and direction
-             *  @param point2: Final position and direction
-             *  @param planeNorm: Normal vector of the bending plane used for the momentum estimation, used to 
-             *         extract the orthogonal component to the field
-             *  @param fieldCache: Magnetic field cache
-             *  @return: Integral of magnetic force */
-            Amg::Vector3D forceIntegration(const PosMomPair_t& point1,
-                                           const PosMomPair_t& point2,
-                                           const Amg::Vector3D& planeNorm,
-                                           MagField::AtlasFieldCache& fieldCache) const;
             /** @brief Append the segment to the raw data container. If the projection onto 
              *         the barrel cylinder / endcap discs exceeds the bounds, the segment is not added.
              *         Segments at the interval boundaries of the expanded sector are mirred into the
@@ -171,8 +114,9 @@ namespace MuonR4{
              *  @param segment: Reference to the segment of interest */
             const MuonGMR4::SpectrometerSector* envelope(const xAOD::MuonSegment& segment) const;
             /** @brief Removes exact duplciates or partial subsets of the MsTrackSeeds
+             *  @param ctx: EventContext (magnetic field for the ordering by fit quality)
              *  @param unresolved: Input MsTrackSeedContainer with duplicates */
-            MsTrackSeedContainer resolveOverlaps(MsTrackSeedContainer&& unresolved) const;
+            MsTrackSeedContainer resolveOverlaps(const EventContext& ctx, MsTrackSeedContainer&& unresolved) const;
             /** @brief  */
             MsTrackSeedContainer splitSeeds(MsTrackSeedContainer&& unsplitted) const;
             /** @brief Checks whether the seed has collected two segments on the same
@@ -192,8 +136,10 @@ namespace MuonR4{
              *  @param b: Reference to the second track seed */
             std::uint8_t countShared(const MsTrackSeed& a,
                                      const MsTrackSeed& b) const;
-            /** @brief The list of field steps in the force field integration */
-            std::vector<double> m_fieldExtpSteps{};
+            /** @brief Helper function to retrieve the beamspot */
+            std::optional<MomentumEstimator::BeamSpot> retrieveBS(const EventContext& ctx,
+                                                                  const Acts::GeometryContext& tgContext) const;
+            
             /** @brief The radius of he barrel cylinder */
             DoubleProperty m_barrelRadius{this, "BarrelRadius", 7.*Gaudi::Units::m};
             /** @brief The maximum length of the barrel cylinder, if 
@@ -209,15 +155,41 @@ namespace MuonR4{
             /** @brief Momentum resolution in the barrel */
             DoubleProperty m_barrelMomentumRes{this, "BarrelMomentumResolution", 0.05};
             /** @brief Momentum resolution in the endcap */
-            DoubleProperty m_endcapMomentumRes{this, "EndcapMomentumResolution", 0.1};
-            /** @brief number of steps between two segments to integrate the magnetic field */
-            UnsignedIntegerProperty m_nFieldSteps{this, "nFieldSteps", 10};
+            DoubleProperty m_endcapMomentumRes{this, "EndcapMomentumResolution", 0.05};
             /** @brief Consider two track seeds sharing a segment if their
              *         number of precision hits exceeds the threshold */
             UnsignedIntegerProperty m_nHitsShareSeg{this, "numHitsSegmentSharing", 3};
-            /** @brief Consider two segments to be equivalent if they share segments on
-             *         in x stations */
+            /** @brief Consider two track seeds to be equivalent if they share segments on
+             *         in x stations. If one candidate has only 2 stations, the used value is 1. */
             UnsignedIntegerProperty m_nSegShareSeed{this, "numSegmentsSeedSharing", 2};
+            /************************* Momentum Estimator ************************** */
+            /** @copydoc MomentumEstimator::Config::nFieldSteps  */
+            UnsignedIntegerProperty m_nFieldSteps{this, "qpNFieldSteps", 30};
+            /** @copydoc MomentumEstimator::Config::refitBendingPlane  */
+            BooleanProperty m_refitBendingPlane{this, "qpRefitBendingPlane", false};
+            /** @copydoc MomentumEstimator::Config::skipNswInBendingPlane */
+            BooleanProperty m_skipNswInBendingPlane{this,"qpSkipNswInBendingPlane", false};
+            /** @copydoc MomentumEstimator::Config::minBendingPower */
+            DoubleProperty m_minBendingPower{this, "qpMinBendingPower", 0.1 * Gaudi::Units::tesla * Gaudi::Units::m};
+            /** @copydoc MomentumEstimator::Config::outlierChi2 */
+            DoubleProperty m_outlierChi2{this, "qpOutlierChi2", 10.};
+            /** @copydoc MomentumEstimator::Config::maxDroppedSegments  */
+            UnsignedIntegerProperty m_maxDroppedSegments{this, "qpMaxDroppedSegments", 3};
+            /** @copydoc MomentumEstimator::Config::planeShiftSigmaB */
+            DoubleProperty m_planeShiftSigmaB{this, "qpPlaneShiftSigmaBarrel", 40. * Gaudi::Units::mm};
+            /** @copydoc MomentumEstimator::Config::planeShiftSigmaE */
+            DoubleProperty m_planeShiftSigmaE{this, "qpPlaneShiftSigmaEndcap", 7. * Gaudi::Units::mm};
+            /** @copydoc MomentumEstimator::Config::planeRotSigmaB */
+            DoubleProperty m_planeRotSigmaB{this, "qpPlaneRotSigmaBarrel", 25. * Gaudi::Units::mrad};
+            /** @copydoc MomentumEstimator::Config::planeRotSigmaE */
+            DoubleProperty m_planeRotSigmaE{this, "qpPlaneRotSigmaEndcap", 5. * Gaudi::Units::mrad};
+            /** @brief The beam spot measurement key, used in the momentum fit recovery of the inner segments. Empty to do not use it. */
+            SG::ReadHandleKey<xAOD::UncalibratedMeasurementContainer> m_beamSpotKey{this, "qpBeamSpotKey", ""};
+            /** @brief Pointer to the magnetic field provider */
+            std::shared_ptr<const Acts::MagneticFieldProvider> m_bField{std::make_shared<ATLASMagneticFieldWrapper>()};
+            /** @brief Momentum Estimator */
+            std::unique_ptr<const MomentumEstimator> m_qOverPest{nullptr};
+
             /** @brief Pointer to the segement selection tool which compares
              *         two segments for their compatibilitiy */
             ToolHandle<ISegmentSelectionTool> m_segSelector{this, "SegmentSelectionTool" , "" };
@@ -228,7 +200,7 @@ namespace MuonR4{
             /** @brief Declare the data dependency on the standard Mdt+Rpc+Tgc segment container
              *         & on the NSW segment container */
             SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{this, "SegmentContainer", "MsSegments" };
-            /** @brief  */
+            /** @brief Pointer to the muon detector manager */
             const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
     };
 }

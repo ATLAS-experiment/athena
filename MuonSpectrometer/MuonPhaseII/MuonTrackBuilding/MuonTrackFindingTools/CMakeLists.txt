@@ -20,5 +20,5 @@ atlas_add_component( MuonTrackFindingTools
                                     Acts::Core xAODTracking CxxUtils MuonSpacePoint ActsGeometryInterfacesLib 
                                     MuonDetDescrUtils ActsToolInterfacesLib MuonTrackFindingToolsLib
                                     MuonPatternEvent ActsGeometryLib MuonRecToolInterfacesR4 
-                                    ActsCalibratorsLib MuonTruthHelpers FourMomUtils)
+                                    ActsCalibratorsLib MuonTruthHelpers FourMomUtils xAODMeasurementBase xAODAuxiliaryMeasurement)
 
