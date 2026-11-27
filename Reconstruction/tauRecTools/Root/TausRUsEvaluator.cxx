@@ -70,6 +70,7 @@ std::vector<float> softmax(std::span<const float> scores) {
     probs[i] = std::exp(scores[i] - largest);
     sum += probs[i];
   }
+  //coverity[DIVIDE_BY_ZERO]
   for (float& p : probs) p /= sum;
   return probs;
 }
@@ -168,7 +169,7 @@ StatusCode TausRUsEvaluator::readModel(const std::string& path) {
 
   ATH_CHECK(m_loader->initialize(inputs));
 
-  std::map<std::string, nlohmann::json> outputMetadata;
+  std::map<std::string, nlohmann::json, std::less<>> outputMetadata;
   for (const nlohmann::json& node : metadata.at("outputs")) {
     Output output;
     output.name = node.at("name").get<std::string>();
@@ -566,6 +567,7 @@ StatusCode TausRUsEvaluator::executeTool(xAOD::TauJet& tau,
                          *findOutput(heads.phi), raw.at(heads.phi), mass);
   };
   decorate(m_tauP4, TAU_HEADS, ParticleConstants::PDG2024::tauMassInMeV);
+  //coverity[NEGATIVE_RETURNS:FALSE]
   decorate(m_chargedPionP4, CHARGED_PION_HEADS,
            N_CHARGED_PIONS[predictedMode] * ParticleConstants::PDG2024::chargedPionMassInMeV);
   decorate(m_neutralPionP4, NEUTRAL_PION_HEADS,
