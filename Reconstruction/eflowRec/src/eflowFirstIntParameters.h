@@ -38,11 +38,6 @@ class eflowFirstIntParameters :  public eflowFirstInt {
 
   void setShapeParameter(eflowCaloENUM layer, int paramNumber, double shapeParam)   {m_parameters[layer][paramNumber] = shapeParam;}
 
-  //TEMPORARY accessor to m_parameters
-  static int nShapeParams() {
-    return m_nShapeParams;
-  }
-
  private:
 
   void setShapeParameters(eflowCaloENUM layer, const std::vector<double>& p)  {m_parameters[layer] = p;}

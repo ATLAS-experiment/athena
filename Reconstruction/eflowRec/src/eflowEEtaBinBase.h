@@ -31,7 +31,6 @@ class eflowEEtaBinBase {
   
   bool binExists(double e, double eta) const  { return (getEBinIndex(e) >= 0 && getEtaBinIndex(eta) >= 0); }
 
-  static double getErrorReturnValue()  {return m_errorReturnValue;}
 
  protected:
 
