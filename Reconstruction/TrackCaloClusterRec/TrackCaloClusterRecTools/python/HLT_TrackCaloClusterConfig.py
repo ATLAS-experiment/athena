@@ -38,7 +38,8 @@ def setupTrackCaloAssoc(flags, caloClusterName="CaloCalTopoClusters",detectorEta
         "TrackParticleClusterAssociationAlg"+assocPostfix,
         TrackParticleContainerName = trackParticleName,
         PtCut = 400.,
-        CaloExtensionName = (caloExtAlg.getEventAlgos()[0]).ParticleCache, # ParticleCache is a defunct attribute
+        CaloEntryExtrapolationTool = CompFactory.TrackCaloEntryExtrapolationTool(
+            CaloExtensionName = (caloExtAlg.getEventAlgos()[0]).ParticleCache), # ParticleCache is a defunct attribute
         CaloClusterLocation = caloClusterName,
         DetectorEtaName = detectorEtaName if detectorEtaName.lower() != "default" else ("DetectorEta" if "Origin" in caloClusterName else ""),
         TrackVertexAssoTool=TrackVertexAssoTool, # will associate trks from PV0 only

@@ -18,6 +18,7 @@
 #include "TrkCaloExtension/CaloExtensionCollection.h"
 
 #include "TrackVertexAssociationTool/ITrackVertexAssociationTool.h"
+#include "ITrackCaloEntryExtrapolationTool.h"
 
 #include <string>
 
@@ -25,11 +26,12 @@
 /// \class TrackParticleClusterAssociationAlg
 /// Associate clusters to each track based on its extrapolation to the calo.
 ///
-/// This alg reads in a CaloExtensionCollection corresponding to a TrackParticleContainer.
+/// For each track the calo entry point (eta, phi and angular uncertainties) is obtained from an
+/// ITrackCaloEntryExtrapolationTool (Trk or ACTS based implementation).
 /// It then decorates each TrackParticleContainer with a vector<EL<CaloCluster>> containing
-/// the clusters close enough (DeltaR property) w.r.t CaloExtension corresponding to the track.
+/// the clusters close enough (DeltaR property) w.r.t the calo entry point of the track.
 /// Optionnaly tracks are also decorated with a const Trk::TrackParameters* obtain from
-/// caloExtension->caloEntryLayerIntersection().
+/// caloExtension->caloEntryLayerIntersection() read from the CaloExtensionCollection (Trk only).
 ///
 /// Note: In earlier versions this alg was creating 2 maps a xAODAssociations/TrackParticleClusterAssociationContainer
 /// and a Rec::ParticleClusterAssociation and was using ParticleCaloClusterAssociationTool to retrieve the extrapolation
@@ -47,9 +49,9 @@ class TrackParticleClusterAssociationAlg : public AthReentrantAlgorithm
 
  private:
 
-  /// returns the clusters from allClusters which are close enough to caloExtensions
+  /// returns the clusters from allClusters which are close enough to the track calo entry point
   std::vector<const xAOD::CaloCluster* >
-  associatedClusters(const Trk::CaloExtension & caloExtensions, const xAOD::CaloClusterContainer & allClusters,
+  associatedClusters(const TrackCaloEntryPoint & caloEntry, const xAOD::CaloClusterContainer & allClusters,
                      const EventContext& ctx) const;
   
   
@@ -61,7 +63,8 @@ class TrackParticleClusterAssociationAlg : public AthReentrantAlgorithm
   Gaudi::Property<double> m_ptCut {this, "PtCut", 25000., ""};
 
   // input containers
-  SG::ReadHandleKey<CaloExtensionCollection> m_caloExtKey {this, "CaloExtensionName", "", ""};
+  // Only used (and required) when CaloEntryParsDecorKey is set
+  SG::ReadHandleKey<CaloExtensionCollection> m_caloExtKey {this, "CaloExtensionName", "", "Trk CaloExtensionCollection, only used to fill CaloEntryParsDecorKey"};
   SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackParticleCollectionHandle {this,"TrackParticleContainerName",  "InDetTrackParticles", "input tracks" };
   SG::ReadHandleKey<xAOD::CaloClusterContainer> m_caloClusters {this, "CaloClusterLocation", "CaloCalTopoClusters","input calo clusters"};
 
@@ -75,6 +78,9 @@ class TrackParticleClusterAssociationAlg : public AthReentrantAlgorithm
   // vertex handling
   SG::ReadHandleKey<xAOD::VertexContainer> m_vertexContHandle {this, "VertexContainerName", "", "if empty all tracks will be decorated. if not only those corresponding to the PV[0] will."};
   ToolHandle<CP::ITrackVertexAssociationTool> m_trackvertexassoTool {this, "TrackVertexAssoTool", "" };
+
+  // track extrapolation to the calo entry (Trk or ACTS implementation)
+  ToolHandle<ITrackCaloEntryExtrapolationTool> m_caloEntryTool {this, "CaloEntryExtrapolationTool", "TrackCaloEntryExtrapolationTool", "Tool providing the track calo entry point"};
 
 
   // decorations 

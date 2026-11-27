@@ -31,6 +31,5 @@ private:
      ActsTrk::ContextUtility m_ctxProvider{this};
 
     SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_extensionReadDecorKey{this, "ExtensionDecoration", "InDetTrackParticles.caloExtensionLink"};
-
 };
 #endif

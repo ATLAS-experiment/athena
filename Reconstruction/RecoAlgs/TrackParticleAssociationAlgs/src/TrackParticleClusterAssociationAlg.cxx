@@ -17,7 +17,7 @@ StatusCode TrackParticleClusterAssociationAlg::initialize()
 
   m_doDetEta = !m_detectorEtaDecor.key().empty();
 
-  ATH_CHECK( m_caloExtKey.initialize() );
+  ATH_CHECK( m_caloEntryTool.retrieve() );
   ATH_CHECK( m_trackParticleCollectionHandle.initialize() );
   ATH_CHECK( m_caloClusters.initialize() );
   ATH_CHECK( m_detectorEtaDecor.initialize(m_doDetEta) );
@@ -26,6 +26,7 @@ StatusCode TrackParticleClusterAssociationAlg::initialize()
   ATH_CHECK(m_trkLinkKey.initialize());
 
   ATH_CHECK(m_caloEntryParsDecor.initialize( !m_caloEntryParsDecor.empty() ) );
+  ATH_CHECK(m_caloExtKey.initialize( !m_caloEntryParsDecor.empty() ) );
 
   ATH_CHECK( m_vertexContHandle.initialize( !m_vertexContHandle.empty() ) );
   if(!m_vertexContHandle.empty() ) {
@@ -70,10 +71,6 @@ StatusCode TrackParticleClusterAssociationAlg::execute(const EventContext& ctx) 
   }
 
 
-  // obtain the CaloExtension from the map in the event store
-  SG::ReadHandle<CaloExtensionCollection> caloExts( m_caloExtKey, ctx );
-  ATH_MSG_DEBUG("CaloExtensionCollection "<< m_caloExtKey.key() << "  : size="<< caloExts->size() );
-
   const xAOD::Vertex * pv0 = nullptr;
   if(!m_vertexContHandle.empty()){
     SG::ReadHandle<xAOD::VertexContainer> vxCont(m_vertexContHandle, ctx);
@@ -99,15 +96,15 @@ StatusCode TrackParticleClusterAssociationAlg::execute(const EventContext& ctx) 
 
     ATH_MSG_DEBUG(" Selected track " << tp->index() << "  pt " << tp->pt() << " eta " << tp->eta() << " phi " << tp->phi() );
 
-    // IMMPORTANT : this assumes a correspondance between the TrackParticleContainer and the CaloExtensionCollection !
-    const Trk::CaloExtension * caloExtension = (*caloExts)[tp->index() ] ;
-    if (caloExtension == nullptr ) {
-      ATH_MSG_DEBUG(" Selected track "<< tp->index() << " has no caloExtension ");
+    // extrapolate the track to the calo entry
+    std::optional<TrackCaloEntryPoint> caloEntry = m_caloEntryTool->caloEntryPoint(ctx, tp);
+    if (!caloEntry) {
+      ATH_MSG_DEBUG(" Selected track "<< tp->index() << " has no calo entry point ");
       continue;
     }
 
     // build the associated clusters
-    std::vector<const xAOD::CaloCluster*> assoClusters = associatedClusters( *caloExtension, *clusterContainer, ctx); 
+    std::vector<const xAOD::CaloCluster*> assoClusters = associatedClusters( *caloEntry, *clusterContainer, ctx);
 
     // translate vector of links to cluster in ElementLink
 
@@ -120,6 +117,8 @@ StatusCode TrackParticleClusterAssociationAlg::execute(const EventContext& ctx) 
   if (! m_caloEntryParsDecor.empty() ){
     // we can not do this in the above loop because declaring a WriteDecorHandle requires a non empty key
     //  (otherwise : run-time error).
+    // IMPORTANT : this assumes a correspondance between the TrackParticleContainer and the CaloExtensionCollection !
+    SG::ReadHandle<CaloExtensionCollection> caloExts( m_caloExtKey, ctx );
     SG::WriteDecorHandle<xAOD::TrackParticleContainer,  const Trk::TrackParameters*> trkParamDecor( m_caloEntryParsDecor, ctx );
     for( const xAOD::TrackParticle* tp : *trackParticles){
       const Trk::CaloExtension * caloExtension = (*caloExts)[tp->index() ] ;
@@ -135,41 +134,22 @@ StatusCode TrackParticleClusterAssociationAlg::execute(const EventContext& ctx) 
 
 
 std::vector<const xAOD::CaloCluster* >
-TrackParticleClusterAssociationAlg::associatedClusters(const Trk::CaloExtension & caloExtension, const xAOD::CaloClusterContainer & allClusters,
+TrackParticleClusterAssociationAlg::associatedClusters(const TrackCaloEntryPoint & caloEntry, const xAOD::CaloClusterContainer & allClusters,
                                                        const EventContext& ctx) const
 {
   std::vector<const xAOD::CaloCluster* > clusters;
 
-  const Trk::TrackParameters*  pars = caloExtension.caloEntryLayerIntersection();
-  if(!pars) {
-    ATH_MSG_WARNING( " NO TrackParameters caloExtension.caloEntryLayerIntersection() ");
-    return clusters;
-  } 
-    
-  float eta = pars->position().eta();
-  float phi = pars->position().phi();
-
-  double uncertEta = 0.;
-  double uncertPhi = 0.;
-  if(pars->covariance()) {
-    uncertEta = std::sqrt((*pars->covariance())(Trk::theta, Trk::theta)) / std::sin(pars->position().theta());
-    uncertPhi = sqrt((*pars->covariance())(Trk::phi,Trk::phi));
-  } 
-  double uncertExtrp = uncertEta*uncertEta + uncertPhi*uncertPhi;
+  const float eta = caloEntry.eta;
+  const float phi = caloEntry.phi;
+  const double uncertEta = caloEntry.uncertEta;
+  const double uncertPhi = caloEntry.uncertPhi;
+  const double uncertExtrp = caloEntry.uncertExtrp();
 
   // --- covariance of the extrapolated (eta, phi) at the calo entry (used when Chi2Match is on) ---
-  // eta = -ln tan(theta/2) => d eta/d theta = -1/sin(theta)
-  double covEtaEta = 0.;
-  double covPhiPhi = 0.;
-  double covEtaPhi = 0.;
-  if (m_chi2Match) {
-    if (const auto* cov = pars->covariance()) {
-      const double sinTheta = std::sin(pars->position().theta());
-      covEtaEta = (*cov)(Trk::theta, Trk::theta) / (sinTheta * sinTheta);
-      covPhiPhi = (*cov)(Trk::phi, Trk::phi);
-      covEtaPhi = -(*cov)(Trk::theta, Trk::phi) / sinTheta;
-    }
-  }
+  // computed by the calo entry extrapolation tool from the (theta, phi) covariance
+  const double covEtaEta = m_chi2Match ? caloEntry.covEtaEta : 0.;
+  const double covPhiPhi = m_chi2Match ? caloEntry.covPhiPhi : 0.;
+  const double covEtaPhi = m_chi2Match ? caloEntry.covEtaPhi : 0.;
   // largest eigenvalue of the extrapolation covariance (rotation invariant, includes correlations)
   const double lambdaExtrp = 0.5 * (covEtaEta + covPhiPhi) + std::sqrt(0.25 * (covEtaEta - covPhiPhi) * (covEtaEta - covPhiPhi) + covEtaPhi * covEtaPhi);
   const float dr2Cut0 = m_dr * m_dr;
