@@ -3,17 +3,17 @@
 # Declare the package name:
 atlas_subdir( PixelGeoModelXml )
 
-# External dependencies:
-find_package( GeoModel COMPONENTS GeoModelKernel GeoModelXml ExpressionEvaluator )
 
+find_package( GeoModelCore )
+find_package( GeoModelTools )
 # Component(s) in the package:
 atlas_add_library( PixelGeoModelXmlLib
                    src/*.cxx
                    PUBLIC_HEADERS PixelGeoModelXml
-                   PRIVATE_INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
                    LINK_LIBRARIES InDetGeoModelUtils PixelReadoutGeometryLib
-                   PRIVATE_LINK_LIBRARIES ${GEOMODEL_LIBRARIES}
-                   GaudiKernel DetDescrConditions InDetSimEvent )
+                   PRIVATE_LINK_LIBRARIES GeoModelCore::GeoModelKernel GeoModelTools::GeoModelXml 
+                                          GeoModelTools::ExpressionEvaluator GaudiKernel DetDescrConditions 
+                                          InDetSimEvent )
 
 atlas_add_component( PixelGeoModelXml
                      src/components/*.cxx

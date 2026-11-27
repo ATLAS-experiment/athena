@@ -7,15 +7,15 @@ find_package( GTest )
 find_package( GMock )
 
 # External dependencies:
-find_package( GeoModel COMPONENTS GeoModelKernel )
+find_package( GeoModelCore )
 
 # Component(s) in the package:
 atlas_add_library( PixelReadoutGeometryLib
   src/PixelDetectorManager.cxx
   src/PixelModuleDesign.cxx
   PUBLIC_HEADERS PixelReadoutGeometry
-  INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
-  LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaKernel CxxUtils GaudiKernel GeoPrimitives InDetIdentifier InDetReadoutGeometry PixelReadoutDefinitionsLib ReadoutGeometryBase TrkDetElementBase TrkSurfaces
+  LINK_LIBRARIES GeoModelCore::GeoModelKernel AthenaKernel CxxUtils GaudiKernel GeoPrimitives InDetIdentifier 
+                 InDetReadoutGeometry PixelReadoutDefinitionsLib ReadoutGeometryBase TrkDetElementBase TrkSurfaces
   PRIVATE_LINK_LIBRARIES AthenaBaseComps AthenaPoolUtilities DetDescrConditions Identifier StoreGateLib TrkEventPrimitives InDetGeoModelUtils)
 
 atlas_add_component( PixelReadoutGeometry

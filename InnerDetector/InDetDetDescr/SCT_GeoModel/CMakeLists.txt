@@ -4,14 +4,18 @@
 atlas_subdir( SCT_GeoModel )
 
 # External dependencies:
-find_package( GeoModel COMPONENTS GeoModelKernel GeoModelDBManager GeoModelRead )
+find_package( GeoModelCore )
+find_package( GeoModelIO )
 
 # Component(s) in the package:
 atlas_add_component( SCT_GeoModel
                      src/*.cxx
                      src/components/*.cxx
-                     INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaKernel CxxUtils GeoModelInterfaces GeoModelUtilities GeoPrimitives GaudiKernel InDetGeoModelUtils ReadoutGeometryBase InDetReadoutGeometry SCT_ReadoutGeometry SGTools StoreGateLib AthenaPoolUtilities DetDescrConditions Identifier InDetIdentifier RDBAccessSvcLib )
+                     LINK_LIBRARIES GeoModelCore::GeoModelKernel GeoModelIO::GeoModelRead GeoModelIO::GeoModelDBManager 
+                                    AthenaKernel CxxUtils GeoModelInterfaces GeoModelUtilities GeoPrimitives 
+                                    GaudiKernel InDetGeoModelUtils ReadoutGeometryBase InDetReadoutGeometry 
+                                    SCT_ReadoutGeometry SGTools StoreGateLib AthenaPoolUtilities DetDescrConditions 
+                                    Identifier InDetIdentifier RDBAccessSvcLib )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
