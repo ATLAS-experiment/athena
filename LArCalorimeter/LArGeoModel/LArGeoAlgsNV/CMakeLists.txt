@@ -4,14 +4,16 @@
 atlas_subdir( LArGeoAlgsNV )
 
 # External dependencies:
-find_package( GeoModel COMPONENTS GeoModelKernel GeoModelDBManager GeoModelRead)
-
+find_package( GeoModelCore )
+find_package( GeoModelIO )
 # Component(s) in the package:
 atlas_add_component( LArGeoAlgsNV
                      src/*.cxx
                      src/components/*.cxx
-                     INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${GEOMODEL_LIBRARIES} GeoModelUtilities LArReadoutGeometry SGTools StoreGateLib DetDescrConditions GaudiKernel LArGeoBarrel LArGeoCode LArGeoEndcap LArGeoRAL LArGeoTBBarrel LArHV RDBAccessSvcLib CxxUtils )
+                     LINK_LIBRARIES GeoModelCore::GeoModelKernel GeoModelIO::GeoModelDBManager
+                                    GeoModelIO::GeoModelRead GeoModelUtilities LArReadoutGeometry SGTools 
+                                    StoreGateLib DetDescrConditions GaudiKernel LArGeoBarrel LArGeoCode 
+                                    LArGeoEndcap LArGeoRAL LArGeoTBBarrel LArHV RDBAccessSvcLib CxxUtils )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py )
