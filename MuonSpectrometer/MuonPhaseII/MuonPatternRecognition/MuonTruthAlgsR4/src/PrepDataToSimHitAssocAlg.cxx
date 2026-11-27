@@ -44,8 +44,7 @@ namespace MuonR4{
             PrepDataToSimHitAssocAlg::truthMatchPrd(Viewer_t<xAOD::MuonSimHitContainer>& simHits,
                                                     const xAOD::MuonMeasurement* measurement) const {
 
-        const auto* prd = dynamic_cast<const  PrdType_t*>(measurement);
-        // const MuonGMR4::MuonReadoutElement* re = prd->readoutElement();
+        const auto* prd = static_cast<const  PrdType_t*>(measurement);
         for (const xAOD::MuonSimHit* hit : simHits) {
             /// Match via the identifier
             const Identifier hitId = hit->identify();
