@@ -86,36 +86,36 @@ namespace MuonR4{
                                                  const double timeDelay) const = 0;
     
             /** @brief Refines the calibration constants of already calibrated space points
-             *  @param cctx: Calibration context which is a packed pointer to the current ATLAS EventContext
+             *  @param calContext: Calibration context which is a packed pointer to the current ATLAS EventContext
              *  @param seedPosInChamb: Position of the external seed expressed in the sector frame
              *  @param seedDirInChamb: Direction of the external seed expressed in the sector frame
              *  @param timeDelay: Shift in time (in ACTS units) to be added to the time of flight of a 
              *                    particle going a straight path 
              *  @param spacePoints: List of already calibrated space points that's eaten by the method */
           
-             virtual CalibSpacePointVec calibrate(const Acts::CalibrationContext& cctx,                                            
+             virtual CalibSpacePointVec calibrate(const Acts::CalibrationContext& calContext,                                            
                                                   const Amg::Vector3D& seedPosInChamb,
                                                   const Amg::Vector3D& seedDirInChamb,
                                                   const double timeDelay,
                                                   const CalibSpacePointVec& spacePoints) const = 0;
 
             /** @brief Returns the drift velocity (in ACTS units) for a given drift-circle space point
-             *  @param cctx: Calibration context which is a packed pointer to the current ATLAS EventContext
+             *  @param calContext: Calibration context which is a packed pointer to the current ATLAS EventContext
              *  @param spacePoint: Reference to the calibrated space point for which the velocity needs to be calculated. */
-            virtual double driftVelocity(const Acts::CalibrationContext& cctx,
+            virtual double driftVelocity(const Acts::CalibrationContext& calContext,
                                          const CalibratedSpacePoint& spacePoint) const = 0;
             /** @brief Returns the drift acceleration (in ACTS units) for a given drift-circle space point
-             *  @param cctx: Calibration context which is a packed pointer to the current ATLAS EventContext
+             *  @param calContext: Calibration context which is a packed pointer to the current ATLAS EventContext
              *  @param spacePoint: Reference to the calibrated space point for which the acceleration needs to be calculated. */
-            virtual double driftAcceleration(const Acts::CalibrationContext& cctx,
+            virtual double driftAcceleration(const Acts::CalibrationContext& calContext,
                                              const CalibratedSpacePoint& spacePoint) const = 0;
             /** @brief Function that's hooked to the calibration delegate of the implemented Acts fitters
-              *  @param geoctx: The geometry context to fetch the local -> global transformations for the surfaces
-              *  @param cctx: Calibration context which is a packed pointer to the current ATLAS EventContext
+              *  @param tgContext: The geometry context to fetch the local -> global transformations for the surfaces
+              *  @param calContext: Calibration context which is a packed pointer to the current ATLAS EventContext
               *  @param link: Sourcelink to the actual measurement to calibrate
               *  @param state: Proxy to the track-state to which the calibrated constants are written */
-            virtual void calibrateSourceLink(const Acts::GeometryContext& geoctx,
-                                             const Acts::CalibrationContext& cctx,
+            virtual void calibrateSourceLink(const Acts::GeometryContext& tgContext,
+                                             const Acts::CalibrationContext& calContext,
                                              const Acts::SourceLink& link,
                                              ActsTrk::MutableTrackStateBackend::TrackStateProxy state) const = 0;
             /** @brief Update the signs of the drift radii for a given straight line track
@@ -131,32 +131,34 @@ namespace MuonR4{
              *         onto the uncalibrated measurements. The stamped signs are later
              *         picked up by the source link calibration in the context of the 
              *         track fit to stabilize the fit.
+             * @param tgContext: The geometry context to align the surfaces
              * @param segment: Reference to the reconstructed segment for which the sign
              *                 stamp shall be executed */
-            virtual void stampSignsOnMeasurements(const xAOD::MuonSegment& segment) const = 0;
+            virtual void stampSignsOnMeasurements(const Acts::GeometryContext& tgContext,
+                                                  const xAOD::MuonSegment& segment) const = 0;
             
             /** @brief Returns the drift radius for a given drift-circle space point and time delay. Needed for the fast fitter.
-             *  @param cctx: Calibration context which is a packed pointer to the current ATLAS EventContext
+             *  @param calContext: Calibration context which is a packed pointer to the current ATLAS EventContext
              *  @param spacePoint: Reference to the calibrated space point for which the drift radius needs to be calculated
              *  @param timeDelay: Shift in time (in ACTS units) to be added to the time of flight of a  
              *                    particle going a straight path . */
-            virtual double driftRadius(const Acts::CalibrationContext& cctx,
+            virtual double driftRadius(const Acts::CalibrationContext& calContext,
                                        const CalibratedSpacePoint& spacePoint, 
                                        const double timeDelay) const = 0;
             /** @brief Returns the drift velocity (in ACTS units) for a given drift-circle space point and time delay. Needed for the fast fitter.
-             *  @param cctx: Calibration context which is a packed pointer to the current ATLAS EventContext
+             *  @param calContext: Calibration context which is a packed pointer to the current ATLAS EventContext
              *  @param spacePoint: Reference to the calibrated space point for which the drift velocity needs to be calculated
              *  @param timeDelay: Shift in time (in ACTS units) to be added to the time of flight of a 
              *                    particle going a straight path . */
-            virtual double driftVelocity(const Acts::CalibrationContext& cctx,
+            virtual double driftVelocity(const Acts::CalibrationContext& calContext,
                                          const CalibratedSpacePoint& spacePoint, 
                                          const double timeDelay) const = 0;
             /** @brief Returns the drift acceleration (in ACTS units) for a given drift-circle space point and time delay. Needed for the fast fitter.
-             *  @param cctx: Calibration context which is a packed pointer to the current ATLAS EventContext
+             *  @param calContext: Calibration context which is a packed pointer to the current ATLAS EventContext
              *  @param spacePoint: Reference to the calibrated space point for which the acceleration needs to be calculated
              *  @param timeDelay: Shift in time (in ACTS units) to be added to the time of flight of a 
              *                    particle going a straight path . */
-            virtual double driftAcceleration(const Acts::CalibrationContext& cctx,
+            virtual double driftAcceleration(const Acts::CalibrationContext& calContext,
                                              const CalibratedSpacePoint& spacePoint, 
                                              const double timeDelay) const = 0;
     };

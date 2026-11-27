@@ -226,7 +226,8 @@ namespace MuonR4 {
                                       CalibSpacePointVec& /*hitsToCalib*/) const {
         /// Truth signs are correct already nothing to do
     }
-    void TruthCalibrator::stampSignsOnMeasurements(const xAOD::MuonSegment& /*segment*/) const {
+    void TruthCalibrator::stampSignsOnMeasurements(const Acts::GeometryContext& /*tgContext */,
+                                                   const xAOD::MuonSegment& /*segment*/) const {
         /** Truth signs are correct already nothing to do */
     }
            

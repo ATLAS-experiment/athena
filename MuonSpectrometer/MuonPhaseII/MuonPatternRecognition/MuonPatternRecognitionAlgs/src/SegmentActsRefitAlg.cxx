@@ -205,7 +205,7 @@ namespace MuonR4{
             const Acts::Transform3& sectorTrf{msSector->localToGlobalTransform(tgContext)};
             const Amg::Vector3D planeNormal = sectorTrf.linear().col(2);
 
-            m_calibTool->stampSignsOnMeasurements(*reFitMe);
+            m_calibTool->stampSignsOnMeasurements(tgContext, *reFitMe);
             line.updateParameters(localSegmentPars(*reFitMe));
             /// Fetch a smeared segment position & direction
             const auto [seedPos, seedDir] = smearSegment(tgContext, *MuonR4::detailedSegment(*reFitMe), randEngine);

@@ -65,7 +65,8 @@ namespace MuonR4 {
                                      const Amg::Vector3D& trackDir,
                                      CalibSpacePointVec& hitsToCalib) const override final;
             /** @copydoc ISpacePointCalibrator::stampSignsOnMeasurements */
-            virtual void stampSignsOnMeasurements(const xAOD::MuonSegment& segment) const override final;
+            virtual void stampSignsOnMeasurements(const Acts::GeometryContext& tgContext,
+                                                  const xAOD::MuonSegment& segment) const override final;
             /** @copydoc ISpacePointCalibrator::driftRadius */
             virtual double driftRadius(const Acts::CalibrationContext& cctx,
                                        const CalibratedSpacePoint& spacePoint, 

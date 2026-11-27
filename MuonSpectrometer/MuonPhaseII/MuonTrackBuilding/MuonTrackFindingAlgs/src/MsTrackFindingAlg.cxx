@@ -117,7 +117,7 @@ namespace MuonR4{
         AmgSymMatrix(1) phiCov{Acts::square(1._cm)};
         /// Count the number of sations
         for (const xAOD::MuonSegment* segment : seed.segments()) {
-            m_calibTool->stampSignsOnMeasurements(*segment);
+            m_calibTool->stampSignsOnMeasurements(tgContext, *segment);
             /** Check if the station has not yet been processed and also  
              *  check whether there were already enough stations processed */
             for (std::size_t m = 0; m < nMeasurements(*segment); ++m) {
