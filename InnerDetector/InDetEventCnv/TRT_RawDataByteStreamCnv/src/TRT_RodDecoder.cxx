@@ -27,45 +27,6 @@
 
 using OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment;
 
-/* -------------------------------------------------------
- * constructor
- * -------------------------------------------------------
- */
-
-TRT_RodDecoder::TRT_RodDecoder(const std::string& type, const std::string& name,
-                               const IInterface* parent)
-    : base_class(type, name, parent),
-      m_CablingSvc("TRT_CablingSvc", name),
-      m_recordBSErrors(true),
-      m_lookAtSidErrors(true),
-      m_lookAtErrorErrors(false),
-      m_lookAtL1idErrors(true),
-      m_lookAtBcidErrors(true),
-      m_lookAtMissingErrors(true),
-      m_loadCompressTableFile(false),
-      m_loadCompressTableDB(true),
-      m_maxCompressionVersion(255),
-      m_forceRodVersion(-1),
-      m_trt_id(nullptr),
-      m_eventTypeIsSim(false),
-      m_escape_marker(0x8000000),
-      m_Nrdos(0)
-
-{
-  declareProperty("TRT_Cabling", m_CablingSvc);
-  declareProperty("RecordByteStreamErrors", m_recordBSErrors);
-  declareProperty("LookAtSidErrors", m_lookAtSidErrors);
-  declareProperty("LookAtErrorErrors", m_lookAtErrorErrors);
-  declareProperty("LookAtL1idErrors", m_lookAtL1idErrors);
-  declareProperty("LookAtBcidErrors", m_lookAtBcidErrors);
-  declareProperty("LookAtMissingErrors", m_lookAtMissingErrors);
-  declareProperty("LoadCompressTableFile", m_loadCompressTableFile);
-  declareProperty("LoadCompressTableDB", m_loadCompressTableDB);
-  declareProperty("ForceRodVersion", m_forceRodVersion);
-  declareProperty("LoadCompressTableVersions", m_LoadCompressTableVersions);
-  declareProperty("SortCollections", m_sortCollections);
-}
-
 /* ----------------------------------------------------------
  * destructor
  * ----------------------------------------------------------
@@ -99,11 +60,11 @@ StatusCode TRT_RodDecoder::initialize() {
   /*
    * Show Look At Me's
    */
-  ATH_MSG_INFO("Look at Sid Errors    : " << m_lookAtSidErrors);
-  ATH_MSG_INFO("Look at Error Errors  : " << m_lookAtErrorErrors);
-  ATH_MSG_INFO("Look at L1ID Errors   : " << m_lookAtL1idErrors);
-  ATH_MSG_INFO("Look at BCID Errors   : " << m_lookAtBcidErrors);
-  ATH_MSG_INFO("Look at Missing Errors: " << m_lookAtMissingErrors);
+  ATH_MSG_INFO("Look at Sid Errors    : " << m_lookAtSidErrors.value());
+  ATH_MSG_INFO("Look at Error Errors  : " << m_lookAtErrorErrors.value());
+  ATH_MSG_INFO("Look at L1ID Errors   : " << m_lookAtL1idErrors.value());
+  ATH_MSG_INFO("Look at BCID Errors   : " << m_lookAtBcidErrors.value());
+  ATH_MSG_INFO("Look at Missing Errors: " << m_lookAtMissingErrors.value());
 
   // m_loadCompressTableDB is set to (globalflags.DataSource()!='geant4') in JO
   if (m_loadCompressTableDB) {
@@ -113,14 +74,15 @@ StatusCode TRT_RodDecoder::initialize() {
   }
 
   if (m_loadCompressTableFile) {
-    if (m_LoadCompressTableVersions.empty()) {
-      m_LoadCompressTableVersions.push_back(4);
+    std::vector<int> compressTableVersions = m_LoadCompressTableVersions.value();
+    if (compressTableVersions.empty()) {
+      compressTableVersions.push_back(4);
     }
 
     std::vector<int>::iterator it;
 
-    for (it = m_LoadCompressTableVersions.begin();
-         it < m_LoadCompressTableVersions.end(); ++it) {
+    for (it = compressTableVersions.begin();
+         it < compressTableVersions.end(); ++it) {
       if ((*it < 4) || (*it > m_maxCompressionVersion)) {
         ATH_MSG_INFO("Not reading bad Compress Table Version: " << *it);
       } else {
@@ -139,7 +101,7 @@ StatusCode TRT_RodDecoder::initialize() {
   if (m_forceRodVersion > 0) {
     ATH_MSG_WARNING("****************************");
     ATH_MSG_WARNING("****************************");
-    ATH_MSG_WARNING("* Forcing ROD Version to " << m_forceRodVersion << " *");
+    ATH_MSG_WARNING("* Forcing ROD Version to " << m_forceRodVersion.value() << " *");
     ATH_MSG_WARNING("****************************");
     ATH_MSG_WARNING("****************************");
   }

@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "InDetDetDescrExample/ReadTRT_DetectorElements.h"
+#include "ReadTRT_DetectorElements.h"
 
 #include "CLHEP/Units/SystemOfUnits.h"
 
@@ -30,20 +30,6 @@ namespace{
 
 /////////////////////////////////////////////////////////////////////////////
 
-ReadTRT_DetectorElements::ReadTRT_DetectorElements(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthAlgorithm(name, pSvcLocator),
-  m_managerName("TRT"),
-  m_manager(nullptr),
-  m_idHelper(nullptr),
-  m_maxdiff(0),
-  m_first(true)
-{  
-  // Get parameter values from jobOptions file
-  declareProperty("ManagerName",  m_managerName);
-  declareProperty("DoInitialize", m_doInit = true);
-  declareProperty("DoExecute",    m_doExec = false);
-}
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 
 StatusCode ReadTRT_DetectorElements::initialize(){
@@ -51,7 +37,7 @@ StatusCode ReadTRT_DetectorElements::initialize(){
   // Get the manager
   StatusCode sc=detStore()->retrieve(m_manager, m_managerName);
   if (sc.isFailure() || !m_manager) {
-    msg(MSG::FATAL) << "Could not find the Manager: "<< m_managerName << " !" << endmsg;
+    msg(MSG::FATAL) << "Could not find the Manager: "<< m_managerName.value() << " !" << endmsg;
     return StatusCode::FAILURE;
   } else {
     msg(MSG::DEBUG) << "Manager found" << endmsg;

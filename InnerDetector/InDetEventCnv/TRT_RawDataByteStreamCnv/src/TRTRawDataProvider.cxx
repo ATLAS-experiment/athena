@@ -1,31 +1,11 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <memory>
 #include "TRTRawDataProvider.h"
 
 using OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment;
-
-// --------------------------------------------------------------------
-// Constructor
-
-TRTRawDataProvider::TRTRawDataProvider(const std::string& name,
-				       ISvcLocator* pSvcLocator) :
-  AthReentrantAlgorithm      ( name, pSvcLocator ),
-  m_robDataProvider ( "ROBDataProviderSvc", name ),
-  m_rawDataTool     ( "TRTRawDataProviderTool",this ),
-  m_CablingSvc      ( "TRT_CablingSvc", name ),
-  m_trt_id          ( nullptr ),
-  m_rdoContainerKey("")
-{
-  declareProperty("RoIs", m_roiCollectionKey = std::string(""), "RoIs to read in");
-  declareProperty("isRoI_Seeded", m_roiSeeded = false, "Use RoI");
-  declareProperty("RDOKey", m_rdoContainerKey = std::string("TRT_RDOs"));
-  declareProperty("BSErrkey",m_bsErrContKey = "TRT_ByteStreamErrs");
-  declareProperty("RDOCacheKey", m_rdoCacheKey);
-  declareProperty ("ProviderTool", m_rawDataTool );
-}
 
 // --------------------------------------------------------------------
 // Initialize

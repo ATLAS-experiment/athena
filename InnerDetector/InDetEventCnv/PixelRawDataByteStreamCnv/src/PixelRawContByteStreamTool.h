@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -76,8 +76,8 @@ class PixelRawContByteStreamTool: public AthAlgTool {
 
     const InDetDD::PixelDetectorManager* m_pixelManager{};
 
-    unsigned short m_RodBlockVersion{};
-    int m_BCs_per_LVL1ID{};
+    Gaudi::Property<unsigned short> m_RodBlockVersion{this, "RodBlockVersion", 0};
+    IntegerProperty m_BCs_per_LVL1ID{this, "BCs_per_LVL1ID", 1};
 
     SG::ReadCondHandleKey<PixelCablingCondData> m_condCablingKey
     {this, "PixelCablingCondData", "PixelCablingCondData", "Pixel cabling key"};

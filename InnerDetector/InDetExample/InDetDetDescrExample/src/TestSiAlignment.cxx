@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "InDetDetDescrExample/TestSiAlignment.h"
+#include "TestSiAlignment.h"
 
 #include "CLHEP/Units/SystemOfUnits.h"
 
@@ -39,31 +39,19 @@ using namespace InDetDD;
 
 /////////////////////////////////////////////////////////////////////////////
 
-TestSiAlignment::TestSiAlignment(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthAlgorithm(name, pSvcLocator),
-  m_manager(nullptr),
-  m_managerName("")
-{  
-  // Get parameter values from jobOptions file
-  declareProperty("ManagerName",  m_managerName);
-  declareProperty("LongPrintOut", m_longPrintOut = false);
-  declareProperty("ErrorRotation",m_errRot = 1e-15);      // For testing if alignment changed
-  declareProperty("ErrorTranslation",m_errTrans = 1e-12); // For testing if alignment changed
-}
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 
 StatusCode TestSiAlignment::initialize(){
 
   ATH_MSG_INFO( "Algorithm Properties" );
-  ATH_MSG_INFO( " ManagerName:      " << m_managerName );  
+  ATH_MSG_INFO( " ManagerName:      " << m_managerName.value() );  
   ATH_MSG_INFO( " LongPrintOut:     " << (m_longPrintOut ? "true" : "false") );  
-  ATH_MSG_INFO( " ErrorRotation:    " << m_errRot );  
-  ATH_MSG_INFO( " ErrorTranslation: " << m_errTrans );  
+  ATH_MSG_INFO( " ErrorRotation:    " << m_errRot.value() );  
+  ATH_MSG_INFO( " ErrorTranslation: " << m_errTrans.value() );  
   // Retrieve Detector Manager
   ATH_CHECK(detStore()->retrieve(m_manager, m_managerName));
   if (m_managerName!="Pixel" && m_managerName!="SCT") {
-    ATH_MSG_FATAL("m_managerName " << m_managerName << " is not appropriate name");
+    ATH_MSG_FATAL("m_managerName " << m_managerName.value() << " is not appropriate name");
   }
   ATH_CHECK(m_detEleCollKey.initialize(m_managerName=="SCT"));
   printAlignmentShifts(true);

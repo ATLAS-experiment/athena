@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCTRawDataProvider.h"
@@ -13,15 +13,6 @@
 #include <memory>
 
 using OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment;
-
-// Constructor
-
-SCTRawDataProvider::SCTRawDataProvider(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthReentrantAlgorithm(name, pSvcLocator)
-{
-  declareProperty("RDOCacheKey", m_rdoContainerCacheKey="");
-  declareProperty("BSErrCacheKey", m_bsErrContainerCacheKey="");
-}
 
 // Initialize
 

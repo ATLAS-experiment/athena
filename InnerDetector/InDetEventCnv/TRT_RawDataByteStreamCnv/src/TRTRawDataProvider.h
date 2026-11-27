@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -35,7 +35,7 @@ class TRTRawDataProvider : public AthReentrantAlgorithm
 public:
 
   //! Constructor.
-  TRTRawDataProvider(const std::string &name, ISvcLocator *pSvcLocator);
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
   //! Initialize
   virtual StatusCode initialize();
@@ -55,16 +55,16 @@ private:
                                           "RegSelTool/RegSelTool_TRT"};
  Gaudi::Property<bool> m_useDataPoolWithCache{this, "useDataPoolWithCache",
                                               false, "use DataPool With Cache"};
- ServiceHandle<IROBDataProviderSvc> m_robDataProvider;
- ToolHandle<ITRTRawDataProviderTool> m_rawDataTool;
- ServiceHandle<ITRT_CablingSvc> m_CablingSvc;
- const TRT_ID* m_trt_id;
+ ServiceHandle<IROBDataProviderSvc> m_robDataProvider{"ROBDataProviderSvc", name()};
+ ToolHandle<ITRTRawDataProviderTool> m_rawDataTool{this, "ProviderTool", "TRTRawDataProviderTool"};
+ ServiceHandle<ITRT_CablingSvc> m_CablingSvc{"TRT_CablingSvc", name()};
+ const TRT_ID* m_trt_id{nullptr};
 
- bool m_roiSeeded;
- SG::ReadHandleKey<TrigRoiDescriptorCollection> m_roiCollectionKey;
- SG::WriteHandleKey<TRT_RDO_Container> m_rdoContainerKey;
- SG::WriteHandleKey<TRT_BSErrContainer> m_bsErrContKey;
- SG::UpdateHandleKey<TRT_RDO_Cache> m_rdoCacheKey;
+ BooleanProperty m_roiSeeded{this, "isRoI_Seeded", false, "Use RoI"};
+ SG::ReadHandleKey<TrigRoiDescriptorCollection> m_roiCollectionKey{this, "RoIs", "", "RoIs to read in"};
+ SG::WriteHandleKey<TRT_RDO_Container> m_rdoContainerKey{this, "RDOKey", "TRT_RDOs"};
+ SG::WriteHandleKey<TRT_BSErrContainer> m_bsErrContKey{this, "BSErrkey", "TRT_ByteStreamErrs"};
+ SG::UpdateHandleKey<TRT_RDO_Cache> m_rdoCacheKey{this, "RDOCacheKey", ""};
 
 };
 

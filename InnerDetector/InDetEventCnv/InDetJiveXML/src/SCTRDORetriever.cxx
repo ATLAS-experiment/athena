@@ -26,9 +26,6 @@ namespace JiveXML {
   {
     //Declare the interface
     declareInterface<IDataRetriever>(this);
-
-    //And properties
-    declareProperty("SCTRDOContainer"  , m_SCTRDOContainerName = std::string("SCT_RDOs"));
   }
 
   /**

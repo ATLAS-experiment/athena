@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -48,7 +48,7 @@ private:
   { this, "ByteStreamCnvSvc", "ByteStreamCnvSvc" };
   unsigned int getSourceID(int ChannelID) const;
 
-  unsigned short m_RodBlockVersion;
-  int m_BCs_per_LVL1ID;
+  Gaudi::Property<unsigned short> m_RodBlockVersion{this, "RodBlockVersion", 0};
+  IntegerProperty m_BCs_per_LVL1ID{this, "BCs_per_LVL1ID", 1};
 };
 #endif

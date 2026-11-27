@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SCT_RAWDATABYTESTREAMCNV_SCTRAWDATAPROVIDER_H
@@ -46,7 +46,7 @@ class SCTRawDataProvider : public AthReentrantAlgorithm
  public:
 
   /** Constructor */
-  SCTRawDataProvider(const std::string &name, ISvcLocator *pSvcLocator);
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
   /** Destructor */
   virtual ~SCTRawDataProvider() = default;
@@ -127,8 +127,8 @@ class SCTRawDataProvider : public AthReentrantAlgorithm
 
 
   /** Update handle for SCT RDO and Erorrs Cache. */
-  SG::UpdateHandleKey<SCT_RDO_Cache> m_rdoContainerCacheKey;
-  SG::UpdateHandleKey<IDCInDetBSErrContainer_Cache> m_bsErrContainerCacheKey;
+  SG::UpdateHandleKey<SCT_RDO_Cache> m_rdoContainerCacheKey{this, "RDOCacheKey", ""};
+  SG::UpdateHandleKey<IDCInDetBSErrContainer_Cache> m_bsErrContainerCacheKey{this, "BSErrCacheKey", ""};
 
   Gaudi::Property<bool> m_storeInDetTimeColls{this, "StoreInDetTimeCollections", true, "Store LVL1ID and BCID"};
 

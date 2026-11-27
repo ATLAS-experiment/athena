@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_RAWDATABYTESTREAMCNV_TRTRAWCONTRAWEVENTTOOL_H
@@ -42,8 +42,7 @@ class TRTRawContByteStreamTool: public extends<AthAlgTool, ITRTRawContByteStream
 
 
   //! constructor
-  TRTRawContByteStreamTool( const std::string& type, const std::string& name,
-			    const IInterface* parent ) ;
+  using base_class::base_class;
   
   //! destructor 
   virtual ~TRTRawContByteStreamTool() ;
@@ -58,10 +57,10 @@ private:
    ServiceHandle<IByteStreamCnvSvc> m_byteStreamCnvSvc
    { this, "ByteStreamCnvSvc", "ByteStreamCnvSvc" };
 
-  ServiceHandle<ITRT_CablingSvc>  m_trt_CablingSvc;
+  ServiceHandle<ITRT_CablingSvc>  m_trt_CablingSvc{"TRT_CablingSvc", name()};
   
-   const TRT_ID*                   m_trt_idHelper;
-   unsigned short                  m_RodBlockVersion;
+   const TRT_ID*                   m_trt_idHelper{nullptr};
+   Gaudi::Property<unsigned short> m_RodBlockVersion{this, "RodBlockVersion", 3};
 
 };
 #endif

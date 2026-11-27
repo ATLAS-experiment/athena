@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRTRawContByteStreamTool.h"
@@ -15,19 +15,6 @@
 #include "TRT_RodEncoder.h"
 
 
-
-// ------------------------------------------------------------------------
-// default contructor 
-
-TRTRawContByteStreamTool::TRTRawContByteStreamTool
-( const std::string& type, const std::string& name,const IInterface* parent )
-  :  base_class(type,name,parent),
-     m_trt_CablingSvc ("TRT_CablingSvc", name ),
-     m_trt_idHelper(nullptr)
-{
-  declareInterface< ITRTRawContByteStreamTool  >( this );
-  declareProperty("RodBlockVersion",m_RodBlockVersion=3);
-}
 
 // ------------------------------------------------------------------------
 // destructor 
@@ -79,7 +66,7 @@ TRTRawContByteStreamTool::convert(TRT_RDO_Container* cont) const
 
   // set ROD Minor version
   fea->setRodMinorVersion(m_RodBlockVersion);
-  ATH_MSG_DEBUG( " Setting Minor Version Number to "<<m_RodBlockVersion );
+  ATH_MSG_DEBUG( " Setting Minor Version Number to "<< m_RodBlockVersion.value() );
    
   // a map for ROD ID onto Encoder
   std::map<uint32_t, TRT_RodEncoder> mapEncoder; 

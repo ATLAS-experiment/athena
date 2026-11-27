@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "InDetDetDescrExample/PrintSiElements.h"
+#include "PrintSiElements.h"
 
 #include "StoreGate/ReadCondHandle.h"
 
@@ -29,30 +29,15 @@ namespace{
 
 /////////////////////////////////////////////////////////////////////////////
 
-PrintSiElements::PrintSiElements(const std::string& name, ISvcLocator* pSvcLocator) 
-  : AthAlgorithm(name, pSvcLocator), 
-    m_firstEvent(true),
-    m_detManagerNames{"Pixel","SCT"}
-{  
-  // Get parameter values from jobOptions file
-  declareProperty("ModulesOnly", m_modulesOnly = true, "Print transforms of modules");
-  declareProperty("ExpandId", m_expandId = true, "Print fields of identifier");
-  declareProperty("NominalPosition", m_nominal = true, "Print out nominal geometry");
-  declareProperty("AlignedPosition", m_aligned = false, "Print out aligned geometry");
-  declareProperty("FullRotationMatrix", m_fullRotationMatrix = false, "If true prints the 9 elements of the rotation matrix");
-  declareProperty("OutputFile", m_outputFileName = "geometry.dat", "Output file name");
-  declareProperty("DetectorManagerNames", m_detManagerNames);
-}
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 
 StatusCode PrintSiElements::initialize(){
   // Get GeoModelSvc
   ATH_CHECK(m_geoModelSvc.retrieve());
-  m_fileout.open(m_outputFileName.c_str());
-  ATH_MSG_DEBUG( "Opening output file " << m_outputFileName );
+  m_fileout.open(m_outputFileName.value().c_str());
+  ATH_MSG_DEBUG( "Opening output file " << m_outputFileName.value() );
   if (!m_fileout) {
-    ATH_MSG_ERROR( "Could not open file " << m_outputFileName );
+    ATH_MSG_ERROR( "Could not open file " << m_outputFileName.value() );
     return StatusCode::FAILURE;
   }
   // Print version infomration

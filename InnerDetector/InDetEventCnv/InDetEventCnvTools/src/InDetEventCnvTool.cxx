@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "InDetEventCnvTools/InDetEventCnvTool.h"
+#include "InDetEventCnvTool.h"
 
 #include "Identifier/Identifier.h"
 #include "Identifier/IdentifierHash.h"
@@ -29,22 +29,6 @@
 #include <vector>
 #include <cassert>
 #include <iostream>
-
-InDet::InDetEventCnvTool::InDetEventCnvTool(const std::string& t,
-                                            const std::string& n,
-                                            const IInterface*  p )
-  :
-  base_class(t,n,p),
-  m_setPrepRawDataLink(false),
-  m_IDHelper(nullptr),
-  m_pixelHelper(nullptr),
-  m_SCTHelper(nullptr),
-  m_TRTHelper(nullptr),
-  m_idDictMgr(nullptr)
-{
-  declareProperty("RecreatePRDLinks", m_setPrepRawDataLink);
-  
-}
 
 StatusCode InDet::InDetEventCnvTool::initialize() {
 

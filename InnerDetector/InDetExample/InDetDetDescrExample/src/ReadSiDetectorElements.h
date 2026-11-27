@@ -32,7 +32,7 @@ class SCT_ID;
 
 class ReadSiDetectorElements : public AthAlgorithm {
 public:
-  ReadSiDetectorElements (const std::string& name, ISvcLocator* pSvcLocator);
+  using AthAlgorithm::AthAlgorithm;
   StatusCode initialize();
   StatusCode execute(const EventContext& ctx);
   StatusCode finalize();
@@ -48,11 +48,11 @@ public:
 
  private:
   // Job properties
-  std::string m_managerName{"Pixel"};
-  bool m_doLoop{true};
-  bool m_doInit{};
-  bool m_doExec{};
-  bool m_useConditionsTools{};
+  StringProperty m_managerName{this, "ManagerName", "Pixel"};
+  BooleanProperty m_doLoop{this, "LoopOverElements", true};
+  BooleanProperty m_doInit{this, "DoInitialize", false};
+  BooleanProperty m_doExec{this, "DoExecute", true};
+  BooleanProperty m_useConditionsTools{this, "UseConditionsTools", false};
   ToolHandle<ISiliconConditionsTool> m_siConditionsTool{this, "SiConditionsTool", "SCT_SiliconConditionsTool", "Silicon conditions tool"};
   ToolHandle<ISiLorentzAngleTool> m_siLorentzAngleTool{this, "SiLorentzAngleTool", "SiLorentzAngleTool", "Silicon Lorentz anglet tool"};
 
@@ -65,9 +65,9 @@ public:
   const SCT_ID * m_sctIdHelper{};
 
   bool m_first{true};
-  bool m_printProbePositions{};
-  bool m_printTransforms{};
-  bool m_printDirections{};
+  BooleanProperty m_printProbePositions{this, "PrintProbePositions", true};
+  BooleanProperty m_printTransforms{this, "PrintTransforms", true};
+  BooleanProperty m_printDirections{this, "PrintDirections", true};
 
 };
 

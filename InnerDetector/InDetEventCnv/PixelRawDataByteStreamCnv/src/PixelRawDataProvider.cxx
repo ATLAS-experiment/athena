@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelRawDataProvider.h"
@@ -11,15 +11,6 @@
 using OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment;
 
 // --------------------------------------------------------------------
-// Constructor
-
-PixelRawDataProvider::PixelRawDataProvider(const std::string& name,
-				       ISvcLocator* pSvcLocator) :
-  AthReentrantAlgorithm(name, pSvcLocator) {
-  declareProperty("RDOCacheKey", m_rdoCacheKey);
-  declareProperty("BSErrorsCacheKey", m_bsErrorsCacheKey);
-}
-
 // Destructor
 
 PixelRawDataProvider::~PixelRawDataProvider() {

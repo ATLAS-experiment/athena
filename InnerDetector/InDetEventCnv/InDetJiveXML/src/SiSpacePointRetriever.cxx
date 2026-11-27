@@ -32,12 +32,6 @@ namespace JiveXML
 
     //Declare the interface
     declareInterface<IDataRetriever>(this);
-    
-    //And the properties
-    declareProperty("PixelSpacePoints"     , m_PixelSPContainerName = std::string("PixelSpacePoints"));
-    declareProperty("SCTSpacePoints"       , m_SCTSPContainerName = std::string("SCT_SpacePoints"));
-    declareProperty("PRD_TruthPixel"       , m_PixelPRDTruthName = std::string("PRD_MultiTruthPixel")); 
-    declareProperty("PRD_TruthSCT"         , m_SCTPRDTruthName = std::string("PRD_MultiTruthSCT"));   
   }
 
   //Namespace for the helper functions

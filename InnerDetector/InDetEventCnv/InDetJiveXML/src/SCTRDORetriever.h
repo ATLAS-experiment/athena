@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML_SCTRDORETRIEVER_H
@@ -60,7 +60,7 @@ namespace JiveXML {
     ToolHandle<ISiLorentzAngleTool> m_lorentzAngleTool{this, "LorentzAngleTool", "SiLorentzAngleTool/SCTLorentzAngleTool", "Tool to retreive Lorentz angle"};
 
     /// The StoreGate key for the SCTRDO container
-    SG::ReadHandleKey<SCT_RDO_Container> m_SCTRDOContainerName;
+    SG::ReadHandleKey<SCT_RDO_Container> m_SCTRDOContainerName{this, "SCTRDOContainer", "SCT_RDOs"};
 
     /// Condition object key of SiDetectorElementCollection for SCT
     SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_SCTDetEleCollKey{this, "SCTDetEleCollKey", "SCT_DetectorElementCollection", "Key of SiDetectorElementCollection for SCT"};

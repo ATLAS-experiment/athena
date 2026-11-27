@@ -28,10 +28,6 @@ namespace JiveXML {
 
     //Only declare the interface
     declareInterface<IDataRetriever>(this);
-    
-    //And the properties
-    declareProperty("SCTClusters"  , m_SiClusterCollName = "SCT_Clusters", "Collection name of SiClusterContainer for SCT");
-    declareProperty("SCT_TruthMap" , m_SiTruthMapName = "PRD_MultiTruthSCT", "Collection name of PRD_MultiTruthCollection> for SCT");
   }
 
   /**

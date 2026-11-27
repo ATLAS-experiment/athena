@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -38,7 +38,7 @@ class TRT_ID;
 class ReadTRT_DetectorElements : public AthAlgorithm {
 public:
   //! Default Algorithm constructor with parameters
-  ReadTRT_DetectorElements (const std::string& name, ISvcLocator* pSvcLocator);
+  using AthAlgorithm::AthAlgorithm;
   //@name Athena Algorithm methods
   //@{
   StatusCode initialize();
@@ -57,15 +57,15 @@ public:
   bool comparePos(const Amg::Vector3D & p1, const Amg::Vector3D & p2, const double err);
  
 private:
-  std::string m_managerName;
-  bool m_doInit;
-  bool m_doExec;
+  StringProperty m_managerName{this, "ManagerName", "TRT"};
+  BooleanProperty m_doInit{this, "DoInitialize", true};
+  BooleanProperty m_doExec{this, "DoExecute", false};
 
-  const InDetDD::TRT_DetectorManager * m_manager;
-  const TRT_ID * m_idHelper;
+  const InDetDD::TRT_DetectorManager * m_manager{nullptr};
+  const TRT_ID * m_idHelper{nullptr};
 
-  double m_maxdiff;
-  bool m_first;
+  double m_maxdiff{0};
+  bool m_first{true};
 };
 
 #endif // InDetDetDescrExample_ReadTRT_DetectorElements_h

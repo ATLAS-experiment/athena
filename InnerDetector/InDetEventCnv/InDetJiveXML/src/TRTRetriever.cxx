@@ -26,9 +26,6 @@ namespace JiveXML {
   {
     //Declare the interface
     declareInterface<IDataRetriever>(this);
-
-    //And properties
-    declareProperty("TRTTruthMap" , m_TRTTruthMapKey = "PRD_MultiTruthTRT");
   }
 
   StatusCode TRTRetriever::initialize() {

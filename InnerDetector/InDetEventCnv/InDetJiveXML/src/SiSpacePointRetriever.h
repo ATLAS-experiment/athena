@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML_SISPACEPOINTRETRIEVER_H
@@ -56,18 +56,18 @@ namespace JiveXML{
          {this,"GeoModelTool","JiveXML::InDetGeoModelTool/InDetGeoModelTool",""};
 
       /** StoreGate key for Pixel space points*/
-      SG::ReadHandleKey<SpacePointContainer> m_PixelSPContainerName;
+      SG::ReadHandleKey<SpacePointContainer> m_PixelSPContainerName{this, "PixelSpacePoints", "PixelSpacePoints"};
 
       /** StoreGate key for SCT space points*/
-      SG::ReadHandleKey<SpacePointContainer> m_SCTSPContainerName;
+      SG::ReadHandleKey<SpacePointContainer> m_SCTSPContainerName{this, "SCTSpacePoints", "SCT_SpacePoints"};
 
       /** StoreGate key for pixel PRD_MultiTruth*/
       bool m_usePixelTruthMap = false;
-      SG::ReadHandleKey<PRD_MultiTruthCollection> m_PixelPRDTruthName;
+      SG::ReadHandleKey<PRD_MultiTruthCollection> m_PixelPRDTruthName{this, "PRD_TruthPixel", "PRD_MultiTruthPixel"};
 
       /** StoreGate key for SCT PRD_MultiTruth*/
       bool m_useSCTTruthMap = false;
-      SG::ReadHandleKey<PRD_MultiTruthCollection> m_SCTPRDTruthName;
+      SG::ReadHandleKey<PRD_MultiTruthCollection> m_SCTPRDTruthName{this, "PRD_TruthSCT", "PRD_MultiTruthSCT"};
   };
 
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef InDetDetDescrExample_TestTRT_Alignment_h
@@ -27,7 +27,7 @@ class TRT_ID;
 
 class TestTRT_Alignment : public AthAlgorithm {
 public:
-  TestTRT_Alignment (const std::string& name, ISvcLocator* pSvcLocator);
+  using AthAlgorithm::AthAlgorithm;
   StatusCode initialize();
   StatusCode execute(const EventContext& ctx);
   StatusCode finalize();
@@ -43,17 +43,17 @@ private:
   bool testIdentity(const Amg::Transform3D & transform, double errRot=0, double errTrans=0);
 
 
-  const InDetDD::TRT_DetectorManager * m_manager;
-  const TRT_ID * m_idHelper;
+  const InDetDD::TRT_DetectorManager * m_manager{nullptr};
+  const TRT_ID * m_idHelper{nullptr};
 
-  std::string m_managerName;
-  bool m_longPrintOut;
-  bool m_testAllStraws;
-  bool m_testAllElements;
-  double m_errRot;
-  double m_errTrans;
-  bool m_hardwiredShifts;
-  int m_precision;
+  StringProperty m_managerName{this, "ManagerName", "TRT"};
+  BooleanProperty m_longPrintOut{this, "LongPrintOut", false};
+  BooleanProperty m_testAllStraws{this, "TestAllStraws", false};
+  BooleanProperty m_testAllElements{this, "TestAllElements", false};
+  DoubleProperty m_errRot{this, "ErrorRotation", 1e-15};      // For testing if alignment changed
+  DoubleProperty m_errTrans{this, "ErrorTranslation", 1e-12}; // For testing if alignment changed
+  BooleanProperty m_hardwiredShifts{this, "HardwiredShifts", false};
+  IntegerProperty m_precision{this, "Precision", 6};
 };
 
 #endif // InDetDetDescrExample_TestTRT_Alignment_h

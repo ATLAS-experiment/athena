@@ -1,4 +1,4 @@
-#include "InDetEventCnvTools/InDetEventCnvTool.h"
+#include "../InDetEventCnvTool.h"
 
 using namespace InDet;
 
