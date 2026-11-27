@@ -4,7 +4,7 @@
 atlas_subdir( GeoModelUtilities )
 
 # External dependencies.
-find_package( GeoModel COMPONENTS GeoGenericFunctions GeoModelKernel GeoModelHelpers )
+find_package( GeoModelCore )
 find_package( ROOT COMPONENTS Core )
 # The list of sources, and list of linked libraries depends on what project is
 # being built.
@@ -25,23 +25,25 @@ endif()
 atlas_add_library( GeoModelUtilities
    GeoModelUtilities/*.h ${sources}
    PUBLIC_HEADERS GeoModelUtilities
-   INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
-   LINK_LIBRARIES ${GEOMODEL_LIBRARIES} ${libraries} GeoPrimitives  )
+
+   LINK_LIBRARIES GeoModelCore::GeoModelKernel GeoModelCore::GeoModelHelpers 
+                  GeoModelCore::GeoGenericFunctions ${libraries} GeoPrimitives  )
 
 atlas_add_test( GeoGetIds_test
                  SOURCES test/GeoGetIds_test.cxx
-                 INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
-                 LINK_LIBRARIES  ${GEOMODEL_LIBRARIES} GeoModelUtilities )
+                 LINK_LIBRARIES GeoModelCore::GeoModelKernel GeoModelCore::GeoModelHelpers 
+                                GeoModelCore::GeoGenericFunctions GeoModelUtilities )
 
 atlas_add_test( GeoVisitVolumes_test
                 SOURCES test/GeoVisitVolumes_test.cxx
-                INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
-                LINK_LIBRARIES ${GEOMODEL_LIBRARIES} GeoModelUtilities )
+                LINK_LIBRARIES GeoModelCore::GeoModelKernel GeoModelCore::GeoModelHelpers 
+                               GeoModelCore::GeoGenericFunctions GeoModelUtilities )
 
 atlas_add_test( GeoAlignStore_test
                 SOURCES test/testAlignStore.cxx
-                INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-                LINK_LIBRARIES ${GEOMODEL_LIBRARIES} ${ROOT_LIBRARIES} GeoModelUtilities
+                INCLUDE_DIRS  ${ROOT_INCLUDE_DIRS}
+                LINK_LIBRARIES GeoModelCore::GeoModelKernel GeoModelCore::GeoModelHelpers 
+                               GeoModelCore::GeoGenericFunctions ${ROOT_LIBRARIES} GeoModelUtilities
                 PROPERTIES TIMEOUT 900
                 POST_EXEC_SCRIPT noerror.sh)
 # Code in this file makes heavy use of eigen and runs orders of magnitude

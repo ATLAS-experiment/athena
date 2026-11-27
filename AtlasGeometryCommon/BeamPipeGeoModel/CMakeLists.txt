@@ -4,14 +4,13 @@
 atlas_subdir( BeamPipeGeoModel )
 
 # External dependencies:
-find_package( GeoModel COMPONENTS GeoModelKernel )
+find_package( GeoModelCore )
 
 # Component(s) in the package:
 atlas_add_library( BeamPipeGeoModelLib
                    src/*.cxx
                    PUBLIC_HEADERS BeamPipeGeoModel
-		   INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaKernel GeoModelUtilities
+                   LINK_LIBRARIES GeoModelCore::GeoModelKernel AthenaKernel GeoModelUtilities
                    PRIVATE_LINK_LIBRARIES GaudiKernel GeoModelInterfaces RDBAccessSvcLib SGTools StoreGateLib )
 
 atlas_add_component( BeamPipeGeoModel

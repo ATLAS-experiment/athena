@@ -7,7 +7,7 @@ atlas_subdir( GeoSpecialShapes )
 find_package( CLHEP )
 find_package( GSL )
 find_package( ROOT COMPONENTS Core MathCore Matrix )
-find_package( GeoModel COMPONENTS GeoModelKernel )
+find_package( GeoModelCore )
 
 # The list of linked libraries depends on what project is being built.
 set( public_libs )
@@ -21,10 +21,10 @@ endif()
 atlas_add_library( GeoSpecialShapes
    GeoSpecialShapes/*.h src/*.cxx src/LArWheelCalculator_Impl/*.cxx
    PUBLIC_HEADERS GeoSpecialShapes
-   INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
+   INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${GSL_INCLUDE_DIRS}
    DEFINITIONS ${CLHEP_DEFINITIONS}
-   LINK_LIBRARIES ${CLHEP_LIBRARIES} ${GEOMODEL_LIBRARIES} ${extra_public_libs}
+   LINK_LIBRARIES ${CLHEP_LIBRARIES} GeoModelCore::GeoModelKernel ${extra_public_libs}
    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${GSL_LIBRARIES} CxxUtils
    GeoModelUtilities ${extra_private_libs} )
 

@@ -4,11 +4,10 @@
 atlas_subdir( CavernInfraGeoModel )
 
 # External dependencies:
-find_package( GeoModel COMPONENTS GeoModelKernel )
+find_package( GeoModelCore )
 
 # Component(s) in the package:
 atlas_add_component( CavernInfraGeoModel
                      src/*.cxx
                      src/components/*.cxx
-                     INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS} 
-                     LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaKernel GaudiKernel GeoModelInterfaces GeoModelUtilities RDBAccessSvcLib StoreGateLib )
+                     LINK_LIBRARIES GeoModelCore::GeoModelKernel AthenaKernel GaudiKernel GeoModelInterfaces GeoModelUtilities RDBAccessSvcLib StoreGateLib )
