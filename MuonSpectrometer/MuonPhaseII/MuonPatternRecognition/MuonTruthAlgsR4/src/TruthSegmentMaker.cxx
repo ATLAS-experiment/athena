@@ -210,7 +210,9 @@ namespace MuonR4{
         /// Associate the hits to the segment and calculate the expected hits
         float chi2{0.f};
         for (const auto& [assocMe, pos, dir] : simHits) {
-            chi2 += std::pow(Amg::signedDistance(pos,dir, chamberPos, chamberDir) / hitUncertainty(ctx,*assocMe), 2);
+            const auto uncertainty = hitUncertainty(ctx,*assocMe);
+            //coverity[DIVIDE_BY_ZERO]
+            chi2 += std::pow(Amg::signedDistance(pos,dir, chamberPos, chamberDir) / uncertainty, 2);
             const MuonGMR4::MuonReadoutElement* assocRE = m_detMgr->getReadoutElement(assocMe->identify());
             switch (assocRE->detectorType()) {
                 case ActsTrk::DetectorType::Mdt:
@@ -304,7 +306,7 @@ namespace MuonR4{
             for (const xAOD::MuonSimHit* simHit : *simHits) {
                 const MuonGMR4::MuonReadoutElement* reElement = m_detMgr->getReadoutElement(simHit->identify()); 
                 const MuonGMR4::SpectrometerSector* id{reElement->msSector()};
-                auto genLink = simHit->genParticleLink();
+                const auto & genLink = simHit->genParticleLink();
                 HepMC::ConstGenParticlePtr genParticle = nullptr; 
                 if (genLink.isValid()){
                     genParticle = genLink.cptr(); 
