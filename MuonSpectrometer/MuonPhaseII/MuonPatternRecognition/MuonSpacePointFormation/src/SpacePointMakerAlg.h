@@ -285,7 +285,6 @@ namespace MuonR4{
             Gaudi::Property<bool> m_doStat{this, "doStats", false, 
                                            "If enabled the algorithm keeps track how many hits have been made" };
             
-            Gaudi::Property<unsigned> m_capacityBucket{this,"CapacityBucket" , 50};
             std::unique_ptr<SpacePointStatistics> m_statCounter ATLAS_THREAD_SAFE{};
 
             Gaudi::Property<double> m_maxOccRpcEta{this, "maxRpcEtaOccupancy", 0.1, 
