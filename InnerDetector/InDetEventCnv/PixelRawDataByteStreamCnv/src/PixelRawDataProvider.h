@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -34,7 +34,7 @@ class PixelRawDataProvider : public AthReentrantAlgorithm {
  public:
 
   //! Constructor.
-  PixelRawDataProvider(const std::string &name, ISvcLocator *pSvcLocator);
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
   //! Initialize
   StatusCode initialize() override;
@@ -55,9 +55,9 @@ private:
   Gaudi::Property<bool> m_roiSeeded                                     { this, "isRoI_Seeded", false, "Use RoI" }; // TODO, doubled information, empty RoIs collection name would be sufficent
   SG::ReadHandleKey<TrigRoiDescriptorCollection> m_roiCollectionKey     { this, "RoIs", "", "If RoI driven unpacking to be used, this is the key"};
   SG::WriteHandleKey<PixelRDO_Container> m_rdoContainerKey              { this, "RDOKey", "PixelRDOs"};
-  SG::UpdateHandleKey<PixelRDO_Cache> m_rdoCacheKey;
+  SG::UpdateHandleKey<PixelRDO_Cache> m_rdoCacheKey                     { this, "RDOCacheKey", ""};
   SG::WriteHandleKey<IDCInDetBSErrContainer> m_bsErrorsKey              { this, "BSErrorsKey", "PixelByteStreamErrs"};  
-  SG::UpdateHandleKey<IDCInDetBSErrContainer_Cache> m_bsErrorsCacheKey;
+  SG::UpdateHandleKey<IDCInDetBSErrContainer_Cache> m_bsErrorsCacheKey { this, "BSErrorsCacheKey", ""};
   SG::ReadCondHandleKey<PixelCablingCondData> m_condCablingKey          { this, "PixelCablingCondData", "PixelCablingCondData", "Pixel cabling key"};
 
 };

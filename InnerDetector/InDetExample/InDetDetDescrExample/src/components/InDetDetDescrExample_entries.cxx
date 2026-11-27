@@ -1,8 +1,8 @@
-#include "InDetDetDescrExample/ReadSiDetectorElements.h"
-#include "InDetDetDescrExample/ReadTRT_DetectorElements.h"
-#include "InDetDetDescrExample/TestSiAlignment.h"
-#include "InDetDetDescrExample/TestTRT_Alignment.h"
-#include "InDetDetDescrExample/PrintSiElements.h"
+#include "../ReadSiDetectorElements.h"
+#include "../ReadTRT_DetectorElements.h"
+#include "../TestSiAlignment.h"
+#include "../TestTRT_Alignment.h"
+#include "../PrintSiElements.h"
 
 DECLARE_COMPONENT( ReadSiDetectorElements )
 DECLARE_COMPONENT( ReadTRT_DetectorElements )

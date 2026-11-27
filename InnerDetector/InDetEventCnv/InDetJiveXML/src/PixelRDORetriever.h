@@ -55,7 +55,7 @@ namespace JiveXML {
       ToolHandle<ISiLorentzAngleTool> m_lorentzAngleTool{this, "LorentzAngleTool", "SiLorentzAngleTool/SCTLorentzAngleTool", "Tool to retreive Lorentz angle"};
 
       /// The StoreGate key for the PixelRDO container
-      SG::ReadHandleKey<PixelRDO_Container> m_PixelRDOContainerName{this, "PixelRDOContKey", "PixelRDOs", "Key of PixelRDO_Container for Pixel"};
+      SG::ReadHandleKey<PixelRDO_Container> m_PixelRDOContainerName{this, "PixelRDOContainer", "PixelRDOs", "Key of PixelRDO_Container for Pixel"};
 
       SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_pixelDetEleCollKey{this, "PixelDetEleCollKey", "PixelDetectorElementCollection", "Key of SiDetectorElementCollection for Pixel"};
 

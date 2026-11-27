@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_RAWDATABYTESTREAMCNV_TRTRAWDATAPROVIDERTOOL_H
@@ -29,8 +29,7 @@ class TRTRawDataProviderTool : public extends<AthAlgTool, ITRTRawDataProviderToo
 {
  public:
   //! constructor
-  TRTRawDataProviderTool( const std::string& type, const std::string& name,
-			  const IInterface* parent ) ;
+  using base_class::base_class;
 
   //! initialize
   virtual StatusCode initialize() override;
@@ -44,7 +43,7 @@ class TRTRawDataProviderTool : public extends<AthAlgTool, ITRTRawDataProviderToo
 			     ) const override;
 
 private:
-  ToolHandle<ITRT_RodDecoder>  m_decoder;
+  ToolHandle<ITRT_RodDecoder>  m_decoder{this, "Decoder", "TRT_RodDecoder"};
 
   SG::WriteHandleKey<InDetTimeCollection> m_lvl1idkey{this,"LVL1IDKey","TRT_LVL1ID","TRT_LVL1ID out-key"};
   SG::WriteHandleKey<InDetTimeCollection> m_bcidkey{this,"BCIDKey","TRT_BCID","TRT_BCID out-key"};

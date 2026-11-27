@@ -57,8 +57,7 @@ class TRT_RodDecoder : public extends<AthAlgTool, ITRT_RodDecoder>
 {
 public:
   //! constructor
-  TRT_RodDecoder(const std::string& type, const std::string& name,
-                 const IInterface* parent ) ;
+  using base_class::base_class;
   //! destructor
   virtual ~TRT_RodDecoder();
   //! initialize
@@ -77,27 +76,27 @@ public:
 
  private:
 
-   ServiceHandle<ITRT_CablingSvc>   m_CablingSvc;
+   ServiceHandle<ITRT_CablingSvc>   m_CablingSvc{this, "TRT_Cabling", "TRT_CablingSvc"};
 
    /*
     * Do we look for Front-End Errors at all?
     */
-   bool m_recordBSErrors{};
+   BooleanProperty m_recordBSErrors{this, "RecordByteStreamErrors", true};
 
    /*
     * Do we look for these types of Front-End Errors?
     */
-   bool m_lookAtSidErrors{};
-   bool m_lookAtErrorErrors{};
-   bool m_lookAtL1idErrors{};
-   bool m_lookAtBcidErrors{};
-   bool m_lookAtMissingErrors{};
+   BooleanProperty m_lookAtSidErrors{this, "LookAtSidErrors", true};
+   BooleanProperty m_lookAtErrorErrors{this, "LookAtErrorErrors", false};
+   BooleanProperty m_lookAtL1idErrors{this, "LookAtL1idErrors", true};
+   BooleanProperty m_lookAtBcidErrors{this, "LookAtBcidErrors", true};
+   BooleanProperty m_lookAtMissingErrors{this, "LookAtMissingErrors", true};
 
-   bool m_loadCompressTableFile{};
-   bool m_loadCompressTableDB{};
-   std::vector<int> m_LoadCompressTableVersions;
-   const int m_maxCompressionVersion{};
-   int m_forceRodVersion{};
+   BooleanProperty m_loadCompressTableFile{this, "LoadCompressTableFile", false};
+   BooleanProperty m_loadCompressTableDB{this, "LoadCompressTableDB", true};
+   IntegerArrayProperty m_LoadCompressTableVersions{this, "LoadCompressTableVersions", {}};
+   const int m_maxCompressionVersion{255};
+   IntegerProperty m_forceRodVersion{this, "ForceRodVersion", -1};
 
    const TRT_ID*               m_trt_id{};
    IdContext                   m_straw_layer_context{};
@@ -108,9 +107,9 @@ public:
    bool m_eventTypeIsSim{};            // look at first event to decide if RODBlockVersion
                                     // is incorrect.
 
-   uint32_t m_escape_marker{};           // Straw word that means escaped literal
+   uint32_t m_escape_marker{0x8000000};           // Straw word that means escaped literal
 
-   bool m_sortCollections{};         // sort collections by identifiers if required
+   BooleanProperty m_sortCollections{this, "SortCollections", false};         // sort collections by identifiers if required
 
 #define CTABLE_FC_LENGTH 33
 #define CTABLE_LI_LENGTH 33
@@ -128,7 +127,7 @@ public:
 
    std::vector<CxxUtils::CachedUniquePtr<t_CompressTable> > m_CompressionTables;
 
-   mutable std::atomic<uint32_t> m_Nrdos;              // Number of RDOs created
+   mutable std::atomic<uint32_t> m_Nrdos{0};              // Number of RDOs created
 
    mutable std::atomic<int> m_err_count_fillCollection{0};
    mutable std::atomic<int> m_err_count_int_fillMinimalCompress{0};

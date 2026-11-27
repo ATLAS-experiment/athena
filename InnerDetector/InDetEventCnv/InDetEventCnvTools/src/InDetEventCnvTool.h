@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETEVENTCNVTOOL_H
@@ -43,7 +43,7 @@ class InDetEventCnvTool :  public extends<AthAlgTool, Trk::ITrkEventCnvTool>
   
     enum InDetConcreteType { SCT, Pixel, TRT, Unknown };
 
-    InDetEventCnvTool(const std::string&,const std::string&,const IInterface*);
+    using base_class::base_class;
   
     virtual ~InDetEventCnvTool() = default;
   
@@ -96,17 +96,17 @@ class InDetEventCnvTool :  public extends<AthAlgTool, Trk::ITrkEventCnvTool>
     /** use the passed IdentifierHash to get TRTDetectorElement for TRT*/
     const InDetDD::TRT_BaseElement* getTRTDetectorElement(const IdentifierHash& HashId) const;
   
-    bool m_setPrepRawDataLink;                     //!< if true, attempt to recreate link to PRD
+    BooleanProperty m_setPrepRawDataLink{this, "RecreatePRDLinks", false}; //!< if true, attempt to recreate link to PRD
 
 
     //various id helpers
-    const AtlasDetectorID* m_IDHelper;
-    const PixelID* m_pixelHelper;
-    const SCT_ID* m_SCTHelper;
-    const TRT_ID* m_TRTHelper;
+    const AtlasDetectorID* m_IDHelper{nullptr};
+    const PixelID* m_pixelHelper{nullptr};
+    const SCT_ID* m_SCTHelper{nullptr};
+    const TRT_ID* m_TRTHelper{nullptr};
   
     // added to check TRT existence (SLHC geo check)
-    const IdDictManager* m_idDictMgr;
+    const IdDictManager* m_idDictMgr{nullptr};
 
     SG::ReadHandleKey<PixelClusterContainer>     m_pixClusContName       {this, "PixelClusterContainer",    "PixelClusters",            "Pixel Cluster container name"}; //!< location of container of pixel clusters
     SG::ReadHandleKey<SCT_ClusterContainer>      m_sctClusContName       {this, "SCT_ClusterContainer",     "SCT_Clusters",             "SCT Cluster container name"};   //!< location of container of sct clusters

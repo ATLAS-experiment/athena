@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "InDetDetDescrExample/TestTRT_Alignment.h"
+#include "TestTRT_Alignment.h"
 
 #include "CLHEP/Units/SystemOfUnits.h"
 
@@ -37,34 +37,18 @@ namespace{
 
 /////////////////////////////////////////////////////////////////////////////
 
-TestTRT_Alignment::TestTRT_Alignment(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthAlgorithm(name, pSvcLocator),
-  m_manager(nullptr),
-  m_idHelper(nullptr)
-{  
-  // Get parameter values from jobOptions file
-  declareProperty("ManagerName", m_managerName = "TRT");
-  declareProperty("LongPrintOut", m_longPrintOut = false);
-  declareProperty("TestAllStraws", m_testAllStraws = false);
-  declareProperty("TestAllElements", m_testAllElements = false);
-  declareProperty("ErrorRotation",m_errRot = 1e-15);      // For testing if alignment changed
-  declareProperty("ErrorTranslation",m_errTrans = 1e-12); // For testing if alignment changed
-  declareProperty("HardwiredShifts", m_hardwiredShifts = false);
-  declareProperty("Precision", m_precision = 6);
-}
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 
 StatusCode TestTRT_Alignment::initialize(){
   msg(MSG::INFO) << "initialize()" << endmsg;
   msg(MSG::INFO) << "Algorithm Properties" << endmsg;
-  msg(MSG::INFO) << " ManagerName:      " << m_managerName << endmsg;  
+  msg(MSG::INFO) << " ManagerName:      " << m_managerName.value() << endmsg;  
   msg(MSG::INFO) << " LongPrintOut:     " << (m_longPrintOut ? "true" : "false") << endmsg;  
   msg(MSG::INFO) << " TestAllElements:  " << (m_testAllElements ? "true" : "false") << endmsg;  
   msg(MSG::INFO) << " TestAllStraws:    " << (m_testAllStraws ? "true" : "false") << endmsg;  
-  msg(MSG::INFO) << " ErrorRotation:    " << m_errRot << endmsg;  
-  msg(MSG::INFO) << " ErrorTranslation: " << m_errTrans << endmsg;  
-  msg(MSG::INFO) << " Precision:        " << m_precision << endmsg;  
+  msg(MSG::INFO) << " ErrorRotation:    " << m_errRot.value() << endmsg;  
+  msg(MSG::INFO) << " ErrorTranslation: " << m_errTrans.value() << endmsg;  
+  msg(MSG::INFO) << " Precision:        " << m_precision.value() << endmsg;  
   if (!m_testAllElements) {
     msg(MSG::INFO) << endmsg;
     msg(MSG::INFO) << " Modules only - the 4 corner straws of each module will be printed. " << endmsg;  
@@ -82,7 +66,7 @@ StatusCode TestTRT_Alignment::initialize(){
   // const SiDetectorManager * manager;
   StatusCode sc = detStore()->retrieve(m_manager, m_managerName);
   if (sc.isFailure() || !m_manager) {
-    msg(MSG::FATAL) << "Could not find the Manager: "<< m_managerName << " !" << endmsg;
+    msg(MSG::FATAL) << "Could not find the Manager: "<< m_managerName.value() << " !" << endmsg;
     return StatusCode::FAILURE;
   } else {
     msg(MSG::DEBUG) << "Manager found" << endmsg;

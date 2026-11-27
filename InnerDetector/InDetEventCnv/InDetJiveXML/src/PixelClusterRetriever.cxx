@@ -28,10 +28,6 @@ namespace JiveXML {
 
     //Only declare the interface
     declareInterface<IDataRetriever>(this);
-    
-    //And the properties
-    declareProperty("PixelClusters"  , m_PixelClusterCollName = "PixelClusters");
-    declareProperty("PixelTruthMap" , m_PixelTruthMapName = "PRD_MultiTruthPixel");
   }
 
   StatusCode PixelClusterRetriever::initialize() {

@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "InDetDetDescrExample/ReadSiDetectorElements.h"
+#include "ReadSiDetectorElements.h"
 
 #include "CLHEP/Units/SystemOfUnits.h"
 
@@ -28,19 +28,6 @@ using namespace InDetDD;
 // Prints out SiDetectorElement positions and other info.
 
 /////////////////////////////////////////////////////////////////////////////
-
-ReadSiDetectorElements::ReadSiDetectorElements(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthAlgorithm(name, pSvcLocator){  
-  // Get parameter values from jobOptions file
-  declareProperty("ManagerName", m_managerName);
-  declareProperty("LoopOverElements", m_doLoop);
-  declareProperty("DoInitialize", m_doInit = false);
-  declareProperty("DoExecute",    m_doExec = true);
-  declareProperty("UseConditionsTools", m_useConditionsTools = false);
-  declareProperty("PrintProbePositions", m_printProbePositions = true);
-  declareProperty("PrintTransforms", m_printTransforms = true);
-  declareProperty("PrintDirections", m_printDirections = true);
-}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 
@@ -117,7 +104,7 @@ void ReadSiDetectorElements::printAllElements(const bool accessDuringInitializat
       return;
     }
   } else {
-    ATH_MSG_INFO("Going to read from detector manager: " << m_managerName);
+    ATH_MSG_INFO("Going to read from detector manager: " << m_managerName.value());
     elements = m_manager->getDetectorElementCollection();
   }
 

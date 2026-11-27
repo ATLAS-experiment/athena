@@ -61,11 +61,11 @@ namespace JiveXML
          {this, "GeoModelTool","JiveXML::InDetGeoModelTool/InDetGeoModelTool",""};
 
       /// The StoreGate key for the SiClusterCollection to retrieve
-      SG::ReadHandleKey<InDet::SiClusterContainer> m_PixelClusterCollName{this, "PixelClusterCollKey", "PixelClusters", "Key of SiClusterContainer for Pixel"};
+      SG::ReadHandleKey<InDet::SiClusterContainer> m_PixelClusterCollName{this, "PixelClusters", "PixelClusters", "Key of SiClusterContainer for Pixel"};
 
       /// The StoreGate key for the PRD MultiTruthMap with the track associations
       bool m_usePixelTruthMap = false;
-      SG::ReadHandleKey<PRD_MultiTruthCollection> m_PixelTruthMapName{this, "PixelClusterMapKey", "PRD_MultiTruthPixel", "Key of PRD_MultiTruthCollection for Pixel"};
+      SG::ReadHandleKey<PRD_MultiTruthCollection> m_PixelTruthMapName{this, "PixelTruthMap", "PRD_MultiTruthPixel", "Key of PRD_MultiTruthCollection for Pixel"};
 
       SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_pixelDetEleCollKey{this, "PixelDetEleCollKey", "PixelDetectorElementCollection", "Key of SiDetectorElementCollection for Pixel"};
     };

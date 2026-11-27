@@ -23,9 +23,6 @@ namespace JiveXML {
   {
     //Declare the interface
     declareInterface<IDataRetriever>(this);
-
-    //And properties
-    declareProperty("PixelRDOContainer"  , m_PixelRDOContainerName = "PixelRDOs");
   }
 
   /**

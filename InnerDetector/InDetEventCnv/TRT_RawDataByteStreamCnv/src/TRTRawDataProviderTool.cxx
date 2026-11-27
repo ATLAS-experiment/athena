@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -19,17 +19,6 @@ using OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment;
 //
 
 
-
-// -------------------------------------------------------
-// default contructor
-
-TRTRawDataProviderTool::TRTRawDataProviderTool
-( const std::string& type, const std::string& name,const IInterface* parent )
-  :  base_class( type, name, parent ),
-     m_decoder   ("TRT_RodDecoder",this)
-{
-  declareProperty ("Decoder", m_decoder);
-}
 
 // -------------------------------------------------------
 // initialize

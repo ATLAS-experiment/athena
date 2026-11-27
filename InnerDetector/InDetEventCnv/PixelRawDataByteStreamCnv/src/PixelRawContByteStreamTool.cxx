@@ -28,8 +28,6 @@ PixelRawContByteStreamTool::PixelRawContByteStreamTool(const std::string& type,c
   AthAlgTool(type,name,parent)
 {
   declareInterface<PixelRawContByteStreamTool>(this);
-  declareProperty("RodBlockVersion",m_RodBlockVersion=0); 
-  declareProperty("BCs_per_LVL1ID",m_BCs_per_LVL1ID=1);
 }
 
 ////////////////////////
@@ -75,7 +73,7 @@ StatusCode PixelRawContByteStreamTool::convert(PixelRDO_Container* cont) const {
 
   // set ROD Minor version
   fea->setRodMinorVersion(m_RodBlockVersion);
-  ATH_MSG_DEBUG("Setting ROD Minor Version Number to: " << m_RodBlockVersion);
+  ATH_MSG_DEBUG("Setting ROD Minor Version Number to: " << m_RodBlockVersion.value());
 
   //loop over the Pixel modules
   PixelRDO_Container::const_iterator it_coll = cont->begin(); 

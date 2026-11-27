@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML_SICLUSTERRETRIEVER_H
@@ -65,11 +65,11 @@ namespace JiveXML
       SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_SCTDetEleCollKey{this, "SCTDetEleCollKey", "SCT_DetectorElementCollection", "Key of SiDetectorElementCollection for SCT"};
       
       /// StoreGate key for the SiClusterContainer for SCT
-      SG::ReadHandleKey<InDet::SiClusterContainer> m_SiClusterCollName{this, "SiClusterContKey", "SCT_Clusters", "Key of the SiClusterContainer for SCT"};
+      SG::ReadHandleKey<InDet::SiClusterContainer> m_SiClusterCollName{this, "SCTClusters", "SCT_Clusters", "Key of the SiClusterContainer for SCT"};
 
       /// StoreGate key for the PRD_MultiTruthCollection for SCT
       bool m_useSiTruthMap = false;
-      SG::ReadHandleKey<PRD_MultiTruthCollection> m_SiTruthMapName{this, "SiTruthMapKey", "PRD_MultiTruthSCT", "Key of the PRD_MultiTruthCollection for SCT"};
+      SG::ReadHandleKey<PRD_MultiTruthCollection> m_SiTruthMapName{this, "SCT_TruthMap", "PRD_MultiTruthSCT", "Key of the PRD_MultiTruthCollection for SCT"};
     };
 }
 #endif

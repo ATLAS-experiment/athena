@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML_TRTRETRIEVER_H
@@ -23,7 +23,7 @@ namespace JiveXML{
    *
    *  - @b Properties
    *    - TRTClusters: @copydoc m_TRTDriftCircleCollKey
-   *    - TRT_TruthMap: @copydoc m_TRTTruthMapKey
+   *    - TRTTruthMap: @copydoc m_TRTTruthMapKey
    *    .
    *
    *  - @b Retrieved @b Data
@@ -67,7 +67,7 @@ namespace JiveXML{
       SG::ReadHandleKey<InDet::TRT_DriftCircleContainer> m_TRTDriftCircleCollKey{ this, "TRTClusters", "TRT_DriftCircles", "Container name for TRT Drift Circles" }; 
       /// The StoreGate key for the TRT MultiTruthMap with the track associations
       bool m_useTRTTruthMap = false;
-      SG::ReadHandleKey<PRD_MultiTruthCollection> m_TRTTruthMapKey{ this, "TRT_TruthMap", "PRD_MultiTruthTRT", "Container name for PRD Multi-truth TRT MAP" };
+      SG::ReadHandleKey<PRD_MultiTruthCollection> m_TRTTruthMapKey{ this, "TRTTruthMap", "PRD_MultiTruthTRT", "Container name for PRD Multi-truth TRT MAP" };
   };
 
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -27,8 +27,6 @@
 ////////////////////////
 BCM_RawContByteStreamTool::BCM_RawContByteStreamTool(const std::string& type, const std::string& name, const IInterface* parent):AthAlgTool(type,name,parent) {
   declareInterface<BCM_RawContByteStreamTool>(this);
-  declareProperty("RodBlockVersion",m_RodBlockVersion=0); 
-  declareProperty("BCs_per_LVL1ID",m_BCs_per_LVL1ID=1);
 }
 
 ////////////////////////
@@ -65,7 +63,7 @@ StatusCode BCM_RawContByteStreamTool::convert(BCM_RDO_Container* cont) const
 
   // set ROD Minor version
   fea->setRodMinorVersion(m_RodBlockVersion);
-  ATH_MSG_DEBUG( "Setting ROD Minor Version Number to: " << m_RodBlockVersion );
+  ATH_MSG_DEBUG( "Setting ROD Minor Version Number to: " << m_RodBlockVersion.value() );
 
   // a map for ROD ID onto Encoder
   std::map<uint32_t, BCM_RodEncoder> mapEncoder; 
